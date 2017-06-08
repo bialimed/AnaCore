@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -36,6 +36,33 @@ else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
 from VEPvcf import VEPVCFIO, getAlleleRecord
 
+
+
+########################################################################
+#
+# FUNCTIONS
+#
+########################################################################
+def getAlleleCounts( FH_vcf, record, allele_separator="," ):
+    """
+    @summary: Returns the AD/DP for each allele for each sample.
+    @param FH_vcf: [VCFIO] The VCF file object.
+    @param record: [VCFRecord] The variant record.
+    @param allele_separator: [str] The character used to separate the alleles information.
+    @return: [list] Each element in the list represents one sample. In each sample the information for each allele is separated by "," (example: ["10/280,5/8", "800/812,62/62"]).
+    """
+    count_by_spl = list()
+    for curr_spl in FH_vcf.samples:
+        if curr_spl not in record.samples:
+            count_by_spl.append("")
+        else:
+            AD = record.get_AD(curr_spl)
+            DP = record.get_DP(curr_spl)
+            alleles_count = list()
+            for idx_allele, curr_AD in enumerate(AD):
+                alleles_count.append( str(curr_AD) + "/" + str(DP) )
+            count_by_spl.append( allele_separator.join(alleles_count) )
+    return( count_by_spl )
 
 
 ########################################################################
@@ -59,10 +86,16 @@ if __name__ == "__main__":
             "Reference_allele",
             "Alternative_alleles",
             "Variant_quality",
+            "Filters",
+            args.separator.join( FH_vcf.samples ),
             args.separator.join( FH_vcf.CSQ_titles ),
             sep=args.separator
         )
         for record in FH_vcf:
+            alt = ",".join(record.alt)
+            qual = "." if record.qual is None else record.qual
+            filters = "." if record.filter is None else ",".join(record.filter)
+            spl_counts = args.separator.join( getAlleleCounts(FH_vcf, record) )
             for idx_csq, csq in enumerate(record.info["CSQ"]):
                 csq_values = list()
                 for title in FH_vcf.CSQ_titles:
@@ -74,8 +107,10 @@ if __name__ == "__main__":
                     (record.chrom if idx_csq == 0 else ""),
                     (record.pos if idx_csq == 0 else ""),
                     (record.ref if idx_csq == 0 else ""),
-                    (",".join(record.alt) if idx_csq == 0 else ""),
-                    (record.qual if idx_csq == 0 else ""),
+                    (alt if idx_csq == 0 else ""),
+                    (qual if idx_csq == 0 else ""),
+                    (filters if idx_csq == 0 else ""),
+                    (spl_counts if idx_csq == 0 else ""),
                     args.separator.join( csq_values ),
                     sep=args.separator
                 )
