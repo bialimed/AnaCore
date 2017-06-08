@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -67,7 +67,7 @@ def getADP( chrom, pos, ref, alt, aln_file ):
             if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
                 # Get unique id
                 read_id = pileupread.alignment.query_name
-                if pileupread.is_read2:
+                if not pileupread.alignment.is_read2:
                     read_id += "_R1"
                 else:
                     read_id += "_R2"
@@ -160,7 +160,7 @@ def getADP( chrom, pos, ref, alt, aln_file ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references.' )
+    parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. ote: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     parser.add_argument( '-p', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
