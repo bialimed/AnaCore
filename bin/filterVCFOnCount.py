@@ -27,6 +27,7 @@ import os
 import sys
 import json
 import argparse
+from argparse import RawTextHelpFormatter
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
@@ -44,6 +45,12 @@ from vcf import VCFIO, getAlleleRecord
 #
 ########################################################################
 def getFilterTag( DP_is_ok, AF_is_ok ):
+    """
+    @summary: Returns the tag corresponding to the filters results (DP and AF) for the variant.
+    @param DP_is_ok: [list] Each element is a sample's result against the DP's filter. Example: [False, True] => sample 1 has an insufficient DP and sample 2 has a sufficient DP.
+    @param AF_is_ok: [list] Each element is a sample's result against the AF's filter. Example: [True, False] => sample 1 has a sufficient AF and sample 2 has an insufficient AF.
+    @return: [str] The filter tag.
+    """
     tag = "PASS"
     if not DP_is_ok[0] and not DP_is_ok[1]: # -- **
         tag = "lowDP"
@@ -71,12 +78,32 @@ def getFilterTag( DP_is_ok, AF_is_ok ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='************************************************' )
+    parser = argparse.ArgumentParser( formatter_class=RawTextHelpFormatter, description='''Filters variants on AF and DP accross samples. The AF must be sufficient in two samples.
+  Case   Sample_1   Sample_2   FILTER
+         DP  AF     DP  AF
+  1      +   +      +   +      PASS
+  2      +   -      +   -      lowAF
+  3      -   +      -   +      lowDP
+  4      -   -      -   -      lowDP
+  5      +   +      -   -      incomplete
+  6      +   -      -   +      invalid
+  7      +   +      -   +      incomplete
+  8      +   -      -   -      invalid
+  9      -   +      +   -      invalid
+  10     -   -      +   +      incomplete
+  11     -   +      +   +      incomplete
+  12     -   -      +   -      invalid
+  13     -   -      -   +      lowDP
+  14     +   -      +   +      libSpe
+  15     -   +      -   -      lowDP
+  16     +   +      +   -      libSpe
+  In "remove" mode only "PASS" and "incomplete" variants are kept.
+''' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     parser.add_argument( '-m', '--mode', default="tag", choices=["tag", "remove"], help='Select the filter mode. In mode "tag" if the variant does not fit criteria a tag is added in FILTER field. In mode "remove" if the variant does not fit criteria it is removed from the output. [Default: %(default)s]' )
     group_filter = parser.add_argument_group( 'Filters' ) # Filters
-    group_filter.add_argument( '-a', '--AF-threshold', type=float, default=0.02, help='*****************************************.' )
-    group_filter.add_argument( '-d', '--DP-threshold', type=int, default=120, help='*****************************************.' )    
+    group_filter.add_argument( '-a', '--AF-threshold', type=float, default=0.02, help='The minimum allele frequency to validate the variant. [Default: %(default)s]' )
+    group_filter.add_argument( '-d', '--DP-threshold', type=int, default=120, help='The minimum depth in sample to validate the variant. [Default: %(default)s].' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
@@ -107,9 +134,6 @@ if __name__ == "__main__":
                         DP_is_ok.append( True )
                         if alt_record.get_DP(curr_spl) < args.DP_threshold:
                             DP_is_ok[spl_idx] = False
-                        print(curr_spl, alt_record.get_AF(curr_spl), alt_record.get_DP(curr_spl))
-                    print(AF_is_ok)
-                    print(DP_is_ok)
                     # Apply filters
                     tag = getFilterTag( DP_is_ok, AF_is_ok )
                     if tag == "PASS":
@@ -122,3 +146,67 @@ if __name__ == "__main__":
                     else:
                         if tag in ["PASS", "incomplete"]:
                             FH_out.write( FH_in.recToVCFLine(alt_record) + "\n" )
+
+
+########################################################################
+#
+# TEST
+#
+########################################################################
+"""
+Parameters:
+-----------
+--AF-threshold 0.1 --DP-threshold 500
+
+
+Input:
+------
+##fileformat=VCFv4.0
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##FORMAT=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA	splB
+1	10	1	A	G	.	.	AF=0.1;DP=1000	DP:AF	500:0.1	500:0.1
+1	10	2	A	G	.	.	AF=0.1;DP=1000	DP:AF	500:0.01	500:0.01
+1	10	3	A	G	.	.	AF=0.1;DP=2	DP:AF	1:0.1	1:0.1
+1	10	4	A	G	.	.	AF=0.01;DP=2	DP:AF	1:0.01	1:0.01
+1	10	5	A	G	.	.	AF=0.1;DP=501	DP:AF	500:0.1	1:0.01
+1	10	6	A	G	.	.	AF=0.01;DP=501	DP:AF	500:0.01	1:0.1
+1	10	7	A	G	.	.	AF=0.1;DP=501	DP:AF	500:0.1	1:0.1
+1	10	8	A	G	.	.	AF=0.01;DP=501	DP:AF	500:0.01	1:0.01
+1	10	9	A	G	.	.	AF=0.01;DP=501	DP:AF	1:0.1	500:0.01
+1	10	10	A	G	.	.	AF=0.1;DP=501	DP:AF	1:0.01	500:0.1
+1	10	11	A	G	.	.	AF=0.1;DP=501	DP:AF	1:0.1	500:0.1
+1	10	12	A	G	.	.	AF=0.01;DP=501	DP:AF	1:0.01	500:0.01
+1	10	13	A	G	.	.	AF=0.055;DP=2	DP:AF	1:0.01	1:0.1
+1	10	14	A	G	.	.	AF=0.55;DP=1000	DP:AF	500:0.01	500:0.1
+1	10	15	A	G	.	.	AF=0.055;DP=2	DP:AF	1:0.1	1:0.01
+1	10	16	A	G	.	.	AF=0.55;DP=1000	DP:AF	500:0.1	500:0.01
+
+
+Output:
+-------
+##fileformat=VCFv4.0
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##FORMAT=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA	splB
+1	10	1	A	G	.	PASS	AF=0.1;DP=1000	DP:AF	500:0.1	500:0.1
+1	10	2	A	G	.	lowAF	AF=0.1;DP=1000	DP:AF	500:0.01	500:0.01
+1	10	3	A	G	.	lowDP	AF=0.1;DP=2	DP:AF	1:0.1	1:0.1
+1	10	4	A	G	.	lowDP	AF=0.01;DP=2	DP:AF	1:0.01	1:0.01
+1	10	5	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	500:0.1	1:0.01
+1	10	6	A	G	.	invalid	AF=0.01;DP=501	DP:AF	500:0.01	1:0.1
+1	10	7	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	500:0.1	1:0.1
+1	10	8	A	G	.	invalid	AF=0.01;DP=501	DP:AF	500:0.01	1:0.01
+1	10	9	A	G	.	invalid	AF=0.01;DP=501	DP:AF	1:0.1	500:0.01
+1	10	10	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	1:0.01	500:0.1
+1	10	11	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	1:0.1	500:0.1
+1	10	12	A	G	.	invalid	AF=0.01;DP=501	DP:AF	1:0.01	500:0.01
+1	10	13	A	G	.	lowDP	AF=0.055;DP=2	DP:AF	1:0.01	1:0.1
+1	10	14	A	G	.	libSpe	AF=0.55;DP=1000	DP:AF	500:0.01	500:0.1
+1	10	15	A	G	.	lowDP	AF=0.055;DP=2	DP:AF	1:0.1	1:0.01
+1	10	16	A	G	.	libSpe	AF=0.55;DP=1000	DP:AF	500:0.1	500:0.01
+"""
