@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -141,7 +141,7 @@ if __name__ == "__main__":
                     valid_consequences = getKeptConsequences( alt_record, VEP_alt[alt_idx], args.kept_consequences )
                     # Filter the variant allele
                     if args.mode == "tag":
-                        if len(alt_record.filter) != 0 and alt_record.filter[0] == "PASS":
+                        if alt_record.filter is None or len(alt_record.filter) == 0 or alt_record.filter[0] == "PASS":
                             alt_record.filter = list()
                         if is_polymophism:
                             alt_record.filter.append( "popAF" )
