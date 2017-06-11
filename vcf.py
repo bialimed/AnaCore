@@ -145,7 +145,7 @@ class VCFRecord:
 
     def get_AF( self, spl_name ):
         """
-        @summary: Returns the list of alleles frequencies for the specified sample.
+        @summary: Returns the list of alleles frequencies for the specified sample. The reference frequency is removed from the result if it exists.
         @param spl_name: [str] The sample name.
         @return: [list] The list of alleles frequencies.
         """
@@ -187,7 +187,7 @@ class VCFRecord:
 
     def get_AD( self, spl_name ):
         """
-        @summary: Returns the list of alleles depths for the specified sample.
+        @summary: Returns the list of alleles depths for the specified sample. The reference depth is removed from the result if it exists.
         @param spl_name: [str] The sample name.
         @return: [list] The list of alleles depths.
         """
@@ -220,11 +220,11 @@ class VCFRecord:
             AD = [int(curr_AF * DP) for curr_AF in AF]
         else:
             raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-        
+
         # Transform AF to list
         if not isinstance(AD, (list, tuple)):
             AD = [AD]
-        
+
         return( AD )
 
     def get_DP( self, spl_name ):
