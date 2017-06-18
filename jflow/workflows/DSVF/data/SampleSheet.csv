@@ -1,0 +1,27 @@
+[Header]
+IEMFileVersion,4
+Investigator Name,Christelle BOURCIER
+Experiment Name,INCa-V1_170503CBOAU
+Date,03/05/2017
+Workflow,Amplicon - DS
+Application,Amplicon - DS
+Assay,TruSight Tumor
+Description,
+Chemistry,Amplicon
+
+[Manifests]
+A,INCa_V1_A.txt
+B,INCa_V1_B.txt
+
+[Reads]
+151
+151
+
+[Settings]
+
+[Data]
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Manifest,GenomeFolder,Sample_Project,Description
+17T020367_A ,17T020367,170503_INCaV1CBOAU,G03,A705,ACCCAGCA,A507,TAAGTTCC,A,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,
+17T020367_B ,17T020367,170503_INCaV1CBOAU,G07,A709,GAAACCCA,A507,TAAGTTCC,B,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,
+17T020525_A ,17T020525,170503_INCaV1CBOAU,E03,A705,ACCCAGCA,A505,CTAATCGA,A,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,
+17T020525_B ,17T020525,170503_INCaV1CBOAU,E07,A709,GAAACCCA,A505,CTAATCGA,B,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,
