@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -85,6 +85,15 @@ def getStdEvalFct( operator ):
         def eval_fct(val, ref): return( val in ref )
     elif operator == "not in":
         def eval_fct(val, ref): return( val not in ref )
+    elif operator == "at least one in":
+        def eval_fct(val, ref):
+            one_in = False
+            if not issubclass(val.__class__, list) and not issubclass(val.__class__, tuple) and issubclass(val.__class__, set):
+                raise Exception('"atLeastOneIn" must be applied on list.')
+            for curr_elt in val:
+                if curr_elt in ref:
+                    one_in = True
+            return( one_in )
     else:
         raise Exception("The operator '" + operator + "' is not implemented.")
     return eval_fct
