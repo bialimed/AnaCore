@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -43,7 +43,7 @@ from vcf import VCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getADP( chrom, pos, ref, alt, aln_file ):
+def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     """
     @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant.
     @param chrom: [str] The variant region name.
@@ -51,42 +51,43 @@ def getADP( chrom, pos, ref, alt, aln_file ):
     @param ref: [str] The reference allele at the position.
     @param alt: [str] The variant allele at the position.
     @param aln_file: [str] The path to the alignment file (format: BAM). The AD and DP are retrieved from reads of this file. This file must be indexed.
+    @param selected_RG: [list] The ID of RG used in AD and DP. Default: all read groups.
     @return: [list] The first element is the AD, the second is the DP.
     @warning: Reads ID must be unique in SAM.
     """
     ref_start = pos
     ref_end = pos + len(ref.replace(".", "")) - 1
-
-    FH_sam = pysam.AlignmentFile( aln_file, "rb" )
+    selected_RG = {RG:1 for RG in selected_RG}
+    # Retrieve reads
     inspect_start = ref_start - 1
     inspect_end = ref_end
     reads = dict()
-        
-    for pileupcolumn in FH_sam.pileup( chrom, inspect_start, inspect_end, max_depth=100000 ):
-        for pileupread in pileupcolumn.pileups:
-            if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
-                # Get unique id
-                read_id = pileupread.alignment.query_name
-                if not pileupread.alignment.is_read2:
-                    read_id += "_R1"
-                else:
-                    read_id += "_R2"
-                # Store new reads
-                if read_id not in reads:
-                    reads[read_id] = [None for pos in range(inspect_start, pileupcolumn.pos)]
-                # Store comparison with ref for current position
-                if pileupread.is_del: # Deletion
-                    reads[read_id].append( "" )
-                elif pileupread.indel > 0: # Insertion
-                    insert = ""
-                    for insert_idx in range(pileupread.indel + 1):
-                        insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
-                    reads[read_id].append( insert )
-                elif not pileupread.is_refskip: # Substitution
-                    reads[read_id].append(
-                        pileupread.alignment.query_sequence[pileupread.query_position].upper()
-                    )
-
+    with pysam.AlignmentFile( aln_file, "rb" ) as FH_sam:
+        for pileupcolumn in FH_sam.pileup( chrom, inspect_start, inspect_end, max_depth=100000 ):
+            for pileupread in pileupcolumn.pileups:
+                if selected_RG is None or (pileupread.alignment.get_tag("RG") in selected_RG):
+                    if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
+                        # Get unique id
+                        read_id = pileupread.alignment.query_name
+                        if not pileupread.alignment.is_read2:
+                            read_id += "_R1"
+                        else:
+                            read_id += "_R2"
+                        # Store new reads
+                        if read_id not in reads:
+                            reads[read_id] = [None for pos in range(inspect_start, pileupcolumn.pos)]
+                        # Store comparison with ref for current position
+                        if pileupread.is_del: # Deletion
+                            reads[read_id].append( "" )
+                        elif pileupread.indel > 0: # Insertion
+                            insert = ""
+                            for insert_idx in range(pileupread.indel + 1):
+                                insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
+                            reads[read_id].append( insert )
+                        elif not pileupread.is_refskip: # Substitution
+                            reads[read_id].append(
+                                pileupread.alignment.query_sequence[pileupread.query_position].upper()
+                            )
     # Process AD and DP
     alt = alt if alt != "." else ""
     AD = 0
@@ -96,7 +97,6 @@ def getADP( chrom, pos, ref, alt, aln_file ):
             DP += 1
             if "".join(reads[read_id]) == alt:
                 AD += 1
-
     # Return
     return( AD, DP )
 
@@ -173,13 +173,9 @@ if __name__ == "__main__":
     # Get identified variants from VCF
     variants = dict()
     aln_by_samples = dict()
-    out_vcf_info = None
-    out_vcf_format = None
     for vcf_idx, current_vcf in enumerate(args.input_variants):
         current_aln = args.input_aln[vcf_idx]
         with VCFIO(current_vcf) as FH_vcf:
-            out_vcf_info = FH_vcf.info
-            out_vcf_format = FH_vcf.format
             for record in FH_vcf: # For each variant
                 for curr_spl in FH_vcf.samples: # For each sample in VCF
                     aln_by_samples[curr_spl] = current_aln
@@ -191,12 +187,12 @@ if __name__ == "__main__":
                         vcaller_curr_AF = vcaller_AF[alt_idx]
                         if len(vcaller_AF) == len(record.alt) + 1: # The AF cointains reference AF
                             vcaller_curr_AF = vcaller_AF[alt_idx + 1]
-                        #~ #######################################################################################
+                        #######################################################################################
                         #~ test_AD, test_DP = getADP( record_allele.chrom, record_allele.pos, record_allele.ref, record_allele.alt[0], current_aln )
-                        #~ test_AF = float(test_AD)/test_DP
+                        #~ test_AF = 0 if test_DP == 0 else float(test_AD)/test_DP
                         #~ print( record_allele.chrom + ":" + str(record_allele.pos), record_allele.ref + "/" + record_allele.alt[0], round(test_AF, 4), "vs", vcaller_curr_AF )
                         #~ print()
-                        #~ #######################################################################################
+                        #######################################################################################
                         record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
                         record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
                         record_allele.samples[curr_spl]["DP"] = vcaller_DP
@@ -240,7 +236,7 @@ if __name__ == "__main__":
                     ref, alt = ref_alt.split("/")
                     AD, DP = getADP( chrom, int(pos), ref, alt, aln_by_samples[spl] )
                     curr_var.samples[spl] = {
-                        "AF": [round(float(AD)/DP, args.AF_precision)],
+                        "AF": [0 if DP == 0 else round(float(AD)/DP, args.AF_precision)],
                         "AD": [AD],
                         "DP": DP
                     }
