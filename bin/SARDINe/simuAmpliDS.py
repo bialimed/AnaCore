@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -28,6 +28,7 @@ import os
 import sys
 import time
 import random
+import logging
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -44,9 +45,138 @@ from sequenceIO import *
 # FUNCTIONS
 #
 ########################################################################
+class Amplicon(object):
+    def __init__(self, reference, strand, up_primer, down_primer, start, end, name=None):
+        self.name = name
+        self.start = start
+        self.end = end
+        self.strand = strand
+        self.reference = reference
+        self.up_primer = up_primer.upper()
+        self.down_primer = down_primer.upper()
+
+    def __str__(self):
+        return str({
+            "name": self.name,
+            "start": self.start,
+            "end": self.end,
+            "strand": self.strand,
+            "region": self.reference,
+            "up_primer": self.up_primer,
+            "down_primer": self.down_primer
+        })
+
+    def getInterestStart(self):
+        interest_start = self.start + len(self.up_primer)
+        if self.strand == "-":
+            interest_start = self.start + len(self.down_primer)
+        return( interest_start )
+
+    def getInterestEnd(self):
+        interest_end = self.end - len(self.down_primer)
+        if self.strand == "-":
+            interest_end = self.end - len(self.up_primer)
+        return( interest_end )
+
+def getOverlappedComplexRegions( complex_regions, variant_start, variant_end ):
+    overlapped = list()
+    for curr_region in complex_regions:
+        if variant_start < curr_region.end and variant_end > curr_region.start:
+            overlapped.append( curr_region )
+    return overlapped
+
+def hasComplexConfiguration( complex_regions, variant_start, variant_end ):
+    is_complex = False
+    overlapped = getOverlappedComplexRegions( complex_regions, variant_start, variant_end )
+    if len(overlapped) > 0:
+        for curr_region in overlapped:
+            if variant_start <= curr_region.getInterestEnd() and variant_end > curr_region.getInterestEnd():
+                is_complex = True
+            elif variant_start < curr_region.getInterestStart() and variant_end >= curr_region.getInterestStart():
+                is_complex = True
+    return is_complex
+
+def getComplexRegions( amplicons_by_chr ):
+    complex_by_chr = dict()
+    for chrom in amplicons_by_chr:
+        complex_by_chr[chrom] = list()
+        amplicons = sorted(amplicons_by_chr[chrom], key=lambda x: (x.start, x.end))
+        prev_ampli = None
+        for curr_ampli in amplicons:
+            if prev_ampli is not None:
+                if prev_ampli.getInterestEnd() + 1 >= curr_ampli.getInterestStart(): # It does not exist a gap in coverage region
+                    complex_by_chr[chrom].append(
+                        Amplicon(
+                            chrom,
+                            "+",
+                            (curr_ampli.up_primer if curr_ampli.strand == "+" else revcom(curr_ampli.down_primer)),
+                            (prev_ampli.down_primer if prev_ampli.strand == "+" else revcom(prev_ampli.up_primer)),
+                            curr_ampli.start,
+                            prev_ampli.end
+                        )
+                    )
+            prev_ampli = curr_ampli
+    return complex_by_chr
+
+def getAmplicons( reference_path, manifest_path ):
+    """
+    @summary: Returns the list of amplicons by chromosome from a Illumina's manifest.
+    @param reference_path: [str] Path to the genome assembly where the amplicon have been defined.
+    @param manifest_path: [str] Path to the manifest.
+    @return: [dict] By chr the amplicons objects.
+    """
+    # Get amplicons by chr
+    amplicons = getAmpliconsFromManifest( manifest_path )
+    amplicons_by_chr = dict()
+    for ampli_idx, ampli in enumerate(amplicons):
+        chr = ampli["chromosome"]
+        if chr not in amplicons_by_chr:
+            amplicons_by_chr[chr] = list()
+        amplicons_by_chr[chr].append(
+            Amplicon(
+                chr,
+                ampli["probe_strand"],
+                ampli["ulso_sequence"],
+                ampli["dlso_sequence"],
+                None,
+                None,
+                "ampl" + str(ampli_idx) + "_" + ampli["target_region_name"].replace(" ", "_")
+            )
+        )
+
+    # Find amplicons coord
+    FH_ref = SequenceFileReader.factory( reference_path )
+    try:
+        for record in FH_ref:
+            if record.id in amplicons_by_chr:
+                chr_str = record.string.upper()
+                for ampli in amplicons_by_chr[record.id]:
+                    up_primer = ampli.up_primer
+                    down_primer = ampli.down_primer
+                    if ampli.strand == "-":
+                        up_primer = revcom(ampli.down_primer)
+                        down_primer = revcom(ampli.up_primer)
+                    try:
+                        ampli.start = chr_str.index( up_primer ) + 1
+                        ampli.end = chr_str.index( down_primer ) + len(down_primer)
+                    except:
+                        raise Exception("The primers '" + up_primer + "' and '" + down_primer + "' cannot be found in " + record.id )
+                    # Check multiple target in chr
+                    if chr_str.count(up_primer) > 1:
+                        raise Exception("The primer '" + up_primer + "' is found multiple twice in " + record.id )
+                    if chr_str.count(down_primer) > 1:
+                        raise Exception("The primer '" + down_primer + "' is found multiple twice in " + record.id )
+                amplicons_by_chr[record.id] = sorted( amplicons_by_chr[record.id], key=lambda ampl: (ampl.start, ampl.end) )
+    finally:
+        FH_ref.close()
+
+    return( amplicons_by_chr )
+
 def revcom( seq ):
     """
-    @summary : Reverse complement the sequence.
+    @summary: Returns the reverse complement the sequence.
+    @param seq: [str] The sequence.
+    @return: [str] The reverse complement of the sequence.
     """
     complement_rules = {'A':'T','T':'A','G':'C','C':'G','U':'A','N':'N','W':'W','S':'S','M':'K','K':'M','R':'Y','Y':'R','B':'V','V':'B','D':'H','H':'D',
                         'a':'t','t':'a','g':'c','c':'g','u':'a','n':'n','w':'w','s':'s','m':'k','k':'m','r':'y','y':'r','b':'v','v':'b','d':'h','h':'d'}
@@ -54,6 +184,11 @@ def revcom( seq ):
     return( "".join([complement_rules[base] for base in seq[::-1]]) )
 
 def getAmpliconsFromManifest( manifest_path ):
+    """
+    @summary: Returns the list of amplicons from a Illumina's manifest.
+    @param manifest_path: [str] Path to the manifest.
+    @return: [list] The amplicons information.
+    """
     amplicons = list()
     with open(manifest_path) as FH_manifest:
         section_probe = False
@@ -71,48 +206,6 @@ def getAmpliconsFromManifest( manifest_path ):
                     amplicons.append( fields )
     return amplicons
 
-def getAmplicons( reference_path, manifest_path ):
-    # Get amplicons
-    amplicons = getAmpliconsFromManifest( manifest_path )
-    amnplicons_by_chr = dict()
-    for ampli in amplicons:
-        chr = ampli["chromosome"]
-        if chr not in amnplicons_by_chr:
-            amnplicons_by_chr[chr] = list()
-        amnplicons_by_chr[chr].append({
-            "strand": ampli["probe_strand"],
-            "up_primer": ampli["ulso_sequence"].upper(),
-            "down_primer": ampli["dlso_sequence"].upper(),
-            "start": None,
-            "end": None
-        })
-
-    # Find amplicons coord
-    FH_ref = SequenceFileReader.factory( reference_path )
-    try:
-        for record in FH_ref:
-            if record.id in amnplicons_by_chr:
-                chr_str = record.string.upper()
-                for ampli in amnplicons_by_chr[record.id]:
-                    up_primer = ampli["up_primer"]
-                    down_primer = ampli["down_primer"]
-                    if ampli["strand"] == "-":
-                        up_primer = revcom(ampli["down_primer"])
-                        down_primer = revcom(ampli["up_primer"])
-                    try:
-                        ampli["start"] = chr_str.index( up_primer ) + 1
-                        ampli["end"] = chr_str.index( down_primer ) + len(down_primer)########## +1                            
-                    except:
-                        raise Exception("The primers '" + up_primer + "' and '" + down_primer + "' cannot be found in " + record.id )
-                    # Check multiple target in chr
-                    if chr_str.count(up_primer) > 1:
-                        raise Exception("The primer '" + up_primer + "' is found multiple twice in " + record.id )
-                    if chr_str.count(down_primer) > 1:
-                        raise Exception("The primer '" + down_primer + "' is found multiple twice in " + record.id )
-    finally:
-        FH_ref.close()
-    return( amnplicons_by_chr )
-
 def getVariantsProfile( profile_path ):
     profiles = list()
     with open(profile_path) as FH_profile:
@@ -128,27 +221,27 @@ def getVariantsProfile( profile_path ):
                 )
     return profiles
 
-def getCoveredLength( area_by_chr ):
+def getCoveredLength( areas_by_chr ):
     covered_len = 0
-    for chr in area_by_chr:
-        for area in area_by_chr[chr]:
+    for chr in areas_by_chr:
+        for area in areas_by_chr[chr]:
             covered_len += area["end"] - area["start"] + 1
     return( covered_len )
 
-def setAmpliconSeq( ref_sequences, area_by_chr ):
+def setAmpliconSeq( ref_sequences, areas_by_chr ):
     FH_ref = SequenceFileReader.factory( ref_sequences )
     for record in FH_ref:
-        if record.id in area_by_chr:
-            for area in area_by_chr[record.id]:
-                area["ref"] = record.string[(area["start"]-1):area["end"]]
+        if record.id in areas_by_chr:
+            for curr_area in areas_by_chr[record.id]:
+                curr_area["ref"] = record.string[(curr_area["start"]-1):curr_area["end"]]
     FH_ref.close()
 
-def getCoveredPos( area_by_chr ):
+def getCoveredPos( areas_by_chr ):
     covered_pos = list()
-    for chr in area_by_chr:
-        for area in area_by_chr[chr]:
+    for chrom in sorted(areas_by_chr):
+        for area in areas_by_chr[chrom]:
             for pos in range( area["start"], (area["end"] + 1) ):
-                covered_pos.append( chr + ":" + str(pos) )
+                covered_pos.append( chrom + ":" + str(pos) )
     return( covered_pos )
 
 def setAlt( variant, region_sequence, start_idx ):
@@ -186,39 +279,23 @@ def writeVariants( out_path, variants_by_chr ):
                 FH_out_vcf.write( chr + "\t" + str(start) + "\t.\t" + variant["ref"] + "\t" + variant["alt"] + "\t.\t.\t" + "AF=" + str(variant["freq"]) + "\t.\n" )
 
 def getCoveredFromAmplicons( amplicons_by_chr, remove_primers=True ):
-    cover_region_by_chr = dict()
-    for chr in amplicons_by_chr:
-        cover_region_by_chr[chr] = dict()
-        for ampli in amplicons_by_chr[chr]:
-            start = ampli["start"]            
-            end = ampli["end"]
-            if remove_primers:
-                up_primer = ampli["up_primer"]
-                down_primer = ampli["down_primer"]
-                if ampli["strand"] == "-":
-                    up_primer = revcom(ampli["down_primer"])
-                    down_primer = revcom(ampli["up_primer"])
-                start += len(up_primer)
-                end -= len(down_primer)
-            if start not in cover_region_by_chr[chr]:
-                cover_region_by_chr[chr][start] = end
-            else:
-                if cover_region_by_chr[chr][start] < end:
-                    cover_region_by_chr[chr][start] = end
-                else:
-                    print("inclusion")
-    area_by_chr = dict()
-    for chr in cover_region_by_chr:
-        area_by_chr[chr] = list()
-        prev_end = -1
-        for start in sorted(cover_region_by_chr[chr]):
-            end = cover_region_by_chr[chr][start]
-            if start <= prev_end:
-                area_by_chr[chr][-1]["end"] = end
-            else:
-                area_by_chr[chr].append({"start": start, "end": end, "ref":None, "alt":None})
-            prev_end = end
-    return( area_by_chr )
+    areas_by_chr = dict()
+    for chrom in sorted(amplicons_by_chr):
+        areas_by_chr[chrom] = list()
+        amplicons = sorted(amplicons_by_chr[chrom], key=lambda x: (x.start, x.end))
+        prev_start = amplicons[0].getInterestStart() if remove_primers else amplicons[0].start
+        prev_end = amplicons[0].getInterestEnd() if remove_primers else amplicons[0].end
+        for curr_ampl in amplicons[1:]:
+            curr_start = curr_ampl.getInterestStart() if remove_primers else curr_ampl.start
+            curr_end = curr_ampl.getInterestEnd() if remove_primers else curr_ampl.end
+            if curr_start > prev_end + 1: # no overlap
+                areas_by_chr[chrom].append({"start": prev_start, "end": prev_end, "ref":None, "alt":None})
+                prev_start = curr_start
+                prev_end = curr_end
+            else: # overlap or inclusion
+                prev_end = max(prev_end , curr_end)
+        areas_by_chr[chrom].append({"start": prev_start, "end": prev_end, "ref":None, "alt":None})
+    return areas_by_chr
 
 def writeReadsPair( pair_id, matrix, rvc_matrix, reads_length, FH_R1, FH_R2 ):
     R1 = Sequence( pair_id, matrix[0:reads_length] )
@@ -231,6 +308,18 @@ def writeReadsPair( pair_id, matrix, rvc_matrix, reads_length, FH_R1, FH_R2 ):
     FH_R1.write( R1 )
     FH_R2.write( R2 )
 
+def minPairsType(value):
+    ivalue = int(value)
+    if ivalue < 100:
+        raise argparse.ArgumentTypeError( "The minimum number of reads pairs by amplicon must be 100." )
+    return ivalue
+
+def maxPairsType(value):
+    ivalue = int(value)
+    if ivalue % 100 != 0:
+        raise argparse.ArgumentTypeError( "The maximum number of reads pairs by amplicon must be a multiple of 100." )
+    return ivalue
+
 
 ########################################################################
 #
@@ -239,62 +328,67 @@ def writeReadsPair( pair_id, matrix, rvc_matrix, reads_length, FH_R1, FH_R2 ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='**************************************************************.' )
-    parser.add_argument( '-s', '--random-seed', type=int, help="The *****************************************. [Default: auto]" )
-    parser.add_argument( '-d', '--min-distance', type=int, default=2, help="The *****************************************. [Default: %(default)s]" )
-    parser.add_argument( '-n', '--sample-name', required=True, help="The *****************************************." )
+    parser = argparse.ArgumentParser( description='Creates simulated reads corresponding Illumina sequencing of amplicon double strand experiment. ***variants *********without error *************************' )
+    parser.add_argument( '-s', '--random-seed', type=int, help="The seed used for the random generator. If you want reproduce results of one execution: use the same parameters AND the same random-seed. [Default: auto]" )
+    parser.add_argument( '-d', '--min-distance', type=int, default=2, help="The minimum distance between two variants. [Default: %(default)s]" )
+    parser.add_argument( '-n', '--sample-name', required=True, help="The name of the simulated sample." )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
+    group_reads = parser.add_argument_group( 'Reads' ) # Reads
+    group_reads.add_argument( '-l', '--reads-length', type=int, default=150, help='The reads length for sequencer. [Default: %(default)s]' )
+    group_reads.add_argument( '-mip', '--min-pairs', type=minPairsType, default=200, help='The minimum number of reads pairs for one amplicon in one library. [Default: %(default)s]' )
+    group_reads.add_argument( '-map', '--max-pairs', type=maxPairsType, default=15000, help='The maximum number of reads pairs for one amplicon in one library. [Default: %(default)s]' )
+    group_reads.add_argument( '-ds', '--is-double-strand', action='store_true', help='With this argument the sequence are created for the specified design and for his reverse complement design (library A and library B in double strand experiment).' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-m', '--input-manifests', required=True, help='*********************************** (format: *****************).' )
-    group_input.add_argument( '-g', '--input-genome', required=True, help='*************************************** (format: fasta).' )
+    group_input.add_argument( '-m', '--input-manifests', required=True, help='Path to the definition of the amplicons (format: Illumina manifest).' )
+    group_input.add_argument( '-g', '--input-genome', required=True, help='Path to the genome sequences file (format: fasta).' )
     group_input.add_argument( '-p', '--input-profile', required=True, help='Path to the variants profile file (format: TSV).' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '--output-variants', required=True, help='*********************************** (format: VCF).' )
-    group_output.add_argument( '--output-folder', default=os.getcwd(), help='*************************************** (format: fasta). [Default: %(default)s]' )
+    group_output.add_argument( '--output-variants', required=True, help='Path to the file describing variants introduced in reads and their AF (format: VCF).' )
+    group_output.add_argument( '--output-folder', default=os.getcwd(), help='Path to the output folder. [Default: %(default)s]' )
     args = parser.parse_args()
 
-    # Get reference sequences
-    print( "[GET amplicons]\tStart" )
-    amplicons_by_chr = getAmplicons( args.input_genome, args.input_manifests )
-    #~ amplicons_by_chr = {'chr15': [{'strand': '+', 'down_primer': 'GCTGGCAATGGCGGTGTGGTGTTCAA', 'up_primer': 'TGATGAGCAGCAGCGAAAGCGCCTTGA', 'start': 66727410, 'end': 66727535}, {'strand': '-', 'down_primer': 'CAAAGTGGGGAGCACAAGTCAATAC', 'up_primer': 'ACCTTCTGCTTCTGGGTAAGAAAGGC', 'start': 66727334, 'end': 66727463}, {'strand': '-', 'down_primer': 'CCCAGCTCACTGATCTTCTCAAAGT', 'up_primer': 'GGCTTCTAAGTACCCTGAGAAATAATCC', 'start': 66727484, 'end': 66727631}], 'chr14': [{'strand': '+', 'down_primer': 'CGCCAGGTCTTGATGTACTCCCCTACA', 'up_primer': 'ACAGAGAAGTTGTTGAGGGGAGCCTCA', 'start': 105246430, 'end': 105246558}, {'strand': '-', 'down_primer': 'TCTTTGCCCACCAGGCCCCACGATG', 'up_primer': 'AAGGAGCGGCCGCAGGATGTGGACCAAC', 'start': 105246346, 'end': 105246485}, {'strand': '-', 'down_primer': 'CCACGCTACTTCCTCCTCAAGAATG', 'up_primer': 'AGTTCCTGCCTGGCTGCCTGGCGAGG', 'start': 105246506, 'end': 105246627}], 'chr7': [{'strand': '+', 'down_primer': 'TCACCCTAAGTACATTACCTTATGCCTG', 'up_primer': 'GTAATCTGCCCATCAGGAATCTCCCAA', 'start': 140481435, 'end': 140481580}, {'strand': '-', 'down_primer': 'ATGTAATGTGGTGACATTGTGACAAGT', 'up_primer': 'ACTTGGTAGACGGGACTCGAGTGATG', 'start': 140481343, 'end': 140481488}, {'strand': '+', 'down_primer': 'GATCTCATTTTCCTATCAGAGCAAGCA', 'up_primer': 'CATCGAGATTTCACTGTAGCTAGACCA', 'start': 140453124, 'end': 140453250}, {'strand': '-', 'down_primer': 'ATTGAGGCTATTTTTCCACTGATTAAATT', 'up_primer': 'GAAGACCTCACAGTAAAAATAGGTGATT', 'start': 140453040, 'end': 140453179}, {'strand': '+', 'down_primer': 'TCTCATGGTCTGGTGGGGAGCCCAGA', 'up_primer': 'AGCTCTCTTGAGGATCTTGAAGGAAAC', 'start': 55241655, 'end': 55241804}, {'strand': '-', 'down_primer': 'GGACAAGAACACAGAGACAAGGGT', 'up_primer': 'GCCCAGCACTTTGATCTTTTTGAATTC', 'start': 55241583, 'end': 55241709}, {'strand': '+', 'down_primer': 'CTGAACCTCAGGCCCACCTTTTCTCAT', 'up_primer': 'GTCGCTATCAAGGAATTAAGAGAAGCA', 'start': 55242454, 'end': 55242576}, {'strand': '-', 'down_primer': 'CAGAGAGAGAAGGAAGACGTTAACTGG', 'up_primer': 'GATTTCCTTGTTGGCTTTCGGAGATG', 'start': 55242382, 'end': 55242507}, {'strand': '+', 'down_primer': 'TGGTGTGTGCAGATCGCAAAGGTAAT', 'up_primer': 'GCTGGGCATCTGCCTCACCTCCA', 'start': 55249033, 'end': 55249176}, {'strand': '-', 'down_primer': 'GAGGGAGAGGCACGTCAGTGTG', 'up_primer': 'ATGAGCTGCGTGATGAGCTGCACG', 'start': 55248957, 'end': 55249080}, {'strand': '-', 'down_primer': 'TTGAGCAGGTACTGGGAGCCAATATTG', 'up_primer': 'CATATCCCCATGGCAAACTCTTGCTAT', 'start': 55249123, 'end': 55249271}, {'strand': '+', 'down_primer': 'AAAGTAAGGAGGTGGCTTTAGGTCAG', 'up_primer': 'TGGCAGCCAGGAACGTACTGGTGAAAA', 'start': 55259455, 'end': 55259590}, {'strand': '-', 'down_primer': 'AGAGAAGACCCTGCTGTGAGGGACAG', 'up_primer': 'AATCTGTGATCTTGACATGCTGCGGT', 'start': 55259379, 'end': 55259508}, {'strand': '-', 'down_primer': 'CCTCCTTCTGCATGGTATTCTTTCTCT', 'up_primer': 'CCCCTGCATGTGTTAAACAATACAGCT', 'start': 55259537, 'end': 55259659}, {'strand': '+', 'down_primer': 'GCTACTTTTCCAGAAGGTATATTTCAGT', 'up_primer': 'GAGTACACACTCCTCATTTGGATAGGC', 'start': 116411936, 'end': 116412055}, {'strand': '-', 'down_primer': 'ACAGAGAGAAAGAAAGAGCTTGTTAAA', 'up_primer': 'TTGGGCTTACACTTCGGGCACTTACA', 'start': 116411870, 'end': 116411989}, {'strand': '-', 'down_primer': 'CGGTAGTCTACAGATTCATTTGAAACCAT', 'up_primer': 'CCAAAAATAAACAACAATGTCACAACC', 'start': 116411998, 'end': 116412120}, {'strand': '+', 'down_primer': 'CTAAATCCAGAGCTGGTCCAGGCAGT', 'up_primer': 'AACGGTTCATGCCGACAAGTGCAGTAT', 'start': 116414958, 'end': 116415103}, {'strand': '+', 'down_primer': 'CAACTGACAGAGCAGTGATAACAAGTG', 'up_primer': 'TTCAATGAAGTCATAGGAAGAGGTAAG', 'start': 116415144, 'end': 116415288}, {'strand': '-', 'down_primer': 'AGAACAACAGTAAAACCTCATTTAATGG', 'up_primer': 'TTAGGATGGGGGACATGTCTGTCAGAG', 'start': 116414882, 'end': 116415012}, {'strand': '-', 'down_primer': 'GCACTGAGGTCAATGTGGACAGTATTT', 'up_primer': 'CGTATTTAACAAAAAGCTGAGTGGAAAT', 'start': 116415050, 'end': 116415199}, {'strand': '+', 'down_primer': 'AACGTTGATTTACACTTTCCCCTTGTG', 'up_primer': 'CAATGATGGCAAGAAAATTCACTGTGC', 'start': 116417480, 'end': 116417620}, {'strand': '-', 'down_primer': 'AAGAAAGAACTTGGTTAGCACTGCG', 'up_primer': 'ATGCCACTTACTGTTCAAGGATTTCAC', 'start': 116417410, 'end': 116417534}, {'strand': '+', 'down_primer': 'TCTTCGAAATTTCATTCGAAATGAGACTC', 'up_primer': 'TGACCGAGGGAATCATCATGAAAGA', 'start': 116418863, 'end': 116419009}, {'strand': '-', 'down_primer': 'TCCAGTGGTGGAGACATTAACTTCATT', 'up_primer': 'AGCGAGAGGACATTGGGATGACTAAA', 'start': 116418795, 'end': 116418914}, {'strand': '-', 'down_primer': 'CTCCATGTTTCATGTATGGTAGGACCA', 'up_primer': 'TTTTGAAGGGATGGCTGGCTTACAGCT', 'start': 116418953, 'end': 116419073}, {'strand': '+', 'down_primer': 'ACAATCCAAATTAAGTGACAAGGAGGA', 'up_primer': 'GTAGCCAAAGGCATGAAATATCTTGCA', 'start': 116422081, 'end': 116422201}, {'strand': '-', 'down_primer': 'CAAAGAGAGTTAGAAAAGCATAAACTAAGC', 'up_primer': 'CCAAGTCTCTGTGGACAAACTTTTTGC', 'start': 116422005, 'end': 116422135}, {'strand': '+', 'down_primer': 'GTGGTAATGTATTGGTTATCTCTGAGT', 'up_primer': 'TTGCCAGAGACATGTATGATAAAGAATAC', 'start': 116423399, 'end': 116423547}, {'strand': '-', 'down_primer': 'GGACAAAAATTATTACCCGTGGCTGA', 'up_primer': 'TTGCACCTGTTTTGTTGTGTACACTAT', 'start': 116423323, 'end': 116423455}, {'strand': '-', 'down_primer': 'TCTGACTTGGTGGTAAACTTTTGAGTT', 'up_primer': 'GAAAACTGGAATTGGTGGTGTTGAATT', 'start': 116423493, 'end': 116423639}, {'strand': '+', 'down_primer': 'TTTACAGAAATGCCTGCCTTCAAAGGG', 'up_primer': 'CGTAAACACCTTTGATATAACTGTTTACT', 'start': 116435768, 'end': 116435908}, {'strand': '-', 'down_primer': 'ACAAGAAACAGGACAGATGAGGTGA', 'up_primer': 'TTGTAGGAGTCTTCTCCCTTGCAAC', 'start': 116435676, 'end': 116435822}, {'strand': '+', 'down_primer': 'CCCGCTGTGCTTGCACCTGGCAT', 'up_primer': 'AAATGGTATAGGTCTTTCAGTTTTCTCTTC', 'start': 116339050, 'end': 116339170}, {'strand': '+', 'down_primer': 'TTCACCGCGGAAACACCCATCCAGAAT', 'up_primer': 'CCTGTTTACCTTGGTGCAGAGGAGCAAT', 'start': 116339180, 'end': 116339300}, {'strand': '+', 'down_primer': 'CCTGTGCTGGAACACCCAGATTGTTT', 'up_primer': 'TCTACATGAGCATCACATTTTCCTTGG', 'start': 116339306, 'end': 116339425}, {'strand': '+', 'down_primer': 'TTAGCTGTGGCAGCGTCAACAGA', 'up_primer': 'TCAGGACTGCAGCAGCAAAGCCAATTTA', 'start': 116339432, 'end': 116339552}, {'strand': '+', 'down_primer': 'GACTGTGTGGTGAGCGCCCTGGGA', 'up_primer': 'CAGCGACATGTCTTTCCCCACAATCATA', 'start': 116339562, 'end': 116339681}, {'strand': '+', 'down_primer': 'GTGAGAAGGCTAAAGGAAACGAAAGATG', 'up_primer': 'TTTCATCTGTAAAGGACCGGTTCATCA', 'start': 116339692, 'end': 116339811}, {'strand': '+', 'down_primer': 'TTTATTTACTTCTTGACGGTCCAAAGGG', 'up_primer': 'TGTTTTTGACGGACCAGTCCTACATTG', 'start': 116339818, 'end': 116339937}, {'strand': '+', 'down_primer': 'AAAAGAGATCCACAAAGAAGGAAGTGT', 'up_primer': 'CAGACTTTTCACACAAGAATAATCAGG', 'start': 116339952, 'end': 116340078}, {'strand': '+', 'down_primer': 'CCTATCAAATATGTCAACGACTTCTTC', 'up_primer': 'CCCAGCTTGCTAGACAAATAGGAGC', 'start': 116340118, 'end': 116340260}, {'strand': '+', 'down_primer': 'GGCTTCTTTTGTGCTTTGTAAATGGTG', 'up_primer': 'CATTTTTACGGACCCAATCATGAGCAC', 'start': 116340300, 'end': 116340444}, {'strand': '-', 'down_primer': 'GGACTTTTACATAGAAGGAAAACAAAAACT', 'up_primer': 'TTCAAGGCGAGAGCAGTTCAGTTGTCAG', 'start': 116338992, 'end': 116339111}, {'strand': '-', 'down_primer': 'CCTTCATTATGAGAGGTTTATCTGCCAAAA', 'up_primer': 'ACTTTGCTAGTGCCTCTTTACACTCC', 'start': 116339116, 'end': 116339235}, {'strand': '-', 'down_primer': 'GGGAAGCTGATACTTCATATTCACATT', 'up_primer': 'CTCATTTAAAACATAAATGTAGTTAGTGGC', 'start': 116339244, 'end': 116339363}, {'strand': '-', 'down_primer': 'CAGTCTTGTACTCAGCAACCTTCTGAAG', 'up_primer': 'GTTGATGTTATCTTTCCAAACACCTCCT', 'start': 116339370, 'end': 116339489}, {'strand': '-', 'down_primer': 'GTTGATCATCATAGTAGGTGTCGACAA', 'up_primer': 'TATGCAGTGAACCTCCGACTGTATGTCA', 'start': 116339500, 'end': 116339621}, {'strand': '-', 'down_primer': 'ACACTGGCTGGGCTCTTCTATCTGTGG', 'up_primer': 'GAAGAATTTATGGTATTGCCTACAAAGAAG', 'start': 116339628, 'end': 116339749}, {'strand': '-', 'down_primer': 'GATATCGAATGCAATGGATGATCTGGG', 'up_primer': 'GGGTAAGAATCTCTGAACTCAGGTAAAACA', 'start': 116339756, 'end': 116339875}, {'strand': '-', 'down_primer': 'TTGTTGCTTTCAAAGGCATGGACAT', 'up_primer': 'GGAATGCAATCCAGAGTTTATGGAACAGA', 'start': 116339884, 'end': 116340008}, {'strand': '-', 'down_primer': 'TCTCTTTTCTGTGAGAATACACTCCAG', 'up_primer': 'CCCGAAAAGAATGTCATCATTCAGGCT', 'start': 116340024, 'end': 116340170}, {'strand': '-', 'down_primer': 'AATGCACACATGGCAGATCGATC', 'up_primer': 'GGAACTGATGTGACTTACCCTATTAAAGC', 'start': 116340210, 'end': 116340356}], 'chr3': [{'strand': '+', 'down_primer': 'GTCACAGGTAAGTGCTAAAATGGAGAT', 'up_primer': 'AGTAACAGACTAGCTAGAGACAATGAA', 'start': 178935998, 'end': 178936142}, {'strand': '-', 'down_primer': 'TCACAGATGATTTACAGAAAAAGCAAAT', 'up_primer': 'TGAGCTGTTCTTTGTCATTTTCCCTTA', 'start': 178935912, 'end': 178936052}, {'strand': '-', 'down_primer': 'CCATAGAAAATCTTTCTCCTGCTCAGT', 'up_primer': 'GGTATGGTAAAAACATGCTGAGATCAG', 'start': 178936088, 'end': 178936214}, {'strand': '+', 'down_primer': 'GCATGCCAATCTCTTCATAAATCTTTTCTC', 'up_primer': 'TTAACATCATTTGCTCCAAACTGACCA', 'start': 178951834, 'end': 178951953}, {'strand': '+', 'down_primer': 'ATTTCATGAAACAAATGAATGATGCAC', 'up_primer': 'ATGCTTGGCTCTGGAATGCCAGAACTA', 'start': 178951958, 'end': 178952084}, {'strand': '+', 'down_primer': 'CACTGCACTGTTAATAACTCTCAGCAG', 'up_primer': 'GCTGGACAACAAAAATGGATTGGATCT', 'start': 178952094, 'end': 178952218}, {'strand': '+', 'down_primer': 'TGATAGCACTTAAACTAGTTCATTTCAAA', 'up_primer': 'GATTGCATAGGAATTGCACAATCCATG', 'start': 178952228, 'end': 178952358}, {'strand': '+', 'down_primer': 'TATAGAAATGATGGAGAAGGAAAAAGTGA', 'up_primer': 'ATAATGCGCAATTTCATGTTATGCCTT', 'start': 178952372, 'end': 178952504}, {'strand': '-', 'down_primer': 'GAGAGGCTTTCGTAGACAAAGCTATAA', 'up_primer': 'CTCCTGAAACCTATAAGTAATAAGAACAGT', 'start': 178951772, 'end': 178951891}, {'strand': '-', 'down_primer': 'GTCGAATAGCTAGATAAGCCTTGTAACAC', 'up_primer': 'CGAATGTATGCAATGTCATCAAAAGATT', 'start': 178951894, 'end': 178952013}, {'strand': '-', 'down_primer': 'CTCCAAAGCCTCTTGCTCAGTTTTATC', 'up_primer': 'GTTCAATGCATGCTGTTTAATTGTGTGG', 'start': 178952030, 'end': 178952149}, {'strand': '-', 'down_primer': 'GGAATCCAGAGTGAGCTTTCATTTTCT', 'up_primer': 'CTGTTCTTGCTGTAAATTCTAATGCTGT', 'start': 178952164, 'end': 178952283}, {'strand': '-', 'down_primer': 'ACCCTGTTTGCGTTTACATTATTTAAA', 'up_primer': 'CAATCTTCAAAGTTTACCTTTTTGGACT', 'start': 178952302, 'end': 178952427}, {'strand': '-', 'down_primer': 'ATTTTGGGGATTTTTGTTTTGTTTTGT', 'up_primer': 'CAATAACAGCCTTTGTTGTGTCCACAT', 'start': 178952448, 'end': 178952568}], 'chr11': [{'strand': '+', 'down_primer': 'AGGGTCTCCTGCCCCACCTGCCAA', 'up_primer': 'GATCAGCTGGATGGTCAGCGCACTCTT', 'start': 534251, 'end': 534382}, {'strand': '-', 'down_primer': 'TGGCGCCGCCGTCCAGGTGCCAGC', 'up_primer': 'TGGTGGTGGTGGGCGCCGGCGGTGTGGG', 'start': 534181, 'end': 534306}, {'strand': '-', 'down_primer': 'TAGGAGGACCCCGGGCCGCAGGCCCCT', 'up_primer': 'TTTGCCCTTCAGATGGCCCTGCCAGC', 'start': 534331, 'end': 534462}, {'strand': '+', 'down_primer': 'GGCGAGGTCCTGAGCCTGCCGAGATT', 'up_primer': 'GGCGGGGCGGGTCCCTGGCTAGCTGT', 'start': 533407, 'end': 533526}, {'strand': '+', 'down_primer': 'GGGGCTGCAGGCGCAGCGGCATCCAG', 'up_primer': 'CAGGTCACACTTGTTCCCCACCA', 'start': 533543, 'end': 533668}, {'strand': '+', 'down_primer': 'TCCTCAAAAGACTTGGTGTTGTTGATG', 'up_primer': 'ACAGGAGGCCCCTGCCTGGACGCA', 'start': 533685, 'end': 533807}, {'strand': '+', 'down_primer': 'CTGCAGGAGGACAGGGCTCAGGGA', 'up_primer': 'GTCCCGCATGGCGCTGTACTCCT', 'start': 533849, 'end': 533968}, {'strand': '-', 'down_primer': 'ACAGGGCAGCCGCTCTGGCTCTAGCT', 'up_primer': 'GCAGGTGAGGCAGCTCTCCACC', 'start': 533337, 'end': 533456}, {'strand': '-', 'down_primer': 'AAGCTACGGCATCCCCTACATCGAGA', 'up_primer': 'AAGGACTCGGATGACGTGCCCATGGTG', 'start': 533473, 'end': 533593}, {'strand': '-', 'down_primer': 'TAGCCAGCTCTCGCTTTCCACCTCTC', 'up_primer': 'ACGCCGCACAGGTGGGGCCAGGCCG', 'start': 533615, 'end': 533735}, {'strand': '-', 'down_primer': 'ATCCACCAGTACAGGTGAACCCCGTGA', 'up_primer': 'TTGGACATCCTGGATACCGCCGGCCAG', 'start': 533753, 'end': 533899}, {'strand': '-', 'down_primer': 'ATTCCTACCGGAAGCAGGTGGTCATTG', 'up_primer': 'ATGAGGGGCATGAGAGGTACCAGGGA', 'start': 533917, 'end': 534038}], 'chr1': [{'strand': '+', 'down_primer': 'CGAGCCACATCTACAGTACTTTAAAGC', 'up_primer': 'CGCTTTTCCCAACACCACCTGCTCCAA', 'start': 115258730, 'end': 115258856}, {'strand': '-', 'down_primer': 'CCAGTGGTAGCCCGCTGACCTG', 'up_primer': 'GAAATGACTGAGTACAAACTGGTGGTG', 'start': 115258642, 'end': 115258784}, {'strand': '+', 'down_primer': 'TTTCTGTAAGAATCCTGGGGGTGTG', 'up_primer': 'GGAAGCCTTCGCCTGTCCTCATGTATT', 'start': 115256476, 'end': 115256610}, {'strand': '-', 'down_primer': 'GGAGCATTATTTTCTCTGAAAGGATGA', 'up_primer': 'CAAGAAGAGTACAGTGCCATGAGAGAC', 'start': 115256388, 'end': 115256530}, {'strand': '-', 'down_primer': 'CAAGTGGTTATAGATGGTGAAACCTGT', 'up_primer': 'AGATGCTTATTTAACCTTGGCAATAGC', 'start': 115256558, 'end': 115256700}, {'strand': '+', 'down_primer': 'GAGTCTTTTACTCGCTTAATCTGCTCCC', 'up_primer': 'AACTCTTGGCCAGTTCGTGGGCTTGTTTT', 'start': 115252231, 'end': 115252350}, {'strand': '-', 'down_primer': 'CAGCTTTCAGCATTTGTGCAAGAGTTT', 'up_primer': 'GTGATTTGCCAACAAGGACAGTTGATA', 'start': 115252155, 'end': 115252287}, {'strand': '-', 'down_primer': 'ATGATGTACCTATGGTGCTAGTGGGA', 'up_primer': 'ATGAGCCACTGTACCCAGCCTAATCT', 'start': 115252295, 'end': 115252414}], 'chr4': [{'strand': '+', 'down_primer': 'ATGCCAGTAGGACGCCTGGCGCCAACA', 'up_primer': 'CGAGGACAACGTGATGAAGATCGCAGA', 'start': 1807819, 'end': 1807961}, {'strand': '-', 'down_primer': 'AAGGGGTGGGAGGCAGGGCTGAAGC', 'up_primer': 'TTGTGCACGTCCCGGGCCAGCCCGAA', 'start': 1807747, 'end': 1807872}, {'strand': '+', 'down_primer': 'CGTGCTCAAGGTGGGCCACCGTGT', 'up_primer': 'CTGGGCAGCGACGTGGAGTTCCACT', 'start': 1803621, 'end': 1803766}, {'strand': '-', 'down_primer': 'GGCAGATGACGCTCAGGGGCCA', 'up_primer': 'CTGTGCGTCACTGTACACCTTG', 'start': 1803533, 'end': 1803668}, {'strand': '-', 'down_primer': 'TAACGTAGGGTGTGCCGTCCGGGCCCA', 'up_primer': 'AAGCTCCAACCCCTAGACCCAAATCCT', 'start': 1803715, 'end': 1803861}, {'strand': '+', 'down_primer': 'GCGGCTGTGACGCTCTGCCGCCT', 'up_primer': 'TTTGCAGCCGAGGAGGAGCTGGT', 'start': 1806050, 'end': 1806174}, {'strand': '+', 'down_primer': 'GGTCCTGGGCTGTGTGAGCCCTCTCT', 'up_primer': 'GCACAAGATCTCCCGCTTCCCGCTCAA', 'start': 1806214, 'end': 1806347}, {'strand': '-', 'down_primer': 'ATGGATGCCCCTGGCCCAGAGCCGCA', 'up_primer': 'ATACACACTGCCCGCCTCGTCAGCCTC', 'start': 1805976, 'end': 1806100}, {'strand': '-', 'down_primer': 'ACCACCAGGATGAACAGGAAGAAGC', 'up_primer': 'CCTGGTATCTACTTTCTGTTACCTGTCG', 'start': 1806126, 'end': 1806269}, {'strand': '+', 'down_primer': 'CCTTTTTGGGTACACATAACAGTGACT', 'up_primer': 'GTTTACATAGACCCAACACAACTTCCT', 'start': 55593639, 'end': 55593765}, {'strand': '-', 'down_primer': 'GAGAAAGGGAAAAATAGATCACCTTTTAAT', 'up_primer': 'TCTGGGAAACTCCCATTTGTGATCAT', 'start': 55593545, 'end': 55593692}, {'strand': '+', 'down_primer': 'TGTCTGTCAGGTTATCAAAACATGACA', 'up_primer': 'AAGTCCTGAGTTACCTTGGTAATCACA', 'start': 55594222, 'end': 55594342}, {'strand': '-', 'down_primer': 'TTGGAAACATGCATTTTAGCAAAAAGC', 'up_primer': 'GCAGGCTCCAAGTAGATTCACAATATTC', 'start': 55594144, 'end': 55594277}, {'strand': '+', 'down_primer': 'CTTGACAGTCCTGCAAAGGATTTTTAG', 'up_primer': 'CTCCTTACTCATGGTCGGATCACAAAG', 'start': 55599269, 'end': 55599403}, {'strand': '-', 'down_primer': 'GGTTGGAGGAGAAAAGAAAACCATTTA', 'up_primer': 'TGTCTCTGGCTAGACCAAAATCACAAA', 'start': 55599203, 'end': 55599323}, {'strand': '+', 'down_primer': 'CTTCTTGAAGTTTCATTGGTGTCCTGC', 'up_primer': 'TGTGTATACACGTTTGAAAGTGACGTC', 'start': 55602709, 'end': 55602847}, {'strand': '-', 'down_primer': 'TAGAAGCACAACAGAGTCAATAATGTT', 'up_primer': 'GCTCCCAAAGAAAAATCCCATAGGACC', 'start': 55602631, 'end': 55602763}, {'strand': '+', 'down_primer': 'GAAGGACTGCAATTCACTTGAATTTCA', 'up_primer': 'ATGCTCCAATGTGTGGCAGCAGGATT', 'start': 55589791, 'end': 55589931}, {'strand': '-', 'down_primer': 'ACAGAAATGGCCATATGTCAGAGTG', 'up_primer': 'CAAAAATACCAATCTATTGTGGGCTCTG', 'start': 55589715, 'end': 55589846}, {'strand': '+', 'down_primer': 'CAAGACTTCTGCCTATTTTAACTTTGC', 'up_primer': 'ATCTGGGCCACCGTTTGGAAAGCTAGT', 'start': 55592068, 'end': 55592196}, {'strand': '-', 'down_primer': 'GGAAGAAAACAAAAGCCCTGGCTTACT', 'up_primer': 'TGCACTAGAATCTATAGAACTCTGAAC', 'start': 55591990, 'end': 55592122}, {'strand': '-', 'down_primer': 'CCACATCGTTGTAAGCCTTACATTCAA', 'up_primer': 'ATCATGACTGATATGGTAGACAGAGCC', 'start': 55592142, 'end': 55592280}, {'strand': '+', 'down_primer': 'CTTTTCCCTTGCACACAACTTTACAAT', 'up_primer': 'GGACATGAATATATTTATGTGGACCCG', 'start': 55141059, 'end': 55141199}, {'strand': '-', 'down_primer': 'TGACCAGGACAGGTAACTGGTGAATT', 'up_primer': 'CATCTTGAGTCATAAGGCAGCTGCA', 'start': 55140975, 'end': 55141111}, {'strand': '+', 'down_primer': 'GATTTTCACTGGACACATGTGGTTGTG', 'up_primer': 'TGAACTGAAGATAATGACTCACCTGGG', 'start': 55144100, 'end': 55144224}, {'strand': '-', 'down_primer': 'AGAATAAATCACATATCAGTCCAGCTG', 'up_primer': 'CCAGCAAGTTTACAATGTTCAAATGTGG', 'start': 55144028, 'end': 55144155}, {'strand': '+', 'down_primer': 'TCAGGCTCATCCTCCTTCACTTTAATC', 'up_primer': 'AAATTGTGAAGATCTGTGACTTTGGCC', 'start': 55152057, 'end': 55152181}, {'strand': '-', 'down_primer': 'GGAAAAGGAAGAAATGACTCAGGATCA', 'up_primer': 'TTCGAATCATGCATGATGTCTCTGGCC', 'start': 55151975, 'end': 55152111}], 'chr10': [{'strand': '+', 'down_primer': 'TCAGTTCATTTCCTCTAACTCATGGGC', 'up_primer': 'TGTTTCCCAATCATCTTCATCATCTCC', 'start': 123258050, 'end': 123258172}, {'strand': '-', 'down_primer': 'GGAGGAAAAACTGCATTCGCCCAAAT', 'up_primer': 'AGACCTTTCTGATCTGGTGTCAGAGA', 'start': 123257976, 'end': 123258103}, {'strand': '+', 'down_primer': 'CAGAACAAAAAGGAAATATGTTCATTTCT', 'up_primer': 'AAAGTCTGCTATTTTCATCACATTGTT', 'start': 123247556, 'end': 123247704}, {'strand': '-', 'down_primer': 'ATGGCAGTAACACAGTGGGCAGGGG', 'up_primer': 'GCAGCCAGAAATGTTTTGGTAACAGA', 'start': 123247472, 'end': 123247609}, {'strand': '+', 'down_primer': 'CCGGCAGTCCGGCTTGGAGGAT', 'up_primer': 'CGTTCTTTTCCACGTGCTTGATCCA', 'start': 123279540, 'end': 123279663}, {'strand': '-', 'down_primer': 'TGAATCTAAAGGTACCCACAACTGGGG', 'up_primer': 'TTTACAGTGATGCCCAGCCCCACATCCA', 'start': 123279454, 'end': 123279593}, {'strand': '-', 'down_primer': 'AAATGCCTCCACAGTGGTCGGAGGAGA', 'up_primer': 'TTTATTGGTCTCTCATTCTCCCATCCC', 'start': 123279614, 'end': 123279740}], 'chr2': [{'strand': '+', 'down_primer': 'ACTGGGAGGAACAGGATACAAAGTTAC', 'up_primer': 'AACCGGGGCAGGGATTGCAGGCTCA', 'start': 29443639, 'end': 29443787}, {'strand': '-', 'down_primer': 'AGAACCAGTCTTTGCTGCAGTTGTTG', 'up_primer': 'AGAACATTGTTCGCTGCATTGGG', 'start': 29443539, 'end': 29443687}, {'strand': '+', 'down_primer': 'TGAAATGCTGGCTTCCAGTGCTCACAA', 'up_primer': 'AGAAGGTCCAGCATGGCCAGGGA', 'start': 29436913, 'end': 29437033}, {'strand': '-', 'down_primer': 'AAAGTGACTGTGCTCTTCCTGTCATC', 'up_primer': 'TTCTGTCTCCCCACAGAGCCAGCCCTC', 'start': 29436817, 'end': 29436963}, {'strand': '+', 'down_primer': 'AACGGCCATCACTAGGATTTTATCTCC', 'up_primer': 'GCCTGGACAGGTCAAGAGGCAGTTTCT', 'start': 29432705, 'end': 29432825}, {'strand': '-', 'down_primer': 'CTCACCCCTCCGGGCCTGTCTC', 'up_primer': 'TTCCTTTCTTCCCAGAGACATTGCTGC', 'start': 29432615, 'end': 29432759}, {'strand': '+', 'down_primer': 'ATTAGCAGTAGGGGTGTTATCAATGCA', 'up_primer': 'ATGGCTTCAATTGCATTGTAAGGGTCC', 'start': 212570090, 'end': 212570238}, {'strand': '-', 'down_primer': 'TTTTAAACTGCAACTGTTGCGCTAT', 'up_primer': 'TTGGCTACATCTCTTCTTGATTTTCTA', 'start': 212570012, 'end': 212570144}, {'strand': '+', 'down_primer': 'CAGGGACTGGAACTGTAGAGAGGTGAT', 'up_primer': 'CTGTTGTCCCGGATTACTATTCTCTGG', 'start': 212566709, 'end': 212566857}, {'strand': '-', 'down_primer': 'TTTCCCATTCTTCTTTGGACCAAACAA', 'up_primer': 'CTGGACAACACTCTTCAGCACAATCA', 'start': 212566621, 'end': 212566762}, {'strand': '-', 'down_primer': 'AGGAAATCAGCGCAGGAAACATCTATA', 'up_primer': 'CCTTATTTTACTCCGGAATGCGTTTCA', 'start': 212566803, 'end': 212566949}], 'chr17': [{'strand': '+', 'down_primer': 'CCAAGGTATGCACCTGGGCTCTTT', 'up_primer': 'TGCCTGACATCCACGGTGCAGCT', 'start': 37881036, 'end': 37881183}, {'strand': '-', 'down_primer': 'ACAAGGGTACGCTGAGAGGGTATGGGA', 'up_primer': 'AGCCATAGGGCATAAGCTGTGTCAC', 'start': 37880946, 'end': 37881084}, {'strand': '-', 'down_primer': 'AATCTGCATACACCAGTTCAGCAGGTCCT', 'up_primer': 'ACATGCCCAGCAAGAGTCCCCATCCTA', 'start': 37881130, 'end': 37881250}], 'chr12': [{'strand': '+', 'down_primer': 'GAACATGTCACACATAAGGTTAATACAC', 'up_primer': 'TCTGAATTAGCTGTATCGTCAAGGCAC', 'start': 25398243, 'end': 25398392}, {'strand': '-', 'down_primer': 'CTTGTTTTAATATGCATATTACTGGTGCA', 'up_primer': 'TAGTTGGAGCTGGTGGCGTAGGCAAG', 'start': 25398173, 'end': 25398296}, {'strand': '+', 'down_primer': 'CTGTGTCGAGAATATCCAAGAGACAGG', 'up_primer': 'CACCTATAATGGTGAATATCTTCAAATGA', 'start': 25380165, 'end': 25380309}, {'strand': '-', 'down_primer': 'TTGAGTCTTTGCTAATGCCATGC', 'up_primer': 'GCTTTCTTTGTGTATTTGCCATAAATAATA', 'start': 25380087, 'end': 25380228}, {'strand': '-', 'down_primer': 'AGGTCAAGAGGAGTACAGTGCAATGAG', 'up_primer': 'GGTGCACTGTAATAATCCAGACTGTGT', 'start': 25380255, 'end': 25380387}, {'strand': '+', 'down_primer': 'CCTTAACTCTTTTAATTTGTTCTCTGGG', 'up_primer': 'CCATAACTTCTTGCTAAGTCCTGAGCC', 'start': 25378585, 'end': 25378712}, {'strand': '-', 'down_primer': 'ACACTGAAATAAATACAGATCTGTTTTCTG', 'up_primer': 'TGCCTTCTAGAACAGTAGACACAAAAC', 'start': 25378511, 'end': 25378639}, {'strand': '-', 'down_primer': 'CTCTGAAGATGTACCTATGGTCCTAGT', 'up_primer': 'ATGACAAAAGTTGTGGACAGGTTTTGA', 'start': 25378657, 'end': 25378785}]}
-    
-    print( "[GET amplicons]\tEnd" ) ############################### Sortir ce code avec la recup des sequences dans un autre script
+    # Logger initialisation
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s -- [%(name)s][pid:%(process)d][%(levelname)s] -- %(message)s' )
+    logger = logging.getLogger( os.path.basename(__file__) )
+    logging.info( " ".join(sys.argv) )
 
-    # Get covered positions
-    print( "[GET coverage]\tStart" )
-    area_by_chr = getCoveredFromAmplicons( amplicons_by_chr, False )
-    # Get covered length
-    #~ covered_len = getCoveredLength(area_by_chr)
-    #~ print( "[GET coverage]\t\t|- Theoriticall covered length:\t" + str(covered_len) )
-    print( "[GET coverage]\tEnd" )
-    #################################
-
-    # Get reference sequences
-    print( "[GET sequences]\tStart" ) ############################################### Ne faire la recherche qu une fois pour les amplicon puis fusionner les region a ce moment du code
-    setAmpliconSeq( args.input_genome, area_by_chr )
-    #~ area_by_chr = {'chr14': [{'alt': None, 'ref': 'CATCGTGGGGCCTGGTGGGCAAAGAGGGCTCCAGCCAACCCCCCAAATCTGAATCCCGAGAGGCCAAGGGGATACTTACGCGCCACAGAGAAGTTGTTGAGGGGAGCCTCACGTTGGTCCACATCCTGCGGCCGCTCCTTGTAGCCAATGAAGGTGCCATCATTCTTGAGGAGGAAGTAGCGTGGCCGCCAGGTCTTGATGTACTCCCCTACAGACGTGCGGGTGGTGAGAGCCACGCACACTCTACCCGTCAGACCCTCGCCAGGCAGCCAGGCAGGAACT', 'end': 105246627, 'start': 105246346}], 'chr10': [{'alt': None, 'ref': 'CCCCTGCCCACTGTGTTACTGCCATCGACTTACATTGGTGGTCTTTTTGTAATAGTCTATATTGTTGATATCTCTGGCGAGTCCAAAGTCTGCTATTTTCATCACATTGTTTTCTGTTACCAAAACATTTCTGGCTGCTAAATCTCGATGAATACACTGAAATCAAGAAAGAAGCAAGAGAAATAACTAATTTCAAAACACCGCCAGAACAAAAAGGAAATATGTTCATTTCT', 'end': 123247704, 'start': 123247472}, {'alt': None, 'ref': 'ATTTGGGCGAATGCAGTTTTTCCTCCTACTCACCATCCTGTGTGCAGGCTCCAAGAAGATTTATGATATTCTTGTGTTTCCCAATCATCTTCATCATCTCCATCTCTGACACCAGATCAGAAAGGTCTTTCTCTGTGGCATCATCTATGAACAGTAGGCATATTCACAAATCAGTTCATTTCCTCTAACTCATGGGC', 'end': 123258172, 'start': 123257976}, {'alt': None, 'ref': 'CCCCAGTTGTGGGTACCTTTAGATTCAGAAAGTCCTCACCTTGAGAACCTTGAGGTAGGGCAGCCCGTCGGGCCCGTATTTACTGCCGTTCTTTTCCACGTGCTTGATCCACTGGATGTGGGGCTGGGCATCACTGTAAACCTTGCAGACAAACTCTACGTCTCCTCCGACCACTGTGGAGGCATTTGCCGGCAGTCCGGCTTGGAGGATGGGCCGGTGAGGCGATCGCTCTGGTGGAGAGAGGGAAGAAAGGAGGAGTGGGGATGGGAGAATGAGAGACCAATAAA', 'end': 123279740, 'start': 123279454}], 'chr12': [{'alt': None, 'ref': 'CAGAAAACAGATCTGTATTTATTTCAGTGTTACTTACCTGTCTTGTCTTTGCTGATGTTTCAATAAAAGGAATTCCATAACTTCTTGCTAAGTCCTGAGCCTGTTTTGTGTCTACTGTTCTAGAAGGCAAATCACATTTATTTCCTACTAGGACCATAGGTACATCTTCAGAGTCCTTAACTCTTTTAATTTGTTCTCTGGGAAAGAAAAAAAAGTTATAGCACAGTCATTAGTAACACAAATATCTTTCAAAACCTGTCCACAACTTTTGTCAT', 'end': 25378785, 'start': 25378511}, {'alt': None, 'ref': 'gcatggcattagcaaagACTCAAAAAATAAAAACTATAATTACTCCTTAATGTCAGCTTATTATATTCAATTTAAACCCACCTATAATGGTGAATATCTTCAAATGATTTAGTATTATTTATGGCAAATACACAAAGAAAGCCCTCCCCAGTCCTCATGTACTGGTCCCTCATTGCACTGTACTCCTCTTGACCTGCTGTGTCGAGAATATCCAAGAGACAGGTTTCTCCATCAATTACTACTTGCTTCCTGTAGGAATCCTGAGAAGGGAGAAACACAGTCTGGATTATTACAGTGCACC', 'end': 25380387, 'start': 25380087}, {'alt': None, 'ref': 'TGCACCAGTAATATGCATATTAAAACAAGATTTACCTCTATTGTTGGATCATATTCGTCCACAAAATGATTCTGAATTAGCTGTATCGTCAAGGCACTCTTGCCTACGCCACCAGCTCCAACTACCACAAGTTTATATTCAGTCATTTTCAGCAGGCCTTATAATAAAAATAATGAAAATGTGACTATATTAGAACATGTCACACATAAGGTTAATACAC', 'end': 25398392, 'start': 25398173}], 'chr1': [{'alt': None, 'ref': 'AAACTCTTGCACAAATGCTGAAAGCTGTACCATACCTGTCTGGTCTTGGCTGAGGTTTCAATGAATGGAATCCCGTAACTCTTGGCCAGTTCGTGGGCTTGTTTTGTATCAACTGTCCTTGTTGGCAAATCACACTTGTTTCCCACTAGCACCATAGGTACATCATCCGAGTCTTTTACTCGCTTAATCTGCTCCCTAAAAACGGGAATATATTATCAGAACATAAGAAAAACAAGATTAggctgggtacagtggctcat', 'end': 115252414, 'start': 115252155}, {'alt': None, 'ref': 'TCATCCTTTCAGAGAAAATAATGCTCCTAGTACCTGTAGAGGTTAATATCCGCAAATGACTTGCTATTATTGATGGCAAATACACAGAGGAAGCCTTCGCCTGTCCTCATGTATTGGTCTCTCATGGCACTGTACTCTTCTTGTCCAGCTGTATCCAGTATGTCCAACAAACAGGTTTCACCATCTATAACCACTTGTTTTCTGTAAGAATCCTGGGGGTGTGGAGGGTAAGGGGGCAGGGAGGGAGGGAAGTTCAATTTTTATTAAAAACCACAGGGAATGCAATGCTATTGCCAAGGTTAAATAAGCATCT', 'end': 115256700, 'start': 115256388}, {'alt': None, 'ref': 'CAGGTCAGCGGGCTACCACTGGGCCTCACCTCTATGGTGGGATCATATTCATCTACAAAGTGGTTCTGGATTAGCTGGATTGTCAGTGCGCTTTTCCCAACACCACCTGCTCCAACCACCACCAGTTTGTACTCAGTCATTTCACACCAGCAAGAACCTGTTGGAAACCAGTAATCAGGGTTAATTGGCGAGCCACATCTACAGTACTTTAAAGC', 'end': 115258856, 'start': 115258642}], 'chr15': [{'alt': None, 'ref': 'GTATTGACTTGTGCTCCCCACTTTGGAACAGGACCAACTTGGAGGCCTTGCAGAAGAAGCTGGAGGAGCTAGAGCTTGATGAGCAGCAGCGAAAGCGCCTTGAGGCCTTTCTTACCCAGAAGCAGAAGGTGGGAGAACTGAAGGATGACGACTTTGAGAAGATCAGTGAGCTGGGGGCTGGCAATGGCGGTGTGGTGTTCAAGGTCTCCCACAAGCCTTCTGGCCTGGTCATGGCCAGAAAGGTGAGTTTGCCTTGATTAACAGGTAATTGGATTATTTCTCAGGGTACTTAGAAGCC', 'end': 66727631, 'start': 66727334}], 'chr2': [{'alt': None, 'ref': 'GAGACAGGCCCGGAGGGGTGAGGCAGTCTTTACTCACCTGTAGATGTCTCGGGCCATCCCGAAGTCTCCAATCTTGGCCACTCTTCCAGGGCCTGGACAGGTCAAGAGGCAGTTTCTGGCAGCAATGTCTCTGGGAAGAAAGGAAATGCATTTCCTAATTTTATCCCTAGGAAGATGAGTGTACAACGGCCATCACTAGGATTTTATCTCC', 'end': 29432825, 'start': 29432615}, {'alt': None, 'ref': 'GATGACAGGAAGAGCACAGTCACTTTGACTCACCGGTGGATGAAGTGGTTTTCCTCCAAATACTGACAGCCACAGGCAATGTCCCGAGCCACGTGCAGAAGGTCCAGCATGGCCAGGGAGGAGGGCTGGCTCTGTGGGGAGACAGAAGCGGGCCACTGACGAGGAGCTTGTCAGTGAGAGGAGGGAAATCTGAAATGCTGGCTTCCAGTGCTCACAA', 'end': 29437033, 'start': 29436817}, {'alt': None, 'ref': 'CAACAACTGCAGCAAAGACTGGTTCTCACTCACCGGGCGAGGGCGGGTCTCTCGGAGGAAGGACTTGAGGTCTCCCCCCGCCATGAGCTCCAGCAGGATGAACCGGGGCAGGGATTGCAGGCTCACCCCAATGCAGCGAACAATGTTCTGGTGGTTGAATTTGCTGCAGAGCAGAGAGGGATGTAACCAAAATTAACTGAGCTGAGTCTGGGCAAATCTTAAACTGGGAGGAACAGGATACAAAGTTAC', 'end': 29443787, 'start': 29443539}, {'alt': None, 'ref': 'TTGTTTGGTCCAAAGAAGAATGGGAAAAAATTTAAGTTTCTATGTTTTAAATGTCTGAGTAATGTACTTACTACAATTTTCAGCTTTTCTGTTGTCCCGGATTACTATTCTCTGGTTGATTGTGCTGAAGAGTGTTGTCCAGTTAATGGTATGATAATAACACAGGTTGCTGTTGTCAGTAATATAGATGTTTCCTGCGCTGATTTCCTTCAGGGACTGGAACTGTAGAGAGGTGATGCCCTGTTGCTTGAGGATAAGCAAGGACAGGCCACTAAGGAGGGGGAAGTGAGAAAACGGAACCATGAAACGCATTCCGGAGTAAAATAAGG', 'end': 212566949, 'start': 212566621}, {'alt': None, 'ref': 'ATAGCGCAACAGTTGCAGTTTAAAAAATTACCTGTTATCTCTCTGACTGTCCGAAAGACGTTCAGTTTCTCTGGGTCTATGGCTTCAATTGCATTGTAAGGGTCCCTAGAAAATCAAGAAGAGATGTAGCCAAATTTAAATTTTACTAAAGGATTGAAAATATGAGAAATGTGACaatattttattcaaatttaattttaattaGCAGTAGGGGTGTTATCAATGCA', 'end': 212570238, 'start': 212570012}], 'chr3': [{'alt': None, 'ref': 'ATTTGCTTTTTCTGTAAATCATCTGTGAATCCAGAGGGGAAAAATATGACAAAGAAAGCTATATAAGATATTATTTTATTTTACAGAGTAACAGACTAGCTAGAGACAATGAATTAAGGGAAAATGACAAAGAACAGCTCAAAGCAATTTCTACACGAGATCCTCTCTCTGAAATCACTGAGCAGGAGAAAGATTTTCTATGGAGTCACAGGTAAGTGCTAAAATGGAGATTCTCTGTTTCTTTTTCTTTATTACAGAAAAAATAACTGAATTTGGCTGATCTCAGCATGTTTTTACCATACC', 'end': 178936214, 'start': 178935912}, {'alt': None, 'ref': 'TTATAGCTTTGTCTACGAAAGCCTCTCTAATTTTGTGACATTTGAGCAAAGACCTGAAGGTATTAACATCATTTGCTCCAAACTGACCAAACTGTTCTTATTACTTATAGGTTTCAGGAGATGTGTTACAAGGCTTATCTAGCTATTCGACAGCATGCCAATCTCTTCATAAATCTTTTCTCAATGATGCTTGGCTCTGGAATGCCAGAACTACAATCTTTTGATGACATTGCATACATTCGAAAGACCCTAGCCTTAGATAAAACTGAGCAAGAGGCTTTGGAGTATTTCATGAAACAAATGAATGATGCACATCATGGTGGCTGGACAACAAAAATGGATTGGATCTTCCACACAATTAAACAGCATGCATTGAACTGAAAAGATAACTGAGAAAATGAAAGCTCACTCTGGATTCCACACTGCACTGTTAATAACTCTCAGCAGGCAAAGACCGATTGCATAGGAATTGCACAATCCATGAACAGCATTAGAATTTACAGCAAGAACAGaaataaaatactatataatttaaataatGTAAACGCAAACAGGGTTTGATAGCACTTAAACTAGTTCATTTCAAAATTAAGCTTTAGAATAATGCGCAATTTCATGTTATGCCTTAAGTCCAAAAAGGTAAACTTTGAAGATTGTTTGTATCTTTTTTTAAAAAACAAAACAAAACAAAAATCCCCAAAATATATAGAAATGATGGAGAAGGAAAAAGTGATGGTTTTTTTTGTCTTGCAAATGTTCTATGTTTTGAAATGTGGACACAACAAAGGCTGTTATTG', 'end': 178952568, 'start': 178951772}], 'chr11': [{'alt': None, 'ref': 'AGCTAGAGCCAGAGCGGCTGCCCTGTGTCAAGGGAGAGGGTCAGTGAGTGCTGCTCCCTGGCTGGGGCGGGGCGGGGCGGGTCCCTGGCTAGCTGTGGGGTGGAGAGCTGCCTCACCTGCCGGGTCTTGGCCGAGGTCTCGATGTAGGGGATGCCGTAGCTTCGGGCGAGGTCCTGAGCCTGCCGAGATTCCACAGTGCGTGCAGCCAGGTCACACTTGTTCCCCACCAGCACCATGGGCACGTCATCCGAGTCCTTCACCCGTTTGATCTGCTCCCTGAGAGGTGGAAAGCGAGAGCTGGCTACGGGGGCTGCAGGCGCAGCGGCATCCAGGACATGCGCAGAGAGGACAGGAGGCCCCTGCCTGGACGCAGCCGGCCTGGCCCCACCTGTGCGGCGTGGGCTCCCGGGCCAGCCTCACGGGGTTCACCTGTACTGGTGGATGTCCTCAAAAGACTTGGTGTTGTTGATGGCAAACACACACAGGAAGCCCTCCCCGGTGCGCATGTACTGGTCCCGCATGGCGCTGTACTCCTCCTGGCCGGCGGTATCCAGGATGTCCAACAGGCACGTCTCCCCATCAATGACCACCTGCTTCCGGTAGGAATCCTGCAGGAGGACAGGGCTCAGGGACCCCCTCAGGACCTTCCGTGGGGGGAGTTCACACAGCCAGCCTCTCCCTGGTACCTCTCATGCCCCTCAT', 'end': 534038, 'start': 533337}, {'alt': None, 'ref': 'GCTGGCACCTGGACGGCGGCGCCAGGCTCACCTCTATAGTGGGGTCGTATTCGTCCACAAAATGGTTCTGGATCAGCTGGATGGTCAGCGCACTCTTGCCCACACCGCCGGCGCCCACCACCACCAGCTTATATTCCGTCATCGCTCCTCAGGGGCCTGCGGCCCGGGGTCCTCCTACAGGGTCTCCTGCCCCACCTGCCAAGGAGGGCCCTGCTCAGCCAGGCCCAGGCCCAGCCCCAGGCCCCACAGGGCAGCTGCTGGCAGGGCCATCTGAAGGGCAAA', 'end': 534462, 'start': 534181}], 'chr17': [{'alt': None, 'ref': 'TCCCATACCCTCTCAGCGTACCCTTGTCCCCAGGAAGCATACGTGATGGCTGGTGTGGGCTCCCCATATGTCTCCCGCCTTCTGGGCATCTGCCTGACATCCACGGTGCAGCTGGTGACACAGCTTATGCCCTATGGCTGCCTCTTAGACCATGTCCGGGAAAACCGCGGACGCCTGGGCTCCCAGGACCTGCTGAACTGGTGTATGCAGATTGCCAAGGTATGCACCTGGGCTCTTTGCAGGTCTCTCCGGAGCAAACCCCTATGTCCACAAGGGGCTAGGATGGGGACTCTTGCTGGGCATGT', 'end': 37881250, 'start': 37880946}], 'chr7': [{'alt': None, 'ref': 'ACCCTTGTCTCTGTGTTCTTGTCCCCCCCAGCTTGTGGAGCCTCTTACACCCAGTGGAGAAGCTCCCAACCAAGCTCTCTTGAGGATCTTGAAGGAAACTGAATTCAAAAAGATCAAAGTGCTGGGCTCCGGTGCGTTCGGCACGGTGTATAAGGTAAGGTCCCTGGCACAGGCCTCTGGGCTGGGCCGCAGGGCCTCTCATGGTCTGGTGGGGAGCCCAGA', 'end': 55241804, 'start': 55241583}, {'alt': None, 'ref': 'CCAGTTAACGTCTTCCTTCTCTCTCTGTCATAGGGACTCTGGATCCCAGAAGGTGAGAAAGTTAAAATTCCCGTCGCTATCAAGGAATTAAGAGAAGCAACATCTCCGAAAGCCAACAAGGAAATCCTCGATGTGAGTTTCTGCTTTGCTGTGTGGGGGTCCATGGCTCTGAACCTCAGGCCCACCTTTTCTCAT', 'end': 55242576, 'start': 55242382}, {'alt': None, 'ref': 'CACACTGACGTGCCTCTCCCTCCCTCCAGGAAGCCTACGTGATGGCCAGCGTGGACAACCCCCACGTGTGCCGCCTGCTGGGCATCTGCCTCACCTCCACCGTGCAGCTCATCACGCAGCTCATGCCCTTCGGCTGCCTCCTGGACTATGTCCGGGAACACAAAGACAATATTGGCTCCCAGTACCTGCTCAACTGGTGTGTGCAGATCGCAAAGGTAATCAGGGAAGGGAGATACGGGGAGGGGAGATAAGGAGCCAGGATCCTCACATGCGGTCTGCGCTCCTGGGATAGCAAGAGTTTGCCATGGGGATATG', 'end': 55249271, 'start': 55248957}, {'alt': None, 'ref': 'CTGTCCCTCACAGCAGGGTCTTCTCTGTTTCAGGGCATGAACTACTTGGAGGACCGTCGCTTGGTGCACCGCGACCTGGCAGCCAGGAACGTACTGGTGAAAACACCGCAGCATGTCAAGATCACAGATTTTGGGCTGGCCAAACTGCTGGGTGCGGAAGAGAAAGAATACCATGCAGAAGGAGGCAAAGTAAGGAGGTGGCTTTAGGTCAGCCAGCATTTTCCTGACACCAGGGACCAGGCTGCCTTCCCACTAGCTGTATTGTTTAACACATGCAGGGG', 'end': 55259659, 'start': 55259379}, {'alt': None, 'ref': 'AGTTTTTGTTTTCCTTCTATGTAAAAGTCCAGTTGGGAAGCTTTATTTCTGATAGATTAAATGGTATAGGTCTTTCAGTTTTCTCTTCATTTCTGACAACTGAACTGCTCTCGCCTTGAACCTGTTTTGGCAGATAAACCTCTCATAATGAAGGCCCCCGCTGTGCTTGCACCTGGCATCCTCGTGCTCCTGTTTACCTTGGTGCAGAGGAGCAATGGGGAGTGTAAAGAGGCACTAGCAAAGTCCGAGATGAATGTGAATATGAAGTATCAGCTTCCCAACTTCACCGCGGAAACACCCATCCAGAATGTCATTCTACATGAGCATCACATTTTCCTTGGTGCCACTAACTACATTTATGTTTTAAATGAGGAAGACCTTCAGAAGGTTGCTGAGTACAAGACTGGGCCTGTGCTGGAACACCCAGATTGTTTCCCATGTCAGGACTGCAGCAGCAAAGCCAATTTATCAGGAGGTGTTTGGAAAGATAACATCAACATGGCTCTAGTTGTCGACACCTACTATGATGATCAACTCATTAGCTGTGGCAGCGTCAACAGAGGGACCTGCCAGCGACATGTCTTTCCCCACAATCATACTGCTGACATACAGTCGGAGGTTCACTGCATATTCTCCCCACAGATAGAAGAGCCCAGCCAGTGTCCTGACTGTGTGGTGAGCGCCCTGGGAGCCAAAGTCCTTTCATCTGTAAAGGACCGGTTCATCAACTTCTTTGTAGGCAATACCATAAATTCTTCTTATTTCCCAGATCATCCATTGCATTCGATATCAGTGAGAAGGCTAAAGGAAACGAAAGATGGTTTTATGTTTTTGACGGACCAGTCCTACATTGATGTTTTACCTGAGTTCAGAGATTCTTACCCCATTAAGTATGTCCATGCCTTTGAAAGCAACAATTTTATTTACTTCTTGACGGTCCAAAGGGAAACTCTAGATGCTCAGACTTTTCACACAAGAATAATCAGGTTCTGTTCCATAAACTCTGGATTGCATTCCTACATGGAAATGCCTCTGGAGTGTATTCTCACAGAAAAGAGAAAAAAGAGATCCACAAAGAAGGAAGTGTTTAATATACTTCAGGCTGCGTATGTCAGCAAGCCTGGGGCCCAGCTTGCTAGACAAATAGGAGCCAGCCTGAATGATGACATTCTTTTCGGGGTGTTCGCACAAAGCAAGCCAGATTCTGCCGAACCAATGGATCGATCTGCCATGTGTGCATTCCCTATCAAATATGTCAACGACTTCTTCAACAAGATCGTCAACAAAAACAATGTGAGATGTCTCCAGCATTTTTACGGACCCAATCATGAGCACTGCTTTAATAGGGTAAGTCACATCAGTTCCCCACTTATAAACTGTGAGGTATAAATTAGAAATAAGTATCAGTCTCAAAAAGAATATCCAGGGCTTCTTTTGTGCTTTGTAAATGGTG', 'end': 116340444, 'start': 116338992}, {'alt': None, 'ref': 'TTTAACAAGCTCTTTCTTTCTCTCTGTTTTAAGATCTGGGCAGTGAATTAGTTCGCTACGATGCAAGAGTACACACTCCTCATTTGGATAGGCTTGTAAGTGCCCGAAGTGTAAGCCCAACTACAGAAATGGTTTCAAATGAATCTGTAGACTACCGAGCTACTTTTCCAGAAGGTATATTTCAGTTTATTGTTCTGAGAAATACCTATACATATACCTCAGTGGGTTGTGACATTGTTGTTTATTTTTGG', 'end': 116412120, 'start': 116411870}, {'alt': None, 'ref': 'CCATTAAATGAGGTTTTACTGTTGTTCTTTAATAATTTTCCTTCATCTTACAGATCAGTTTCCTAATTCATCTCAGAACGGTTCATGCCGACAAGTGCAGTATCCTCTGACAGACATGTCCCCCATCCTAACTAGTGGGGACTCTGATATATCCAGTCCATTACTGCAAAATACTGTCCACATTGACCTCAGTGCTCTAAATCCAGAGCTGGTCCAGGCAGTGCAGCATGTAGTGATTGGGCCCAGTAGCCTGATTGTGCATTTCAATGAAGTCATAGGAAGAGGTAAGTATTTCCACTCAGCTTTTTGTTAAATACGATTTTCCAGTAAGCATTTTATCTTTGGCCTTTGCAGATTAGGAACTTAGACAATGGTGAAAGCAACTGACAGAGCAGTGATAACAAGTG', 'end': 116415288, 'start': 116414882}, {'alt': None, 'ref': 'CGCAGTGCTAACCAAGTTCTTTCTTTTGCACAGGGCATTTTGGTTGTGTATATCATGGGACTTTGTTGGACAATGATGGCAAGAAAATTCACTGTGCTGTGAAATCCTTGAACAGTAAGTGGCATTTTATTTAACCATGGAGTATACTTTTGTGGTTTGCAACCTAATAAATAGCTTATAATAAAACGTTGATTTACACTTTCCCCTTGTG', 'end': 116417620, 'start': 116417410}, {'alt': None, 'ref': 'AATGAAGTTAATGTCTCCACCACTGGATTTCTCAGGAATCACTGACATAGGAGAAGTTTCCCAATTTCTGACCGAGGGAATCATCATGAAAGATTTTAGTCATCCCAATGTCCTCTCGCTCCTGGGAATCTGCCTGCGAAGTGAAGGGTCTCCGCTGGTGGTCCTACCATACATGAAACATGGAGATCTTCGAAATTTCATTCGAAATGAGACTCATGTAAGTTGACTGCCAAGCTTACTAACTGGCAAACTAGCTGTAAGCCAGCCATCCCTTCAAAA', 'end': 116419073, 'start': 116418795}, {'alt': None, 'ref': 'GCTTAGTTTATGCTTTTCTAACTCTCTTTGACTGCAGAATCCAACTGTAAAAGATCTTATTGGCTTTGGTCTTCAAGTAGCCAAAGGCATGAAATATCTTGCAAGCAAAAAGTTTGTCCACAGAGACTTGGCTGCAAGAAACTGTATGTAAGTATCAGAATCTCTGTGCCACAATCCAAATTAAGTGACAAGGAGGA', 'end': 116422201, 'start': 116422005}, {'alt': None, 'ref': 'TCAGCCACGGGTAATAATTTTTGTCCTTTCTGTAGGCTGGATGAAAAATTCACAGTCAAGGTTGCTGATTTTGGTCTTGCCAGAGACATGTATGATAAAGAATACTATAGTGTACACAACAAAACAGGTGCAAAGCTGCCAGTGAAGTGGATGGCTTTGGAAAGTCTGCAAACTCAAAAGTTTACCACCAAGTCAGATGTGGTAATGTATTGGTTATCTCTGAGTTTCTCCTCTTTTACTTTCATATCCAACTTTTTTTGAAGTTTTATCACTACTTAATTTTTTAAAAAAATTCAACACCACCAATTCCAGTTTTC', 'end': 116423639, 'start': 116423323}, {'alt': None, 'ref': 'TCACCTCATCTGTCCTGTTTCTTGTTTTACTAGTGGTCCTTTGGCGTGCTCCTCTGGGAGCTGATGACAAGAGGAGCCCCACCTTATCCTGACGTAAACACCTTTGATATAACTGTTTACTTGTTGCAAGGGAGAAGACTCCTACAACCCGAATACTGCCCAGACCCCTTGTAAGTAGTCTTTCTGTACCTCTTACGTTCTTTACTTTTACAGAAATGCCTGCCTTCAAAGGG', 'end': 116435908, 'start': 116435676}, {'alt': None, 'ref': 'AATTTAATCAGTGGAAAAATAGCCTCAATTCTTACCATCCACAAAATGGATCCAGACAACTGTTCAAACTGATGGGACCCACTCCATCGAGATTTCACTGTAGCTAGACCAAAATCACCTATTTTTACTGTGAGGTCTTCATGAAGAAATATATCTGAGGTGTAGTAAGTAAAGGAAAACAGTAGATCTCATTTTCCTATCAGAGCAAGCA', 'end': 140453250, 'start': 140453040}, {'alt': None, 'ref': 'ACTTGTCACAATGTCACCACATTACATACTTACCATGCCACTTTCCCTTGTAGACTGTTCCAAATGATCCAGATCCAATTCTTTGTCCCACTGTAATCTGCCCATCAGGAATCTCCCAATCATCACTCGAGTCCCGTCTACCAAGTGTTTTCTTGATAAAAACAGTAAAAAAGTCAAGTCAAGCCAAACAGAAAAAGAAAACCTTATGTTTCACCCTAAGTACATTACCTTATGCCTG', 'end': 140481580, 'start': 140481343}], 'chr4': [{'alt': None, 'ref': 'tggCCCCTGAGCGTCATCTGCCCCCACAGAGCGCTCCCCGCACCGGCCCATCCTGCAGGCGGGGCTGCCGGCCAACCAGACGGCGGTGCTGGGCAGCGACGTGGAGTTCCACTGCAAGGTGTACAGTGACGCACAGCCCCACATCCAGTGGCTCAAGCACGTGGAGGTGAATGGCAGCAAGGTGGGCCCGGACGGCACACCCTACGTTACCGTGCTCAAGGTGGGCCACCGTGTGCACGTGGGTGCCGCCGCTGGGGCTCCTGGGCTGGCCCCAAGGGTGCCCCTTGGCTGCGGGTTGCGTGAGGATTTGGGTCTAGGGGTTGGAGCTT', 'end': 1803861, 'start': 1803533}, {'alt': None, 'ref': 'TGCGGCTCTGGGCCAGGGGCATCCATGGGAGCCCCGTGGGGGGGGGGGCCAGGCCAGGCCTCAACGCCCATGTCTTTGCAGCCGAGGAGGAGCTGGTGGAGGCTGACGAGGCGGGCAGTGTGTATGCAGGCATCCTCAGCTACGGGGTGGGCTTCTTCCTGTTCATCCTGGTGGTGGCGGCTGTGACGCTCTGCCGCCTGCGCAGCCCCCCCAAGAAAGGCCTGGGCTCCCCCACCGTGCACAAGATCTCCCGCTTCCCGCTCAAGCGACAGGTAACAGAAAGTAGATACCAGGTTCTGAGCTGCCTGCCCGCCAGGCCTCCTGGAGCCCCACCTCGGCCCACGCTGGTCCTGGGCTGTGTGAGCCCTCTCT', 'end': 1806347, 'start': 1805976}, {'alt': None, 'ref': 'GCTTCAGCCCTGCCTCCCACCCCTTCCCCAGTGCATCCACAGGGACCTGGCTGCCCGCAATGTGCTGGTGACCGAGGACAACGTGATGAAGATCGCAGACTTCGGGCTGGCCCGGGACGTGCACAACCTCGACTACTACAAGAAGACGACCAACGTGAGCCCGGCCCTGGGGTGCGGGGGTGGGGGTCATGCCAGTAGGACGCCTGGCGCCAACA', 'end': 1807961, 'start': 1807747}, {'alt': None, 'ref': 'AATTCACCAGTTACCTGTCCTGGTCATTTATAGAAACCGAGGTATGAAATTCGCTGGAGGGTCATTGAATCAATCAGCCCAGATGGACATGAATATATTTATGTGGACCCGATGCAGCTGCCTTATGACTCAAGATGGGAGTTTCCAAGAGATGGACTAGTGCTTGGTAAGTTCCATGGGGTAACCTCCCAAGACTCCCTTTTCCCTTGCACACAACTTTACAAT', 'end': 55141199, 'start': 55140975}, {'alt': None, 'ref': 'CAGCTGGACTGATATGTGATTTATTCTTTCAACAGCCACGGCCAGATCCAGTGAAAAACAAGCTCTCATGTCTGAACTGAAGATAATGACTCACCTGGGGCCACATTTGAACATTGTAAACTTGCTGGGAGCCTGCACCAAGTCAGGTGGGCTCACTGACCTGGAGTGAGGATTTTCACTGGACACATGTGGTTGTG', 'end': 55144224, 'start': 55144028}, {'alt': None, 'ref': 'TGATCCTGAGTCATTTCTTCCTTTTCCATGCAGTGTGTCCACCGTGATCTGGCTGCTCGCAACGTCCTCCTGGCACAAGGAAAAATTGTGAAGATCTGTGACTTTGGCCTGGCCAGAGACATCATGCATGATTCGAACTATGTGTCGAAAGGCAGTGTACGTCCTCACTTCCCTCACTGGTCAGGCTCATCCTCCTTCACTTTAATC', 'end': 55152181, 'start': 55151975}, {'alt': None, 'ref': 'CACTCTGACATATGGCCATTTCTGTTTTCCTGTAGCAAAACCAGAAATCCTGACTTACGACAGGCTCGTGAATGGCATGCTCCAATGTGTGGCAGCAGGATTCCCAGAGCCCACAATAGATTGGTATTTTTGTCCAGGAACTGAGCAGAGGTGAGATGATTATTTTTGGCACTGCTTATAATGCAGAGGGGAAGGACTGCAATTCACTTGAATTTCA', 'end': 55589931, 'start': 55589715}, {'alt': None, 'ref': 'AGTAAGCCAGGGCTTTTGTTTTCTTCCCTTTAGATGCTCTGCTTCTGTACTGCCAGTGGATGTGCAGACACTAAACTCATCTGGGCCACCGTTTGGAAAGCTAGTGGTTCAGAGTTCTATAGATTCTAGTGCATTCAAGCACAATGGCACGGTTGAATGTAAGGCTTACAACGATGTGGGCAAGACTTCTGCCTATTTTAACTTTGCATTTAAAGGTAACAACAAAGGTATATTTCTTTTTAATCCAATTTAAGGGGATGTTTAGGCTCTGTCTACCATATCAGTCATGAT', 'end': 55592280, 'start': 55591990}, {'alt': None, 'ref': 'ATTAAAAGGTGATCTATTTTTCCCTTTCTCCCCACAGAAACCCATGTATGAAGTACAGTGGAAGGTTGTTGAGGAGATAAATGGAAACAATTATGTTTACATAGACCCAACACAACTTCCTTATGATCACAAATGGGAGTTTCCCAGAAACAGGCTGAGTTTTGGTCAGTATGAAACAGGGGCTTTCCATGTCACCTTTTTGGGTACACATAACAGTGACT', 'end': 55593765, 'start': 55593545}, {'alt': None, 'ref': 'GCTTTTTGCTAAAATGCATGTTTCCAATTTTAGCGAGTGCCCATTTGACAGAACGGGAAGCCCTCATGTCTGAACTCAAAGTCCTGAGTTACCTTGGTAATCACATGAATATTGTGAATCTACTTGGAGCCTGCACCATTGGAGGTAAAGCCGTGTCCAAGCTGCCTTTTATTGTCTGTCAGGTTATCAAAACATGACA', 'end': 55594342, 'start': 55594144}, {'alt': None, 'ref': 'TAAATGGTTTTCTTTTCTCCTCCAACCTAATAGTGTATTCACAGAGACTTGGCAGCCAGAAATATCCTCCTTACTCATGGTCGGATCACAAAGATTTGTGATTTTGGTCTAGCCAGAGACATCAAGAATGATTCTAATTATGTGGTTAAAGGAAACGTGAGTACCCATTCTCTGCTTGACAGTCCTGCAAAGGATTTTTAG', 'end': 55599403, 'start': 55599203}, {'alt': None, 'ref': 'AACATTATTGACTCTGTTGTGCTTCTATTACAGGCTCGACTACCTGTGAAGTGGATGGCACCTGAAAGCATTTTCAACTGTGTATACACGTTTGAAAGTGACGTCTGGTCCTATGGGATTTTTCTTTGGGAGCTGTTCTCTTTAGGTAAAATGATCCTTGCCAAAGACAACTTCATTAGACTCAGAGCATCTTCTTGAAGTTTCATTGGTGTCCTGC', 'end': 55602847, 'start': 55602631}]}
-    print( "[GET sequences]\tEnd" )
-
-    # Get variant profile
+    # Load variant profile
     models = getVariantsProfile( args.input_profile )
 
-    # Apply variant profile
-    #################################
+    # Get reference sequences
+    logging.info( "\t[GET amplicons] START" )
+    amplicons_by_chr = getAmplicons( args.input_genome, args.input_manifests )
+    logging.info( "\t[GET amplicons] END" ) ############################### Sortir ce code avec la recup des sequences dans un autre script
+
+    # Get covered positions
+    logging.info( "\t[GET covered areas] START" )
+    areas_by_chr = getCoveredFromAmplicons( amplicons_by_chr, False )
+    areas_wout_primers_by_chr = getCoveredFromAmplicons( amplicons_by_chr, True )
+    logging.info( "\t[GET covered areas] END" )
+
+    # Find warn positions
+    logging.info( "\t[GET warn positions] START" )
+    complex_areas = getComplexRegions( amplicons_by_chr ) # Positions where the variant can overlap primer and interest in multiple amplicons
+    logging.info( "\t[GET warn positions] END" )
+
+
+    # Find variants positions
+    logging.info( "\t[GET variants pos] START" )
     random_seed = args.random_seed if args.random_seed is not None else int(time.time())
     random.seed(random_seed)
-    print( "Random seed used:\t" + str(random_seed) )
-
-    # Find positions
-    print( "[GET variants pos]\tStart" )
-    area_wt_primers_by_chr = getCoveredFromAmplicons( amplicons_by_chr, True )
-    mutable_pos = getCoveredPos( area_wt_primers_by_chr )
+    logging.info( "\t[GET variants pos] Random seed used: " + str(random_seed)  )
+    mutable_pos = getCoveredPos( areas_wout_primers_by_chr )
+    del( areas_wout_primers_by_chr )
     covered_len = len(mutable_pos)
     variant_by_pos = dict()
     for model in models:
-        nb_variant = int(model["occurence"] * covered_len)
-        for idx in range(nb_variant):
+        nb_variants = int(model["occurence"] * covered_len)
+        for idx in range(nb_variants):
             mutable_pos_len = len(mutable_pos)
             variant_len = random.randint(model["length"]["min"], model["length"]["max"])
+            # Find mutated positions
             ########################################### fct
             pos_start_idx = None
             pos_end_idx = None
@@ -303,17 +397,23 @@ if __name__ == "__main__":
             valid_position = False
             while not valid_position:
                 pos_start_idx = random.randint(0, mutable_pos_len -1)
-                pos_end_idx = pos_start_idx + variant_len -1
+                pos_end_idx = pos_start_idx + variant_len -1 if model["type"] != "insertion" else pos_start_idx
                 variant_start_chr, variant_start_pos = mutable_pos[pos_start_idx].split(":")
                 variant_start_pos = int(variant_start_pos)
-                if pos_end_idx < mutable_pos_len:
+                if pos_end_idx < mutable_pos_len: # not out of index
                     variant_end_chr, variant_end_pos = mutable_pos[pos_end_idx].split(":")
                     variant_end_pos = int(variant_end_pos)
-                    if variant_end_chr == variant_start_chr:
-                        if variant_end_pos == (variant_start_pos + variant_len -1):
-                            valid_position = True
+                    if variant_len == 1 or model["type"] == "insertion":
+                        valid_position = True
+                    elif variant_end_chr == variant_start_chr: # start and end are on the same chromosome
+                        if variant_end_pos == (variant_start_pos + variant_len -1): # The positions are continuous on chromosome
+                            if not hasComplexConfiguration( complex_areas[variant_start_chr], variant_start_pos, variant_end_pos ):
+                                valid_position = True
+                            else:
+                                logging.debug( "\t[GET variants pos] Simulation impossible for " + variant_start_chr + ":" + str(variant_start_pos) + "-" + str(variant_end_pos) + " the variant will be moved to another location." )
             variant_chr = variant_start_chr
             ###########################################
+            # Remove mutated pos and margin from mutable positions
             masked_indexes = [pos_idx for pos_idx in range(pos_start_idx, pos_end_idx + 1)] # List of indexes to remove from the mutable positions
             for margin_offset in range(1, (args.min_distance + 1)):
                 if pos_end_idx + margin_offset < mutable_pos_len:
@@ -324,102 +424,93 @@ if __name__ == "__main__":
                     start_chr = mutable_pos[pos_start_idx - margin_offset].split(":")[0]
                     if variant_chr == start_chr:
                         masked_indexes.insert(0, pos_start_idx - margin_offset )
-            # Remove mutated pos and margin from mutable positions
             masked_indexes = sorted(masked_indexes, reverse=True)
-            if( len(masked_indexes) < (variant_len + 2*args.min_distance) ):
-                print( "[GET variants pos]\t\t|- Limited mask on: " + ", ".join([mutable_pos[idx] for idx in masked_indexes]) )
+            clean_variant_len = variant_len if model["type"] != "insertion" else 1
+            if( len(masked_indexes) < (clean_variant_len + 2*args.min_distance) ):
+                logging.debug( "[GET variants pos] Limited mask on " + ", ".join([mutable_pos[idx] for idx in masked_indexes]) + " for " + model["type"] + " in position " + variant_chr + ":" + str(variant_start_pos) + "-" + str(variant_end_pos)  )
             for idx in masked_indexes:
                 del mutable_pos[idx]
+            # Store variant information
             variant_freq = random.randint(int(1000*model["freq"]["min"]), int(1000*model["freq"]["max"]))/float(1000)
             if variant_chr not in variant_by_pos:
                 variant_by_pos[variant_chr] = dict()
             variant_by_pos[variant_chr][variant_start_pos] = {"type":model["type"], "length":variant_len, "ref":None, "alt":None, "freq":variant_freq}
-    print( "[GET variants pos]\tEnd" )
+    logging.info( "\t[GET variants pos] END" )
 
     # Create variants set origin
-    for chr in area_by_chr:
-        if chr in variant_by_pos:
-            for area in area_by_chr[chr]:
+    logging.info( "\t[INIT covered sequences] START" )
+    setAmpliconSeq( args.input_genome, areas_by_chr ) ############################################### Ne faire la recherche qu une fois pour les amplicon puis fusionner les region a ce moment du code
+    for chrom in areas_by_chr:
+        if chrom in variant_by_pos:
+            for area in areas_by_chr[chrom]:
                 area["alt"] = [list(area["ref"]) for idx in range(100)]
+    logging.info( "\t[INIT covered sequences] END" )
 
     # Create variant set
-    for chr in area_by_chr:
-        if chr in variant_by_pos:
-            for area in area_by_chr[chr]:
+    for chrom in sorted(areas_by_chr):
+        if chrom in variant_by_pos:
+            for area in areas_by_chr[chrom]:
                 for pos in range(area["start"], (area["end"] + 1)):
-                    if pos in variant_by_pos[chr]:
+                    if pos in variant_by_pos[chrom]:
                         # Set alternative variant
-                        setAlt( variant_by_pos[chr][pos], area["ref"], pos - area["start"] )
-                        ref_allele = variant_by_pos[chr][pos]["ref"]
-                        alt_allele = variant_by_pos[chr][pos]["alt"]
-                        #~ print( (pos - area["start"]), ref_allele, alt_allele )
+                        setAlt( variant_by_pos[chrom][pos], area["ref"], pos - area["start"] )
+                        ref_allele = variant_by_pos[chrom][pos]["ref"]
+                        alt_allele = variant_by_pos[chrom][pos]["alt"]
                         # Random selection of alternative sequence
-                        nb_alterated_amplicons = int( (variant_by_pos[chr][pos]["freq"]*100) + 0.5 )
+                        nb_alterated_amplicons = int( (variant_by_pos[chrom][pos]["freq"]*100) + 0.5 )
                         alterated_amplicons = random.sample( area["alt"], nb_alterated_amplicons )
-                        #~ print("-------------------------------------")
                         # Apply variant in selected alternatives
                         for amplicon_variant in alterated_amplicons:
-                            #~ print( amplicon_variant )
                             # Apply variant
                             if "." in alt_allele or len(alt_allele) < len(ref_allele): # Deletion
                                 del_length = len(ref_allele)
                                 for idx in range(del_length):
                                     amplicon_variant[(pos + idx) - area["start"]] = ""
                             elif "." in ref_allele or len(alt_allele) > len(ref_allele): # Insertion
-                                amplicon_variant[pos - area["start"]] = alt_allele 
+                                amplicon_variant[pos - area["start"]] = alt_allele
                             else: # Substitution
                                 subst_length = len(alt_allele)
                                 for idx in range(subst_length):
                                     amplicon_variant[(pos + idx) - area["start"]] = alt_allele[idx]
-                            #~ print( amplicon_variant )
-                            #~ print("")
-    
     # Write variant
-    print( "[WRITE variants]\tStart" )
     writeVariants( args.output_variants, variant_by_pos )
     del variant_by_pos
-    print( "[WRITE variants]\tEnd" )
-    
+
     # Generate reads
-    print( "[GENERATE reads]\tStart" )
-    nb_pairs = {
-        "min": 200,
-        "max": 15000
-    }
-    reads_length = 150
-    dual_lib = True
-    idx_ampli = 1
+    logging.info( "\t[GENERATE reads] START" )
     lib = {
         "A":{ 
             "R1": FastaIO(getFastaPath(args.output_folder, args.sample_name, "A", 1), "w"),
             "R2": FastaIO(getFastaPath(args.output_folder, args.sample_name, "A", 2), "w")
-        },
-        "B":{
+        }
+    }
+    if args.is_double_strand:
+        lib["B"] = {
             "R1": FastaIO(getFastaPath(args.output_folder, args.sample_name, "B", 1), "w"),
             "R2": FastaIO(getFastaPath(args.output_folder, args.sample_name, "B", 2), "w")
         }
-    }
-    
-    for chr in amplicons_by_chr:
-        for amplicon in amplicons_by_chr[chr]:
+
+    idx_ampli = 1
+    for chrom in sorted(amplicons_by_chr):
+        for amplicon in amplicons_by_chr[chrom]:
             # Select area ############################################## fct
             amplicon_area = None
-            for area in area_by_chr[chr]:
-                if amplicon["start"] >= area["start"]:
-                    if amplicon["end"] <= area["end"]:
+            for area in areas_by_chr[chrom]:
+                if amplicon.start >= area["start"]:
+                    if amplicon.end <= area["end"]:
                         amplicon_area = area
-            start_idx = amplicon["start"] - amplicon_area["start"]
-            end_idx = amplicon["end"] - amplicon_area["start"]
+            start_idx = amplicon.start - amplicon_area["start"]
+            end_idx = amplicon.end - amplicon_area["start"]
             # Primers
-            up_primer = amplicon["up_primer"]
-            down_primer = amplicon["down_primer"]
-            if amplicon["strand"] == "-":
-                up_primer = revcom(amplicon["down_primer"])
-                down_primer = revcom(amplicon["up_primer"])
+            up_primer = amplicon.up_primer
+            down_primer = amplicon.down_primer
+            if amplicon.strand == "-":
+                up_primer = revcom(amplicon.down_primer)
+                down_primer = revcom(amplicon.up_primer)
             interest_start_idx = start_idx + len(up_primer)
             interest_end_idx = end_idx - len(down_primer)
             # Reads
-            nb_selected_pairs = random.randrange( nb_pairs["min"], nb_pairs["max"], 100 )
+            nb_selected_pairs = random.randrange( args.min_pairs, args.max_pairs, 100 )
             nb_from_alt = int(nb_selected_pairs/100)
             if amplicon_area["alt"] is None:
                 amplicon_area["alt"] = [list(amplicon_area["ref"])]
@@ -427,20 +518,19 @@ if __name__ == "__main__":
             for alt_seq in amplicon_area["alt"]:
                 matrix = up_primer + "".join(alt_seq[interest_start_idx:interest_end_idx+1]) + down_primer # The protocol primers mask variation on matrix
                 rvc_matrix = revcom(matrix)
-                if amplicon["strand"] == "-":
+                if amplicon.strand == "-":
                     tmp = rvc_matrix
                     rvc_matrix = matrix
                     matrix = tmp    
                 for idx in range(nb_from_alt):
-                    pair_id = "theoritical:" + chr + "_" + str(amplicon["start"]) + "-" + str(amplicon["end"]) + ":" + str(idx_ampli).zfill(10)
-                    writeReadsPair( pair_id, matrix, rvc_matrix, reads_length, lib["A"]["R1"], lib["A"]["R2"] )
+                    pair_id = "theoritical:" + chrom + "_" + str(amplicon.start) + "-" + str(amplicon.end) + ":" + str(idx_ampli).zfill(10)
+                    writeReadsPair( pair_id, matrix, rvc_matrix, args.reads_length, lib["A"]["R1"], lib["A"]["R2"] )
                     idx_ampli += 1
-                    if dual_lib:
-                        pair_id = "theoritical:" + chr + "_" + str(amplicon["start"]) + "-" + str(amplicon["end"]) + ":" + str(idx_ampli).zfill(10)
-                        writeReadsPair( pair_id, rvc_matrix, matrix, reads_length, lib["B"]["R1"], lib["B"]["R2"] )
+                    if args.is_double_strand:
+                        pair_id = "theoritical:" + chrom + "_" + str(amplicon.start) + "-" + str(amplicon.end) + ":" + str(idx_ampli).zfill(10)
+                        writeReadsPair( pair_id, rvc_matrix, matrix, args.reads_length, lib["B"]["R1"], lib["B"]["R2"] )
                         idx_ampli += 1
     for lib_name in lib:
         for read in lib[lib_name]:
-            if lib[lib_name][read] is not None:
-                lib[lib_name][read].close()
-    print( "[GENERATE reads]\tEnd" )
+            lib[lib_name][read].close()
+    logging.info( "\t[GENERATE reads] END" )
