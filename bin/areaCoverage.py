@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2017 IUCT
+# Copyright (C) 2017 IUCT-O
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,15 +19,14 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+import os
 import json
 import numpy
-import statistics
 import argparse
-
 
 
 ########################################################################
@@ -35,102 +34,128 @@ import argparse
 # FUNCTIONS
 #
 ########################################################################
-def getInterestArea( interest_bed ):
+def getSelectedAreas( input_panel ):
     """
-    #~ interest_area = {
-        #~ "6":{
-            #~ 26115141: [26123500],
-            #~ 26114621: [26114873]
-        #~ }
-    #~ }
+    @summary: Returns the list of selected areas from a BED file.
+    @param input_panel: [str] The path to the amplicons with their primers (format: BED)
+    @return: [list] The list of BED's areas. Each area is represented by a dictionary with this format: {"region":"chr1", "start":501, "end":608, "name":"gene_98"}.
     """
-    nb_area = 0
-    interest_area = dict()
-    with open(interest_bed) as FH_bed:
-        for line in FH_bed:
-            region, start, end = line.strip().split("\t")[0:3]
-            name = "" if len(line.split("\t")) < 4 else line.split("\t")[3].strip()
-            start = int(start) + 1 # In BED start is zero-based starting position
-            end = int(end) # In BED end is one-based starting position
-            if start > end:
-                old_start = start
-                start = end
-                end = old_start
-            if region not in interest_area:
-                interest_area[region] = dict()
-            if start not in interest_area[region]:
-                interest_area[region][start] = list()
-            interest_area[region][start].append({"end":end, "name":name})
-    return interest_area
+    selected_areas = list()
+    with open(input_panel) as FH_panel:
+        for line in FH_panel:
+            if not line.startswith("browser ") and not line.startswith("track ") and not line.startswith("#"):
+                fields = [elt.strip() for elt in line.split("\t")]
+                selected_areas.append({
+                    "region": fields[0],
+                    "start": int(fields[1]) +1, # Start in BED is 0-based
+                    "end": int(fields[2]),
+                    "name": None if len(fields) < 4 else fields[3]
+                })
+    return( selected_areas )
 
-def getCovByArea( coverage_file, interest_area ):
+def setDepths( depths_file, selected_areas ):
     """
-    @warning: All the positions must exist in coverage_file.
+    @summary: Adds the list of depths for each area in selected_areas. These depths are stored with the key "data".
+    @param depths_file: [str] The path to the depths by position (format: samtools depth output). The file must only contains one sample and it must contains every positions in selected areas (see samtools depth -a option for positions with 0 reads).
+    @param selected_areas: [list] The list of area. Each area is represented by a dictionary with this format: { "region":"chr1", "start":501, "end":608, "name":"gene_98" }.
     """
-    achieved_area = list()
-    with open(coverage_file) as FH_coverage:
+    # List areas by pos ID
+    area_by_pos = dict()
+    for curr_area in selected_areas:
+        pos_id = curr_area["region"] + ":" + str(curr_area["start"])
+        if pos_id not in area_by_pos:
+            area_by_pos[pos_id] = list()
+        area_by_pos[pos_id].append( curr_area )
+    # Parse depths file
+    with open(depths_file) as FH_depths:
         opened_area = list()
-        for line in FH_coverage:
+        for line in FH_depths:
             fields = line.strip().split("\t")
             region = fields[0]
-            position = int(fields[1])
-            coverage = int(fields[2])
-            if region in interest_area:
-                if position in interest_area[region]:
-                    for current_area in interest_area[region][position]:
-                        opened_area.append( {"region":region, "start":position, "end":current_area["end"], "name":current_area["name"], "cov":[]} )
+            position = int(fields[1]) # Start in depth is 1-based
+            depth = int(fields[2])
+            # Open areas with start on the current position
+            pos_id = region + ":" + str(position)
+            if pos_id in area_by_pos:
+                for curr_area in area_by_pos[pos_id]:
+                    curr_area["data"] = list()
+                    opened_area.append( curr_area )
+            # Manage position in opened areas
             achieved_idx = list()
             for idx_area, area in enumerate(opened_area):
-                if region == area["region"] and position <= area["end"]:
-                    area["cov"].append( coverage )
-                else:
+                if region == area["region"] and position <= area["end"]: # Current position is in area
+                    area["data"].append( depth )
+                else: # Current position is after the end of the area
                     achieved_idx.append( idx_area )
+            # Close achieved areas
             for idx in sorted(achieved_idx, reverse=True):
-                achieved_area.append( opened_area[idx] )
                 del opened_area[idx]
-        for area in opened_area:
-            achieved_area.append( area )
-    return( achieved_area )
 
-def writeOutputTSV( out_path, area_coverage ):
+def writeOutputTSV( out_path, area_depths, percentile_step ):
+    """
+    @summary: Writes depths distribution for each area and each sample in TSV format.
+    @param out_path: [str] The path to the outputted file (format: TSV).
+    @param area_depths: [list] The list of area. Each area is represented by a dictionary with this format:
+                        {
+                          "region":"chr1",
+                          "start":501,
+                          "end":608,
+                          "name":"gene_98",
+                          "depths":
+                            {
+                              "splA":{"min":8, "25_percentile":10, "50_percentile":10, "75_percentile":10, "max":30},
+                              "splB":{"min":0, "25_percentile":1, "50_percentile":30, "75_percentile":35, "max":50}
+                            }
+                        }
+    @param percentile_step: [int] The step used to restrain distribution (only the depths for this percentile and his multiples have been retained).
+    """
+    percentiles_titles = ['{:02}'.format(perc) + "_percentile" for perc in range(percentile_step, 100, percentile_step)]
     with open(out_path, "w") as FH_out:
         print(
             "#Region",
             "start",
             "end",
             "name",
-            "cov_min",
-            "cov_lower_quartile",
-            "cov_median",
-            "cov_upper_quartile",
-            "cov_max",
+            "sample",
+            "min_depth",
+            "\t".join( [curr_title + "_depth" for curr_title in percentiles_titles] ),
+            "max_depth",
             sep="\t", file=FH_out
         )    
-        for area in area_coverage:
-            print(
-                area["region"],
-                area["start"],
-                area["end"],
-                area["name"],
-                min(area["cov"]),
-                numpy.percentile( area["cov"], 25 ),
-                numpy.percentile( area["cov"], 50 ),
-                numpy.percentile( area["cov"], 75 ),
-                max( area["cov"] ),
-                sep="\t", file=FH_out
-            )
+        for area in area_depths:
+            for spl_name in sorted(area["depths"]):
+                print(
+                    area["region"],
+                    area["start"],
+                    area["end"],
+                    area["name"],
+                    spl_name,
+                    area["depths"][spl_name]["min"],
+                    "\t".join( [str(area["depths"][spl_name][curr_title]) for curr_title in percentiles_titles] ),
+                    area["depths"][spl_name]["max"],
+                    sep="\t", file=FH_out
+                )
 
-def writeOutputJSON( out_path, area_coverage ):
-    with open(out_path, "w") as FH_out:
-        for area in area_coverage:
-            area["coverage"] = {
-                "min": min(area["cov"]),
-                "1st_quart": numpy.percentile( area["cov"], 25 ),
-                "median": statistics.median( area["cov"] ),
-                "3rd_quart": numpy.percentile( area["cov"], 75 ),
-                "max": max(area["cov"]) }
-            del( area["cov"] )
-        FH_out.write( json.dumps(area_coverage, default=lambda o: o.__dict__, sort_keys=True ) )
+def writeOutputJSON( out_path, area_depths ):
+    """
+    @summary: Writes depths distribution for each area and each sample in JSON format.
+    @param out_path: [str] The path to the outputted file (format: JSON).
+    @param area_depths: [list] The list of area. Each area is represented by a dictionary with this format:
+                        {
+                          "region":"chr1",
+                          "start":501,
+                          "end":608,
+                          "name":"gene_98",
+                          "depths":
+                            {
+                              "splA":{"min":8, "25_percentile":10, "50_percentile":10, "75_percentile":10, "max":30},
+                              "splB":{"min":0, "25_percentile":1, "50_percentile":30, "75_percentile":35, "max":50}
+                            }
+                        }
+    """
+    with open(out_path, 'w') as FH_out:
+        data = json.dumps( area_depths, default=lambda o: o.__dict__, sort_keys=True, indent=2 )
+        FH_out.write( data )
 
 
 ########################################################################
@@ -140,24 +165,41 @@ def writeOutputJSON( out_path, area_coverage ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Coverage distribution for specied area in alignment." )
+    parser = argparse.ArgumentParser( description='Writes depths distribution for specified areas.' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
+    parser.add_argument( '-s', '--percentile-step', type=int, default=5, help='Only the depths for this percentile and his multiples are retained. For example, with 25 only the minimum, the 1st quartile, the 2nd quartile, the 3rd quartile and the maximum depths are retained. [Default: %(default)s]' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-s', '--input-selection', required=True, help='Path to the interests area description (format: BED).' )
-    group_input.add_argument( '-d', '--input-depth', required=True, help='Path to the samtools depth output (format: TSV).' )
+    group_input.add_argument( '-c', '--inputs-depths', nargs='+', required=True, help='The path to the depths by position (format: samtools depth output). Each file represents only one sample. The file must contains every positions in selected areas (see samtools depth -a option for positions with 0 reads).' )
+    group_input.add_argument( '-r', '--input-regions', required=True, help='Path to the list of regions (format: BED).' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output', default="areaDepth.json", help='Path to the output (format: JSON or TSV). [Default: %(default)s]' )
+    group_output.add_argument( '-o', '--output-metrics', default="depths_distrib.json", help='The path to outputted file (format: JSON or TSV according to the extension).' )
     args = parser.parse_args()
 
     # Get interest area
-    interest_area = getInterestArea( args.input_selection )
+    selected_areas = getSelectedAreas( args.input_regions )
 
-    # Get coverage by pos in area
-    coverage = getCovByArea( args.input_depth, interest_area )
-    coverage = sorted( coverage, key=lambda x: (x["region"], x["start"], x["end"]) )
+    # Get coverage by area in samples
+    for spl_file in args.inputs_depths:
+        spl_name = os.path.basename(spl_file)
+        setDepths( spl_file, selected_areas )
+        for curr_area in selected_areas:
+            # Transform depths to distribution
+            if "data" not in curr_area:
+                curr_area["data"] = [0]
+            spl_distrib = {
+                "min": min(curr_area["data"]),
+                "max": max(curr_area["data"])
+            }
+            for curr_percentile in range(args.percentile_step, 100, args.percentile_step):
+                spl_distrib['{:02}'.format(curr_percentile) + "_percentile"] = numpy.percentile( curr_area["data"], curr_percentile )
+            del(curr_area["data"])
+            # Store distribution
+            if "depths" not in curr_area:
+                curr_area["depths"] = dict()
+            curr_area["depths"][spl_name] = spl_distrib
 
     # Write output
-    if args.output.endswith("json"):
-        writeOutputJSON( args.output, coverage )
+    if args.output_metrics.endswith("json"):
+        writeOutputJSON( args.output_metrics, selected_areas )
     else:
-        writeOutputTSV( args.output, coverage )
+        writeOutputTSV( args.output_metrics, selected_areas, args.percentile_step )
