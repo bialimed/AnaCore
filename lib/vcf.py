@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.1'
+__version__ = '1.6.0'
 __email__ = 'support.genopole@toulouse.inra.fr'
 __status__ = 'prod'
 
@@ -142,6 +142,93 @@ class VCFRecord:
         # Substitution
         elif len(self.alt[0]) == len(self.ref) and len(self.ref) != 1:
             twoSideTrimming( self )
+
+    def getPopDP( self ):############################################### test
+        """
+        @summary: Returns the depth for the population (it is composed by all samples).
+        @return: [int] The depth.
+        """
+        DP = None
+        if "DP" in self.info: # The DP is already processed for the population
+            DP = self.info["DP"]
+        else:
+            spl_wout_DP = [spl_name for spl_name in self.samples if "DP" not in self.samples[spl_name]]
+            if len(spl_wout_DP) == 0: # All samples have DP
+                DP = sum([self.samples[spl_name]["DP"] for spl_name in self.samples])
+            else:
+                raise Exception( 'The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+        return( DP )
+
+    def getAD( self, spl_name ):############################################### test
+        AD = None
+
+        # Retrieve AD from self
+        if "AD" in self.samples[spl_name]: # The AD is already processed for the sample
+            AD = self.samples[spl_name]["AD"]
+        elif len(self.samples) == 1 and spl_name in self.samplesend and "AD" in self.info: # Only one sample and AD is already processed for population
+            AD = self.info["AD"]
+        else: # AD must be calculated
+            try:
+                AF = self.get_AF( spl_name )
+                DP = self.get_DP( spl_name )
+                AD = [round(curr_AF * DP, 0) for curr_AF in AF]
+            except:
+                raise Exception( 'The alternative alleles depths cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+
+        # Transform AD to list
+        if not isinstance(AD, (list, tuple)):
+            AD = [AD]
+
+        # Remove the reference allele frequency
+        if len(AD) == len(self.alt) + 1:
+            AD = AD[1:]
+
+        return( AD )
+
+    def getPopAF( self ):############################################### test
+        """
+        @summary: Returns the list of alleles frequencies for the population (it is composed by all samples). The reference frequency is removed from the result if it exists.
+        @return: [list] The list of alleles frequencies.
+        """
+        # Retrieve DP
+        DP = None
+        try:
+            DP = self.getPopDP()
+        except:
+            DP = None
+
+        # Retrieve AF from self
+        AF = None
+        if "AF" in self.info: # The AF is already processed for the population
+            AF = self.info["AF"]
+        elif "AD" in self.info and DP is not None: # The AF can be processed directly from the population information
+            AD = self.info["AD"]
+            AF = [curr_AD/float(DP) for curr_AD in AD]
+        else: # The AF must be calculated from samples
+            if len(self.samples) == 1 and "AF" in self.samples[self.samples.keys()[0]]: # Only one sample and it contains AF
+                AF = self.samples[self.samples.keys()[0]]["AF"]
+            else:
+                try:
+                    AD = None
+                    for idx_spl, spl_name in enumerate(self.samples):
+                        if idx_spl == 0:
+                            AD = self.getAD( spl_name )
+                        else:
+                            for idx_allele, curr_AD in self.getAD( spl_name ):
+                                AD[idx_allele] += curr_A
+                    AF = [curr_AD/float(DP) for curr_AD in AD]
+                except:
+                    raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+
+        # Transform AF to list
+        if not isinstance(AF, (list, tuple)):
+            AF = [AF]
+
+        # Remove the reference allele frequency
+        if len(AF) == len(self.alt) + 1:
+            AF = AF[1:]
+
+        return( AF )
 
     def get_AF( self, spl_name ):
         """
