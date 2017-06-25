@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -87,6 +87,7 @@ if __name__ == "__main__":
             "Alternative_alleles",
             "Variant_quality",
             "Filters",
+            "Alt_alleles_frequencies",
             args.separator.join( FH_vcf.samples ),
             args.separator.join( FH_vcf.CSQ_titles ),
             sep=args.separator
@@ -95,6 +96,7 @@ if __name__ == "__main__":
             alt = ",".join(record.alt)
             qual = "." if record.qual is None else record.qual
             filters = "." if record.filter is None else ",".join(record.filter)
+            alt_AF = ",".join([str(round(AF, 5)) for AF in record.getPopAF()])
             spl_counts = args.separator.join( getAlleleCounts(FH_vcf, record) )
             for idx_csq, csq in enumerate(record.info["CSQ"]):
                 csq_values = list()
@@ -110,7 +112,8 @@ if __name__ == "__main__":
                     (alt if idx_csq == 0 else ""),
                     (qual if idx_csq == 0 else ""),
                     (filters if idx_csq == 0 else ""),
-                    (spl_counts if idx_csq == 0 else ""),
+                    (alt_AF if idx_csq == 0 else ""),
+                    (spl_counts if idx_csq == 0 else args.separator*(len(FH_vcf.samples) - 1)),
                     args.separator.join( csq_values ),
                     sep=args.separator
                 )
