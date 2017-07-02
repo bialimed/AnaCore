@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -203,6 +203,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references.' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     parser.add_argument( '-f', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
+    parser.add_argument( '-l', '--library-name', required=True, help="***********************************" )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-p', '--input-panel', required=True, help='The path to the *********************** without primers (format: BED).' )
     group_input.add_argument( '-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).' )
@@ -216,7 +217,6 @@ if __name__ == "__main__":
 
     # Get identified variants from VCF
     variants = dict()
-    sample_name = None
     out_vcf_info = None
     out_vcf_format = None
     for vcf_idx, current_vcf in enumerate(args.input_variants):
@@ -225,19 +225,20 @@ if __name__ == "__main__":
             out_vcf_format = FH_vcf.format
             for record in FH_vcf: # For each variant
                 for curr_spl in FH_vcf.samples: # For each sample in VCF
-                    sample_name = curr_spl
                     vcaller_AF = record.get_AF( curr_spl )
                     vcaller_DP = record.get_DP( curr_spl )
                     for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in in variant
                         record_allele = getAlleleRecord( FH_vcf, record, alt_idx )
+                        record_allele.samples[args.library_name] = record_allele.samples[curr_spl]
+                        del(record_allele.samples[curr_spl])
                         # Get allele frequency from the variant caller
                         vcaller_curr_AF = vcaller_AF[alt_idx]
                         if len(vcaller_AF) == len(record.alt) + 1: # The AF cointains reference AF
                             vcaller_curr_AF = vcaller_AF[alt_idx + 1]
                         vcaller_curr_AD = int(vcaller_curr_AF*vcaller_DP)
-                        record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
-                        record_allele.samples[curr_spl]["AD"] = [vcaller_curr_AD]
-                        record_allele.samples[curr_spl]["DP"] = vcaller_DP
+                        record_allele.samples[args.library_name]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
+                        record_allele.samples[args.library_name]["AD"] = [vcaller_curr_AD]
+                        record_allele.samples[args.library_name]["DP"] = vcaller_DP
                         # Store allele
                         allele_id = record_allele.chrom + ":" + str(record_allele.pos) + "=" + record_allele.ref + "/" + record_allele.alt[0]
                         if allele_id not in variants:
@@ -249,18 +250,18 @@ if __name__ == "__main__":
                             record_allele.format.append("OADP")
                             # Add allele informations
                             variants[allele_id] = record_allele
-                            variants[allele_id].samples[curr_spl]["OAID"] = [vcf_idx] # Temporary variable used to store amplicons groups where the variant has been see
-                            variants[allele_id].samples[curr_spl]["OAAF"] = [round(vcaller_curr_AF, args.AF_precision)]
-                            variants[allele_id].samples[curr_spl]["OADP"] = [vcaller_DP]
+                            variants[allele_id].samples[args.library_name]["OAID"] = [vcf_idx] # Temporary variable used to store amplicons groups where the variant has been see
+                            variants[allele_id].samples[args.library_name]["OAAF"] = [round(vcaller_curr_AF, args.AF_precision)]
+                            variants[allele_id].samples[args.library_name]["OADP"] = [vcaller_DP]
                         else:
-                            variants[allele_id].samples[curr_spl]["AD"][0] += vcaller_curr_AD
-                            variants[allele_id].samples[curr_spl]["DP"] += vcaller_DP
-                            AF = variants[allele_id].samples[curr_spl]["AD"][0]/float(variants[allele_id].samples[curr_spl]["DP"])
-                            variants[allele_id].samples[curr_spl]["AF"] = [round(AF, args.AF_precision)]
-                            variants[allele_id].samples[curr_spl]["OAID"].append( vcf_idx ) # Temporary variable used to store amplicons groups where the variant has been see
+                            variants[allele_id].samples[args.library_name]["AD"][0] += vcaller_curr_AD
+                            variants[allele_id].samples[args.library_name]["DP"] += vcaller_DP
+                            AF = variants[allele_id].samples[args.library_name]["AD"][0]/float(variants[allele_id].samples[args.library_name]["DP"])
+                            variants[allele_id].samples[args.library_name]["AF"] = [round(AF, args.AF_precision)]
+                            variants[allele_id].samples[args.library_name]["OAID"].append( vcf_idx ) # Temporary variable used to store amplicons groups where the variant has been see
                             OAAF = vcaller_curr_AD/float(vcaller_DP)
-                            variants[allele_id].samples[curr_spl]["OAAF"].append( round(OAAF, args.AF_precision) )
-                            variants[allele_id].samples[curr_spl]["OADP"].append( vcaller_DP )
+                            variants[allele_id].samples[args.library_name]["OAAF"].append( round(OAAF, args.AF_precision) )
+                            variants[allele_id].samples[args.library_name]["OADP"].append( vcaller_DP )
 
     # Completes and writes variants
     with VCFIO(args.output_variants, "w") as FH_out:
@@ -278,7 +279,7 @@ if __name__ == "__main__":
         FH_out.format["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth."}
         FH_out.format["OAAF"] = {"type": float, "type_tag": "Float", "number": None, "description": "Overlap amplicons alleles frequency."}
         FH_out.format["OADP"] = {"type": int, "type_tag": "Integer", "number": None, "description": "Overlap amplicons alleles depths."}
-        FH_out.samples = [sample_name]
+        FH_out.samples = [args.library_name]
         FH_out._writeHeader()
 
         # Records
@@ -286,29 +287,33 @@ if __name__ == "__main__":
             curr_var = variants[allele_id]
             ref_start = curr_var.pos
             ref_end = curr_var.pos + len(curr_var.ref) - 1
+            # Complete overlapping variants
             if isOverlapping( overlap_by_chr, curr_var.chrom, ref_start, ref_end ): # Check only overlapping zone of interest otherwise the primers mask variants
+                print(curr_var.samples)
                 for idx_gp, aln_file in enumerate(args.input_aln):
-                    if idx_gp not in curr_var.samples[curr_spl]["OAID"]:
+                    if idx_gp not in curr_var.samples[args.library_name]["OAID"]:
                         # Retrieve AD, AF and DP from aln file
                         chrom_pos, ref_alt = allele_id.split("=")
                         chrom, pos = chrom_pos.split(":")
                         ref, alt = ref_alt.split("/")
                         OAAD, OADP = getADP( chrom, int(pos), ref, alt, aln_file )
-                        curr_var.samples[curr_spl]["AD"][0] += OAAD
-                        curr_var.samples[curr_spl]["DP"] += OADP
-                        AF = curr_var.samples[curr_spl]["AD"][0]/float(curr_var.samples[curr_spl]["DP"])
-                        curr_var.samples[curr_spl]["AF"] = [round(AF, args.AF_precision)]
+                        curr_var.samples[args.library_name]["AD"][0] += OAAD
+                        curr_var.samples[args.library_name]["DP"] += OADP
+                        AF = curr_var.samples[args.library_name]["AD"][0]/float(curr_var.samples[args.library_name]["DP"])
+                        curr_var.samples[args.library_name]["AF"] = [round(AF, args.AF_precision)]
                         OAAF = 0 if OADP == 0 else OAAD/float(OADP)
-                        curr_var.samples[curr_spl]["OAAF"].append( round(OAAF, args.AF_precision) )
-                        curr_var.samples[curr_spl]["OADP"].append( OADP )
-            del(curr_var.samples[curr_spl]["OAID"])
-            # Write variant
+                        curr_var.samples[args.library_name]["OAAF"].append( round(OAAF, args.AF_precision) )
+                        curr_var.samples[args.library_name]["OADP"].append( OADP )
+            if "OAID" in curr_var.samples[args.library_name]:
+                del(curr_var.samples[args.library_name]["OAID"])
+            # Remove population information
             if "AF" in curr_var.info:
                 del(curr_var.info["AF"])
             if "AD" in curr_var.info:
                 del(curr_var.info["AD"])
             if "DP" in curr_var.info:
                 del(curr_var.info["DP"])
+            # Write variant
             FH_out.write( curr_var )
 
             #~ """
