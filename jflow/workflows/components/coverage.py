@@ -24,9 +24,14 @@ from weaver.function import ShellFunction
 class Coverage (Component):
 
     def define_parameters(self, aln_files, bed_file=None, max_depth=50000):
+        # Parameters
         self.add_parameter( "max_depth", "Truncate reported depth at a maximum of INT reads.", type="int", default=max_depth )
+
+        # Input files
         self.add_input_file_list( "aln_files", "Computes the depth at each position for the specified BAM files (format: BAM).", default=aln_files, required=True )
         self.add_input_file( "bed_file", "Compute depth at list of positions or regions in specified file (format: BED).", default=bed_file )
+
+        # Output files
         self.add_output_file_list( "depth_files", "The depth for each posiion (format: TSV)", pattern='{basename_woext}_coverage.tsv', items=self.aln_files )
         self.add_output_file_list( "stderr", "The samtools depth stderr file", pattern='{basename_woext}.stderr', items=self.aln_files )
 

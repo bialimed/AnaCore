@@ -34,4 +34,4 @@ class VCFToTSV (Component):
             " > $2" + \
             " 2> $3"
         convert_fct = ShellFunction( cmd, cmd_format='{EXE} {IN} {OUT}' )
-        MultiMap(convert_fct, inputs=[self.in_variants], outputs=[self.out_variants, self.stderr] )
+        MultiMap( convert_fct, inputs=[self.in_variants], outputs=[self.out_variants, self.stderr] )
