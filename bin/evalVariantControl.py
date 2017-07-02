@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -36,7 +36,7 @@ sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import *
+from vcf import VCFIO, getAlleleRecord
 
 
 
@@ -75,33 +75,22 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
     @param vcf_idx: [int] Index used to store the frequency of each vrariants of the VCF in frequencies list (start from 0).
     @param spl_name: [str] The frequency of the variants came from this sample. This parameters is optional when the VCF file contain 0 to 1 sample.
     """
-    if spl_name is None:
-        spl_name = get_VCF_samples( vcf_path )[0]
-    FH_vcf = VCFIO( vcf_path )
-    try:
+    with VCFIO( vcf_path ) as FH_vcf:
+        if spl_name is None:
+            spl_name = FH_vcf.samples[0]
         for record in FH_vcf:
-            # Get allele frequency
-            allele_freq = list()
-            if len(record.samples) <= 1 and "AF" in record.info:
-                allele_freq = record.info["AF"]
-            elif "AF" in record.samples[spl_name]:
-                allele_freq = record.samples[spl_name]["AF"]                
-            elif "AD" in record.samples[spl_name]:
-                for allele_depth in record.samples[spl_name]["AD"][1:]: # Skip the reference allele depth
-                    allele_freq.append( allele_depth/float(record.info["DP"]) )
-            else:
-                raise Exception( 'The allele frequency cannot be retrieved in variant "' + record.chrom + ":" + str(record.pos) + '".' )
-            if not isinstance(allele_freq, (list, tuple)):
-                allele_freq = [allele_freq]
-            # Add alleles
+            allele_freq = record.get_AF( spl_name )
+            # For each alternative allele
             for idx_alt, alt in enumerate(record.alt):
-                variant_id = record.chrom + ":" + str(record.pos) + "=" + alt
+                allele_record = getAlleleRecord( FH_vcf, record, idx_alt )
+                allele_record.standardizeSingleAllele()
+                variant_id = allele_record.chrom + ":" + str(allele_record.pos) + "=" + allele_record.alt[0]
                 if variant_id not in variants:
                     variants[variant_id] = {
-                        "chrom": record.chrom,
-                        "pos": record.pos,
-                        "ref": record.ref,
-                        "alt": alt,
+                        "chrom": allele_record.chrom,
+                        "pos": allele_record.pos,
+                        "ref": allele_record.ref,
+                        "alt": allele_record.alt[0],
                         "freq": list()
                     }
                 # Complete variants missing in previous VCF
@@ -109,8 +98,6 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
                     variants[variant_id]["freq"].append(0)
                 # Add allele frequency
                 variants[variant_id]["freq"][vcf_idx] = allele_freq[idx_alt]
-    finally:
-        FH_vcf.close()
     # Complete variants missing in current VCF
     for variant_id in variants:
         while len(variants[variant_id]["freq"]) <= vcf_idx:
