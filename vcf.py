@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.0'
+__version__ = '1.6.1'
 __email__ = 'support.genopole@toulouse.inra.fr'
 __status__ = 'prod'
 
@@ -205,8 +205,9 @@ class VCFRecord:
             AD = self.info["AD"]
             AF = [curr_AD/float(DP) for curr_AD in AD]
         else: # The AF must be calculated from samples
-            if len(self.samples) == 1 and "AF" in self.samples[self.samples.keys()[0]]: # Only one sample and it contains AF
-                AF = self.samples[self.samples.keys()[0]]["AF"]
+            spl_names = list(self.samples.keys())
+            if len(self.samples) == 1 and "AF" in self.samples[spl_names[0]]: # Only one sample and it contains AF
+                AF = self.samples[spl_names[0]]["AF"]
             else:
                 try:
                     AD = None
