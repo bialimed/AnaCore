@@ -15,11 +15,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+__author__ = 'Frederic Escudie'
+__copyright__ = 'Copyright (C) 2017 IUCT-O'
+__license__ = 'GNU General Public License'
+__version__ = '1.0.0'
+__email__ = 'support.genopole@toulouse.inra.fr'
+__status__ = 'prod'
+
+
 class SampleSheetIO(object):
     def __init__(self, path ):
         self.filepath = path
         self.run = None
         self.samples = None
+        self.header = None
+        self.manifests = None
         self._parse()
     
     def _parse(self):
@@ -37,6 +47,8 @@ class SampleSheetIO(object):
                     sections_by_title[section_title].append( line.strip() )
         # Process information
         self.samples = self._getSamplesFromData( sections_by_title["Data"] )
+        self.header = self._getInfoFromSection( sections_by_title["Header"] )
+        self.manifests = self._getInfoFromSection( sections_by_title["Manifests"] )
 
     def _getSamplesFromData(self, data_section):
         samples = list()
@@ -44,3 +56,10 @@ class SampleSheetIO(object):
         for line in data_section[1:]:
             samples.append( {data_titles[idx]:field.strip() for idx, field in enumerate(line.split(","))} )
         return( samples )
+
+    def _getInfoFromSection(self, section):
+        info = dict()
+        for line in section:
+            key, value = [field.strip() for field in line.split(",", 1)]
+            info[key] = value
+        return( info )
