@@ -46,6 +46,7 @@ class DSVF (Workflow):
         self.add_parameter_list( "pos_ctrl_names", 'Names of the positives controls. These samples contain a known set of variants with a predetermined AF.', group="Control samples" )
         self.add_input_file( "pos_ctrl_expected", 'Variants expected in positives controls (format: VCF).', group="Control samples" )
         # Analysis
+        self.add_input_file( "RNA_selection", "The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.", group="Analysis" )
         self.add_parameter( "min_AF", 'Under this allele frequency the variant is tagged "lowAF".', type=float, default=0.02, group="Analysis" )
         self.add_parameter( "min_DP", 'Under this depth in each library the variant is tagged "lowDP". Under this value in one library the variant can be tagged "incomplete" or "invalid".', type=int, default=120, group="Analysis" )
         self.add_input_file( "filters", "Parameters to filter variants (format: JSON).", required=True, group="Analysis" )
@@ -166,7 +167,11 @@ class DSVF (Workflow):
         tag_annot_variants = self.add_component( "FilterVCFOnAnnot", [variants_annot.out_variants] ) # tags on consequences and polymorphism
         tag_count_variants = self.add_component( "FilterVCFOnCount", [tag_annot_variants.out_variants, self.min_AF, self.min_DP] ) # tags on AF, DP and on presence in two lib
         sorted_variants = self.add_component( "SortVCF", [tag_count_variants.out_variants] )
-        filtered_variants = self.add_component( "FilterVCF", [self.filters, sorted_variants.out_variants] ) # removes variants on their FILTER tags
+        final_vcf = sorted_variants.out_variants
+        if self.RNA_selection != None:
+            select_annot_variants = self.add_component( "FilterVCFAnnotOnRNA", [self.RNA_selection, sorted_variants.out_variants] )
+            final_vcf = select_annot_variants.out_variants
+        filtered_variants = self.add_component( "FilterVCF", [self.filters, final_vcf] ) # removes variants on their FILTER tags
 
         # Convert to TSV
         self.add_component( "VCFToTSV", [filtered_variants.out_variants] )
