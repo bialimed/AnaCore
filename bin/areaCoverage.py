@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -34,6 +34,22 @@ import argparse
 # FUNCTIONS
 #
 ########################################################################
+def getDistributionDict( values, percentile_step=25, precision=4 ):
+    """
+    @summary: Returns the distribution of values (min, max and percentiles).
+    @param values: [list] The values.
+    @param percentile_step: [int] Only this percentile and his multiples are returned.
+    @param precision: [int] The decimal precision.
+    @retrun: [dict] The min, max and percentiles values. Example: {"min":0, "05_percentile":10, "10_percentile":15, ..., "95_percentile":853, "max":859}
+    """
+    distrib = {
+        "min": round(min(values), precision),
+        "max": round(max(values), precision)
+    }
+    for curr_percentile in range(percentile_step, 100, percentile_step):
+        distrib['{:02}'.format(curr_percentile) + "_percentile"] = round( numpy.percentile(values, curr_percentile), precision )
+    return distrib
+
 def getSelectedAreas( input_panel ):
     """
     @summary: Returns the list of selected areas from a BED file.
@@ -186,12 +202,7 @@ if __name__ == "__main__":
             # Transform depths to distribution
             if "data" not in curr_area:
                 curr_area["data"] = [0]
-            spl_distrib = {
-                "min": min(curr_area["data"]),
-                "max": max(curr_area["data"])
-            }
-            for curr_percentile in range(args.percentile_step, 100, args.percentile_step):
-                spl_distrib['{:02}'.format(curr_percentile) + "_percentile"] = numpy.percentile( curr_area["data"], curr_percentile )
+            spl_distrib = getDistributionDict( curr_area["data"], args.percentile_step, 1 )
             del(curr_area["data"])
             # Store distribution
             if "depths" not in curr_area:
