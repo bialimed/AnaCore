@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -140,7 +140,10 @@ if __name__ == "__main__":
                         if len(alt_record.filter) == 0:
                             alt_record.filter.append( "PASS" )
                     else:
-                        alt_record.filter.append( tag )
+                        if len(alt_record.filter) == 1 and alt_record.filter[0] == "PASS":
+                            alt_record.filter[0] = tag
+                        else:
+                            alt_record.filter.append( tag )
                     if args.mode == "tag":
                         FH_out.write( FH_in.recToVCFLine(alt_record) + "\n" )
                     else:
