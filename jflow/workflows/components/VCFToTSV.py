@@ -15,6 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+__author__ = 'Frederic Escudie'
+__copyright__ = 'Copyright (C) 2017 IUCT'
+__license__ = 'GNU General Public License'
+__version__ = '1.0.0'
+__email__ = 'escudie.frederic@iuct-oncopole.fr'
+__status__ = 'prod'
+
 from jflow.component import Component
 from jflow.abstraction import MultiMap
 
@@ -24,8 +31,8 @@ from weaver.function import ShellFunction
 class VCFToTSV (Component):
 
     def define_parameters(self, in_variants):
-        self.add_input_file_list( "in_variants", "****************** (format: VCF).", default=in_variants, required=True )
-        self.add_output_file_list( "out_variants", "****************** (format: TSV).", pattern='{basename_woext}.tsv', items=self.in_variants )
+        self.add_input_file_list( "in_variants", "The path to the file file containing variants and annotated with VEP v88+ (format: VCF).", default=in_variants, required=True )
+        self.add_output_file_list( "out_variants", "The path to the outputted variants file (format: TSV).", pattern='{basename_woext}.tsv', items=self.in_variants )
         self.add_output_file_list( "stderr", "The stderr file.", pattern='{basename_woext}.stderr', items=self.in_variants )
 
     def process(self):

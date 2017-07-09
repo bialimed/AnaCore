@@ -15,6 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+__author__ = 'Frederic Escudie'
+__copyright__ = 'Copyright (C) 2017 IUCT'
+__license__ = 'GNU General Public License'
+__version__ = '1.0.0'
+__email__ = 'escudie.frederic@iuct-oncopole.fr'
+__status__ = 'prod'
+
 from jflow.component import Component
 
 from weaver.function import ShellFunction
