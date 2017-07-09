@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             for idx_csq, csq in enumerate(record.info["CSQ"]):
                 csq_values = list()
                 for title in FH_vcf.CSQ_titles:
-                    if csq[title] is None:
+                    if title not in csq or csq[title] is None:
                         csq_values.append("")
                     else:
                         csq_values.append( str(csq[title]) )
