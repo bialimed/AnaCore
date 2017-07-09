@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -45,20 +45,55 @@ from illumina import SampleSheetIO
 # FUNCTIONS
 #
 ########################################################################
-def getRunCmd( in_spl_folder, out_run_folder ):
+def getProtocol( in_spl_folder ):
     """
-    @summary: Returns the command to launch the workflow.
+    @summary: Returns the command to launch the workflow.******************************************************
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
-    @param out_run_folder: [str] Path to the workflow output folder.
     @return: [None/list] The command if the corresponding workflow exists and None otherwise.
     @warning: For Amplicon - DS the manifests names must be <DESIGN>_A.txt and <DESIGN>_B.txt.
     """
-    cmd = None
+    protocol = {"workflow": None, "design": None}
     samplesheet = SampleSheetIO( os.path.join(in_spl_folder, "SampleSheet.csv") )
     if samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
+        protocol["workflow"] = "Amplicon - DS"
         manifest_A = os.path.basename(samplesheet.manifests["A"])
-        design = manifest_A.split("_A.txt")[0].upper()
-        cmd = getRunAmpliDSCmd( in_spl_folder, out_run_folder, design )
+        protocol["design"] = manifest_A.split("_A.txt")[0]
+    return protocol
+
+def getRunCmd( protocol, in_spl_folder, out_run_folder ):
+    """
+    @summary: Returns the command to launch the workflow.
+    @param protocol: [dict] **************************************************************************************
+    @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
+    @param out_run_folder: [str] Path to the workflow output folder.
+    @return: [None/list] The command if the corresponding workflow exists and None otherwise.
+    """
+    cmd = None
+    if protocol["workflow"] == "Amplicon - DS":
+        cmd = getRunAmpliDSCmd( in_spl_folder, out_run_folder, protocol["design"] )
+    return cmd
+
+def getRunIlluminaAnnotCmd( in_spl_folder, design ):
+    """
+    @summary: Returns the command to launch the varainst annotation on MiSeq reporter outputs.
+    @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
+    @param design: [str] Path to the folder containing the files describing the amplicons.
+    @return: [list] The command.
+    """
+    ressources_folder = "/save/fescudie/data/amplicon_design"
+    genome = {
+        'assembly': "GRCh37",
+        'sequences': "/work/fescudie/bank/Homo_sapiens/DNA/GRCh37_Ensembl75_std/without_contig/Homo_sapiens.GRCh37.75.dna.woutContigs.fa"
+    }
+    cmd = [
+        "python3", "/save/fescudie/softwares/jflow/bin/jflow_cli.py", "amplicondsannot",
+        "--RNA-selection", os.path.join(ressources_folder, design, "reference_RNA.tsv"),
+        "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon",
+        "--pos-ctrl-expected", os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf"),
+        "--assembly-version", genome["assembly"],
+        "--filters", os.path.join(ressources_folder, "ampliDS_filters_wfAmpliconDS.json"),
+        "--samplesheet", os.path.join(in_spl_folder, "SampleSheet.csv")
+    ]
     return cmd
 
 def getRunAmpliDSCmd( in_spl_folder, out_run_folder, design ):
@@ -69,17 +104,18 @@ def getRunAmpliDSCmd( in_spl_folder, out_run_folder, design ):
     @param design: [str] Path to the folder containing the files describing the amplicons.
     @return: [list] The command.
     """
-    ressources_folder = "/save/fescudie/softwares/jflow/workflows/DSVF/data/"
+    ressources_folder = "/save/fescudie/data/amplicon_design"
     genome = {
         'assembly': "GRCh37",
         'sequences': "/work/fescudie/bank/Homo_sapiens/DNA/GRCh37_Ensembl75_std/without_contig/Homo_sapiens.GRCh37.75.dna.woutContigs.fa"
     }
     cmd = [
         "python3", "/save/fescudie/softwares/jflow/bin/jflow_cli.py", "dsvfanapath",
-        "--R1-end-adapter", os.path.join(ressources_folder, "Illumina_3prim_adapter.fasta"),
-        "--R2-end-adapter", os.path.join(ressources_folder, "Illumina_5prim_adapter_rvc.fasta"),
+        "--R1-end-adapter", os.path.join(ressources_folder, "adapters", "Illumina_3prim_adapter.fasta"),
+        "--R2-end-adapter", os.path.join(ressources_folder, "adapters", "Illumina_5prim_adapter_rvc.fasta"),
         "--libA-folder", os.path.join(ressources_folder, design, genome["assembly"], "libA"),
         "--libB-folder", os.path.join(ressources_folder, design, genome["assembly"], "libB"),
+        "--RNA-selection", os.path.join(ressources_folder, design, "reference_RNA.tsv"),
         "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon",
         "--pos-ctrl-expected", os.path.join(ressources_folder, design, genome["assembly"], "pos_ctrl_expected.vcf"),
         "--assembly-version", genome["assembly"],
@@ -115,15 +151,20 @@ if __name__ == "__main__":
             if os.path.isdir(in_run_folder):
                 out_run_folder = os.path.join( args.output_folder, filename )
                 if not os.path.exists(out_run_folder) and os.path.exists(os.path.join(in_run_folder, "CompletedJobInfo.xml")): # The run must be process
-                    if filename.startswith("INCa-V1_17"):##################################################
-                        in_spl_folder = os.path.join( in_run_folder, "Data", "Intensities", "BaseCalls" )
-                        cmd = getRunCmd( in_spl_folder, out_run_folder )
-                        if cmd is not None:
-                            os.mkdir( out_run_folder )
-                            with open(os.path.join(out_run_folder, "log.txt"), "w") as FH_log:
-                                FH_log.write( "[START]\t" + datetime.datetime.now().isoformat() + "\n" )
-                                FH_log.write( "[CMD]\t" + " ".join(cmd) + "\n" )
-                            subprocess.check_call( cmd )
-                            with open(os.path.join(out_run_folder, "log.txt"), "a") as FH_log:
-                                FH_log.write( "[END]\t" + datetime.datetime.now().isoformat() + "\n" )
+                    in_spl_folder = os.path.join( in_run_folder, "Data", "Intensities", "BaseCalls" )
+                    protocol = getProtocol( in_spl_folder )
+                    # Analysis workflow
+                    cmd_analysis = getRunCmd( protocol, in_spl_folder, out_run_folder )
+                    if cmd_analysis is not None:
+                        os.mkdir( out_run_folder )
+                        with open(os.path.join(out_run_folder, "log.txt"), "w") as FH_log:
+                            FH_log.write( "[START]\t" + datetime.datetime.now().isoformat() + "\n" )
+                            FH_log.write( "[CMD]\t" + " ".join(cmd_analysis) + "\n" )
+                        subprocess.check_call( cmd_analysis )
+                        with open(os.path.join(out_run_folder, "log.txt"), "a") as FH_log:
+                            FH_log.write( "[END]\t" + datetime.datetime.now().isoformat() + "\n" )
+                    # Illumina annotation steps
+                    if protocol["workflow"] == "Amplicon - DS":
+                        cmd_annot = getRunIlluminaAnnotCmd( in_spl_folder, protocol["design"] )
+                        subprocess.check_call( cmd_annot )
         time.sleep( args.roll_time )
