@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -60,7 +60,7 @@ class DSVFAnapath (DSVF):
             shutil.copytree( os.path.join(self.sequencer_run_dir, "InterOp"), os.path.join(interop_folder, "InterOp") )
 
         # Reads stat
-        #~ ReadsStat
+        ############################# ReadsStat
 
         # Alignment
         for curr_lib in self.libraries:
@@ -91,7 +91,7 @@ class DSVFAnapath (DSVF):
         os.mkdir(data_folder)
         for curr_lib in self.libraries:
             # Alignment statistics
-            for metrics in self.get_cmpt_by_nameid("AddAmpliRG." + curr_lib["name"]).stdout:
+            for metrics in self.get_cmpt_by_nameid("AddAmpliRG." + curr_lib["name"]).out_summary:
                 filename = os.path.basename(metrics).split("_")[0] + "_" + curr_lib["name"] + "_aln.tsv"
                 shutil.move( metrics, os.path.join(data_folder, filename) )
             # Depths
