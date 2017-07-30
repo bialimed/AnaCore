@@ -46,6 +46,11 @@ class Region:
             raise Exception( "The type " + str(type(reference)) + " is not authorized for reference attribute in Region class." )
 
     def contains(self, eval_region):
+        """
+        @summary: Returns True if the region contains the eval_region.
+        @param eval_region: The evaluated region.
+        @return: [bool] True if the region contains the evaluated region.
+        """
         contains = False
         if self.reference.name == eval_region.reference.name:
             if self.start <= eval_region.start and self.end >= eval_region.end:
@@ -59,6 +64,11 @@ class Region:
         return( contains )        
 
     def hasOverlap(self, eval_region):
+        """
+        @summary: Returns True if the region has an overlap with eval_region.
+        @param eval_region: The evaluated region.
+        @return: [bool] True if the region has an overlap with evaluated region.
+        """
         has_overlap = False
         if self.reference.name == eval_region.reference.name:
             if not self.start > eval_region.end and not self.end < eval_region.start:
@@ -101,14 +111,6 @@ class Region:
                     #~ "id": fields[3]
                 #~ })
     #~ return( selected_areas )
-
-#~ def hasNoOverlap( area_A, area_B ):
-    #~ """
-    #~ @summary: Returns True if the area_A does not overlap area_B.
-    #~ @param area_A: The first evaluated area.
-    #~ @param area_B: The second evaluated area.
-    #~ @return: [bool] True if the area does not overlap the last area in area_thread.
-    #~ """
 
 
 class RegionList(list):
