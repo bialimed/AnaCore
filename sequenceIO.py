@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.2'
+__version__ = '1.1.0'
 __email__ = 'frogs@toulouse.inra.fr'
 __status__ = 'prod'
 
@@ -90,6 +90,12 @@ class FastqIO:
             self.file_handle.close()
             self.file_handle = None
             self.current_line_nb = None
+
+    def __enter__(self):
+        return(self)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def __iter__(self):
         seq_id = None
@@ -209,6 +215,12 @@ class FastaIO:
             self.file_handle.close()
             self.file_handle = None
             self.current_line_nb = None
+
+    def __enter__(self):
+        return(self)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def __iter__(self):
         seq_id = None

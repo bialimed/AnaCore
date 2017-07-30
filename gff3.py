@@ -15,11 +15,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+__author__ = 'Frederic Escudie'
+__copyright__ = 'Copyright (C) 2015 INRA'
+__license__ = 'GNU General Public License'
+__version__ = '1.1.0'
+__email__ = 'frederic.escudie@iuct-oncopole.fr'
+__status__ = 'prod'
+
+
 import sys, re
+
 
 class GFF3Record:
     """
-     @summary : Record for GFF3.
+    @summary: Record for GFF3.
     """
     def __init__( self ):
         self.seq_id = None
@@ -34,9 +43,9 @@ class GFF3Record:
 
     def setAttribute( self, tag, value ):
         """
-         @summary : Create or replace an attribute tag.
-          @param tag : tag of the attribute.
-          @param value : value of the attribute tag.
+        @summary: Create or replace an attribute tag.
+        @param tag: tag of the attribute.
+        @param value: value of the attribute tag.
         """
         cleaned_tag = GFF3Record._getCleanedAttribute(tag)
         cleaned_value = GFF3Record._getCleanedAttribute(value)
@@ -47,9 +56,9 @@ class GFF3Record:
 
     def addToAttribute( self, tag, value ):
         """
-         @summary : Add one value on an existing tag.
-          @param tag : tag of the attribute.
-          @param value : value to add of the tag.
+        @summary: Add one value on an existing tag.
+        @param tag: tag of the attribute.
+        @param value: value to add of the tag.
         """
         cleaned_tag = GFF3Record._getCleanedAttribute(tag)
         cleaned_value = GFF3Record._getCleanedAttribute(value)
@@ -63,8 +72,8 @@ class GFF3Record:
 
     def _attributesToGff( self ):
         """
-         @summary : Returns a string in GFF3 format attributes field from the GFF3Record.attributes.
-         @return : [str] the attributes in GFF3 format.
+        @summary: Returns a string in GFF3 format attributes field from the GFF3Record.attributes.
+        @return: [str] the attributes in GFF3 format.
         """
         gff_string = ""
         for tag in self.attributes:
@@ -74,8 +83,8 @@ class GFF3Record:
 
     def toGff( self ):
         """
-         @summary : Returns a string in GFF3 format from the GFF3Record object.
-         @return : [str] the line in GFF3 format.
+        @summary: Returns a string in GFF3 format from the GFF3Record object.
+        @return: [str] the line in GFF3 format.
         """
         gff_record = "\t".join( [self.seq_id, self.source, self.type, str(self.start), str(self.end), str(self.score), self.strand, str(self.phase), self._attributesToGff()] )
 
@@ -83,10 +92,10 @@ class GFF3Record:
 
     def attributesToStr( self, tag ):
         """
-         @summary : Returns the attribute value in human readable format.
-          @param tag : [str] the attribute tag.
-         @return : [str] the human readable value.
-         @see : RFC 3986 Percent-Encoding
+        @summary: Returns the attribute value in human readable format.
+        @param tag: [str] the attribute tag.
+        @return: [str] the human readable value.
+        @see: RFC 3986 Percent-Encoding
         """
         cleaned_tag = GFF3Record._getCleanedAttribute(tag)
         if cleaned_tag in self.attributes:
@@ -100,13 +109,13 @@ class GFF3Record:
     @staticmethod
     def _getCleanedAttribute( dirty_value ):
         """
-         @summary : Returns value after GFF3 attribute cleaning. cleanning :
+        @summary: Returns value after GFF3 attribute cleaning. cleanning :
             - URL escaping rules are used for tags or values containing the following characters: ",=;".
             - Spaces are allowed in this field, but tabs must be replaced with the space.
             - Quotes ' and " are deleted.
-          @param dirty_value : [str] value before cleaning.
-         @return : [str] the clean value.
-         @see : RFC 3986 Percent-Encoding
+        @param dirty_value: [str] value before cleaning.
+        @return: [str] the clean value.
+        @see: RFC 3986 Percent-Encoding
         """
         cleaned_value = dirty_value.replace(';', '%3B')
         cleaned_value = cleaned_value.replace(',', '%2C')
@@ -120,9 +129,9 @@ class GFF3Record:
     @staticmethod
     def fromGff( line ):
         """
-         @summary : Returns a GFF3Record from a GFF3 line.
-          @param line : line of the GFF.
-         @return : [GFF3Record] the record.
+        @summary: Returns a GFF3Record from a GFF3 line.
+        @param line: line of the GFF.
+        @return: [GFF3Record] the record.
         """
         gff_record = GFF3Record()
         line_fields = line.split("\t")
@@ -148,7 +157,7 @@ class GFF3Record:
                 cleaned_attributes.append(attribute)
         for attribute in cleaned_attributes:
             matches = re.match("^([^=]+)=(.*)", attribute)
-            tag = matches.group(1)
+            tag = matches.group(1).strip()
             values = matches.group(2).split(',')
             for current_val in values:
                 gff_record.addToAttribute(tag, current_val)
@@ -157,7 +166,7 @@ class GFF3Record:
 
 class GFF3IO:
     """
-     @summary : Specific handler for GFF3 file.
+    @summary: Specific handler for GFF3 file.
     """
     def __init__( self, file_path, mode="r" ):
         self._path = file_path
@@ -165,6 +174,12 @@ class GFF3IO:
         self._line = 1
 
     def __del__( self ):
+        self.close()
+
+    def __enter__(self):
+        return(self)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
     def __iter__( self ):
