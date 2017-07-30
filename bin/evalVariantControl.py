@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -140,7 +140,7 @@ def writeTSVResults(variants, out_path, error_threshold=0.8, separator="\t"):
         error_values_sum += abs(error)
         error_ratio_sum += error_ratio
         # Error out of threshold
-        if error_ratio > error_threshold:
+        if error_ratio > (1 - error_threshold):
             nb_out_threshold += 1
 
     # Write
