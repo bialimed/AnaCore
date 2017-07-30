@@ -24,7 +24,7 @@ __status__ = 'prod'
 
 
 class Reference:
-    def __init__(self, id, name, sequence, description=None) :
+    def __init__(self, id, name, sequence, description=None):
         self.id          = id
         self.name        = name
         self.sequence    = sequence
