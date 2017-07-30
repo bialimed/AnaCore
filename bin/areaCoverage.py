@@ -186,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument( '-s', '--percentile-step', type=int, default=5, help='Only the depths for this percentile and his multiples are retained. For example, with 25 only the minimum, the 1st quartile, the 2nd quartile, the 3rd quartile and the maximum depths are retained. [Default: %(default)s]' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-c', '--inputs-depths', nargs='+', required=True, help='The path to the depths by position (format: samtools depth output). Each file represents only one sample. The file must contains every positions in selected areas (see samtools depth -a option for positions with 0 reads).' )
-    group_input.add_argument( '-r', '--input-regions', required=True, help='Path to the list of regions (format: BED).' )
+    group_input.add_argument( '-r', '--input-regions', required=True, help='Path to the list of evaluated regions (format: BED).' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
     group_output.add_argument( '-o', '--output-metrics', default="depths_distrib.json", help='The path to outputted file (format: JSON or TSV according to the extension).' )
     args = parser.parse_args()

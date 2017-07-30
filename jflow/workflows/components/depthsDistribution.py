@@ -16,7 +16,7 @@
 #
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT'
+__copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
@@ -32,15 +32,15 @@ class DepthsDistribution (Component):
 
     def define_parameters(self, in_regions, in_depths, out_format="json", percentile_step=5):
         # Parameters
-        self.add_parameter( "percentile_step", "***************", type=int, default=percentile_step )
-        self.add_parameter( "out_format", "***************", choices=["tsv", "json"], default=out_format )
+        self.add_parameter( "percentile_step", "Only the depths for this percentile and his multiples are retained. For example, with 25 only the minimum, the 1st quartile, the 2nd quartile, the 3rd quartile and the maximum depths are retained.", type=int, default=percentile_step )
+        self.add_parameter( "out_format", "The format of the output.", choices=["tsv", "json"], default=out_format )
         
         # Input files
-        self.add_input_file( "in_regions", "********* (format: BED).", default=in_regions, required=True )
-        self.add_input_file_list( "in_depths", "********** (format: TSV).", default=in_depths, required=True )
+        self.add_input_file( "in_regions", "Path to the list of evaluated regions (format: BED).", default=in_regions, required=True )
+        self.add_input_file_list( "in_depths", "The path to the depths by position (format: samtools depth output). Each file represents only one sample. The file must contains every positions in selected areas (see samtools depth -a option for positions with 0 reads).", default=in_depths, required=True )
 
         # Output files
-        self.add_output_file_list( "out_depths", "***************** (format: see out_format)", pattern='{basename_woext}.' + self.out_format, items=self.in_depths )
+        self.add_output_file_list( "out_depths", "The path to outputted files (format: see out_format)", pattern='{basename_woext}.' + self.out_format, items=self.in_depths )
         self.add_output_file_list( "stderr", "The stderr file", pattern='{basename_woext}.stderr', items=self.in_depths )
 
     def process(self):
