@@ -19,12 +19,13 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import json
 import pysam
 import argparse
 
@@ -126,6 +127,37 @@ def hasValidStrand( read, ampl_region ):
                 has_valid_strand = True
     return( has_valid_strand )
 
+def writeTSVSummary(out_path, data, ratio_precision=5):
+    """
+    @summary: Writes summary in TSV file. It contains information about the number of reads out off target, reversed and valid.' )
+    @param out_path: [str] Path to the output file.
+    @param data: [dict] The metrics stored in summary.
+    """
+    prec = str(ratio_precision)
+    with open(args.output_summary) as FH_summary:
+        print(
+            "Category\tCount\tRatio",
+            "Unpaired\t{}\t{:" + prec + "f}".format( data["unpaired"], data["unpaired_reads"]/data["total"] ),
+            "Unmapped\t{}\t{:" + prec + "f}".format( data["pair_unmapped"], data["pair_unmapped"]/data["total"] ),
+            "Out_target\t{}\t{:" + prec + "f}".format( data["out_target"], data["out_target"]/data["total"] ),
+            "Cross_panel\t{}\t{:" + prec + "f}".format( data["cross_panel"], data["cross_panel"]/data["total"] ),
+            "Valid\t{}\t{:" + prec + "f}".format( data["valid"], data["valid"]/data["total"] ),
+            sep="\n",
+            file=FH_summary
+        )
+
+def writeJSONSummary(out_path, data):
+    """
+    @summary: Writes summary in JSON file. It contains information about the number of reads out off target, reversed and valid.
+    @param out_path: [str] Path to the output file.
+    @param data: [dict] The metrics stored in summary.
+    """
+    eval_order = ["unpaired", "pair_unmapped", "out_target", "out_target", "cross_panel", "valid"]
+    with open(args.output_summary) as FH_summary:
+        FH_summary.write(
+            json.dumps({ "eval_order":eval_order, "results":data}, default=lambda o: o.__dict__, sort_keys=True)
+        )
+
 
 ########################################################################
 #
@@ -135,14 +167,16 @@ def hasValidStrand( read, ampl_region ):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser( description='Adds RG corresponding to the panel amplicon. for a reads pair the amplicon is determined from the position of the first match position of the reads (primers start positions).' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    parser.add_argument( '-t', '--RG-tag', default='LB', help='RG tag used to store the area ID. [Default: %(default)s]' )
+    parser.add_argument( '-f', '--summary-format', default='tsv', choices=['json', 'tsv'], help='The summary format. [Default: %(default)s]' )
     parser.add_argument( '-l', '--anchor-offset', type=int, default=4, help='The alignment of the read can start at N nucleotids after the start of the primer. This parameter allows to take account the possible mismatches on the firsts read positions. [Default: %(default)s]' )
+    parser.add_argument( '-t', '--RG-tag', default='LB', help='RG tag used to store the area ID. [Default: %(default)s]' )
+    parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-a', '--input-aln', required=True, help='The path to the alignments files (format: BAM). This file must be sorted by coordinates.' )
     group_input.add_argument( '-p', '--input-panel', required=True, help='Path to the list of amplicons with their primers (format: BED). Each area must have an unique ID in the name field and a strand.' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
     group_output.add_argument( '-o', '--output-aln', required=True, help='The path to the alignments file (format: BAM).' )
+    group_output.add_argument( '-s', '--output-summary', help='The path to the summary file (format: see --summary-format). It contains information about the number of reads out off target, reversed and valid.' )
     args = parser.parse_args()
 
     # Count
@@ -205,13 +239,17 @@ if __name__ == "__main__":
     pysam.sort( "-o", args.output_aln, tmp_aln )
     os.remove( tmp_aln )
 
-    # Display stat
-    print(
-        "Category\tCount\tRatio",
-        "Unpaired\t{}\t{:5f}".format( unpaired_reads, unpaired_reads/total_reads ),
-        "Unmapped\t{}\t{:5f}".format( unmapped_pairs, unmapped_pairs/total_reads ),
-        "Out_target\t{}\t{:5f}".format( out_target_reads, out_target_reads/total_reads ),
-        "Cross_panel\t{}\t{:5f}".format( reverse_reads, reverse_reads/total_reads ),
-        "Valid\t{}\t{:5f}".format( valid_reads_valid_pair, valid_reads_valid_pair/total_reads ),
-        sep="\n"
-    )
+    # Write summary
+    if args.output_summary is not None:
+        data = {
+            "total": total_reads,
+            "unpaired": unpaired_reads,
+            "pair_unmapped": unmapped_pairs,
+            "out_target": out_target_reads,
+            "cross_panel": reverse_reads,
+            "valid": valid_reads_valid_pair
+        }
+        if args.summary_format == "json":
+            writeJSONSummary(args.output_summary, data)
+        else:
+            writeTSVSummary(args.output_summary, data)

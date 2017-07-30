@@ -16,9 +16,9 @@
 #
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT'
+__copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -30,14 +30,17 @@ from weaver.function import ShellFunction
 
 class VariantsCtrlCheck (Component):
 
-    def define_parameters(self, expected_file, variants_files ):
+    def define_parameters(self, expected_file, variants_files, out_format="tsv" ):
+        # Parameters
+        self.add_parameter( "out_format", "The format of the output.", choices=["tsv", "json"], default=out_format )
+
         # Input files
         self.add_input_file( "expected_file", "The expected variants in control samples (format: VCF).", default=expected_file )
         self.add_input_file_list( "variants_files", "The variants found in control samples (format: VCF).", default=variants_files, required=True )
 
         # Output files
-        self.add_output_file_list( "eval_files", "The divergence between expected and found variants (format: TSV)", pattern='{basename_woext}_eval.tsv', items=self.variants_files )
-        self.add_output_file_list( "stderr", "The stderr files", pattern='{basename_woext}.stderr', items=self.variants_files )
+        self.add_output_file_list( "eval_files", "The divergence between expected and found variants (format: see out_format).", pattern='{basename_woext}_eval.' + self.out_format, items=self.variants_files )
+        self.add_output_file_list( "stderr", "The stderr files.", pattern='{basename_woext}.stderr', items=self.variants_files )
 
     def process(self):
         eval_cmd = self.get_exec_path("evalVariantControl.py") + \
