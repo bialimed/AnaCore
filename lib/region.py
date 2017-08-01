@@ -25,17 +25,33 @@ __status__ = 'dev'
 
 class Region:
     def __init__(self, start=None, end=None, strand=None, reference=None, name=None, annot=None):
-        self.start = None if start is None else int(start) # The start position with 1-based and ascending positions on reference
-        self.end = self.start if end is None else int(end) # The end position with 1-based and ascending positions on reference
+        """
+        @param start: [int] The start position on the reference. This position is 1-based and ascending (start <= end).
+        @param end: [int] The end position on the reference. This position is 1-based and ascending (start <= end). [Default: start]
+        @param strand: [str] The strand of the instance ("+" or "-").
+        @param reference: [Region|str] The region object or the region name of the reference.
+        @param name: [str] The name of the region.
+        @param annot: [dict] The annotations of the region.
+        """
+        self.start = None if start is None else int(start)
+        self.end = self.start if end is None else int(end)
         self.strand = strand
         self.setReference(reference)
         self.name = name
         self.annot = annot
 
     def length( self ):
+        """
+        @summary: Returns the length of the region.
+        @return: [int] The length of the region.
+        """
         return( self.end - self.start + 1 )
 
     def setReference(self, reference):
+        """
+        @summary: Changes the reference region of the instance.
+        @param reference: [Region|str] The region object or the region name of the reference.
+        """
         if reference is None:
             self.reference = None
         elif isinstance(reference, str):
@@ -58,6 +74,11 @@ class Region:
         return( contains )
 
     def strandedContains(self, eval_region):
+        """
+        @summary: Returns True if the region contains the eval_region and their are on the same strand.
+        @param eval_region: The evaluated region.
+        @return: [bool] True if the region contains the evaluated region.
+        """
         contains = False
         if self.reference.strand == eval_region.reference.strand:
             contains = self.contains( eval_region )
@@ -76,12 +97,22 @@ class Region:
         return( has_overlap )
 
     def strandedHasoverlap(self, eval_region):
+        """
+        @summary: Returns True if the region has an overlap with eval_region and their are on the same strand.
+        @param eval_region: The evaluated region.
+        @return: [bool] True if the region has an overlap with evaluated region.
+        """
         has_overlap = False
         if self.reference.strand == eval_region.reference.strand:
             has_overlap = self.hasOverlap( eval_region )
         return( has_overlap )
 
     def getMinDist(self, eval_region):
+        """
+        @summary: Returns the distance with the eval_region.
+        @param eval_region: The evaluated region.
+        @return: [int] The distance between the instance and the evaluated region.
+        """
         if self.reference.name != eval_region.reference.name:
             raise Exception( 'The minimal distance between regions cannot be processed because their are located on diffrents reference ("' + self.reference.name+ '" vs "' + eval_region.reference.name + '").' )
         min_dist = None
@@ -93,33 +124,22 @@ class Region:
             min_dist = eval_region.start - self.end
         return( min_dist )
 
-#~ def getSelectedArea( input_panel ):
-    #~ """
-    #~ @summary: Returns the list of selected areas from a BED file.
-    #~ @param input_panel: [str] The path to the selected areas description (format: BED).
-    #~ @return: [list] The list of BED's areas. Each area is represented by a dictionary with this format: {"region":"chr1", "start":501, "end":608, "id":"gene_98"}.
-    #~ """
-    #~ selected_areas = list()
-    #~ with open(input_panel) as FH_panel:
-        #~ for line in FH_panel:
-            #~ if not line.startswith("browser ") and not line.startswith("track ") and not line.startswith("#"):
-                #~ fields = [elt.strip() for elt in line.split("\t")]
-                #~ selected_areas.append({
-                    #~ "region": fields[0],
-                    #~ "start": int(fields[1]) +1, # Start in BED is 0-based
-                    #~ "end": int(fields[2]),
-                    #~ "id": fields[3]
-                #~ })
-    #~ return( selected_areas )
-
 
 class RegionList(list):
     def __init__(self, regions=None):
+        """
+        @param regions: [list] The list of regions.
+        """
         if regions is not None:
             for curr_region in regions:
                 self.append( curr_region )
 
     def getContainer(self, eval_region):
+        """
+        @summary: Returns all the regions that contains the eval_region.
+        @param eval_region: The evaluated region.
+        @return: [list] The regions that contains the evaluated region.
+        """
         containers = list()
         for curr_region in self:
             if curr_region.contains( eval_region ):
@@ -127,6 +147,11 @@ class RegionList(list):
         return containers
 
     def getOverlapped(self, eval_region):
+        """
+        @summary: Returns all the regions that have an overlap with eval_region.
+        @param eval_region: The evaluated region.
+        @return: [list] The regions that have an overlap with evaluated region.
+        """
         overlapped = list()
         for curr_region in self:
             if curr_region.hasOverlap( eval_region ):
@@ -134,6 +159,11 @@ class RegionList(list):
         return overlapped
 
     def getNearests(self, eval_region, select_fct=None):
+        """
+        @summary: Returns the nearest region to eval_region.
+        @param eval_region: The evaluated region.
+        @return: [list] The distance with the nearest region and the nearest region himself.
+        """
         nearests = list()
         min_dist = None
         for curr_region in self:
