@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -170,7 +170,7 @@ def writeTSVResults(variants, out_path, error_threshold=0.8, separator="\t"):
                 current_variant["freq"][idx_detec],
                 error,
                 error_ratio,
-                (error_ratio > error_threshold) ])
+                (error_ratio > (1 - error_threshold)) ])
 
 def writeJSONResults(variants, out_path):
     """
