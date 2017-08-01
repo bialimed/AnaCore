@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -127,21 +127,20 @@ def hasValidStrand( read, ampl_region ):
                 has_valid_strand = True
     return( has_valid_strand )
 
-def writeTSVSummary(out_path, data, ratio_precision=5):
+def writeTSVSummary(out_path, data):
     """
     @summary: Writes summary in TSV file. It contains information about the number of reads out off target, reversed and valid.' )
     @param out_path: [str] Path to the output file.
     @param data: [dict] The metrics stored in summary.
     """
-    prec = str(ratio_precision)
-    with open(args.output_summary) as FH_summary:
+    with open(args.output_summary, "w") as FH_summary:
         print(
             "Category\tCount\tRatio",
-            "Unpaired\t{}\t{:" + prec + "f}".format( data["unpaired"], data["unpaired_reads"]/data["total"] ),
-            "Unmapped\t{}\t{:" + prec + "f}".format( data["pair_unmapped"], data["pair_unmapped"]/data["total"] ),
-            "Out_target\t{}\t{:" + prec + "f}".format( data["out_target"], data["out_target"]/data["total"] ),
-            "Cross_panel\t{}\t{:" + prec + "f}".format( data["cross_panel"], data["cross_panel"]/data["total"] ),
-            "Valid\t{}\t{:" + prec + "f}".format( data["valid"], data["valid"]/data["total"] ),
+            "Unpaired\t{}\t{:5f}".format( data["unpaired"], data["unpaired"]/data["total"] ),
+            "Unmapped\t{}\t{:5f}".format( data["pair_unmapped"], data["pair_unmapped"]/data["total"] ),
+            "Out_target\t{}\t{:5f}".format( data["out_target"], data["out_target"]/data["total"] ),
+            "Cross_panel\t{}\t{:5f}".format( data["cross_panel"], data["cross_panel"]/data["total"] ),
+            "Valid\t{}\t{:5f}".format( data["valid"], data["valid"]/data["total"] ),
             sep="\n",
             file=FH_summary
         )
@@ -153,7 +152,7 @@ def writeJSONSummary(out_path, data):
     @param data: [dict] The metrics stored in summary.
     """
     eval_order = ["unpaired", "pair_unmapped", "out_target", "out_target", "cross_panel", "valid"]
-    with open(args.output_summary) as FH_summary:
+    with open(args.output_summary, "w") as FH_summary:
         FH_summary.write(
             json.dumps({ "eval_order":eval_order, "results":data}, default=lambda o: o.__dict__, sort_keys=True)
         )
