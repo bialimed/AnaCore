@@ -35,12 +35,20 @@ class AddAmpliRG (Component):
         self.add_parameter( "summary_format", "The format of the stdout.", choices=["tsv", "json"], default=summary_format )
 
         # Input files
-        self.add_input_file( "in_regions", "Path to the list of amplicons with their primers (format: BED). Each area must have an unique ID in the name field and a strand.", default=in_regions, required=True )
-        self.add_input_file_list( "in_aln", "The path to the alignments files (format: BAM). This file must be sorted by coordinates.", default=in_aln, required=True )
+        self.add_input_file( "in_regions",
+                             "Path to the list of amplicons with their primers (format: BED). Each area must have an unique ID in the name field and a strand.",
+                             default=in_regions,
+                             required=True )
+        self.add_input_file_list( "in_aln", "The path to the alignments files (format: BAM). This file must be sorted by coordinates.",
+                                  default=in_aln,
+                                  required=True )
 
         # Output files
         self.add_output_file_list( "out_aln", "The path to the alignments files (format: BAM).", pattern='{basename_woext}.bam', items=self.in_aln )
-        self.add_output_file_list( "out_summary", "The summary files (format: see summary_format). These files contain information about the number of reads out off target, reversed and valid.", pattern='{basename_woext}.' + self.out_format, items=self.in_aln )
+        self.add_output_file_list( "out_summary",
+                                   "The summary files (format: see summary_format). These files contain information about the number of reads out off target, reversed and valid.",
+                                   pattern='{basename_woext}.' + self.summary_format,
+                                   items=self.in_aln )
         self.add_output_file_list( "stderr", "The stderr files.", pattern='{basename_woext}.stderr', items=self.in_aln )
 
     def process(self):
@@ -52,4 +60,4 @@ class AddAmpliRG (Component):
             " --output-summary $3" + \
             " 2> $4"
         add_fct = ShellFunction( cmd, cmd_format='{EXE} {IN} {OUT}' )
-        MultiMap( add_fct, inputs=[self.in_aln], outputs=[self.out_aln, self.stdout, self.stderr], includes=[self.in_regions] )
+        MultiMap( add_fct, inputs=[self.in_aln], outputs=[self.out_aln, self.out_summary, self.stderr], includes=[self.in_regions] )

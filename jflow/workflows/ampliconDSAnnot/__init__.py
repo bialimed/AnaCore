@@ -26,7 +26,7 @@ import os
 import shutil
 import warnings
 
-from jflow.featureio import SampleSheetIO
+from illumina import SampleSheetIO
 from jflow.workflow import Workflow
 
 

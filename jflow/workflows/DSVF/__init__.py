@@ -26,7 +26,7 @@ import os
 import glob
 import warnings
 
-from jflow.featureio import SampleSheetIO
+from illumina import SampleSheetIO
 from jflow.workflow import Workflow
 
 
@@ -60,6 +60,8 @@ class DSVF (Workflow):
         self.add_input_directory( "libB_folder", "Path to folder containing files describing libB design (regions with primers, regions without primers and groups of non-overlapping amplicons).", required=True, group="Librairies design")
 
     def pre_process(self):
+        self.metrics_type = "tsv"
+
         # Samples
         samples_dir = self.samples_dir if self.samples_dir else os.path.dirname(self.samplesheet)
         samples_dir = samples_dir.replace(" ", "\ ")
@@ -126,13 +128,13 @@ class DSVF (Workflow):
             curr_lib_aln = [idx_aln.out_aln[idx_spl] for idx_spl, spl in enumerate(self.samples) if spl["Manifest"] == curr_lib["name"]]
 
             # Add read group by amplicon
-            aln_RG = self.add_component( "AddAmpliRG", [curr_lib["design_with_primers"], curr_lib_aln], component_prefix=curr_lib["name"] )
+            aln_RG = self.add_component( "AddAmpliRG", [curr_lib["design_with_primers"], curr_lib_aln, self.metrics_type], component_prefix=curr_lib["name"] )
             idx_aln_RG = self.add_component( "BAMIndex", [aln_RG.out_aln], component_prefix=curr_lib["name"] )
             curr_lib["aln"] = idx_aln_RG.out_aln
             
             # Coverage
             coverage = self.add_component( "Coverage", [idx_aln_RG.out_aln, curr_lib["design_with_primers"], 1000000], component_prefix=curr_lib["name"] )
-            self.add_component( "DepthsDistribution", [curr_lib["design_wout_primers"], coverage.depth_files], component_prefix=curr_lib["name"] )
+            self.add_component( "DepthsDistribution", [curr_lib["design_wout_primers"], coverage.depth_files, self.metrics_type], component_prefix=curr_lib["name"] )
             
             # Variant Calling
             variant_calling = self.add_component( "VarDictAmpli", [self.genome_seq, curr_lib["design_with_primers"], idx_aln_RG.out_aln, self.min_AF], component_prefix=curr_lib["name"] )
@@ -181,6 +183,6 @@ class DSVF (Workflow):
             spl_names = sorted([spl["Sample_Name"] for spl in self.samples if spl["Manifest"] == libA["name"]])
             positive_ctrl_variants = [filtered_variants.out_variants[idx] for idx, spl_name in enumerate(spl_names) if spl_name in self.pos_ctrl_names]
             if len(positive_ctrl_variants) > 0:
-                self.add_component( "VariantsCtrlCheck", [self.pos_ctrl_expected, positive_ctrl_variants] )
+                self.add_component( "VariantsCtrlCheck", [self.pos_ctrl_expected, positive_ctrl_variants, self.metrics_type] )
             else:
                 warnings.warn( 'No positives controls can be found with the names "' + '" or "'.join(self.pos_ctrl_names) + '"' )

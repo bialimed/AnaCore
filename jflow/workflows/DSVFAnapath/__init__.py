@@ -34,7 +34,11 @@ class DSVFAnapath (DSVF):
 
     def define_parameters(self, parameters_section=None):
         DSVF.define_parameters(self)
-        self.add_input_directory( "output_dir", "Path to the output folder.", group="Output data" )
+        self.add_input_directory( "output_dir", "Path to the output folder.", required=True, group="Output data" )
+
+    def pre_process(self):
+        DSVF.pre_process(self)
+        self.metrics_type = "json"
 
     def process(self):
         # Store in database
@@ -54,7 +58,7 @@ class DSVFAnapath (DSVF):
         # Interop
         if self.sequencer_run_dir != None:
             interop_folder = os.path.join( self.output_dir, "instrument_log" )
-            os.mkdir(interop_folder)
+            if not os.path.exists(interop_folder): os.mkdir(interop_folder)
             for filename in ["RunInfo.xml", "runParameters.xml"]:
                 shutil.copyfile( os.path.join(self.sequencer_run_dir, filename), os.path.join(interop_folder, filename) )
             shutil.copytree( os.path.join(self.sequencer_run_dir, "InterOp"), os.path.join(interop_folder, "InterOp") )
@@ -65,7 +69,7 @@ class DSVFAnapath (DSVF):
         # Alignment
         for curr_lib in self.libraries:
             aln_lib_folder = os.path.join( self.output_dir, "alignments_" + curr_lib["name"] )
-            os.mkdir(aln_lib_folder)
+            if not os.path.exists(aln_lib_folder): os.mkdir(aln_lib_folder)
             for aln in self.get_cmpt_by_nameid("AddAmpliRG." + curr_lib["name"]).out_aln: # Aln
                 filename = os.path.basename(aln).split("_")[0] + ".bam"
                 shutil.move( aln, os.path.join(aln_lib_folder, filename) )
@@ -75,7 +79,7 @@ class DSVFAnapath (DSVF):
 
         # Variants
         variants_folder = os.path.join( self.output_dir, "variants" )
-        os.mkdir(variants_folder)
+        if not os.path.exists(variants_folder): os.mkdir(variants_folder)
         for vcf in self.get_cmpt_by_nameid("SortVCF.default").out_variants: # VCF
             filename = os.path.basename(vcf).split("_")[0] + ".vcf"
             shutil.move( vcf, os.path.join(variants_folder, filename) )
@@ -88,11 +92,11 @@ class DSVFAnapath (DSVF):
 
         # Data
         data_folder = os.path.join( self.output_dir, "data" )
-        os.mkdir(data_folder)
+        if not os.path.exists(data_folder): os.mkdir(data_folder)
         for curr_lib in self.libraries:
             # Alignment statistics
             for metrics in self.get_cmpt_by_nameid("AddAmpliRG." + curr_lib["name"]).out_summary:
-                filename = os.path.basename(metrics).split("_")[0] + "_" + curr_lib["name"] + "_aln.tsv"
+                filename = os.path.basename(metrics).split("_")[0] + "_" + curr_lib["name"] + "_aln.json"
                 shutil.move( metrics, os.path.join(data_folder, filename) )
             # Depths
             for depths in self.get_cmpt_by_nameid("DepthsDistribution." + curr_lib["name"]).out_depths:
@@ -102,7 +106,7 @@ class DSVFAnapath (DSVF):
         ########################### nothing
         # Positives control
         for ctrl in self.get_cmpt_by_nameid("VariantsCtrlCheck.default").eval_files:
-            filename = os.path.basename(ctrl).split("_")[0] + "_ctrl.tsv"
+            filename = os.path.basename(ctrl).split("_")[0] + "_ctrl.json"
             shutil.move( ctrl, os.path.join(data_folder, filename) )
         # Sequencer metrics
         if self.sequencer_run_dir != None:
