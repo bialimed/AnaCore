@@ -1,0 +1,27 @@
+[Header]
+IEMFileVersion,4
+Investigator Name,IV1
+Experiment Name,INCa-V1_20170719CB
+Date,19/07/2017
+Workflow,Amplicon - DS
+Application,Amplicon - DS
+Assay,TruSight Tumor
+Description,
+Chemistry,Amplicon
+
+[Manifests]
+A,INCa_V1_A.txt
+B,INCa_V1_B.txt
+
+[Reads]
+151
+151
+
+[Settings]
+
+[Data]
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Manifest,GenomeFolder,Sample_Project,Description
+HORIZON_A,HORIZON,20170718_INCaV1CB,B01,A712,AGGAGTGG,A502,TGCTAAGT,A,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,
+HORIZON_B,HORIZON,20170718_INCaV1CB,B03,A702,ACAGTGGT,A502,TGCTAAGT,B,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,
+17T033348_A,17T033348,20170718_INCaV1CB,C01,A712,AGGAGTGG,A503,TGTTCTCT,A,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,
+17T033348_B,17T033348,20170718_INCaV1CB,C03,A702,ACAGTGGT,A503,TGTTCTCT,B,Homo_sapiens\UCSC\hg19\Sequence\WholeGenomeFasta,,

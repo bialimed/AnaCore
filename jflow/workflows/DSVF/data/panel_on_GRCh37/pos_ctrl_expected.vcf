@@ -1,0 +1,11 @@
+##fileformat=VCFv4.1
+##fileDate=20170307
+##reference=hg19
+##source=Tru-Q 3 (5% Tier) Reference Standard(catalog_ID:HD730)
+##INFO=<ID=GI,Number=1,Type=String,Description="Gene ID">
+##INFO=<ID=FC,Number=1,Type=String,Description="Functional consequence">
+##FORMAT=<ID=AF,Number=1,Type=Float,Description="Minor Allele Frequency">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Control
+1	115256528	rs121913255	T	A	.	PASS	GI=NRAS;FC=Q61H	AF	0.05
+12	25398281	rs112445441	C	T	.	PASS	GI=KRAS;FC=G13D	AF	0.25
+12	25398285	rs121913530	C	T	.	PASS	GI=KRAS;FC=G12S	AF	0.05
