@@ -27,6 +27,8 @@ from abstractFile import AbstractFile
 
 class BEDRecord:
     def __init__(self, chrom=None, start=None, end=None, name=None, score=None, strand=None, thickStart=None, thickEnd=None, itemRgb=None, blockCount=None, blockSizes=None, blockStarts=None):
+        """
+        """
         self.chrom = chrom
         self.start = start
         self.end = end
@@ -42,11 +44,38 @@ class BEDRecord:
 
 
 class BEDIO(AbstractFile):
-    def isSkippedLine(self, line):
-        is_skipped = False
+    def BEDRecordToBEDLine(self, bed_record):
+        """
+        @summary : Returns the record in BED format.
+        @param bed_record : [BEDRecord] The sequence to process.
+        @return : [str] The BED line.
+        """
+        line = "{}\t{}\t{}".format(
+            self.chrom,
+            (self.start - 1),
+            self.end
+        )
+#             ("." if self.name is None else self.name),
+#             ("." if self.score is None else str(self.score)),
+#             ("." if self.strand is None else self.strand),
+#             ("." if self.thickStart is None else str(self.thickStart - 1)),
+#             ("." if self.thickEnd is None else str(self.thickEnd)),
+#             ("." if self.itemRgb is None else ",".join(self.itemRgb)),
+#             ("." if self.blockCount is None else str(self.blockCount)),
+#             ("." if self.blockSizes is None else ",".join(map(str, self.blockSizes))),
+#             ("." if self.blockStarts is None else ",".join(map(str, self.blockStarts)))
+        return line
+
+    def isRecordLine(self, line):
+        """
+        @summary: Returns True if the line corresponds to a record (it is not a comment or an header line).
+        @param line: [str] The evaluated line.
+        @return: [bool] True if the line corresponds to a record.
+        """
+        is_record = True
         if line.startswith("browser ") or line.startswith("track ") or line.startswith("#"):
-            is_skipped = True
-        return is_skipped
+            is_record = False
+        return is_record
 
     @staticmethod
     def isValid(filepath):
@@ -94,3 +123,11 @@ class BEDIO(AbstractFile):
                             if len(fields) >= 12:
                                 fields[11] = [int(block) for block in fields[11].split(",")] # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
         return BEDRecord(*fields)
+
+    def write(self, bed_record):
+        """
+        @summary: Writes record line in file.
+        @param bed_record: [BEDRecord] The record.
+        """
+        self.file_handle.write( self.BEDRecordToBEDLine(bed_record) + "\n" )
+        self.current_line_nb += 1
