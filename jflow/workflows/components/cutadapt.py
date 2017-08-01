@@ -16,9 +16,9 @@
 #
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT'
+__copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -37,14 +37,17 @@ class Cutadapt (Component):
         self.add_parameter( "error_rate", "***********************", default=error_rate, type=float )
         self.add_parameter( "min_overlap", "***********************", default=min_overlap, type=int )
 
-        # Files        
+        # Input Files
         self.add_input_file( "adaptor_file", "***********************", default=adaptor_file, required=True )
         self.add_input_file_list( "in_R1", "************************", default=R1, required=True )
         self.add_input_file_list( "in_R2", "************************", default=R2, required=True )
-        self.add_output_file_list( "out_R1", "***********************", pattern='{basename_woext}.fastq.gz', items=self.in_R1 )
+
+        # Output Files
+        self.add_output_file_list( "out_R1", "*********************** (format: fastq).", pattern='{basename_woext}_trim.fastq.gz', items=self.in_R1 )
         if len(self.in_R2) != 0:
-            self.add_output_file_list( "out_R2", "***********************", pattern='{basename_woext}.fastq.gz', items=self.in_R2 )
-        self.add_output_file_list( "stderr", "Cutadapt stderr files", pattern='{basename_woext}.stderr', items=self.in_R1 )
+            self.add_output_file_list( "out_R2", "*********************** (format: fastq).", pattern='{basename_woext}_trim.fastq.gz', items=self.in_R2 )
+        self.add_output_file_list( "stdout", "Cutadapt stdout files (format: txt).", pattern='{basename_woext}.stdout', items=self.in_R1 )
+        self.add_output_file_list( "stderr", "Cutadapt stderr files (format: txt).", pattern='{basename_woext}.stderr', items=self.in_R1 )
 
     def process(self):
         cmd = self.get_exec_path("cutadapt") + \
@@ -56,14 +59,16 @@ class Cutadapt (Component):
         if len(self.in_R2) == 0: # Process single read cutadapt
             cmd += " --output $2" + \
                 " $1" + \
-                " 2> $3"
+                " > $3" + \
+                " 2> $4"
             cutadapt = ShellFunction( cmd, cmd_format='{EXE} {IN} {OUT}' )
-            MultiMap( cutadapt, inputs=[self.in_R1], outputs=[self.out_R1, self.stderr], includes=[self.adaptor_file] )
+            MultiMap( cutadapt, inputs=[self.in_R1], outputs=[self.out_R1, self.stdout, self.stderr], includes=[self.adaptor_file] )
         else: # Process paired-end cutadapt
             cmd += " --output $3" + \
                 " --paired-output $4" + \
                 " $1" + \
                 " $2" + \
-                " 2> $5"
+                " > $5" + \
+                " 2> $6"
             cutadapt = ShellFunction( cmd, cmd_format='{EXE} {IN} {OUT}' )
-            MultiMap( cutadapt, inputs=[self.in_R1, self.in_R2], outputs=[self.out_R1, self.out_R2, self.stderr], includes=[self.adaptor_file] )
+            MultiMap( cutadapt, inputs=[self.in_R1, self.in_R2], outputs=[self.out_R1, self.out_R2, self.stdout, self.stderr], includes=[self.adaptor_file] )
