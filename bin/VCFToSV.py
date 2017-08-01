@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2017 IUCT
+# Copyright (C) 2017 IUCT-O
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT'
+__copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
 __version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
