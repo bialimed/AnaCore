@@ -80,7 +80,7 @@ class AbstractFile(object):
         for line in self.file_handle:
             self.current_line = line.rstrip()
             self.current_line_nb += 1
-            if self.isSkippedLine(self.current_line):
+            if not self.isRecordLine(self.current_line): # Skip non-record line
                 continue
             record = None
             try:
@@ -91,5 +91,10 @@ class AbstractFile(object):
             else:
                 yield record
 
-    def isSkippedLine(line):
-		return False
+    def isRecordLine(self, line):
+        """
+        @summary: Returns True if the line corresponds to a record (it is not a comment or an header line).
+        @param line: [str] The evaluated line.
+        @return: [bool] True if the line corresponds to a record.
+        """
+        return True
