@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2015 INRA
+# Copyright (C) 2017 IUCT-O
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,30 +16,30 @@
 #
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2015 INRA'
+__copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
-
-import sys, re
+import re
+from abstractFile import AbstractFile
 
 
 class GFF3Record:
     """
     @summary: Record for GFF3.
     """
-    def __init__( self ):
-        self.seq_id = None
-        self.source = None
-        self.type = None
-        self.start = None
-        self.end = None
-        self.score = None
-        self.strand = None
-        self.phase = None
-        self.attributes = None
+    def __init__( self, seq_id=None, source=None, type=None, start=None, end=None, score=None, strand=None, phase=None, attributes=None ):
+        self.seq_id = seq_id
+        self.source = source
+        self.type = type
+        self.start = start
+        self.end = end
+        self.score = score
+        self.strand = strand
+        self.phase = phase
+        self.attributes = attributes
 
     def setAttribute( self, tag, value ):
         """
@@ -52,7 +52,7 @@ class GFF3Record:
         if self.attributes is not None :
             self.attributes[cleaned_tag] = cleaned_value
         else:
-            raise ValueError("The attibute 'Attributes' is not initialized.")
+            raise ValueError("The attribute 'Attributes' is not initialized.")
 
     def addToAttribute( self, tag, value ):
         """
@@ -126,26 +126,38 @@ class GFF3Record:
 
         return cleaned_value
 
-    @staticmethod
-    def fromGff( line ):
+
+class GFF3IO(AbstractFile):
+    def isRecordLine(self, line):
         """
-        @summary: Returns a GFF3Record from a GFF3 line.
-        @param line: line of the GFF.
-        @return: [GFF3Record] the record.
+        @summary: Returns True if the line corresponds to a record (it is not a comment or an header line).
+        @param line: [str] The evaluated line.
+        @return: [bool] True if the line corresponds to a record.
         """
-        gff_record = GFF3Record()
-        line_fields = line.split("\t")
-        gff_record.seq_id = line_fields[0]
-        gff_record.source = line_fields[1]
-        gff_record.type = line_fields[2]
-        gff_record.start = int(line_fields[3])
-        gff_record.end = int(line_fields[4])
-        gff_record.score = line_fields[5]
-        gff_record.strand = line_fields[6]
-        gff_record.phase = line_fields[7]
+        is_record = True
+        if line.startswith("#"):
+            is_record = False
+        return is_record
+
+    def _parseLine(self):
+        """
+        @summary: Returns a structured record from the GFF current line.
+        @return: [GFF3Record] The record.
+        """
+        fields = self.current_line.split("\t")
+        gff_record = GFF3Record(
+            fields[0],
+            fields[1],
+            fields[2],
+            ("." if fields[3] == "." else int(fields[3])),
+            ("." if fields[4] == "." else int(fields[4])),
+            fields[5],
+            fields[6],
+            ("." if fields[7] == "." else int(fields[7])),
+        )
         # Parse attributes
         gff_record.attributes = dict()
-        attributes = "\t".join(line_fields[8:])
+        attributes = "\t".join(fields[8:])
         if attributes.strip().endswith(";"): # if attributes end with ';'
             attributes = attributes.strip()[:-1]
         attributes_array = attributes.split(";")
@@ -163,49 +175,10 @@ class GFF3Record:
                 gff_record.addToAttribute(tag, current_val)
         return gff_record
 
-
-class GFF3IO:
-    """
-    @summary: Specific handler for GFF3 file.
-    """
-    def __init__( self, file_path, mode="r" ):
-        self._path = file_path
-        self._handle = open( file_path, mode )
-        self._line = 1
-
-    def __del__( self ):
-        self.close()
-
-    def __enter__(self):
-        return(self)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-    def __iter__( self ):
-        for line in self._handle:
-            line = line.rstrip()
-            self._line += 1
-            if line.startswith('#') :
-                continue
-            try:
-                gff_record = GFF3Record.fromGff(line)
-            except:
-                raise IOError( "The line " + str(self._line) + " in '" + self._path + "' cannot be parsed by " + self.__class__.__name__ + ".\n" +
-                               "Line content : " + line )
-            else:
-                yield gff_record
-
-    def close( self ) :
-        if  hasattr(self, '_handle') and self._handle is not None:
-            self._handle.close()
-            self._handle = None
-            self._line = None
-
     def write( self, gff_record ):
         """
-         @summary : Write one line on gff file.
-          @param gff_record : [GFF3Record] the object to write.
+        @summary: Write one line on gff file.
+        @param gff_record: [GFF3Record] the object to write.
         """
         self._handle.write( gff_record.toGff() + "\n" )
         self._line += 1
