@@ -172,12 +172,12 @@ def getRGIdByRGTag( in_aln, tag, selected_value ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. ote: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.' )
+    parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. Note: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     parser.add_argument( '-f', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
     parser.add_argument( '-t', '--RG-tag', default='LB', help='RG tag used to store the area ID. [Default: %(default)s]' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-p', '--input-designs', nargs='+', required=True, help='The path to the amplicons design. The start and end of the amplicons must be without primers (format: BED).' ) 
+    group_input.add_argument( '-p', '--input-designs', nargs='+', required=True, help='The path to the amplicons design. The start and end of the amplicons must be without primers (format: BED).' )
     group_input.add_argument( '-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).' )
     group_input.add_argument( '-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a VCF.' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
@@ -198,11 +198,11 @@ if __name__ == "__main__":
                     design_by_samples[curr_spl] = current_design
                     vcaller_AF = record.get_AF( curr_spl )
                     vcaller_DP = record.get_DP( curr_spl )
-                    for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in in variant
+                    for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in variant
                         record_allele = getAlleleRecord( FH_vcf, record, alt_idx )
                         # Get allele frequency from the variant caller
                         vcaller_curr_AF = vcaller_AF[alt_idx]
-                        if len(vcaller_AF) == len(record.alt) + 1: # The AF cointains reference AF
+                        if len(vcaller_AF) == len(record.alt) + 1: # The AF contains reference AF
                             vcaller_curr_AF = vcaller_AF[alt_idx + 1]
                         record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
                         record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         FH_out.format["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth."}
         FH_out.samples = [spl for spl in sorted(aln_by_samples)]
         FH_out._writeHeader()
-        
+
         # Records
         for allele_id in variants:
             curr_var = variants[allele_id]
@@ -235,7 +235,7 @@ if __name__ == "__main__":
             if "AF" not in curr_var.format: curr_var.format.append("AF")
             if "AD" not in curr_var.format: curr_var.format.append("AD")
             if "DP" not in curr_var.format: curr_var.format.append("DP")
-            # Process population AF, Ad and DP
+            # Process population AF, AD and DP
             curr_var.info["AF"] = [0]
             curr_var.info["AD"] = [0]
             curr_var.info["DP"] = 0
