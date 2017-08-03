@@ -1,16 +1,16 @@
-# 
+#
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -18,9 +18,9 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
-__status__ = 'dev'
+__status__ = 'prod'
 
 
 class Region:
@@ -82,7 +82,7 @@ class Region:
         contains = False
         if self.reference.strand == eval_region.reference.strand:
             contains = self.contains( eval_region )
-        return( contains )        
+        return( contains )
 
     def hasOverlap(self, eval_region):
         """
@@ -134,7 +134,7 @@ class RegionList(list):
             for curr_region in regions:
                 self.append( curr_region )
 
-    def getContainer(self, eval_region):
+    def getContainers(self, eval_region):
         """
         @summary: Returns all the regions that contains the eval_region.
         @param eval_region: The evaluated region.
