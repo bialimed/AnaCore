@@ -1,16 +1,16 @@
-# 
+#
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -18,52 +18,67 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
+from region import Region
 from abstractFile import AbstractFile
 
 
-class BEDRecord:
+class BEDRecord(Region):
     def __init__(self, chrom=None, start=None, end=None, name=None, score=None, strand=None, thickStart=None, thickEnd=None, itemRgb=None, blockCount=None, blockSizes=None, blockStarts=None):
         """
         """
-        self.chrom = chrom
-        self.start = start
-        self.end = end
-        self.name = name
+        Region.__init__(self, start, end, strand, chrom, name)
         self.score = score
-        self.strand = strand
         self.thickStart = thickStart
         self.thickEnd = thickEnd
         self.itemRgb = itemRgb
         self.blockCount = blockCount
         self.blockSizes = blockSizes
-        self.blockStarts = blockStarts 
+        self.blockStarts = blockStarts
 
+    def __getattribute__(self, attr_name):
+        attr_value = None
+        if attr_name == "chrom":
+            attr_value = object.__getattribute__(self, "reference").name
+        else:
+            attr_value = object.__getattribute__(self, attr_name)
+        return attr_value
+
+    def __setattr__(self, attr_name, attr_value):
+        if attr_name == "chrom":
+            self.setReference( attr_value )
+        else:
+            object.__setattr__(self, attr_name, attr_value)
 
 class BEDIO(AbstractFile):
-    def BEDRecordToBEDLine(self, bed_record):
+    def __init__( self, filepath, mode="r", write_nb_col=3 ):
+        AbstractFile.__init__(self, filepath, mode)
+        self._write_nb_col = write_nb_col
+
+    def BEDRecordToBEDLine(self, record):
         """
         @summary : Returns the record in BED format.
-        @param bed_record : [BEDRecord] The sequence to process.
+        @param record : [BEDRecord] The sequence to process.
         @return : [str] The BED line.
         """
-        line = "{}\t{}\t{}".format(
-            self.chrom,
-            (self.start - 1),
-            self.end
+        str_fmt = "\t".join(["{}" for idx in range(self._write_nb_col)])
+        line = str_fmt.format(
+            record.chrom,
+            (record.start - 1),
+            record.end,
+            ("." if record.name is None else record.name),
+            ("." if record.score is None else str(record.score)),
+            ("." if record.strand is None else record.strand),
+            ("." if record.thickStart is None else str(record.thickStart - 1)),
+            ("." if record.thickEnd is None else str(record.thickEnd)),
+            ("." if record.itemRgb is None else ",".join(record.itemRgb)),
+            ("." if record.blockCount is None else str(record.blockCount)),
+            ("." if record.blockSizes is None else ",".join(map(str, record.blockSizes))),
+            ("." if record.blockStarts is None else ",".join(map(str, record.blockStarts)))
         )
-#             ("." if self.name is None else self.name),
-#             ("." if self.score is None else str(self.score)),
-#             ("." if self.strand is None else self.strand),
-#             ("." if self.thickStart is None else str(self.thickStart - 1)),
-#             ("." if self.thickEnd is None else str(self.thickEnd)),
-#             ("." if self.itemRgb is None else ",".join(self.itemRgb)),
-#             ("." if self.blockCount is None else str(self.blockCount)),
-#             ("." if self.blockSizes is None else ",".join(map(str, self.blockSizes))),
-#             ("." if self.blockStarts is None else ",".join(map(str, self.blockStarts)))
         return line
 
     def isRecordLine(self, line):
@@ -95,7 +110,7 @@ class BEDIO(AbstractFile):
                                "Line content : " + self.current_line )
                     #~ if record.itemRgb is not None and len(record.itemRgb.split(",")) != 3:
                         #~ raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".\n" +
-                               #~ "Line content : " + self.current_line )                        
+                               #~ "Line content : " + self.current_line )
                     record_idx += 1
                 is_valid = True
         except:
