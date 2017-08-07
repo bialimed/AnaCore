@@ -26,15 +26,12 @@ import os
 import glob
 import warnings
 
+
 from illumina import SampleSheetIO
 from jflow.workflow import Workflow
 
 
 class DSVF (Workflow):
-    """
-    @todo: - Add quality check
-           - Add filter on NM
-    """
     def get_description(self):
         return "Variant analysis on amplicon double strand librairies."
 
@@ -111,7 +108,7 @@ class DSVF (Workflow):
         # Prepare reads by amplicon
         cleaned_R1 = self.add_component( "Cutadapt", ["a", self.R1_end_adapter, R1, None, 0.01, 10], component_prefix="R1" )
         cleaned_R2 = self.add_component( "Cutadapt", ["a", self.R2_end_adapter, R2, None, 0.01, 10], component_prefix="R2" )
-        
+
         # Align reads by amplicon
         ################################################################
         for idx in range(len(R1)):
@@ -131,11 +128,11 @@ class DSVF (Workflow):
             aln_RG = self.add_component( "AddAmpliRG", [curr_lib["design_with_primers"], curr_lib_aln, self.metrics_type], component_prefix=curr_lib["name"] )
             idx_aln_RG = self.add_component( "BAMIndex", [aln_RG.out_aln], component_prefix=curr_lib["name"] )
             curr_lib["aln"] = idx_aln_RG.out_aln
-            
+
             # Coverage
             coverage = self.add_component( "Coverage", [idx_aln_RG.out_aln, curr_lib["design_with_primers"], 1000000], component_prefix=curr_lib["name"] )
             self.add_component( "DepthsDistribution", [curr_lib["design_wout_primers"], coverage.depth_files, self.metrics_type], component_prefix=curr_lib["name"] )
-            
+
             # Variant Calling
             variant_calling = self.add_component( "VarDictAmpli", [self.genome_seq, curr_lib["design_with_primers"], idx_aln_RG.out_aln, self.min_AF], component_prefix=curr_lib["name"] )
             curr_lib["vcf"] = variant_calling.out_variants
@@ -161,7 +158,7 @@ class DSVF (Workflow):
                 raise Exception("Merge list are not consistent")       
         ################################################################
         spl_merging = self.add_component( "MergeVCFAmpli", [libA["design_wout_primers"], libB["design_wout_primers"], libA["vcf"], libB["vcf"], libA["aln"], libB["aln"]] )
-        
+
         # Variants annotation
         variants_annot = self.add_component( "VEP", [spl_merging.out_variants, "homo_sapiens", self.assembly_version] )
 
