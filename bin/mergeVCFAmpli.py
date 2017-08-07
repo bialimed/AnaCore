@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -34,6 +34,8 @@ sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
+from bed import BEDIO
+from region import Region, RegionList
 from vcf import VCFIO, getAlleleRecord
 
 
@@ -100,54 +102,30 @@ def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     # Return
     return( AD, DP )
 
-def getSelectedAreas( in_design ):
+def getAreas( input_areas ):
     """
-    @summary: Returns the list of selected areas from a BED file.
-    @param in_design: [str] The path to the selected areas description (format: BED).
-    @return: [list] The list of BED's areas. Each area is represented by a dictionary with this format: {"region":"chr1", "start":501, "end":608, "id":"gene_98"}.
+    @summary: Returns the list of areas from a BED file.
+    @param input_areas: [str] The path to the areas description (format: BED).
+    @return: [RegionList] The list of areas.
     """
-    selected_areas = list()
-    with open(in_design) as FH_design:
-        for line in FH_design:
-            if not line.startswith("browser ") and not line.startswith("track ") and not line.startswith("#"):
-                fields = [elt.strip() for elt in line.split("\t")]
-                selected_areas.append({
-                    "region": fields[0],
-                    "start": int(fields[1]) +1, # Start in BED is 0-based
-                    "end": int(fields[2]),
-                    "id": fields[3]
-                })
-    return( selected_areas )
+    areas = RegionList()
+    with BEDIO(input_areas) as FH_panel:
+        areas = RegionList(FH_panel.read())
+    return( areas )
 
-def getAreasContaining( areas, chrom, start, end ):
+def getAreasByChr( input_areas ):
     """
-    @summary: Returns the ID of the areas containing the specidfied segment (contiguous positions).
-    @param areas: [list] List of evaluated area. Each area is represented by a dictionary with this format: {"region":"chr1", "start":501, "end":608, "id":"gene_98"}.
-    @param chrom: [str] The chromosome of the evaluated segment.
-    @param start: The start position of the evaluated segment.
-    @param end: The end position of the evaluated segment.
-    @returns: [list] IDs of the areas containing the segment.
+    @summary: Returns from a BED file the list of areas by chromosome.
+    @param input_areas: [str] The path to the areas description (format: BED).
+    @return: [dict] The list of areas by chromosome (each list is an instance of Regionlist).
     """
-    containers = list()
-    for curr_area in areas:
-        if contains( curr_area, chrom, start, end ):
-            containers.append( curr_area["id"] )
-    return containers
-
-def contains( area, chrom, start, end=None ):
-    """
-    @summary: Returns True if the segment (contiguous positions) is contained in area.
-    @param area: [dict] The evaluated area. Format: {"region":"chr1", "start":501, "end":608}.
-    @param chrom: [str] The chromosome of the evaluated segment.
-    @param start: The start position of the evaluated segment.
-    @param end: The end position of the evaluated segment.
-    @returns: [bool] True if the segment is contained in area.
-    """
-    contains = False
-    end = start if end is None else end
-    if area["region"] == chrom and area["start"] <= start and area["end"] >= end:
-        contains = True
-    return contains
+    areas_by_chr = dict()
+    for curr_area in getAreas(input_areas):
+        chrom = curr_area.reference.name
+        if chrom not in areas_by_chr:
+            areas_by_chr[chrom] = RegionList()
+        areas_by_chr[chrom].append( curr_area )
+    return( areas_by_chr )
 
 def getRGIdByRGTag( in_aln, tag, selected_value ):
     """
@@ -190,7 +168,7 @@ if __name__ == "__main__":
     design_by_samples = dict()
     for vcf_idx, current_vcf in enumerate(args.input_variants):
         current_aln = args.input_aln[vcf_idx]
-        current_design = getSelectedAreas( args.input_designs[vcf_idx] )
+        current_design = getAreasByChr( args.input_designs[vcf_idx] )
         with VCFIO(current_vcf) as FH_vcf:
             for record in FH_vcf: # For each variant
                 for curr_spl in FH_vcf.samples: # For each sample in VCF
@@ -241,12 +219,18 @@ if __name__ == "__main__":
             curr_var.info["DP"] = 0
             for spl in aln_by_samples:
                 if spl not in curr_var.samples: # If the variant has not be seen in sample
+                    AD = 0
+                    DP = 0
                     # Get valid RG
                     ref_end = curr_var.pos + len(curr_var.ref) - 1
-                    overlapped_ampl = getAreasContaining( design_by_samples[spl], curr_var.chrom, curr_var.pos, ref_end )
-                    overlapped_RG = getRGIdByRGTag( aln_by_samples[spl], args.RG_tag, overlapped_ampl )
-                    # Retrieve AD, AF and DP from aln file
-                    AD, DP = getADP( curr_var.chrom, curr_var.pos, curr_var.ref, curr_var.alt[0], aln_by_samples[spl], overlapped_RG )
+                    curr_var_region = Region(curr_var.pos, ref_end, None, curr_var.chrom)
+                    overlapped_ampl = design_by_samples[spl][curr_var.chrom].getContainers(curr_var_region)
+                    if len(overlapped_ampl) > 0:
+                        # Retrieve AD, AF and DP from aln file
+                        overlapped_ampl_name = [ampl.name for ampl in overlapped_ampl]
+                        overlapped_RG = getRGIdByRGTag( aln_by_samples[spl], args.RG_tag, overlapped_ampl_name )
+                        AD, DP = getADP( curr_var.chrom, curr_var.pos, curr_var.ref, curr_var.alt[0], aln_by_samples[spl], overlapped_RG )
+                    # Store AD, AF and DP for sample
                     curr_var.samples[spl] = {
                         "AF": [0 if DP == 0 else round(float(AD)/DP, args.AF_precision)],
                         "AD": [AD],
