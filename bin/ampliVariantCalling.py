@@ -19,9 +19,9 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prototype'
+__status__ = 'dev'
 
 import os
 import sys
@@ -340,16 +340,16 @@ class FreeBayes(Cmd):
                       cmd_param,
                       "--version" )
 
-class VarDict(Cmd):
+class VarDictStep1(Cmd):
     """
     @summary: Dicovers variants.
     """
-    def __init__(self, in_reference, in_regions, in_aln, out_variants, min_AF=0.02):
+    def __init__(self, in_reference, in_regions, in_aln, out_file, min_AF=0.02):
         """
         @param in_reference: [str] Path to the reference sequences file (format: fasta).
         @param in_regions: [str] Path to the amplicons design (format: BED). Start and end of the amplicons must be with primers.
         @param in_aln: [str] Path to the alignments file (format: BAM).
-        @param out_variants: [str] Path to the outputted file (format: VCF).
+        @param out_file: [str] Path to the outputted file.
         @param min_AF: [float] The threshold for allele frequency.
         """
         cmd_param = "" + \
@@ -359,15 +359,55 @@ class VarDict(Cmd):
             " -b " + in_aln + \
             " -G " + in_reference + \
             " " + in_regions + \
-            " | teststrandbias.R | var2vcf_valid.pl " + \
-                " -a" + \
-                " -E" + \
-                " -f " + str(min_AF) + \
-                " > " + out_variants
+            " > " + out_file
 
         Cmd.__init__( self,
                       "VarDict",
                       "Dicovers variants.",
+                      cmd_param,
+                      None )
+
+class VarDictStep2(Cmd):
+    """
+    @summary: Filters variant on strand bias.
+    """
+    def __init__(self, in_file, out_file):
+        """
+        @param in_file: [str] Path to the input file.
+        @param out_file: [str] Path to the outputted file.
+        """
+        cmd_param = "" + \
+            " cat " + in_file + " | " + \
+            " ##PROGRAM##" + \
+            " > " + out_file
+
+        Cmd.__init__( self,
+                      "teststrandbias.R",
+                      "Filters variants on strand bias.",
+                      cmd_param,
+                      None )
+
+class VarDictStep3(Cmd):
+    """
+    @summary: Filters variants and converts to VCF.
+    """
+    def __init__(self, in_file, out_variants, min_AF=0.02):
+        """
+        @param in_file: [str] Path to the input file.
+        @param out_variants: [str] Path to the outputted file (format: VCF).
+        @param min_AF: [float] The threshold for allele frequency.
+        """
+        cmd_param = "" + \
+            " cat " + in_file + " | " + \
+            " ##PROGRAM##" + \
+            " -a" + \
+            " -E" + \
+            " -f " + str(min_AF) + \
+            " > " + out_variants
+
+        Cmd.__init__( self,
+                      "var2vcf_valid.pl",
+                      "Filters variants and converts to VCF.",
                       cmd_param,
                       None )
 
@@ -438,6 +478,23 @@ def filterBED(in_bed, in_names, out_bed):
                     if fields[3] in retained_regions:
                         FH_out.write( line )
 
+def VarDictFct(in_reference, in_regions, in_aln, out_variants, logger, tmp_file, min_AF=0.02):
+    """
+    @summary: Dicovers amplicons variants with VarDict.
+    @param in_reference: [str] Path to the reference sequences file (format: fasta).
+    @param in_regions: [str] Path to the amplicons design (format: BED). Start and end of the amplicons must be with primers.
+    @param in_aln: [str] Path to the alignments file (format: BAM).
+    @param out_variants: [str] Path to the outputted file (format: VCF).
+    @param logger: [Logger] Logger used to trace sub-commands.
+    @param tmp_file: [TmpFiles] Temporaries files manager.
+    @param min_AF: [float] The threshold for allele frequency.
+    """
+    out_vardict = tmp.add("vardict.txt")
+    out_strand_bias = tmp.add("strdBias.txt")
+    VarDictStep1( in_reference, in_regions, in_aln, out_vardict, min_AF ).submit( logger )
+    VarDictStep2( out_vardict, out_strand_bias ).submit( logger )
+    VarDictStep3( out_strand_bias, out_variants, min_AF ).submit( logger )
+
 
 ########################################################################
 #
@@ -505,7 +562,7 @@ if __name__ == "__main__":
 
         # Call variants
         curr_gp_vcf = tmp.add( curr_gp + ".vcf" )
-        VarDict( args.input_genome, curr_gp_regions_with_prim, curr_gp_aln_new_RG, curr_gp_vcf, args.min_AF ).submit( args.output_log )
+        VarDictFct( args.input_genome, curr_gp_regions_with_prim, curr_gp_aln_new_RG, curr_gp_vcf, args.output_log, tmp, args.min_AF )
 
         # Store current group files
         groups.append({
