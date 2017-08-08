@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.2'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -51,7 +51,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
     @param variants: [dict] By uniq ID the variants. The content of this variable is set by the call of this function.
                      Content example:
                      {
-                       "chr1:10=T":{ 
+                       "chr1:10=T":{
                          "chrom":"chr1",
                          "pos":10,
                          "ref":"A",
@@ -116,12 +116,12 @@ def filterVarNotIn( variants, vcf_idx ):
     for variant_id in removed:
         del( variants[variant_id] )
 
-def writeTSVResults(variants, out_path, error_threshold=0.8, separator="\t"):
+def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
     """
     @summary: Writes expected and detected fequency for each expected variant in TSV file.
     @param variants: [dict] By uniq ID the variants (see addVCFVariants).
     @param out_path: [str] Path to the output file.
-    @param error_threshold: [float] The minimum similarity ratio between expected and detected.
+    @param error_threshold: [float] The maximum percentage difference between expected and detected.
     @param separator: [str] The  column separator in output file.
     """
     idx_expec = 0
@@ -140,7 +140,7 @@ def writeTSVResults(variants, out_path, error_threshold=0.8, separator="\t"):
         error_values_sum += abs(error)
         error_ratio_sum += error_ratio
         # Error out of threshold
-        if error_ratio > (1 - error_threshold):
+        if error_ratio > error_threshold:
             nb_out_threshold += 1
 
     # Write
@@ -170,7 +170,7 @@ def writeTSVResults(variants, out_path, error_threshold=0.8, separator="\t"):
                 current_variant["freq"][idx_detec],
                 error,
                 error_ratio,
-                (error_ratio > (1 - error_threshold)) ])
+                (error_ratio > error_threshold) ])
 
 def writeJSONResults(variants, out_path):
     """
@@ -201,7 +201,7 @@ def writeJSONResults(variants, out_path):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser( description='Compare variant calling result to expected variants. This comparison is only processed on expected variants.' )
-    parser.add_argument( '-t', '--error-threshold', type=float, default=0.8, help='The minimum similarity ratio between expected and detected. This value is used on TSV output to count the number of the expected variants with an error out of threshold. Simitarity ratio calculation: |1 - detected_freq/expected_freq| (e.g. ratio=0.5 for expected_freq=0.1 and detected_freq=0.05 ; ratio=0.25 for expected_freq=0.1 and detected_freq=0.4). [Default: %(default)s]' )
+    parser.add_argument( '-t', '--error-threshold', type=float, default=0.2, help='In TSV output, variants with a percentage difference compared to expected frequency superior than this value are tagged "out of threshold". Difference percentage calculation: abs(1 - detected_freq/expected_freq). Examples: diff=50prct for expected_freq=0.1 and detected_freq=0.05 ; diff=300prct for expected_freq=0.1 and detected_freq=0.4. [Default: %(default)s]' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-e', '--expected-file', required=True, help='The path to the file containing the expected variants (format: VCF).' )
