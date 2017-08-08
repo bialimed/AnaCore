@@ -285,6 +285,13 @@ class AddRGOnBAM(Cmd):
     @summary: Adds tag on reads by origin (amplicon ID).
     """
     def __init__(self, in_aln, out_aln, platform, sample, library):
+        """
+        @param in_aln: [str] Path to the alignments file (format: BAM).
+        @param out_aln: [str] Path to the outputted alignments file (format: BAM).
+        @param platform: [str] Platform/technology used to produce the reads.
+        @param sample: [str] Sample. Use pool name where a pool is being sequenced.
+        @param library: [str] Library.
+        """
         cmd_param = "" + \
             " --pl " + platform + \
             " --sm " + sample + \
@@ -334,7 +341,17 @@ class FreeBayes(Cmd):
                       "--version" )
 
 class VarDict(Cmd):
+    """
+    @summary: Dicovers variants.
+    """
     def __init__(self, in_reference, in_regions, in_aln, out_variants, min_AF=0.02):
+        """
+        @param in_reference: [str] Path to the reference sequences file (format: fasta).
+        @param in_regions: [str] Path to the amplicons design (format: BED). Start and end of the amplicons must be with primers.
+        @param in_aln: [str] Path to the alignments file (format: BAM).
+        @param out_variants: [str] Path to the outputted file (format: VCF).
+        @param min_AF: [float] The threshold for allele frequency.
+        """
         cmd_param = "" + \
             " -f " + str(min_AF) + \
             " -F 0" + \
@@ -350,12 +367,21 @@ class VarDict(Cmd):
 
         Cmd.__init__( self,
                       "VarDict",
-                      "Variant calling step.",
+                      "Dicovers variants.",
                       cmd_param,
                       None )
 
 class GatherOverlappingRegions(Cmd):
+    """
+    @summary: Gathers variants from non-overlapping groups.
+    """
     def __init__(self, in_regions, in_variants, in_aln, out_variants):
+        """
+        @param in_regions: [str] Path to the amplicons design. Start and end of the amplicons must be without primers (format: BED).
+        @param in_variants: [str] Path to the variants files (format: VCF).
+        @param in_aln: [str] Path to the alignments files (format: BAM). Each alignment file correspond to a variants file.
+        @param out_variants: [str] Path to the outputted file (format: VCF).
+        """
         cmd_param = "" + \
             " --input-designs " + " ".join(in_regions) + \
             " --input-variants " + " ".join(in_variants) + \
@@ -364,12 +390,20 @@ class GatherOverlappingRegions(Cmd):
 
         Cmd.__init__( self,
                       "mergeVCFAmpli.py",
-                      "Gather variants from non-overlapping groups.",
+                      "Gathers variants from non-overlapping groups.",
                       cmd_param,
                       "--version" )
 
 class MeltOverlappingRegions(Cmd):
+    """
+    @summary: Melts all the samples contained in variant file in one sample.
+    """
     def __init__(self, spl_name, in_variants, out_variants):
+        """
+        @param spl_name: [str] Name of the final sample.
+        @param in_variants: [str] Path to the variants file with several samples (format: VCF).
+        @param out_variants: [str] Path to the outputted file (format: VCF).
+        """
         cmd_param = "" + \
             " --new-spl-name '" + spl_name + "'" + \
             " --input-variants " + in_variants + \
@@ -377,22 +411,30 @@ class MeltOverlappingRegions(Cmd):
 
         Cmd.__init__( self,
                       "meltVCFSamples.py",
-                      "Melt samples in variants file.",
+                      "Melts all the samples contained in variant file in one sample.",
                       cmd_param,
                       "--version" )
 
 def filterBED(in_bed, in_names, out_bed):
+    """
+    @summary: Filters a BED file with the list of names of regions to keep.
+    @param in_bed: [str] Path to the initial file (format: BED).
+    @param in_names: [str] Path to the file containing the list of names of the retained regions.
+    @param out_bed: [str] Path to the filtered file (format: BED).
+    """
+    # Retrieve retained regions names
     retained_regions = dict()
     with open(in_names) as FH_names:
         for line in FH_names:
             retained_regions[line.strip()] = 1
+    # Filter BED
     with open(in_bed) as FH_in:
         with open(out_bed, "w") as FH_out:
             for line in FH_in:
-                if line.startswith("#"):
+                if line.startswith("browser ") or line.startswith("track ") or line.startswith("#"):
                     FH_out.write( line )
                 else:
-                    fields = line.split("\t")
+                    fields = [field.strip() for field in line.split("\t")]
                     if fields[3] in retained_regions:
                         FH_out.write( line )
 
