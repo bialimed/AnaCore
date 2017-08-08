@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -59,10 +59,12 @@ if __name__ == "__main__":
     with VCFIO(args.input_variants) as FH_in:
         with VCFIO(args.output_variants, "w") as FH_out:
             # Header
-            FH_out.info = FH_in.info
+            removed_from_info = list()
+            FH_out.info = FH_in.info.copy()
             for field in ["AD", "AF", "DP"]:
                 # Remove population AD, AF and DP
                 if field in FH_out.info:
+                    removed_from_info.append(field)
                     del(FH_out.info[field])
                 # Create new FORMAT
                 if field in FH_in.format:
@@ -93,7 +95,7 @@ if __name__ == "__main__":
                 record.samples = {args.new_spl_name: pop}
                 record.format = ["AF", "AD", "DP"]
                 # Remove old population AD, AF and DP
-                for field in ["AD", "AF", "DP"]:
-                    if field in FH_out.info:
+                for field in removed_from_info:
+                    if field in record.info:
                         del(record.info[field])
                 FH_out.write( record )
