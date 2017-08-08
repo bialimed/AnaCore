@@ -54,7 +54,7 @@ def getNonOverlappingThread( selected_areas ):
         if is_valid_thread:
             non_overlapping_threads[thread_idx - 1].append(
                 curr_area
-            )            
+            )
         else:
             non_overlapping_threads.append([
                 curr_area
@@ -106,15 +106,15 @@ if __name__ == "__main__":
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-i', '--input-panel', required=True, help='Path to the list of selected areas (format: BED). Each area must have an unique ID in the name field.' )
     group_output = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_output.add_argument( '-o', '--output-design', required=True, help='Path to the list of amplicons with (format: TSV).' )
+    group_output.add_argument( '-o', '--output-design', required=True, help='Path to the list of amplicons (format: TSV). The first column is the ID of the amplicon and the second is the name of the group where the amplicon has no overlap with other amplicons of this group.' )
     args = parser.parse_args()
-  
+
     # Get selected area from BED
     selected_areas = getSelectedArea(args.input_panel)
-    
+
     # Split overlapping area
     non_overlapping_threads = getNonOverlappingThread( selected_areas )
-    
+
     # Write split design
     with open(args.output_design, "w") as FH_design:
         FH_design.write( "#Area\tNon-overlapping_group\n" )

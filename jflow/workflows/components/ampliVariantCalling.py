@@ -43,8 +43,8 @@ class AmpliVariantCalling (Component):
 
         # Output files
         self.add_output_file_list( "out_variants", "Path to the outputted variants file (format: VCF).", pattern='{basename_woext}.vcf', items=self.in_aln )
-        self.add_output_file_list( "stderr", "The stderr file.", pattern='{basename_woext}.stderr', items=self.in_aln )
-        self.add_output_file_list( "stdout", "The stdout file.", pattern='{basename_woext}.stdout', items=self.in_aln )
+        self.add_output_file_list( "stderr", "Path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.in_aln )
+        self.add_output_file_list( "stdout", "Path to the stdout file (format: txt).", pattern='{basename_woext}.stdout', items=self.in_aln )
 
     def process(self):
         cmd = self.get_exec_path("ampliVariantCalling.py") + \

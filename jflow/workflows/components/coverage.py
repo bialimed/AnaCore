@@ -1,16 +1,16 @@
 #
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -40,7 +40,7 @@ class Coverage (Component):
 
         # Output files
         self.add_output_file_list( "depth_files", "The depth for each posiion (format: TSV)", pattern='{basename_woext}_coverage.tsv', items=self.aln_files )
-        self.add_output_file_list( "stderr", "The samtools depth stderr file", pattern='{basename_woext}.stderr', items=self.aln_files )
+        self.add_output_file_list( "stderr", "The path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.aln_files )
 
     def process(self):
         bed_opt = "-b " + self.bed_file + " " if self.bed_file != None else ""

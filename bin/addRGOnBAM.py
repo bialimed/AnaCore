@@ -54,9 +54,9 @@ if __name__ == "__main__":
     group_RG.add_argument( '--pu', help='Platform unit (e.g. flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.' )
     group_RG.add_argument( '--sm', help='Sample. Use pool name where a pool is being sequenced.' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-a', '--input-aln', required=True, help='The path to the alignments files (format: BAM).' )
+    group_input.add_argument( '-a', '--input-aln', required=True, help='The path to the alignments file (format: BAM).' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-aln', required=True, help='The path to the alignments file (format: BAM).' )
+    group_output.add_argument( '-o', '--output-aln', required=True, help='The path to the outputted alignments file (format: BAM).' )
     args = parser.parse_args()
 
     with pysam.AlignmentFile( args.input_aln, "rb" ) as FH_in:

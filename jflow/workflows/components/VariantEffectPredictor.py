@@ -1,22 +1,22 @@
 #
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT'
+__copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
@@ -31,7 +31,7 @@ from weaver.function import ShellFunction
 
 
 class VEP (Component):
-    
+
     def define_parameters(self, in_variants, species, assembly=None, out_format="vcf"):
         # Parameters
         self.add_parameter( "assembly", "The assembly version to use.", default=assembly )
@@ -43,11 +43,11 @@ class VEP (Component):
 
         # Output files
         self.add_output_file_list( "out_variants", "The VEP annotations files (format: see out_format).", pattern='{basename_woext}.' + out_format, items=self.in_variants )
-        self.add_output_file_list( "stderr", "The error files.", pattern='{basename_woext}.stderr', items=self.in_variants )
-        
+        self.add_output_file_list( "stderr", "Path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.in_variants )
+
     def process(self):
         cache_directory = None
-        try: 
+        try:
             cache_directory = self.get_resource("VEP_cache_directory")
         except: pass
         cmd = self.get_exec_path("vep") + \

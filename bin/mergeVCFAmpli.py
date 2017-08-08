@@ -155,9 +155,9 @@ if __name__ == "__main__":
     parser.add_argument( '-f', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
     parser.add_argument( '-t', '--RG-tag', default='LB', help='RG tag used to store the area ID. [Default: %(default)s]' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-p', '--input-designs', nargs='+', required=True, help='The path to the amplicons design. The start and end of the amplicons must be without primers (format: BED).' )
+    group_input.add_argument( '-p', '--input-designs', nargs='+', required=True, help='The path to the amplicons design (format: BED). The start and end of the amplicons must be without primers.' )
     group_input.add_argument( '-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).' )
-    group_input.add_argument( '-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a VCF.' )
+    group_input.add_argument( '-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a variants file.' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
     group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).' )
     args = parser.parse_args()

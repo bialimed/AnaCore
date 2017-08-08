@@ -1,16 +1,16 @@
 #
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -49,7 +49,7 @@ class AddAmpliRG (Component):
                                    "The summary files (format: see summary_format). These files contain information about the number of reads out off target, reversed and valid.",
                                    pattern='{basename_woext}.' + self.summary_format,
                                    items=self.in_aln )
-        self.add_output_file_list( "stderr", "The stderr files.", pattern='{basename_woext}.stderr', items=self.in_aln )
+        self.add_output_file_list( "stderr", "The path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.in_aln )
 
     def process(self):
         cmd = self.get_exec_path("addAmpliRG.py") + \

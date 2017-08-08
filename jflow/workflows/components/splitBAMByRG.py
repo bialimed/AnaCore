@@ -1,16 +1,16 @@
 #
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -31,7 +31,7 @@ from weaver.function import ShellFunction
 class SplitBAMByRG (Component):
 
     def define_parameters(self, in_regions, in_aln):
-        self.add_input_file( "in_regions", "*****", default=in_regions, required=True )    
+        self.add_input_file( "in_regions", "*****", default=in_regions, required=True )
         self.add_input_file_list( "in_aln", "*****", default=aln_files, required=True )
 
 
@@ -44,10 +44,10 @@ class SplitBAMByRG (Component):
         out_items = list()
         for curr_aln in in_aln:
 			curr_aln_basename = os.path.basename( curr_aln )
-			
+
         self.add_output_file_list( "out_aln", "******************", pattern='{basename_woext}.bam', items=self.in_aln )
         self.add_output_file_list( "stdout", "******************", pattern='{basename_woext}.tsv', items=self.in_aln )
-        self.add_output_file_list( "stderr", "The stderr file", pattern='{basename_woext}.stderr', items=self.in_aln )
+        self.add_output_file_list( "stderr", "Path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.in_aln )
 
     def process(self):
         cmd = self.get_exec_path("splitBAMByRG.py") + \

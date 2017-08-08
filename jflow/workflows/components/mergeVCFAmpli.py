@@ -41,7 +41,7 @@ class MergeVCFAmpli (Component):
 
         # Output files
         self.add_output_file_list( "out_variants", "The path to the outputted file (format: VCF).", pattern='{basename_woext}.vcf', items=self.libA_variants )
-        self.add_output_file_list( "stderr", "The stderr file", pattern='{basename_woext}.stderr', items=self.libA_variants )
+        self.add_output_file_list( "stderr", "The path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.libA_variants )
 
     def process(self):
         cmd = self.get_exec_path("mergeVCFAmpli.py") + \

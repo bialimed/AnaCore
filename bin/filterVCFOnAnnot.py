@@ -106,7 +106,7 @@ def getVEPAlt( ref, alt ):
 # format see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#json
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Filter VCF on annotation criteria. ************************************************ filter variants and filter annot' )
+    parser = argparse.ArgumentParser( description='Filters variants and their annotations on annotations. In "remove" mode the annotations are deleted if they not fit criteria and the variant is removed if none of his annotations fit criterias.' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_filter = parser.add_argument_group( 'Filters' ) # Filters
     group_filter.add_argument( '-m', '--mode', default="tag", choices=["tag", "remove"], help='Select the filter mode. In mode "tag" if the variant does not fit criteria a tag "CSQ" and/or "popAF" is added in FILTER field. In mode "remove" if the variant does not fit criteria it is removed from the output. [Default: %(default)s]' )
@@ -114,9 +114,9 @@ if __name__ == "__main__":
     group_filter.add_argument( '-l', '--polym-threshold', default=0.01, help='Minimum frequency in population to tag allele as polymorphism. [Default: %(default)s]' )
     group_filter.add_argument( '-k', '--kept-consequences', default=["TFBS_ablation", "TFBS_amplification", "TF_binding_site_variant", "regulatory_region_ablation", "regulatory_region_amplification", "transcript_ablation", "splice_acceptor_variant", "splice_donor_variant", "stop_gained", "frameshift_variant", "stop_lost", "start_lost", "transcript_amplification", "inframe_insertion", "inframe_deletion", "missense_variant", "protein_altering_variant"], nargs='+', help='************* (see http://www.ensembl.org/info/genome/variation/predicted_data.html). [Default: %(default)s]' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the file file containing variants and annotated with VEP v88+ (format: VCF).' )
+    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the file containing variants annotated with VEP v88+ (format: VCF).' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the file containing the filtered variants and annotations (format: VCF).')
+    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the filtered file (format: VCF).')
     args = parser.parse_args()
 
     # Process
