@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -64,14 +64,14 @@ def getSelectedAreasByChr( input_panel ):
     """
     selected_areas = getSelectedAreas( input_panel )
     selected_areas = sorted(selected_areas, key=lambda x: (x["region"], x["start"], x["end"]))
-    
+
     area_by_chr = dict()
     for curr_area in selected_areas:
         chrom = curr_area["region"]
         if chrom not in area_by_chr:
             area_by_chr[chrom] = list()
         area_by_chr[chrom].append( curr_area )
-    
+
     return( area_by_chr )
 
 def getSourceRegion( read, regions, anchor_offset=0 ):
@@ -114,14 +114,14 @@ def hasValidStrand( read, ampl_region ):
     if read.is_read1:
         if read.is_reverse:
             if ampl_region["strand"] == "-":
-                has_valid_strand = True                    
+                has_valid_strand = True
         else:
             if ampl_region["strand"] == "+":
                 has_valid_strand = True
     else:
         if read.is_reverse:
             if ampl_region["strand"] == "+":
-                has_valid_strand = True                    
+                has_valid_strand = True
         else:
             if ampl_region["strand"] == "-":
                 has_valid_strand = True
@@ -140,6 +140,7 @@ def writeTSVSummary(out_path, data):
             "Unmapped\t{}\t{:5f}".format( data["pair_unmapped"], data["pair_unmapped"]/data["total"] ),
             "Out_target\t{}\t{:5f}".format( data["out_target"], data["out_target"]/data["total"] ),
             "Cross_panel\t{}\t{:5f}".format( data["cross_panel"], data["cross_panel"]/data["total"] ),
+            "Invalid_pair\t{}\t{:5f}".format( data["invalid_pair"], data["invalid_pair"]/data["total"] ),
             "Valid\t{}\t{:5f}".format( data["valid"], data["valid"]/data["total"] ),
             sep="\n",
             file=FH_summary
@@ -151,7 +152,7 @@ def writeJSONSummary(out_path, data):
     @param out_path: [str] Path to the output file.
     @param data: [dict] The metrics stored in summary.
     """
-    eval_order = ["unpaired", "pair_unmapped", "out_target", "out_target", "cross_panel", "valid"]
+    eval_order = ["unpaired", "pair_unmapped", "out_target", "cross_panel", "invalid_pair", "valid"]
     with open(args.output_summary, "w") as FH_summary:
         FH_summary.write(
             json.dumps({ "eval_order":eval_order, "results":data}, default=lambda o: o.__dict__, sort_keys=True)
@@ -186,10 +187,10 @@ if __name__ == "__main__":
     reverse_reads = 0
     valid_reads = 0
     valid_reads_valid_pair = 0
-    
+
     # Get panel regions
     panel_regions = getSelectedAreasByChr( args.input_panel )
-    
+
     # Filter reads in panel
     RG_id_by_source = dict()
     tmp_aln = args.output_aln + "_tmp.bam"
@@ -199,7 +200,7 @@ if __name__ == "__main__":
         new_header = FH_in.header.copy()
         new_header["RG"] = list()
         RG_idx = 1
-        for chrom in panel_regions:
+        for chrom in sorted(panel_regions):
             for curr_area in panel_regions[chrom]:
                 new_header["RG"].append({"ID": str(RG_idx), args.RG_tag: curr_area["id"]})
                 RG_id_by_source[curr_area["id"]] = str(RG_idx)
@@ -207,7 +208,7 @@ if __name__ == "__main__":
         # Parse reads
         with pysam.AlignmentFile( tmp_aln, "wb", header=new_header ) as FH_out:
             for curr_read in FH_in.fetch(until_eof=True):
-                if not curr_read.is_secondary:
+                if not curr_read.is_secondary and not curr_read.is_supplementary:
                     total_reads += 1
                     if not curr_read.is_paired:
                         unpaired_reads += 1
@@ -226,14 +227,14 @@ if __name__ == "__main__":
                             curr_read.set_tag( "RG", RG_id_by_source[source_region["id"]] )
                             if curr_read.query_name in valid_reads_by_id: # Pair is valid
                                 prev_read = valid_reads_by_id[curr_read.query_name]
-                                if prev_read is not None:
+                                if prev_read.get_tag("RG") == RG_id_by_source[source_region["id"]]:
                                     valid_reads_valid_pair += 2
                                     FH_out.write( prev_read )
+                                    FH_out.write( curr_read )
                                     valid_reads_by_id[curr_read.query_name] = None
-                                FH_out.write( curr_read )
                             else:
                                 valid_reads_by_id[curr_read.query_name] = curr_read
-    
+
     # Sort output file
     pysam.sort( "-o", args.output_aln, tmp_aln )
     os.remove( tmp_aln )
@@ -246,6 +247,7 @@ if __name__ == "__main__":
             "pair_unmapped": unmapped_pairs,
             "out_target": out_target_reads,
             "cross_panel": reverse_reads,
+            "invalid_pair": valid_reads - valid_reads_valid_pair,
             "valid": valid_reads_valid_pair
         }
         if args.summary_format == "json":
