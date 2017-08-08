@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -60,12 +60,11 @@ if __name__ == "__main__":
         with VCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.info = FH_in.info
-            for field in ["AD", "AF", "DP"]: # Update INFO
+            for field in ["AD", "AF", "DP"]:
+                # Remove population AD, AF and DP
                 if field in FH_out.info:
-                    if field != "DP":
-                        FH_out.info[field]["number"] = None
-                        FH_out.info[field]["number_tag"] = "A"
-            for field in ["AD", "AF", "DP"]: # Update FORMAT
+                    del(FH_out.info[field])
+                # Create new FORMAT
                 if field in FH_in.format:
                     FH_out.format[field] = FH_in.format[field]
                     if field != "DP":
@@ -93,8 +92,8 @@ if __name__ == "__main__":
                 # Replace samples by the new sample
                 record.samples = {args.new_spl_name: pop}
                 record.format = ["AF", "AD", "DP"]
-                # Update variant information
-                for field in ["AF", "AD", "DP"]:
-                    if field in record.info:
-                        record.info[field] = pop[field]
+                # Remove old population AD, AF and DP
+                for field in ["AD", "AF", "DP"]:
+                    if field in FH_out.info:
+                        del(record.info[field])
                 FH_out.write( record )
