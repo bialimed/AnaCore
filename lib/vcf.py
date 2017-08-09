@@ -1,16 +1,16 @@
-# 
+#
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.1'
+__version__ = '1.7.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -59,24 +59,73 @@ class VCFRecord:
         self.format  = pFormat if pFormat is not None else list()
         self.samples = samples if samples is not None else dict()
 
+    def containsIndel(self):
+        """
+        @summary: Returns True if the variant contains an allele corresponding to an insertion or a deletion.
+        @return: [bool] True if the variant contains an allele corresponding to an insertion or a deletion.
+        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        """
+        contains_indel = False
+        ref = self.ref.replace(".", "").replace("-", "")
+        alt = [curr_alt.replace(".", "").replace("-", "") for curr_alt in self.alt]
+        for allele in alt:
+            if len(allele) != len(ref):
+                contains_indel = True
+        return contains_indel
+
+    def isDeletion(self):
+        """
+        @summary: Returns True if the variant is a deletion.
+        @return: [bool] True if the variant is a deletion.
+        @warnings: This method can only be used on record with only one alternative allele.
+        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
+        is_deletion = False
+        ref = self.ref.replace(".", "").replace("-", "")
+        alt = self.alt[0].replace(".", "").replace("-", "")
+        if len(alt) < len(ref):
+            is_deletion = True
+        return is_deletion
+
     def isIndel(self):
         """
         @summary: Returns True if the variant is an insertion or a deletion.
-        @return: [bool]
+        @return: [bool] True if the variant is an insertion or a deletion.
+        @warnings: This method can only be used on record with only one alternative allele.
+        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
-        isIndel = False
-        if self.ref == "." or self.ref == "-":
-            isIndel = True
-        else:
-            for allele in self.alt:
-                if len(allele) != len(self.ref) or allele == "." or allele == "-":
-                    isIndel = True
-        return isIndel
-        
+        if len(self.alt) > 1:
+            raise Exception("The function 'isIndel' cannot be used on multi-allelic variant.")
+        is_indel = False
+        ref = self.ref.replace(".", "").replace("-", "")
+        alt = self.alt[0].replace(".", "").replace("-", "")
+        if len(alt) != len(ref):
+            is_indel = True
+        return is_indel
+
+    def isInsertion(self):
+        """
+        @summary: Returns True if the variant is an insertion.
+        @return: [bool] True if the variant is an insertion.
+        @warnings: This method can only be used on record with only one alternative allele.
+        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant.")
+        is_insertion = False
+        ref = self.ref.replace(".", "").replace("-", "")
+        alt = self.alt[0].replace(".", "").replace("-", "")
+        if len(alt) > len(ref):
+            is_insertion = True
+        return is_insertion
+
     def type(self):
         """
         @summary: Returns the vrariant type.
         @return: [str] 'snp' or 'indel' or 'variation'.
+        @warnings: This method can only be used on record with only one alternative allele.
         """
         record_type = "snp"
         if self.isIndel():
@@ -85,7 +134,7 @@ class VCFRecord:
             record_type = "variation"
         return record_type
 
-    def standardizeSingleAllele( self, empty_marker="." ):
+    def standardizeSingleAllele(self, empty_marker="."):
         """
         @summary: The empty allele marker is replaced by the empty_marker and the alternative and reference allele are reduced to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.
         @param empty_marker: The value used for the empty allele (example: A/. for a deletion of A).
@@ -94,7 +143,7 @@ class VCFRecord:
         def twoSideTrimming( record ):
             """
             @summary: Removes identical end and start between reference allele and alternative allele (example: ATGACT/ATCT becomes G/). The end is removed first to manage repeat cases.
-            @param record: [VCFRecord] The mono-alternative variant. 
+            @param record: [VCFRecord] The mono-alternative variant.
             """
             while record.ref != "" and record.alt[0] != "" and record.ref[-1] == record.alt[0][-1]:
                 record.ref = record.ref[:-1]
@@ -106,9 +155,8 @@ class VCFRecord:
 
         if len(self.alt) > 1:
             raise Exception("The function 'standardizeSingleAllele' cannot be used on multi-allelic variant.")
-        #~ self.ref = self.ref.upper() ####################################################
-        #~ self.alt[0] = self.alt[0].upper() ####################################################
-        #~ print( self.pos, self.ref, self.alt[0], sep="\t" )
+        self.ref = self.ref.upper()
+        self.alt[0] = self.alt[0].upper()
         # Deletion with marker
         if self.alt[0] in [".", "-", ""]:
             self.alt[0] = empty_marker
@@ -142,6 +190,84 @@ class VCFRecord:
         # Substitution
         elif len(self.alt[0]) == len(self.ref) and len(self.ref) != 1:
             twoSideTrimming( self )
+
+    def getMostUpstream(self, ref_seq):
+        """
+        @summary: Returns the most upstream variant that can have the same alternative sequence of the instance.
+        @param ref_seq: [str] The reference sequence where the variant has been identified (example: the sequence of the chromosome).
+        @return: [VCFRecord] The standardized most upstream variant (see standardizeSingleAllele).
+        @warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
+        new_record = deepcopy(self)
+        new_record.standardizeSingleAllele()
+        if new_record.isIndel():
+            uc_ref_seq = ref_seq.upper()
+            ref = new_record.ref
+            alt = new_record.alt[0]
+            # Deletion
+            if new_record.isDeletion():
+                if uc_ref_seq[(new_record.pos - 1):(new_record.pos - 1 + len(ref))] != ref:
+                    raise Exception('The reference on position ' + new_record.chrom + ':' + str(new_record.pos) + ' does not correspond to "' + ref + '".')
+                before_var = uc_ref_seq[0:(new_record.pos - 1)]
+                while before_var != "" and before_var[-1] == ref[-1]:
+                    # shift to upstream
+                    before_var = before_var[:-1]
+                    ref = ref[-1] + ref[:-1]
+                new_record.pos = len(before_var) + 1
+                new_record.ref = ref
+            # Insertion
+            else:
+                before_var = uc_ref_seq[0:(new_record.pos - 1)]
+                while before_var != "" and before_var[-1] == alt[-1]:
+                    # shift to upstream
+                    before_var = before_var[:-1]
+                    alt = alt[-1] + alt[:-1]
+                new_record.pos = len(before_var) + 1
+                new_record.alt = [alt]
+        return new_record
+
+    def getMostDownstream(self, ref_seq):
+        """
+        @summary: Returns the most downstream variant that can have the same alternative sequence of the instance.
+        @param ref_seq: [str] The reference sequence where the variant has been identified (example: the sequence of the chromosome).
+        @return: [VCFRecord] The standardized most downstream variant (see standardizeSingleAllele).
+        @warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
+        new_record = deepcopy(self)
+        new_record.standardizeSingleAllele()
+        if new_record.isIndel():
+            uc_ref_seq = ref_seq.upper()
+            ref = new_record.ref
+            alt = new_record.alt[0]
+            # Deletion
+            if new_record.isDeletion():
+                if uc_ref_seq[(new_record.pos - 1):(new_record.pos - 1 + len(ref))] != ref:
+                    raise Exception('The reference on position ' + new_record.chrom + ':' + str(new_record.pos) + ' does not correspond to "' + ref + '".')
+                after_var = uc_ref_seq[new_record.pos + len(ref) - 1:]
+                nb_move = 0
+                while after_var != "" and after_var[0] == ref[0]:
+                    # shift to downstream
+                    after_var = after_var[1:]
+                    ref = ref[1:] + ref[0]
+                    nb_move += 1
+                new_record.pos += nb_move
+                new_record.ref = ref
+            # Insertion
+            else:
+                after_var = uc_ref_seq[new_record.pos - 1:]
+                nb_move = 0
+                while after_var != "" and after_var[0] == alt[0]:
+                    # shift to upstream
+                    after_var = after_var[1:]
+                    alt = alt[1:] + alt[0]
+                    nb_move += 1
+                new_record.pos += nb_move
+                new_record.alt = [alt]
+        return new_record
 
     def getPopDP( self ):############################################### test
         """
@@ -291,7 +417,7 @@ class VCFRecord:
         if "AD" in self.samples[spl_name]: # The AD is already processed for the sample
             AD = self.samples[spl_name]["AD"]
             if isinstance(AD, (list, tuple)) and len(AD) == len(self.alt) + 1: # Skip the reference allele depth
-                AD = AD[1:]              
+                AD = AD[1:]
         elif "AF" in self.samples[spl_name] and DP is not None: # The AD must be processed for the sample
             AF = self.samples[spl_name]["AF"]
             if len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
@@ -323,7 +449,7 @@ class VCFRecord:
         """
         DP = None
         if "DP" in self.samples[spl_name]: # The DP is already processed for the sample
-            DP = self.samples[spl_name]["DP"]            
+            DP = self.samples[spl_name]["DP"]
         elif len(self.samples) == 1 and spl_name in self.samples and "DP" in self.info: # Only one sample and DP is already processed for population
             DP = self.info["DP"]
         else:
@@ -350,10 +476,10 @@ class VCFIO:
         self.format = dict() # { "GT":{"type": str, "number": 1, "description": "Genotype"} }
         if mode == "r":
             self._parse_header()
-    
+
     def __del__( self ):
         self.close()
-    
+
     def __iter__( self ):
         for line in self.file_handle:
             self.current_line = line.rstrip()
@@ -596,25 +722,13 @@ class VCFIO:
             )
         self.file_handle.write( "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([spl for spl in self.samples]) + "\n" )
 
-
-def get_VCF_samples( filepath ):
-    """
-    @deprecated
-    """
-    samples = list()
-    with open( filepath ) as FH:
-        for line in FH: #################################################### Limit read
-            if line.startswith("#CHROM\tPOS"):
-                samples = [spl.strip() for spl in line.split("\t")[9:]]
-    return samples
-
 def getAlleleRecord( FH_vcf, record, idx_alt ):
     new_record = VCFRecord(
         region=record.chrom,
         position=record.pos,
         knownSNPId=record.id,
-        refAllele=record.ref.upper(),
-        altAlleles=[record.alt[idx_alt].upper()],
+        refAllele=record.ref.upper(), ########################### pb transfo
+        altAlleles=[record.alt[idx_alt].upper()], ########################### pb transfo
         qual=record.qual,
         pFilter=deepcopy(record.filter),
         pFormat=deepcopy(record.format)

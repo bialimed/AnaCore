@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.1'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -52,7 +52,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
     @param variants: [dict] By uniq ID the variants. The content of this variable is set by the call of this function.
                      Content example:
                      {
-                       "chr1:10=A/T":{ 
+                       "chr1:10=A/T":{
                          "chrom":"chr1",
                          "pos":10,
                          "ref":"A",
@@ -76,10 +76,10 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
     @param vcf_idx: [int] Index used to store the frequency of each vrariants of the VCF in frequencies list (start from 0).
     @param spl_name: [str] The frequency of the variants came from this sample. This parameters is optional when the VCF file contain 0 to 1 sample.
     """
-    if spl_name is None:
-        spl_name = get_VCF_samples( vcf_path )[0]
     FH_vcf = VCFIO( vcf_path )
     try:
+        if spl_name is None:
+            spl_name = FH_vcf.samples[0]
         for record in FH_vcf:
             # Get allele frequency
             allele_freq = list()
@@ -87,7 +87,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
                 #~ allele_freq = record.info["AF"]
             #~ elif "AF" in record.samples[spl_name]:
             if "AF" in record.samples[spl_name]:
-                allele_freq = record.samples[spl_name]["AF"]                
+                allele_freq = record.samples[spl_name]["AF"]
             elif "AD" in record.samples[spl_name]:
                 for allele_depth in record.samples[spl_name]["AD"][1:]: # Skip the reference allele depth
                     allele_freq.append( allele_depth/float(record.samples[spl_name]["DP"]) )

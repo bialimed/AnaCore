@@ -70,7 +70,7 @@ def mostUpstream( genome_path, in_variant_file, out_variant_file ):
                     ref = record.ref
                     alt = record.alt[0]
                     # Deletion
-                    if alt == ".":
+                    if record.isDeletion():
                         if genome_by_chr[record.chrom][(record.pos - 1):(record.pos - 1 + len(ref))] != ref:
                             raise Exception('The reference on position ' + record.chrom + ':' + str(record.pos) + ' does not correspond to "' + ref + '".')
                         before_var = genome_by_chr[record.chrom][0:(record.pos - 1)]
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
     group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).' )
     args = parser.parse_args()
-    
+
     # Process
     out_dir = os.path.dirname( args.output_variants )
     tmp_vcf = os.path.join( out_dir, str(uuid.uuid1()) )
