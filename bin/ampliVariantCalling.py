@@ -19,9 +19,9 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.1'
+__version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'dev'
+__status__ = 'prod'
 
 import os
 import sys
@@ -455,6 +455,29 @@ class MeltOverlappingRegions(Cmd):
                       cmd_param,
                       "--version" )
 
+class FilterVCFPrimers(Cmd):
+    """
+    @summary: Removes variants located on amplicons primers.
+    """
+    def __init__(self, in_sequences, in_regions, in_variants, out_variants):
+        """
+        @param in_sequences: [str] Path to the reference sequences file (format: fasta). The reference used to discover variants.
+        @param in_regions: [str] Path to the amplicons design with their primers (format: BED). The zone of interest is defined by thickStart and thickEnd. The amplicons must not have any overlap between them.
+        @param in_variants: [str] Path to the variants file (format: VCF). This file should be sorted by coordinates otherwise the execution time will be dramatically increased.
+        @param out_variants: [str] Path to the outputted variants file (format: VCF).
+        """
+        cmd_param = "" + \
+            " --input-sequences " + in_sequences + \
+            " --input-regions " + in_regions + \
+            " --input-variants " + in_variants + \
+            " --output-variants " + out_variants
+
+        Cmd.__init__( self,
+                      "filterVCFPrimers.py",
+                      "Removes variants located on amplicons primers.",
+                      cmd_param,
+                      "--version" )
+
 def filterBED(in_bed, in_names, out_bed):
     """
     @summary: Filters a BED file with the list of names of regions to keep.
@@ -520,6 +543,7 @@ if __name__ == "__main__":
     group_output.add_argument( '-ol', '--output-log', default=sys.stdout, help='The path to the outputted log file (format: txt). [Default: STDOUT]' )
     args = parser.parse_args()
 
+    Logger.static_write(args.output_log, "## Application\n\tSoftware:\n\t\t" + os.path.basename(sys.argv[0]) + " (version: " + str(__version__) + ")\n\tCommand:\n\t\t" + " ".join(sys.argv) + "\n\n")
     tmp = TmpFiles( os.path.dirname(args.output_variants) )
     library_name = os.path.basename(args.input_aln).split(".")[0] if args.library_name is None else args.library_name
 
@@ -543,7 +567,7 @@ if __name__ == "__main__":
         curr_gp_aln = gp_alignment[idx_gp]
 
         # Index BAM
-        tmp.add( curr_gp_aln + ".bai" )
+        tmp.files.append( curr_gp_aln + ".bai" )
         SamtoolsIndex( curr_gp_aln ).submit( args.output_log )
 
         # Select regions of current group
@@ -557,18 +581,22 @@ if __name__ == "__main__":
         # Add RG on BAM
         curr_gp_aln_new_RG = tmp.add( curr_gp + "_RG.bam" )
         AddRGOnBAM( curr_gp_aln, curr_gp_aln_new_RG, "ILLUMINA", library_name, library_name ).submit( args.output_log )
-        tmp.add( curr_gp_aln_new_RG + ".bai" )
+        tmp.files.append( curr_gp_aln_new_RG + ".bai" )
         SamtoolsIndex( curr_gp_aln_new_RG ).submit( args.output_log )
 
         # Call variants
         curr_gp_vcf = tmp.add( curr_gp + ".vcf" )
         VarDictFct( args.input_genome, curr_gp_regions_with_prim, curr_gp_aln_new_RG, curr_gp_vcf, args.output_log, tmp, args.min_AF )
 
+        # Filters variants located on primers
+        curr_gp_clean_vcf = tmp.add( curr_gp + "_clean.vcf" )
+        FilterVCFPrimers( args.input_genome, curr_gp_regions_with_prim, curr_gp_vcf, curr_gp_clean_vcf ).submit( args.output_log )
+
         # Store current group files
         groups.append({
             "name": curr_gp,
             "aln": curr_gp_aln,
-            "vcf": curr_gp_vcf,
+            "vcf": curr_gp_clean_vcf,
             "design_wout_prim": curr_gp_regions_wout_prim,
             "design_with_prim": curr_gp_regions_with_prim
         })
