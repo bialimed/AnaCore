@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.7.0'
+__version__ = '1.7.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -642,7 +642,7 @@ class VCFIO:
         line = "\t".join([
             record.chrom,
             str(record.pos),
-            record.id,
+            ("." if record.id is None else record.id),
             record.ref,
             ",".join(record.alt),
             ("." if record.qual is None else str(record.qual)),
