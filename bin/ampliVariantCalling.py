@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -551,7 +551,7 @@ if __name__ == "__main__":
         subprocess.check_output('grep "' + curr_gp + '$" ' + args.input_non_overlapping_design + ' | cut -f 1 > ' +  curr_gp_regions, shell=True )
         curr_gp_regions_with_prim = tmp.add( curr_gp + "_withPrimers.bed" )
         filterBED( args.input_design_with_primers, curr_gp_regions, curr_gp_regions_with_prim )
-        curr_gp_regions_wout_prim = tmp.add( curr_gp + "_withPrimers.bed" )
+        curr_gp_regions_wout_prim = tmp.add( curr_gp + "_woutPrimers.bed" )
         filterBED( args.input_design_wout_primers, curr_gp_regions, curr_gp_regions_wout_prim )
 
         # Add RG on BAM
