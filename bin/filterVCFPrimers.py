@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -61,11 +61,16 @@ def canBeMovedToInterest( overlapped_region, ref_seq, variant ):
     else:
         moved_variant = variant.getMostUpstream( ref_seq )
         if variant.isInsertion():
-            if moved_variant.pos <= overlapped_region.start: # Positions can be equals in case where the insertion end the interest area
-                can_be_moved = True
+            if moved_variant.ref == ".": # The standardization is ok
+                if moved_variant.pos <= overlapped_region.start: # Positions can be equals in case where the insertion end the interest area
+                    can_be_moved = True
+            else: # The standardization has failed
+                if moved_variant.pos + len(moved_variant.ref) - 1 < overlapped_region.start:
+                    can_be_moved = True
         elif variant.isDeletion():
-            if moved_variant.pos + len(variant.ref) < overlapped_region.start:
-                can_be_moved = True
+            if len(moved_variant.alt[0].replace(".", "")): # The standardization is ok
+                if moved_variant.pos + len(variant.ref) - 1 < overlapped_region.start:
+                    can_be_moved = True
     return can_be_moved
 
 def checkAmpliconsOverlap( in_regions ):
@@ -132,7 +137,7 @@ def getVariantRegion( variant ):
     std_variant.standardizeSingleAllele()
     return Region(
         std_variant.pos,
-        std_variant.pos + len(std_variant.ref.replace(".", "")),
+        std_variant.pos + len(std_variant.ref) - 1, # Works also with standardized insertion
         None,
         std_variant.chrom
     )
@@ -173,7 +178,7 @@ if __name__ == "__main__":
                     alt_record = getAlleleRecord( FH_in, record, alt_idx )
                     alt_region = getVariantRegion( alt_record )
                     overlapped_primers = primers_by_chr[alt_record.chrom].getOverlapped( alt_region )
-                    if len(overlapped_primers) > 0:
+                    if len(overlapped_primers) > 0: # The variant overlaps a primer or variant is an insertion just before the downstream primer
                         is_kept = False
                         if len(overlapped_primers) == 1: # Variants over 2 primers are removed
                             if alt_record.isIndel():
