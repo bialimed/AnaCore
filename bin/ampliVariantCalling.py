@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -478,12 +478,13 @@ class FilterVCFPrimers(Cmd):
                       cmd_param,
                       "--version" )
 
-def filterBED(in_bed, in_names, out_bed):
+def filterBED(in_bed, in_names, out_bed, nb_col=None):
     """
     @summary: Filters a BED file with the list of names of regions to keep.
     @param in_bed: [str] Path to the initial file (format: BED).
     @param in_names: [str] Path to the file containing the list of names of the retained regions.
     @param out_bed: [str] Path to the filtered file (format: BED).
+    @param nb_col: [int] Number of columns in output.
     """
     # Retrieve retained regions names
     retained_regions = dict()
@@ -499,6 +500,8 @@ def filterBED(in_bed, in_names, out_bed):
                 else:
                     fields = [field.strip() for field in line.split("\t")]
                     if fields[3] in retained_regions:
+                        if nb_col is not None:
+                            line = "\t".join(fields[:nb_col]) + "\n"
                         FH_out.write( line )
 
 def VarDictFct(in_reference, in_regions, in_aln, out_variants, logger, tmp_file, min_AF=0.02):
@@ -575,6 +578,8 @@ if __name__ == "__main__":
         subprocess.check_output('grep "' + curr_gp + '$" ' + args.input_non_overlapping_design + ' | cut -f 1 > ' +  curr_gp_regions, shell=True )
         curr_gp_regions_with_prim = tmp.add( curr_gp + "_withPrimers.bed" )
         filterBED( args.input_design_with_primers, curr_gp_regions, curr_gp_regions_with_prim )
+        curr_gp_regions_with_prim_4_col = tmp.add( curr_gp + "_withPrimers_4col.bed" )
+        filterBED( args.input_design_with_primers, curr_gp_regions, curr_gp_regions_with_prim_4_col, 4 )
         curr_gp_regions_wout_prim = tmp.add( curr_gp + "_woutPrimers.bed" )
         filterBED( args.input_design_wout_primers, curr_gp_regions, curr_gp_regions_wout_prim )
 
@@ -586,7 +591,7 @@ if __name__ == "__main__":
 
         # Call variants
         curr_gp_vcf = tmp.add( curr_gp + ".vcf" )
-        VarDictFct( args.input_genome, curr_gp_regions_with_prim, curr_gp_aln_new_RG, curr_gp_vcf, args.output_log, tmp, args.min_AF )
+        VarDictFct( args.input_genome, curr_gp_regions_with_prim_4_col, curr_gp_aln_new_RG, curr_gp_vcf, args.output_log, tmp, args.min_AF )
 
         # Filters variants located on primers
         curr_gp_clean_vcf = tmp.add( curr_gp + "_clean.vcf" )
