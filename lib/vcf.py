@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.7.2'
+__version__ = '1.8.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -496,11 +496,21 @@ class VCFIO:
                 yield vcf_record
 
     def close( self ):
+        """
+        @summary: Closes file handle.
+        """
         if hasattr(self, 'file_handle') and self.file_handle is not None:
             self.file_handle.close()
             self.file_handle = None
             self.current_line_nb = None
             self.current_line = None
+
+    def closed( self ):
+        """
+        @summary: Returns True if the file is closed.
+        @retrun: [bool] True if the file is closed.
+        """
+        return self.file_handle.closed()
 
     def __enter__(self):
         return(self)
@@ -527,6 +537,9 @@ class VCFIO:
                 self.current_line = self.file_handle.readline().rstrip()
 
     def _parse_header_line( self ):
+        """
+        @summary: Parses one VCF header line to update info, format or samples attributes.
+        """
         type_fct = {
             "String": str,
             "Integer": int,
@@ -630,6 +643,10 @@ class VCFIO:
         return variation
 
     def write(self, record):
+        """
+        @summary: Writes variant record in VCF.
+        @param record: [VCFRecord] The variant record.
+        """
         self.file_handle.write( self.recToVCFLine(record) + "\n" )
 
     def recToVCFLine(self, record):
@@ -723,6 +740,12 @@ class VCFIO:
         self.file_handle.write( "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([spl for spl in self.samples]) + "\n" )
 
 def getAlleleRecord( FH_vcf, record, idx_alt ):
+    """
+    @summary: Returns the record corresponding to the specified allele in variant.
+    @param record: [VCFRecord] The variant record.
+    @param idx_alt: [int] The index of the allele in alt attribute.
+    @return: [VCFRecord] The record corresponding to the specified allele in variant.
+    """
     new_record = VCFRecord(
         region=record.chrom,
         position=record.pos,
