@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -89,6 +89,12 @@ class FilterVCFPrimers(unittest.TestCase):
                 VCFRecord( "artificial_chr1", 14, None, "G", ["GG"], None, None, {"ZOI": "yes"} ),
                 VCFRecord( "artificial_chr1", 18, None, "GGG", ["G"], None, None, {"ZOI": "yes"} ), # ZOI downstream limit deletion
                 VCFRecord( "artificial_chr1", 22, None, "T", ["TT"], None, None, {"ZOI": "yes"} ),
+
+				VCFRecord( "artificial_chr1", 9, None, "TT", ["TC"], None, None, {"ZOI": "no"} ), # Substitution before end of upstream primer
+                VCFRecord( "artificial_chr1", 10, None, "TG", ["TC"], None, None, {"ZOI": "yes"} ), # Substitution in upstream limit of ZOI
+				VCFRecord( "artificial_chr1", 15, None, "GG", ["GC"], None, None, {"ZOI": "yes"} ), # Substitution in dosnstream limit of ZOI
+				VCFRecord( "artificial_chr1", 20, None, "GT", ["GC"], None, None, {"ZOI": "no"} ), # Substitution after start of downstream primer
+				VCFRecord( "artificial_chr1", 21, None, "TT", ["TC"], None, None, {"ZOI": "no"} ), # Substitution in downstream primer
 
                 VCFRecord( "artificial_chr2", 1, None, "C", ["CTT"], None, None, {"ZOI": "no"} ), # Insertion before end of upstream primer
                 VCFRecord( "artificial_chr2", 2, None, "G", ["GCC"], None, None, {"ZOI": "yes"} ), # Insertion in upstream limit of ZOI
