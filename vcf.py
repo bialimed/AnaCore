@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.7.1'
+__version__ = '1.7.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -202,7 +202,7 @@ class VCFRecord:
             raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
         new_record = deepcopy(self)
         new_record.standardizeSingleAllele()
-        if new_record.isIndel():
+        if new_record.ref == "." or new_record.alt[0] == ".": # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
@@ -239,7 +239,7 @@ class VCFRecord:
             raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
         new_record = deepcopy(self)
         new_record.standardizeSingleAllele()
-        if new_record.isIndel():
+        if new_record.ref == "." or new_record.alt[0] == ".": # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
