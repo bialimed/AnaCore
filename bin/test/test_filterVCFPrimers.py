@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -33,6 +33,7 @@ import subprocess
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BIN_DIR = os.path.dirname(CURRENT_DIR)
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(BIN_DIR), "lib"))
+os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
 sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
