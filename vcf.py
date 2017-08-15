@@ -18,32 +18,16 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.8.0'
+__version__ = '1.9.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
 
 import re
-import gzip
 import warnings
 from copy import deepcopy
+from abstractFile import AbstractFile
 
-
-def is_gzip(file):
-    """
-    @return: [bool] True if the file is gziped.
-    @param file: [str] Path to processed file.
-    """
-    is_gzip = None
-    FH_input = gzip.open( file )
-    try:
-        FH_input.readline()
-        is_gzip = True
-    except:
-        is_gzip = False
-    finally:
-        FH_input.close()
-    return is_gzip
 
 
 class VCFRecord:
@@ -457,86 +441,48 @@ class VCFRecord:
         return( DP )
 
 
-class VCFIO:
+class VCFIO(AbstractFile):
     def __init__( self, filepath, mode="r" ):
         """
         @param filepath: [str] The filepath.
         @param mode: [str] Mode to open the file ('r', 'w', 'a').
         """
-        self.filepath = filepath
-        self.mode = mode
-        if (mode in ["w", "a"] and filepath.endswith('.gz')) or (mode not in ["w", "a"] and is_gzip(filepath)):
-            self.file_handle = gzip.open( filepath, mode + "t" )
-        else:
-            self.file_handle = open( filepath, mode )
-        self.current_line_nb = 0
-        self.current_line = None
+        AbstractFile.__init__(self, filepath, mode)
         self.samples = list()
         self.info = dict() # { "IDREP":{"type": int, "number": 1, "description": "Number of times RU is repeated in indel allele."} }
         self.format = dict() # { "GT":{"type": str, "number": 1, "description": "Genotype"} }
         if mode == "r":
-            self._parse_header()
+            self._parseHeader()
 
-    def __del__( self ):
-        self.close()
-
-    def __iter__( self ):
-        for line in self.file_handle:
-            self.current_line = line.rstrip()
-            self.current_line_nb += 1
-            if self.current_line.startswith('#'):
-                self._parse_header_line()
-                continue
-            try:
-                vcf_record = self._parse_line()
-            except:
-                raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".\n" +
-                               "Line content : " + self.current_line )
-            else:
-                yield vcf_record
-
-    def close( self ):
+    def isRecordLine(self, line):
         """
-        @summary: Closes file handle.
+        @summary: Returns True if the line corresponds to a record (it is not a comment or an header line).
+        @param line: [str] The evaluated line.
+        @return: [bool] True if the line corresponds to a record.
         """
-        if hasattr(self, 'file_handle') and self.file_handle is not None:
-            self.file_handle.close()
-            self.file_handle = None
-            self.current_line_nb = None
-            self.current_line = None
+        is_record = True
+        if line.startswith("#"):
+            is_record = False
+        return is_record
 
-    def closed( self ):
-        """
-        @summary: Returns True if the file is closed.
-        @retrun: [bool] True if the file is closed.
-        """
-        return self.file_handle.closed()
-
-    def __enter__(self):
-        return(self)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-    def _parse_header( self ):
+    def _parseHeader( self ):
         """
         @summary: Parses VCF header to set info, format and samples attributes.
         """
         if self.current_line_nb == 0:
-            self.current_line_nb += 1
             self.current_line = self.file_handle.readline().rstrip()
         is_header = False
         if self.current_line.startswith('#'):
             is_header = True
         while is_header:
-            self._parse_header_line()
+            self._parseHeaderLine()
             if self.current_line is None or self.current_line.startswith("#CHROM"): # Last header line
                 is_header = False
             else:
                 self.current_line_nb += 1
                 self.current_line = self.file_handle.readline().rstrip()
 
-    def _parse_header_line( self ):
+    def _parseHeaderLine( self ):
         """
         @summary: Parses one VCF header line to update info, format or samples attributes.
         """
@@ -578,7 +524,7 @@ class VCFIO:
         elif self.current_line.startswith("#CHROM\tPOS"):
             self.samples = [spl.strip() for spl in self.current_line.split("\t")[9:]]
 
-    def _parse_line( self ):
+    def _parseLine( self ):
         """
         @summary: Returns a structured record from the VCF current line.
         @return: [VCFRecord] The variant described by the current line.
