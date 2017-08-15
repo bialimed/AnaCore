@@ -19,12 +19,14 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import uuid
+import tempfile
 import unittest
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +43,64 @@ from vcf import VCFRecord, VCFIO
 # FUNCTIONS
 #
 ########################################################################
+class TestVCFIO(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+
+        # Temporary files
+        self.tmp_variants = os.path.join( tmp_folder, unique_id + ".vcf")
+
+        # Create VCF
+        spec_example = """##fileformat=VCFv4.2
+##fileDate=20090805"
+##source=myImputationProgramV3.1
+##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
+##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
+##phasing=partial
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
+##FILTER=<ID=q10,Description="Quality below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples have data">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+20	14370	rs6054257	G	A	29	PASS	NS=3;DP=14;AF=0.5;DB;H2	GT:GQ:DP:HQ	0|0:48:1:51,51	1|0:48:8:51,51	1/1:43:5:.,.
+20	17330	.	T	A	3	q10	NS=3;DP=11;AF=0.017	GT:GQ:DP:HQ	0|0:49:3:58,50	0|1:3:5:65,3	0/0:41:3
+20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4
+20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:7:56,60	0|0:48:4:51,51	0/0:61:2
+20	1234567	microsat1	GTC	G,GTCT	50	PASS	NS=3;DP=9;AA=G	GT:GQ:DP	0/1:35:4	0/2:17:2	1/1:40:3"""
+        with open(self.tmp_variants, "w") as FH_variants:
+            FH_variants.write( spec_example )
+
+    def testIter(self):
+        with VCFIO(self.tmp_variants) as FH_vcf:
+            # Header
+            self.assertEqual( FH_vcf.samples, ["NA00001", "NA00002", "NA00003"] )
+            self.assertEqual( sorted(list(FH_vcf.format.keys())), sorted(["GT", "GQ", "DP", "HQ"]) )
+            self.assertEqual( sorted(list(FH_vcf.info.keys())), sorted(["NS", "DP", "AF", "AA", "DB", "H2"]) )
+            # Records
+            expected_records = ["20_14370_G_A", "20_17330_T_A", "20_1110696_A_G,T", "20_1230237_T_.", "20_1234567_GTC_G,GTCT"]
+            readed_records = list()
+            for variant in FH_vcf:
+                readed_records.append(
+                    "_".join([variant.chrom, str(variant.pos), variant.ref, ",".join(variant.alt)])
+                )
+            self.assertEqual( expected_records, readed_records )
+
+    def tearDown(self):
+        # Clean temporary files
+        for curr_file in [self.tmp_variants]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+
 class TestVCFRecord(unittest.TestCase):
     def testStandardizeSingleAllele(self):
         # Test substitution one nt

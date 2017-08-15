@@ -33,8 +33,8 @@ class VEPVCFIO(VCFIO):
         self.CSQ_titles = list()
         super().__init__(*args, **kwargs)
 
-    def _parse_header( self ):
-        super()._parse_header()
+    def _parseHeader( self ):
+        super()._parseHeader()
         if "CSQ" in self.info:
             # Get CSQ fields
             match = re.search( "Format: ([^ ]+)", self.info["CSQ"]["description"] )
