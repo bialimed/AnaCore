@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -54,10 +54,13 @@ class AbstractFile(object):
             self.file_handle = gzip.open( filepath, mode + "t" )
         else:
             self.file_handle = open( filepath, mode )
-        self.current_line_nb = 1
+        self.current_line_nb = 0
         self.current_line = None
 
     def close( self ) :
+        """
+        @summary: Closes file handle.
+        """
         if hasattr(self, 'file_handle') and self.file_handle is not None:
             self.file_handle.close()
             self.file_handle = None
@@ -65,6 +68,10 @@ class AbstractFile(object):
             self.current_line = None
 
     def closed( self ):
+        """
+        @summary: Returns True if the file is closed.
+        @retrun: [bool] True if the file is closed.
+        """
         return self.file_handle.closed()
 
     def __del__( self ):
