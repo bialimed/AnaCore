@@ -1,16 +1,16 @@
 #
 # Copyright (C) 2017 IUCT-O
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -116,7 +116,7 @@ class DSVF (Workflow):
             curr_spl_R2 = os.path.basename( cleaned_R2.out_R1[idx] ).split("_")[0]
             if curr_spl_R1 != curr_spl_R2:
                 print( curr_spl_R1, curr_spl_R2 )
-                raise Exception("Aln list are not consistent")    
+                raise Exception("Aln list are not consistent")
         ################################################################
         bwa = self.add_component( "BWAmem", [self.genome_seq, cleaned_R1.out_R1, cleaned_R2.out_R1] )
         idx_aln = self.add_component( "BAMIndex", [bwa.aln_files] )
@@ -134,7 +134,7 @@ class DSVF (Workflow):
             self.add_component( "DepthsDistribution", [curr_lib["design_wout_primers"], coverage.depth_files, self.metrics_type], component_prefix=curr_lib["name"] )
 
             # Variant Calling
-            variant_calling = self.add_component( "VarDictAmpli", [self.genome_seq, curr_lib["design_with_primers"], idx_aln_RG.out_aln, self.min_AF], component_prefix=curr_lib["name"] )
+            variant_calling = self.add_component( "AmpliVariantCalling", [self.genome_seq, curr_lib["design_with_primers"], curr_lib["design_wout_primers"], curr_lib["non_overlap_groups"], idx_aln_RG.out_aln, self.min_AF], component_prefix=curr_lib["name"] )
             curr_lib["vcf"] = variant_calling.out_variants
 
         # Merge DS variants
@@ -155,7 +155,7 @@ class DSVF (Workflow):
                 pass
             else:
                 print( curr_spl_libA_aln, curr_spl_libB_aln, curr_spl_libA_vcf, curr_spl_libB_vcf)
-                raise Exception("Merge list are not consistent")       
+                raise Exception("Merge list are not consistent")
         ################################################################
         spl_merging = self.add_component( "MergeVCFAmpli", [libA["design_wout_primers"], libB["design_wout_primers"], libA["vcf"], libB["vcf"], libA["aln"], libB["aln"]] )
 
