@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -42,12 +42,12 @@ class VEPVCFIO(VCFIO):
                 raise Exception("The CSQ description cannot be parsed in file " + self.filepath)
             self.CSQ_titles = match.group(1).split("|")
 
-    def _parse_line(self):
-        record = super()._parse_line()
-        self._parse_CSQ( record )
+    def _parseLine(self):
+        record = super()._parseLine()
+        self._parseCSQ( record )
         return record
 
-    def _parse_CSQ(self, record):
+    def _parseCSQ(self, record):
         for annot_idx, annot in enumerate(record.info["CSQ"]):
             annot_val = dict()
             for field_idx, field_value in enumerate(annot.split("|")):
