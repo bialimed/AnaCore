@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -180,6 +180,7 @@ class DSVF (Workflow):
             spl_names = sorted([spl["Sample_Name"] for spl in self.samples if spl["Manifest"] == libA["name"]])
             positive_ctrl_variants = [filtered_variants.out_variants[idx] for idx, spl_name in enumerate(spl_names) if spl_name in self.pos_ctrl_names]
             if len(positive_ctrl_variants) > 0:
+                self.pos_ctrl_spl = [spl_name for spl_name in spl_names if spl_name in self.pos_ctrl_names]
                 self.add_component( "VariantsCtrlCheck", [self.pos_ctrl_expected, positive_ctrl_variants, self.metrics_type] )
             else:
                 warnings.warn( 'No positives controls can be found with the names "' + '" or "'.join(self.pos_ctrl_names) + '"' )
