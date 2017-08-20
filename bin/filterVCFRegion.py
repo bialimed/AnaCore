@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -46,7 +46,7 @@ def getKeptFromBed( bed_path ):
     """
     @summary: Returns selected regions by chromosome from BED.
     @param bed_path: [str] Path to the file describing selected regions (format: BED).
-    @return: [dict] By chromosome the list of selected regions. Each list of region is sorted firstly by start position (1-based) and secondly by end position (1-based). Each region is represented by a dictionary with this format: {"start":501, "end":608}. 
+    @return: [dict] By chromosome the list of selected regions. Each list of region is sorted firstly by start position (1-based) and secondly by end position (1-based). Each region is represented by a dictionary with this format: {"start":501, "end":608}.
     """
     kept_by_chr = dict()
     # Group by chromosome
@@ -67,7 +67,7 @@ def getKeptFromBed( bed_path ):
 def isOverlapping( regions_by_chr, chrom, pos ):
     """
     @summary: Returns True if the specified position overlap one region in regions_by_chr.
-    @param regions_by_chr: [dict] By chromosome the list of selected regions. Each list of region is sorted firstly by start position (1-based) and secondly by end position (1-based). Each region is represented by a dictionary with this format: {"start":501, "end":608}. 
+    @param regions_by_chr: [dict] By chromosome the list of selected regions. Each list of region is sorted firstly by start position (1-based) and secondly by end position (1-based). Each region is represented by a dictionary with this format: {"start":501, "end":608}.
     @param chrom: [str] The chromosome where is located the evaluated position.
     @param pos: [int] The evaluated position on chrom.
     @return: [bool] True if the specified position overlap one region in regions_by_chr.
@@ -98,15 +98,13 @@ if __name__ == "__main__":
 
     # Process
     kept_by_chr = getKeptFromBed( args.selected_regions )
-    with open(args.output_variants, "w") as FH_out:
-        # Writes header
-        with open(args.input_variants) as FH_in:
-            line = FH_in.readline()
-            while line.startswith("#"):
-                FH_out.write( line )
-                line = FH_in.readline()
-        # Writes variants
-        with VCFIO(args.input_variants) as FH_in:
+    with VCFIO(args.input_variants) as FH_in:
+        with VCFIO(args.output_variants, "w") as FH_out:
+            # Writes header
+            FH_out.copyHeader( FH_in )
+            FH_out.filter["REG"] = 'The variant is located on an excluded region (' + args.selected_regions + ').'
+            FH_out._writeHeader()
+            # Writes variants
             for variant in FH_in:
                 if isOverlapping(kept_by_chr, variant.chrom, variant.pos):
-                    FH_out.write( FH_in.recToVCFLine(variant) + "\n" )
+                    FH_out.write( variant )

@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -59,6 +59,7 @@ if __name__ == "__main__":
     with VCFIO(args.input_variants) as FH_in:
         with VCFIO(args.output_variants, "w") as FH_out:
             # Header
+            FH_out.filter = FH_in.filter
             removed_from_info = list()
             FH_out.info = FH_in.info.copy()
             for field in ["AD", "AF", "DP"]:

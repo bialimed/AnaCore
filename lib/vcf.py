@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.9.0'
+__version__ = '1.10.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -449,6 +449,7 @@ class VCFIO(AbstractFile):
         """
         AbstractFile.__init__(self, filepath, mode)
         self.samples = list()
+        self.filter = dict() # { "q10":"Quality below 10" }
         self.info = dict() # { "IDREP":{"type": int, "number": 1, "description": "Number of times RU is repeated in indel allele."} }
         self.format = dict() # { "GT":{"type": str, "number": 1, "description": "Genotype"} }
         if mode == "r":
@@ -484,7 +485,7 @@ class VCFIO(AbstractFile):
 
     def _parseHeaderLine( self ):
         """
-        @summary: Parses one VCF header line to update info, format or samples attributes.
+        @summary: Parses one VCF header line to update info, filter, format or samples attributes.
         """
         type_fct = {
             "String": str,
@@ -494,7 +495,7 @@ class VCFIO(AbstractFile):
             "Flag": None
         } ################################################################### Flag
         if self.current_line.startswith("##INFO"):
-            line = self.current_line[8:-1] # Remove ##INFO=< and >
+            line = self.current_line[8:-1] # Remove "##INFO=<" and ">"
             match = re.search('ID=([^,]+)', line)
             id = match.group(1)
             match = re.search('Type=([^,]+)', line)
@@ -507,6 +508,13 @@ class VCFIO(AbstractFile):
             if match.group(1) not in [".", "A", "R", "G"]:
                 number = int(match.group(1))
             self.info[id] = { "type": type_fct[type], "type_tag": type, "number": number, "number_tag": number_tag, "description": description }
+        elif self.current_line.startswith("##FILTER"):
+            line = self.current_line[8:-1] # Remove "##FILTER=<" and ">"
+            match = re.search('ID=([^,]+)', line)
+            id = match.group(1)
+            match = re.search('Description="([^"]+)"', line)
+            description = match.group(1)
+            self.filter[id] = description
         elif self.current_line.startswith("##FORMAT"):
             line = self.current_line[10:-1] # Remove "##FORMAT=<" and ">"
             match = re.search('ID=([^,]+)', line)
@@ -656,12 +664,22 @@ class VCFIO(AbstractFile):
                     line += "\t" + ":".join(spl_fields)
         return line
 
+    def copyHeader( self, model ):
+        """
+        @summary: Copy header fields from the specified VCF.
+        @param model: [VCFIO] The VCF source.
+        """
+        self.filter = deepcopy(model.filter)
+        self.format = deepcopy(model.format)
+        self.info = deepcopy(model.info)
+        self.samples = deepcopy(model.samples)
+
     def _writeHeader( self ):
         """
         @note: Draft
         """
         self.file_handle.write( "##fileformat=VCFv4.0\n" )
-        for tag in self.info:
+        for tag in sorted(self.info):
             number_tag = self.info[tag]["number"] if self.info[tag]["number"] is not None else "."
             if "number_tag" in self.info[tag]:
                 number_tag = self.info[tag]["number_tag"]
@@ -672,7 +690,13 @@ class VCFIO(AbstractFile):
                 'Description="' + self.info[tag]["description"] + '"' + \
                 '>\n'
             )
-        for tag in self.format:
+        for tag in sorted(self.filter):
+            self.file_handle.write( '##FILTER=<' + \
+                'ID=' + tag + ',' + \
+                'Description="' + self.filter[tag] + '"' + \
+                '>\n'
+            )
+        for tag in sorted(self.format):
             number_tag = self.format[tag]["number"] if self.format[tag]["number"] is not None else "."
             if "number_tag" in self.format[tag]:
                 number_tag = self.format[tag]["number_tag"]

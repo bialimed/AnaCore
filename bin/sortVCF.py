@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -56,11 +56,8 @@ if __name__ == "__main__":
     with VCFIO(args.output_variants, "w") as FH_out:
         with VCFIO(args.input_variants) as FH_in:
             # Header
-            FH_out.info = FH_in.info
-            FH_out.format = FH_in.format
-            FH_out.samples = FH_in.samples
+            FH_out.copyHeader( FH_in )
             FH_out._writeHeader()
-        
             # Records
             records_by_chr = dict()
             for record in FH_in:

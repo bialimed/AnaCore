@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.2'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -111,16 +111,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process
-    with open(args.output_variants, "w") as FH_out:
-        # Filter variant file
-        with open(args.input_variants) as FH_vcf:
-            line = FH_vcf.readline()
-            while line.startswith("#"):
-                ######################################### add filter info
-                FH_out.write( line )
-                line = FH_vcf.readline()
-        # Find retained variants
-        with VCFIO(args.input_variants) as FH_in:
+    with VCFIO(args.input_variants) as FH_in:
+        with VCFIO(args.output_variants, "w") as FH_out:
+            # Header
+            FH_out.copyHeader( FH_in )
+            FH_out.filter["incomplete"] = 'The variant has a sufficient frequency in one sample (AF>=' + str(args.AF_threshold * 100) + '% and DP>=' + str(args.DP_threshold) + ') but the depth in second sample it has an insufficiant depth (the AF cannot be take into account).'
+            FH_out.filter["invalid"] = 'The variant has an insufficient frequency in one sample (AF<' + str(args.AF_threshold * 100) + '% and DP>=' + str(args.DP_threshold) + ') but the depth in second sample it has an insufficiant depth (the AF cannot be take into account).'
+            FH_out.filter["libSpe"] = 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in one of the sample and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.'
+            FH_out.filter["lowAF"] = 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in all the samples and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.'
+            FH_out.filter["lowDP"] = 'The variant has a depth lower than ' + str(args.DP_threshold) + ' in all the samples.'
+            FH_out._writeHeader()
+            # Records
             for record in FH_in:
                 for alt_idx, alt in enumerate(record.alt):
                     alt_record = getAlleleRecord( FH_in, record, alt_idx )
@@ -145,71 +146,7 @@ if __name__ == "__main__":
                         else:
                             alt_record.filter.append( tag )
                     if args.mode == "tag":
-                        FH_out.write( FH_in.recToVCFLine(alt_record) + "\n" )
+                        FH_out.write( alt_record )
                     else:
                         if tag in ["PASS", "incomplete"]:
-                            FH_out.write( FH_in.recToVCFLine(alt_record) + "\n" )
-
-
-########################################################################
-#
-# TEST
-#
-########################################################################
-"""
-Parameters:
------------
---AF-threshold 0.1 --DP-threshold 500
-
-
-Input:
-------
-##fileformat=VCFv4.0
-##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
-##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
-##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
-##FORMAT=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA	splB
-1	10	1	A	G	.	.	AF=0.1;DP=1000	DP:AF	500:0.1	500:0.1
-1	10	2	A	G	.	.	AF=0.1;DP=1000	DP:AF	500:0.01	500:0.01
-1	10	3	A	G	.	.	AF=0.1;DP=2	DP:AF	1:0.1	1:0.1
-1	10	4	A	G	.	.	AF=0.01;DP=2	DP:AF	1:0.01	1:0.01
-1	10	5	A	G	.	.	AF=0.1;DP=501	DP:AF	500:0.1	1:0.01
-1	10	6	A	G	.	.	AF=0.01;DP=501	DP:AF	500:0.01	1:0.1
-1	10	7	A	G	.	.	AF=0.1;DP=501	DP:AF	500:0.1	1:0.1
-1	10	8	A	G	.	.	AF=0.01;DP=501	DP:AF	500:0.01	1:0.01
-1	10	9	A	G	.	.	AF=0.01;DP=501	DP:AF	1:0.1	500:0.01
-1	10	10	A	G	.	.	AF=0.1;DP=501	DP:AF	1:0.01	500:0.1
-1	10	11	A	G	.	.	AF=0.1;DP=501	DP:AF	1:0.1	500:0.1
-1	10	12	A	G	.	.	AF=0.01;DP=501	DP:AF	1:0.01	500:0.01
-1	10	13	A	G	.	.	AF=0.055;DP=2	DP:AF	1:0.01	1:0.1
-1	10	14	A	G	.	.	AF=0.55;DP=1000	DP:AF	500:0.01	500:0.1
-1	10	15	A	G	.	.	AF=0.055;DP=2	DP:AF	1:0.1	1:0.01
-1	10	16	A	G	.	.	AF=0.55;DP=1000	DP:AF	500:0.1	500:0.01
-
-
-Output:
--------
-##fileformat=VCFv4.0
-##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
-##INFO=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
-##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
-##FORMAT=<ID=AF,Number=.,Type=Float,Description="Allele Frequency">
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA	splB
-1	10	1	A	G	.	PASS	AF=0.1;DP=1000	DP:AF	500:0.1	500:0.1
-1	10	2	A	G	.	lowAF	AF=0.1;DP=1000	DP:AF	500:0.01	500:0.01
-1	10	3	A	G	.	lowDP	AF=0.1;DP=2	DP:AF	1:0.1	1:0.1
-1	10	4	A	G	.	lowDP	AF=0.01;DP=2	DP:AF	1:0.01	1:0.01
-1	10	5	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	500:0.1	1:0.01
-1	10	6	A	G	.	invalid	AF=0.01;DP=501	DP:AF	500:0.01	1:0.1
-1	10	7	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	500:0.1	1:0.1
-1	10	8	A	G	.	invalid	AF=0.01;DP=501	DP:AF	500:0.01	1:0.01
-1	10	9	A	G	.	invalid	AF=0.01;DP=501	DP:AF	1:0.1	500:0.01
-1	10	10	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	1:0.01	500:0.1
-1	10	11	A	G	.	incomplete	AF=0.1;DP=501	DP:AF	1:0.1	500:0.1
-1	10	12	A	G	.	invalid	AF=0.01;DP=501	DP:AF	1:0.01	500:0.01
-1	10	13	A	G	.	lowDP	AF=0.055;DP=2	DP:AF	1:0.01	1:0.1
-1	10	14	A	G	.	libSpe	AF=0.55;DP=1000	DP:AF	500:0.01	500:0.1
-1	10	15	A	G	.	lowDP	AF=0.055;DP=2	DP:AF	1:0.1	1:0.01
-1	10	16	A	G	.	libSpe	AF=0.55;DP=1000	DP:AF	500:0.1	500:0.01
-"""
+                            FH_out.write( alt_record )

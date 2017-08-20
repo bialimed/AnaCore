@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -98,15 +98,12 @@ if __name__ == "__main__":
     kept_ID = getGeneByNM( args.reference_RNA, args.without_version )
 
     # Filter annotations
-    with VEPVCFIO(args.input_variants) as FH_in_vcf:
-        with VEPVCFIO(args.output_variants, "w") as FH_out_vcf:
+    with VEPVCFIO(args.input_variants) as FH_in:
+        with VEPVCFIO(args.output_variants, "w") as FH_out:
             # Header
-            FH_out_vcf.info = FH_in_vcf.info
-            FH_out_vcf.format = FH_in_vcf.format
-            FH_out_vcf.samples = FH_in_vcf.samples
-            FH_out_vcf.CSQ_titles = FH_in_vcf.CSQ_titles
-            FH_out_vcf._writeHeader()
+            FH_out.copyHeader( FH_in )
+            FH_out._writeHeader()
             # Records
-            for record in FH_in_vcf:
+            for record in FH_in:
                 filterRecordAnnot( record, kept_ID, args.without_version )
-                FH_out_vcf.write( record )
+                FH_out.write( record )
