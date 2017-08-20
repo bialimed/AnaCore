@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -57,6 +57,14 @@ class VEPVCFIO(VCFIO):
                 else:
                     annot_val[csq_key] = None
             record.info["CSQ"][annot_idx] = annot_val
+
+    def copyHeader( self, model ):
+        """
+        @summary: Copy header fields from the specified VCF.
+        @param model: [VEPVCFIO] The VCF source.
+        """
+        super().copyHeader( model )
+        self.CSQ_titles = model.CSQ_titles
 
     def recToVCFLine(self, record):
         std_record = deepcopy( record )
