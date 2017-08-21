@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -30,9 +30,10 @@ from weaver.function import ShellFunction
 
 class AmpliVariantCalling (Component):
 
-    def define_parameters(self, in_genome_seq, in_regions_with_primers, in_regions_wout_primers, non_overlapping_design, in_aln, min_AF=0.02):
+    def define_parameters(self, in_genome_seq, in_regions_with_primers, in_regions_wout_primers, non_overlapping_design, in_aln, min_AF=0.02, min_base_qual=25):
         # Parameters
         self.add_parameter( "min_AF", "Variants with an allele frequency under this value are not emitted.", type=float, default=min_AF, required=True )
+        self.add_parameter( "min_base_qual", "The phred score for a base to be considered a good call.", type=int, default=min_base_qual, required=True )
 
         # Input files
         self.add_input_file_list( "in_aln", "Path to the alignment file (format: BAM).", default=in_aln, required=True )
@@ -49,6 +50,7 @@ class AmpliVariantCalling (Component):
     def process(self):
         cmd = self.get_exec_path("ampliVariantCalling.py") + \
             " --min-AF " + str(self.min_AF) + \
+            " --min-base-qual " + str(self.min_base_qual) + \
             " --input-genome " + self.in_genome_seq + \
             " --input-design-with-primers " + self.in_regions_with_primers + \
             " --input-design-wout-primers " + self.in_regions_wout_primers + \

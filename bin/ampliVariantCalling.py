@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -344,16 +344,18 @@ class VarDictStep1(Cmd):
     """
     @summary: Dicovers variants.
     """
-    def __init__(self, in_reference, in_regions, in_aln, out_file, min_AF=0.02):
+    def __init__(self, in_reference, in_regions, in_aln, out_file, min_AF=0.02, min_base_qual=25):
         """
         @param in_reference: [str] Path to the reference sequences file (format: fasta).
         @param in_regions: [str] Path to the amplicons design (format: BED). Start and end of the amplicons must be with primers.
         @param in_aln: [str] Path to the alignments file (format: BAM).
         @param out_file: [str] Path to the outputted file.
         @param min_AF: [float] The threshold for allele frequency.
+        @param min_base_qual: [int] The phred score for a base to be considered a good call.
         """
         cmd_param = "" + \
             " -f " + str(min_AF) + \
+            " -Q " + str(min_base_qual) + \
             " -F 0" + \
             " -c 1 -S 2 -E 3 -g 4" + \
             " -b " + in_aln + \
@@ -504,7 +506,7 @@ def filterBED(in_bed, in_names, out_bed, nb_col=None):
                             line = "\t".join(fields[:nb_col]) + "\n"
                         FH_out.write( line )
 
-def VarDictFct(in_reference, in_regions, in_aln, out_variants, logger, tmp_file, min_AF=0.02):
+def VarDictFct(in_reference, in_regions, in_aln, out_variants, logger, tmp_file, min_AF=0.02, min_base_qual=25):
     """
     @summary: Dicovers amplicons variants with VarDict.
     @param in_reference: [str] Path to the reference sequences file (format: fasta).
@@ -514,10 +516,11 @@ def VarDictFct(in_reference, in_regions, in_aln, out_variants, logger, tmp_file,
     @param logger: [Logger] Logger used to trace sub-commands.
     @param tmp_file: [TmpFiles] Temporaries files manager.
     @param min_AF: [float] The threshold for allele frequency.
+    @param min_base_qual: [int] The phred score for a base to be considered a good call.
     """
     out_vardict = tmp.add("vardict.txt")
     out_strand_bias = tmp.add("strdBias.txt")
-    VarDictStep1( in_reference, in_regions, in_aln, out_vardict, min_AF ).submit( logger )
+    VarDictStep1( in_reference, in_regions, in_aln, out_vardict, min_AF, min_base_qual ).submit( logger )
     VarDictStep2( out_vardict, out_strand_bias ).submit( logger )
     VarDictStep3( out_strand_bias, out_variants, min_AF ).submit( logger )
 
@@ -530,7 +533,8 @@ def VarDictFct(in_reference, in_regions, in_aln, out_variants, logger, tmp_file,
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser( description='Varaint calling on Illumina amplicon sequencing. It use VarDictJava (see: https://github.com/AstraZeneca-NGS/VarDictJava).' )
-    parser.add_argument( '-m', '--min-AF', default=0.02, help='Variants with an allele frequency under this value are not emitted. [Default: %(default)s]' )
+    parser.add_argument( '-m', '--min-AF', default=0.02, type=float, help='Variants with an allele frequency under this value are not emitted. [Default: %(default)s]' )
+    parser.add_argument( '-q', '--min-base-qual', default=25, type=int, help='The phred score for a base to be considered a good call. [Default: %(default)s]' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_reference = parser.add_argument_group( 'Reference' ) # Reference
     group_reference.add_argument( '-g', '--input-genome', required=True, help='The path to the reference genome (format: fasta).' )
@@ -591,7 +595,7 @@ if __name__ == "__main__":
 
         # Call variants
         curr_gp_vcf = tmp.add( curr_gp + ".vcf" )
-        VarDictFct( args.input_genome, curr_gp_regions_with_prim_4_col, curr_gp_aln_new_RG, curr_gp_vcf, args.output_log, tmp, args.min_AF )
+        VarDictFct( args.input_genome, curr_gp_regions_with_prim_4_col, curr_gp_aln_new_RG, curr_gp_vcf, args.output_log, tmp, args.min_AF, args.min_base_qual )
 
         # Filters variants located on primers
         curr_gp_clean_vcf = tmp.add( curr_gp + "_clean.vcf" )
