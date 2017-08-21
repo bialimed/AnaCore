@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -42,6 +42,8 @@ class DSVF (Workflow):
         # Control samples
         self.add_parameter_list( "pos_ctrl_names", 'Names of the positives controls. These samples contain a known set of variants with a predetermined AF.', group="Control samples" )
         self.add_input_file( "pos_ctrl_expected", 'Variants expected in positives controls (format: VCF).', group="Control samples" )
+        # Variant calling
+        self.add_parameter( "min_call_AF", 'Variants with an allele frequency under this value are not emitted by variant caller.', type=float, default=0.01, group="Variant calling" )
         # Analysis
         self.add_input_file( "RNA_selection", "The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.", group="Analysis" )
         self.add_parameter( "min_AF", 'Under this allele frequency the variant is tagged "lowAF".', type=float, default=0.02, group="Analysis" )
@@ -134,7 +136,7 @@ class DSVF (Workflow):
             self.add_component( "DepthsDistribution", [curr_lib["design_wout_primers"], coverage.depth_files, self.metrics_type], component_prefix=curr_lib["name"] )
 
             # Variant Calling
-            variant_calling = self.add_component( "AmpliVariantCalling", [self.genome_seq, curr_lib["design_with_primers"], curr_lib["design_wout_primers"], curr_lib["non_overlap_groups"], idx_aln_RG.out_aln, self.min_AF], component_prefix=curr_lib["name"] )
+            variant_calling = self.add_component( "AmpliVariantCalling", [self.genome_seq, curr_lib["design_with_primers"], curr_lib["design_wout_primers"], curr_lib["non_overlap_groups"], idx_aln_RG.out_aln, self.min_call_AF], component_prefix=curr_lib["name"] )
             curr_lib["vcf"] = variant_calling.out_variants
 
         # Merge DS variants
