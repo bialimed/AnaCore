@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -65,8 +65,11 @@ class DSVF (Workflow):
         # Samples
         samples_dir = self.samples_dir if self.samples_dir else os.path.dirname(self.samplesheet)
         samples_dir = samples_dir.replace(" ", "\ ")
+        self.pos_ctrl_spl = set()
         self.samples = SampleSheetIO( self.samplesheet ).samples
         for spl_idx, spl in enumerate(self.samples):
+            if spl["Sample_Name"] in self.pos_ctrl_names:
+                self.pos_ctrl_spl.add( spl["Sample_Name"] )
             spl_name = spl["Sample_Name"].replace("_", "-").replace(" ", "-")
             lib_name = spl_name + "_S" + str(spl_idx + 1)
             spl["Manifest"] = "lib" + spl["Manifest"]
@@ -74,6 +77,8 @@ class DSVF (Workflow):
             spl["R2"] = sorted( glob.glob(os.path.join(samples_dir, lib_name + '_*_R2_*.fastq.gz')) )
             if len(spl["R1"]) == 0 or len(spl["R2"]) == 0:
                 raise Exception( 'All reads files cannot be found for sample "' + lib_name + '" in folder "' + samples_dir + '".' )
+        if len(self.pos_ctrl_names) > 0 and len(self.pos_ctrl_spl) == 0:
+            warnings.warn( 'No positives controls can be found with the names "' + '" or "'.join(self.pos_ctrl_names) + '"' )
 
         # InterOp directory
         self.sequencer_run_dir = None
@@ -183,7 +188,4 @@ class DSVF (Workflow):
             spl_names = sorted([spl["Sample_Name"] for spl in self.samples if spl["Manifest"] == libA["name"]])
             positive_ctrl_variants = [filtered_variants.out_variants[idx] for idx, spl_name in enumerate(spl_names) if spl_name in self.pos_ctrl_names]
             if len(positive_ctrl_variants) > 0:
-                self.pos_ctrl_spl = [spl_name for spl_name in spl_names if spl_name in self.pos_ctrl_names]
                 self.add_component( "VariantsCtrlCheck", [self.pos_ctrl_expected, positive_ctrl_variants, self.metrics_type] )
-            else:
-                warnings.warn( 'No positives controls can be found with the names "' + '" or "'.join(self.pos_ctrl_names) + '"' )
