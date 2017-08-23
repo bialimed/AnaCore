@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '2.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -45,21 +45,66 @@ from vcf import VCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
+class ConsensusException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+def getADPContig( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     """
-    @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant.
+    @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of contig: if the R1 and the R2 of a sequence has overlaps the variant they only the consensus is counted for the pair.
     @param chrom: [str] The variant region name.
     @param pos: [int] The variant position.
     @param ref: [str] The reference allele at the position.
     @param alt: [str] The variant allele at the position.
     @param aln_file: [str] The path to the alignment file (format: BAM). The AD and DP are retrieved from reads of this file. This file must be indexed.
     @param selected_RG: [list] The ID of RG used in AD and DP. Default: all read groups.
-    @return: [list] The first element is the AD, the second is the DP.
-    @warning: Reads ID must be unique in SAM.
+    @returns: [list] The first element is the AD, the second is the DP. These counts are expressed in number of contig: if the R1 and the R2 of a sequence has overlaps the variant they only the consensus is counted for the pair.
+    """
+    if ref == ".":
+        raise Exception('The method getADPContig() cannot be used on insertion with dot as reference (instead of "./AGC" prefer an other fromat like "T/TAGC").')
+    # Retrieve reads
+    ref_start = pos
+    ref_end = pos + len(ref) - 1
+    inspect_start = ref_start - 1
+    inspect_end = ref_end
+    reads, quals = getAlnAndQual( aln_file, chrom, inspect_start, inspect_end, selected_RG, 100000 )
+    # Process AD and DP
+    alt = alt if alt != "." else ""
+    AD = 0
+    DP = 0
+    for read_id in reads:
+        consensus = ""
+        try:
+            consensus = getSimplePairConsensus( reads[read_id], quals[read_id] )
+        except ConsensusException:
+            # Calculate alignment cost and choose the lowest
+            cost_aln_R1 = getAlnCost( ref, reads[read_id]["R1"] )
+            cost_aln_R2 = getAlnCost( ref, reads[read_id]["R2"] )
+            consensus = reads[read_id]["R1"] if cost_aln_R1 <= cost_aln_R2 else reads[read_id]["R2"]
+        if None not in consensus: # Skip partial reads
+            DP += 1
+            if "".join(consensus) == alt:
+                AD += 1
+    # Return
+    return( AD, DP )
+
+def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
+    """
+    @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
+    @param chrom: [str] The variant region name.
+    @param pos: [int] The variant position.
+    @param ref: [str] The reference allele at the position.
+    @param alt: [str] The variant allele at the position.
+    @param aln_file: [str] The path to the alignment file (format: BAM). The AD and DP are retrieved from reads of this file. This file must be indexed.
+    @param selected_RG: [list] The ID of RG used in AD and DP. Default: all read groups.
+    @returns: [list] The first element is the AD, the second is the DP.
+    @warning: Reads ID must be unique in SAM. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     """
     ref_start = pos
     ref_end = pos + len(ref.replace(".", "")) - 1
-    selected_RG = {RG:1 for RG in selected_RG}
+    if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
     # Retrieve reads
     inspect_start = ref_start - 1
     inspect_end = ref_end
@@ -90,6 +135,12 @@ def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
                             reads[read_id].append(
                                 pileupread.alignment.query_sequence[pileupread.query_position].upper()
                             )
+    # Completes downstream positions
+    inspected_len = inspect_end - inspect_start
+    for read_id in reads:
+        read_len = len(reads[read_id])
+        for idx in range(inspected_len - read_len):
+            reads[read_id].append( None )
     # Process AD and DP
     alt = alt if alt != "." else ""
     AD = 0
@@ -102,11 +153,166 @@ def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     # Return
     return( AD, DP )
 
+def getAlnCost( ref, aln_seq, weights=None ):
+    """
+    @summary: Returns cost of the alignment for alignment comparison. For two alignments on the
+              same area the alignment with the lower cost is the nearest of the reference.
+    @param ref: [str] The reference sequenece on the interest area. It will be used for
+                differenciate matches and substitutions.
+                Example:
+                  Ref:   NNNNNNNNNAGATAAGGC---CCANNNNNNNN
+                  Read:  NNNNNNNNNAGAT--GGCTTACC
+                  ref =  "AGATAAGGCCCA"
+    @param aln_seq: [list] The read alignment on the interest area.
+                    Example:
+                      Ref:   NNNNNNNNNAGATAAGGC---CCANNNNNNNN
+                      Read:  NNNNNNNNNAGAT--GGCTTACC
+                      aln_seq = ["A",  "G", "A", "T", "", "", "G", "G", "CTTA", "C", "C", None]
+    @param weights: [dict] The weights of each evenments. Each evenment must be setted.
+                    Default:
+                      { "del": 10, "del_ext": 0.5, "ins": 10, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5 }
+    @return: [float] The cost of the alignment.
+    """
+    if weights is None:
+        weights = { "del": 10, "del_ext": 0.5, "ins": 10, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5 }
+    nb = { "del": 0, "del_ext": 0, "ins": 0, "ins_ext": 0, "miss": 0, "subs": 0, "match": 0 }
+    prev = ""
+    for idx_nt, nt in enumerate(aln_seq):
+        if nt is None:
+            nb["miss"] += 1
+            prev = "miss"
+        elif nt == "":
+            if prev == "del":
+                nb["del_ext"] += 1
+            else:
+                nb["del"] += 1
+            prev = "del"
+        elif len(nt) > 1:
+            nb["ins"] += 1
+            nb["ins_ext"] = len(nt) - 2
+            prev = "ins"
+        elif ref[idx_nt] != nt:
+            nb["subs"] += 1
+            prev = "subs"
+        else:
+            nb["match"] += 1
+            prev = "match"
+    cost = sum([(nb[category] * weights[category]) for category in nb])
+    return cost
+
+def getAlnAndQual( aln_file, chrom, inspect_start, inspect_end, selected_RG, max_depth=100000 ):
+    """
+    @summary: Returns for each reads in inspected area the fragment of the alignment corresponding.
+              Two elements are returned: by read ID the sequence alignment fragment for R1 and R2
+              and by read ID the bases qualities in alignment fragment for R1 and R2.
+              The sequence alignment is a list where each element corresponds to one position on
+              reference. The deletions in reads are marked with en empty string (AT/A becomes "" at
+              T position) ; the insertions are marked by a string with a length superior than 1 on
+              the previous position (A/ATG becomes "ATG" at A position) ; Matches and substitutions
+              are marked by a string with length equals to 1 (A/G becomes "G" at A position) ;
+              Missing positions are marked by a None.
+              The bases qualities in alignment is a list where each element corresponds to quality
+              of the base(s) corresponding to one position in reference. The deletions and missing
+              positions are marked by None ; the insertions are marked by a list of qualities.
+    @param aln_file: [str] The path to the alignment file (format: BAM). This file must be indexed.
+    @param chrom: [str] The reference region name.
+    @param inspect_start: [int] The start position of the inspected area (0-based).
+    @param inspect_end: [int] The end position of the inspected area (1-based).
+    @param inspect_end: [int] The end position of the inspected area (1-based).
+    @param selected_RG: [list] The retained RG. Default: all read groups.
+    @param max_depth: [int] Maximum read depth processed.
+    @returns: [list] First element is by read ID the sequence alignment fragment for R1 and R2.
+              Second element is by read ID the base quality in alignment fragment for R1 and R2.
+              Input:
+                  Pos:                10           20
+                                      |            |
+                  chr1:      NNNNNNNNNAGATAAGGC---CCANNNNNNNN
+                  seq_A R1:  NNNNNNNNNAGAT--GACTTACC
+                  seq_A R2:            GAT--GACTTACCANNNNNNNN
+                  seq_B R1:  NNNNNNNNNAGATAAGGCTTAC
+              Parameters:
+                  chrom = "chr1"
+                  inspect_start = 10
+                  inspect_end = 21
+                  selected_RG = None
+              Returns:
+                  reads = {
+                    "seq_A":{
+                        "R1": ["A",  "G", "A", "T", "", "", "G", "G", "CTTA", "C", "C", None],
+                        "R2": [None, "G", "A", "T", "", "", "G", "A", "CTTA", "C", "C", "A"]
+                    },
+                    "seq_B":{
+                        "R1": ["A", "G", "A", "T", "A", "A", "G", "G", "CTTA", "C", None, None]
+                    }
+                  }
+                  quals = {
+                    "seq_A":{
+                        "R1": [35,   35, 35, 34, None, None, 34, 34, [33, 33, 33, 32], 32, 31, None],
+                        "R2": [None, 31, 32, 32, None, None, 33, 33, [33, 34, 34, 34], 35, 35, 35]
+                    },
+                    "seq_B":{
+                         "R1": [31, 31, 30, 30, 30, 29, 29, 29, [28, 28, 29, 28], 27, None, None]
+                    }
+                  }
+    @warning: Insertions are stored as an alternative of the previous base (example: A/ATC becomes
+              "ATC" at A position). If you want to extract insertion from alignment take care of
+              provide inspected_start equal to the previous position of the insertion (example:
+              position of A in A/ATC).
+    """
+    if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
+    reads = dict()
+    quals = dict()
+    with pysam.AlignmentFile( aln_file, "rb" ) as FH_sam:
+        for pileupcolumn in FH_sam.pileup( chrom, inspect_start, inspect_end, max_depth=max_depth ):
+            for pileupread in pileupcolumn.pileups:
+                if selected_RG is None or (pileupread.alignment.get_tag("RG") in selected_RG):
+                    if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
+                        # Get id
+                        read_id = pileupread.alignment.query_name
+                        pair_id = "R1" if not pileupread.alignment.is_read2 else "R2"
+                        # Store new reads
+                        if read_id not in reads:
+                            reads[read_id] = dict()
+                            quals[read_id] = dict()
+                        if pair_id not in reads[read_id]:
+                            reads[read_id][pair_id] = [None for pos in range(inspect_start, pileupcolumn.pos)]
+                            quals[read_id][pair_id] = [None for pos in range(inspect_start, pileupcolumn.pos)]
+                        curr_read = reads[read_id][pair_id]
+                        curr_qual = quals[read_id][pair_id]
+                        # Store comparison with ref for current position
+                        if pileupread.is_del: # Deletion
+                            curr_read.append( "" )
+                            curr_qual.append( "" )
+                        elif pileupread.indel > 0: # Insertion
+                            insert = ""
+                            insert_qual = list()
+                            for insert_idx in range(pileupread.indel + 1):
+                                insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
+                                insert_qual.append( pileupread.alignment.query_qualities[pileupread.query_position + insert_idx] )
+                            curr_read.append( insert )
+                            curr_qual.append( insert_qual )
+                        elif not pileupread.is_refskip: # Substitution
+                            curr_read.append(
+                                pileupread.alignment.query_sequence[pileupread.query_position].upper()
+                            )
+                            curr_qual.append(
+                                pileupread.alignment.query_qualities[pileupread.query_position]
+                            )
+    # Completes downstream positions
+    inspected_len = inspect_end - inspect_start
+    for read_id in reads:
+        for pair_id in reads[read_id]:
+            read_len = len(reads[read_id][pair_id])
+            for idx in range(inspected_len - read_len):
+                reads[read_id][pair_id].append( None )
+                quals[read_id][pair_id].append( None )
+    return reads, quals
+
 def getAreas( input_areas ):
     """
     @summary: Returns the list of areas from a BED file.
     @param input_areas: [str] The path to the areas description (format: BED).
-    @return: [RegionList] The list of areas.
+    @returns: [RegionList] The list of areas.
     """
     areas = RegionList()
     with BEDIO(input_areas) as FH_panel:
@@ -117,7 +323,7 @@ def getAreasByChr( input_areas ):
     """
     @summary: Returns from a BED file the list of areas by chromosome.
     @param input_areas: [str] The path to the areas description (format: BED).
-    @return: [dict] The list of areas by chromosome (each list is an instance of Regionlist).
+    @returns: [dict] The list of areas by chromosome (each list is an instance of Regionlist).
     """
     areas_by_chr = dict()
     for curr_area in getAreas(input_areas):
@@ -141,6 +347,78 @@ def getRGIdByRGTag( in_aln, tag, selected_value ):
             if RG[tag] in selected_value:
                 RG_id.append( RG["ID"] )
     return RG_id
+
+def getSimplePairConsensus( seq, qual ):
+    """
+    @summary: Returns pair consensus between alignment fragments from R1 and R2 of the same matrix. The consensus is based on the best base quality at position.
+    @param seq: [dict] The sequence alignment fragment for R1 and R2 (see getAlnAndQual()).
+                Example:
+                  Ref: NNNNNNNNNAGATAAGGC---CCANNNNNNNN
+                  R1:  NNNNNNNNNAGAT--GGCTTACC
+                                 |||  |*||||||
+                  R2:            GAT--GACTTACCANNNNNNNN
+                  seq = {
+                     "R1": ["A",  "G", "A", "T", "", "", "G", "G", "CTTA", "C", "C", None],
+                     "R2": [None, "G", "A", "T", "", "", "G", "A", "CTTA", "C", "C", "A"]
+                  }
+    @param qual: [dict] The quality of bases in alignment fragment for R1 and R2 (see getAlnAndQual()).
+                 Example:
+                   Ref: NNNNNNNNNAGATAAGGC---CCANNNNNNNN
+                   R1:  NNNNNNNNNAGAT--GGCTTACC
+                                  |||  |*||||||
+                   R2:            GAT--GACTTACCANNNNNNNN
+                   Q1:  FFFFFFFFFFEDC  BA@:::?>
+                   Q2:            <=>  ?0A:::BCDDDDDDDDD
+                   qual = {
+                      "R1": [37, 36, 35, 34, None, None, 33, 32, [31, 25, 25, 25], 30, 29, None],
+                      "R2": [None, 27, 28, 29, None, None, 30, 15, [32, 25, 25, 25], 33, 34, 35]
+                   }
+    @returns: [list] The consensus sequence alignment fragment.
+              Example:
+                Ref: NNNNNNNNNAGATAAGGC---CCANNNNNNNN
+                R1:  NNNNNNNNNAGAT--GGCTTACC
+                               |||  |*||||||
+                R2:            GAT--GACTTACCANNNNNNNN
+                Q1:  FFFFFFFFFFEDC  BA@:::?>
+                Q2:            <=>  ?0A:::BCDDDDDDDDD
+                consensus = ["A", "G", "A", "T", "", "", "G", "G", "CTTA", "C", "C", "A"],
+    """
+    consensus = list()
+    if "R1" in seq and "R2" in seq: # R1 and R2 overlap inspected region
+        inspect_len = len(seq["R1"])
+        for idx in range(inspect_len):
+            if seq["R1"][idx] is not None and seq["R2"][idx] is not None: # R1 and R2 overlap position
+                if seq["R1"][idx] == seq["R2"][idx]: # The sequence at the current position is the same between two reads
+                    consensus.append( seq["R1"][idx] )
+                else: # R1 and R2 differ on position
+                    if len(seq["R1"][idx]) == len(seq["R2"][idx]): # The sequences are different but with the same frame
+                        if len(seq["R1"][idx]) < 2: # Substitution or deletion
+                            if qual["R1"][idx] is None or qual["R1"][idx] >= qual["R2"][idx]: # deletion or qual R1 superior
+                                consensus.append( seq["R1"][idx] )
+                            else:
+                                consensus.append( seq["R2"][idx] )
+                        else: # Insertion
+                            insert = ""
+                            for idx_ins, qual_R1 in enumerate(qual["R1"][idx]):
+                                qual_R2 = qual["R1"][idx][idx_ins]
+                                if qual_R1 >= qual_R2:
+                                    insert += seq["R1"][idx][idx_ins]
+                                else:
+                                    insert += seq["R2"][idx][idx_ins]
+                            consensus.append( insert )
+                    else:
+                        raise ConsensusException( "Simple consensus cannot be found between {} and {}.".format(seq["R1"], seq["R2"]) )
+            elif seq["R1"][idx] is not None: # Only the R1 overlaps position
+                consensus.append( seq["R1"][idx] )
+            elif seq["R2"][idx] is not None: # Only the R2 overlaps position
+                consensus.append( seq["R2"][idx] )
+            else:
+                consensus.append( None )
+    elif "R1" in seq: # Only R1 overlaps inspected region
+        consensus = seq["R1"]
+    else: # Only R2 overlaps inspected region
+        consensus = seq["R2"]
+    return consensus
 
 
 ########################################################################
@@ -228,7 +506,7 @@ if __name__ == "__main__":
                         # Retrieve AD, AF and DP from aln file
                         overlapped_ampl_name = [ampl.name for ampl in overlapped_ampl]
                         overlapped_RG = getRGIdByRGTag( aln_by_samples[spl], args.RG_tag, overlapped_ampl_name )
-                        AD, DP = getADP( curr_var.chrom, curr_var.pos, curr_var.ref, curr_var.alt[0], aln_by_samples[spl], overlapped_RG )
+                        AD, DP = getADPContig( curr_var.chrom, curr_var.pos, curr_var.ref, curr_var.alt[0], aln_by_samples[spl], overlapped_RG )
                     # Store AD, AF and DP for sample
                     curr_var.samples[spl] = {
                         "AF": [0 if DP == 0 else round(float(AD)/DP, args.AF_precision)],
