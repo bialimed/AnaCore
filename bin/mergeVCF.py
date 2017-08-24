@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -176,9 +176,12 @@ if __name__ == "__main__":
     for vcf_idx, current_vcf in enumerate(args.input_variants):
         current_aln = args.input_aln[vcf_idx]
         with VCFIO(current_vcf) as FH_vcf:
+            # Manage samples
+            for curr_spl in FH_vcf.samples: # For each sample in VCF
+                aln_by_samples[curr_spl] = current_aln
+            # Manage records
             for record in FH_vcf: # For each variant
                 for curr_spl in FH_vcf.samples: # For each sample in VCF
-                    aln_by_samples[curr_spl] = current_aln
                     vcaller_AF = record.get_AF( curr_spl )
                     vcaller_DP = record.get_DP( curr_spl )
                     for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in in variant
