@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -27,35 +27,43 @@ import os
 from jflow.component import Component
 from jflow.abstraction import MultiMap
 
-from weaver.function import ShellFunction
+from weaver.function import PythonFunction
 
 
-class VEP (Component):
+def VEPWrapper( exec_path, in_vcf, out_file, stderr, out_format, species, assembly, cache_directory ):
+    """
+    @summary: Wraps VEP execution for prevent error when the in_vcf does not contain any records.
+    """
+    import subprocess
 
-    def define_parameters(self, in_variants, species, assembly=None, out_format="vcf"):
-        # Parameters
-        self.add_parameter( "assembly", "The assembly version to use.", default=assembly )
-        self.add_parameter( "out_format", "The output format.", choices=["json", "vcf", "tab"], default=out_format )
-        self.add_parameter( "species", 'The latin name for your species (example: "homo_sapiens")', default=species, required=True  )
-
-        # Input files
-        self.add_input_file_list( "in_variants", "Path to the variants file before annotation (format: VCF).", default=in_variants, required=True )
-
-        # Output files
-        self.add_output_file_list( "out_variants", "The VEP annotations files (format: see out_format).", pattern='{basename_woext}.' + out_format, items=self.in_variants )
-        self.add_output_file_list( "stderr", "Path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.in_variants )
-
-    def process(self):
-        cache_directory = None
-        try:
-            cache_directory = self.get_resource("VEP_cache_directory")
-        except: pass
-        cmd = self.get_exec_path("vep") + \
+    # Check if VCF contains records
+    is_empty = True
+    with open(in_vcf) as FH_in:
+        for line in FH_in:
+            if not line.startswith("#"):
+                is_empty = False
+    # Process
+    if is_empty: # Create empty output if VCF does not contain any records
+        with open(stderr, "w") as FH_err:
+            FH_err.write( '[WARN] The input file "' + stderr + '" does not contain any records.' )
+        if out_format == "json":
+            with open(out_file, "w") as FH_out:
+                out_file.write("{}")
+        elif out_format == "tab":
+            with open(out_file, "w") as FH_out:
+                out_file.write("")
+        else: # vcf
+            with open(in_vcf) as FH_in:
+                with open(out_file, "w") as FH_out:
+                    for line in FH_in:
+                        out_file.write( line )
+    else: # Annotate
+        cmd = exec_path + \
               " --cache" + \
-              ("" if cache_directory == None else " --dir_cache " + cache_directory) + \
+              ("" if cache_directory == "none" else " --dir_cache " + cache_directory) + \
               " --offline" + \
-              " --species " + self.species + \
-              ("" if self.assembly == None else " --assembly " + self.assembly) + \
+              ' --species "' + species + '"' + \
+              ("" if assembly == "none" else ' --assembly "' + assembly + '"') + \
               " --sift b" + \
               " --polyphen b" + \
               " --gene_phenotype" + \
@@ -74,9 +82,45 @@ class VEP (Component):
               " --pubmed" + \
               " --no_stats" + \
               " --merged" + \
-              " --" + self.out_format + \
-              " --input_file $1" + \
-              " --output_file $2" + \
-              " 2> $3"
-        vep = ShellFunction( cmd, cmd_format="{EXE} {IN} {OUT}")
-        MultiMap(vep, inputs=self.in_variants, outputs=[self.out_variants, self.stderr])
+              " --" + out_format + \
+              " --input_file " + in_vcf + \
+              " --output_file " + out_file + \
+              " 2> " + stderr
+        subprocess.check_output( cmd, shell=True )
+
+
+class VEP (Component):
+
+    def define_parameters(self, in_variants, species, assembly=None, out_format="vcf"):
+        # Parameters
+        self.add_parameter( "assembly", "The assembly version to use.", default=assembly )
+        self.add_parameter( "out_format", "The output format.", choices=["json", "vcf", "tab"], default=out_format )
+        self.add_parameter( "species", 'The latin name for your species (example: "homo_sapiens")', default=species, required=True  )
+
+        # Input files
+        self.add_input_file_list( "in_variants", "Path to the variants file before annotation (format: VCF).", default=in_variants, required=True )
+
+        # Output files
+        self.add_output_file_list( "out_variants", "The VEP annotations files (format: see out_format).", pattern='{basename_woext}.' + out_format, items=self.in_variants )
+        self.add_output_file_list( "stderr", "Path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.in_variants )
+
+    def process(self):
+        # Transform parameters for command line
+        cache_param = "none"
+        try:
+            cache_param = self.get_resource("VEP_cache_directory")
+        except: pass
+        assembly_param = "none" if self.assembly == None else self.assembly
+        # Command
+        vep_fct = PythonFunction(
+            VEPWrapper,
+            cmd_format="{EXE}" + \
+                       " " + self.get_exec_path("vep") + \
+                       " {IN}" + \
+                       " {OUT}" + \
+                       " " + self.out_format + \
+                       ' "' + self.species + '"' + \
+                       ' "' + assembly_param + '"' + \
+                       ' "' + cache_param + '"'
+        )
+        MultiMap( vep_fct, inputs=self.in_variants, outputs=[self.out_variants, self.stderr] )
