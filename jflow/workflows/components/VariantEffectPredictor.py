@@ -48,15 +48,15 @@ def VEPWrapper( exec_path, in_vcf, out_file, stderr, out_format, species, assemb
             FH_err.write( '[WARN] The input file "' + stderr + '" does not contain any records.' )
         if out_format == "json":
             with open(out_file, "w") as FH_out:
-                out_file.write("{}")
+                FH_out.write("{}")
         elif out_format == "tab":
             with open(out_file, "w") as FH_out:
-                out_file.write("")
+                FH_out.write("")
         else: # vcf
             with open(in_vcf) as FH_in:
                 with open(out_file, "w") as FH_out:
                     for line in FH_in:
-                        out_file.write( line )
+                        FH_out.write( line )
     else: # Annotate
         cmd = exec_path + \
               " --cache" + \
