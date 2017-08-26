@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.3.1'
+__version__ = '0.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -41,9 +41,7 @@ class DSVFAnapath (DSVF):
         self.metrics_type = "json"
 
     def process(self):
-        # Store in database
         DSVF.process(self)
-        ############################# Convert BAM to CRAM
 
     def get_cmpt_by_nameid( self, selected_nameid ):
         selected_cpmt = None
@@ -54,17 +52,6 @@ class DSVFAnapath (DSVF):
 
     def post_process(self):
         DSVF.post_process(self)
-
-        # Interop
-        if self.sequencer_run_dir != None:
-            interop_folder = os.path.join( self.output_dir, "instrument_log" )
-            if not os.path.exists(interop_folder): os.mkdir(interop_folder)
-            for filename in ["RunInfo.xml", "runParameters.xml"]:
-                shutil.copyfile( os.path.join(self.sequencer_run_dir, filename), os.path.join(interop_folder, filename) )
-            shutil.copytree( os.path.join(self.sequencer_run_dir, "InterOp"), os.path.join(interop_folder, "InterOp") )
-
-        # Reads stat
-        ############################# ReadsStat
 
         # Alignment
         for curr_lib in self.libraries:
@@ -94,6 +81,8 @@ class DSVFAnapath (DSVF):
         data_folder = os.path.join( self.output_dir, "data" )
         if not os.path.exists(data_folder): os.mkdir(data_folder)
         for curr_lib in self.libraries:
+            # Reads quality
+            #################################################################### TODO
             # Alignment statistics
             for metrics in self.get_cmpt_by_nameid("AddAmpliRG." + curr_lib["name"]).out_summary:
                 filename = os.path.basename(metrics).split("_")[0] + "_" + curr_lib["name"] + "_aln.json"
@@ -103,7 +92,7 @@ class DSVFAnapath (DSVF):
                 filename = os.path.basename(depths).split("_")[0] + "_" + curr_lib["name"] + "_depths.json"
                 shutil.move( depths, os.path.join(data_folder, filename) )
         # Variants
-        ########################### nothing
+        ######################################################################## TODO ?
         # Positives control
         if len(self.pos_ctrl_spl) > 0:
             for ctrl in self.get_cmpt_by_nameid("VariantsCtrlCheck.default").eval_files:
