@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.11.0'
+__version__ = '1.11.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -616,23 +616,24 @@ class VCFIO(AbstractFile):
                 data_by_spl = dict()
                 for spl_idx, spl_cell in enumerate(fields[9:]):
                     spl_data = dict()
-                    for field_idx, field_data in enumerate(spl_cell.split(':')):
-                        field_id = variation.format[field_idx]
-                        field_format = self.format[field_id]
-                        if field_format["number"] is None or field_format["number"] > 1:
-                            spl_data[field_id] = list()
-                            for list_elt in field_data.split(","):
-                                if list_elt == ".":
-                                    spl_data[field_id].append( None )
+                    if variation.format is not None: # Samples cannot have any data if format is None
+                        for field_idx, field_data in enumerate(spl_cell.split(':')):
+                            field_id = variation.format[field_idx]
+                            field_format = self.format[field_id]
+                            if field_format["number"] is None or field_format["number"] > 1:
+                                spl_data[field_id] = list()
+                                for list_elt in field_data.split(","):
+                                    if list_elt == ".":
+                                        spl_data[field_id].append( None )
+                                    else:
+                                        spl_data[field_id].append( self.format[field_id]["type"](list_elt) )
+                            elif field_format["number"] == 1:
+                                if field_data == ".":
+                                    spl_data[field_id] = None
                                 else:
-                                    spl_data[field_id].append( self.format[field_id]["type"](list_elt) )
-                        elif field_format["number"] == 1:
-                            if field_data == ".":
+                                    spl_data[field_id] = self.format[field_id]["type"](field_data)
+                            else: # Number == 0
                                 spl_data[field_id] = None
-                            else:
-                                spl_data[field_id] = self.format[field_id]["type"](field_data)
-                        else: # Number == 0
-                            spl_data[field_id] = None
                     data_by_spl[self.samples[spl_idx]] = spl_data
                 variation.samples = data_by_spl
 
