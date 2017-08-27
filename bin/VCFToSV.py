@@ -57,7 +57,7 @@ def getAlleleCounts( FH_vcf, record, allele_separator="," ):
             count_by_spl.append("")
         else:
             AD = record.get_AD(curr_spl)
-            DP = record.get_DP(curr_spl)
+            DP = record.getDP(curr_spl)
             alleles_count = list()
             for idx_allele, curr_AD in enumerate(AD):
                 alleles_count.append( str(curr_AD) + "/" + str(DP) )

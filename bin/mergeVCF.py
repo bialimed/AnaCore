@@ -182,8 +182,8 @@ if __name__ == "__main__":
             # Manage records
             for record in FH_vcf: # For each variant
                 for curr_spl in FH_vcf.samples: # For each sample in VCF
-                    vcaller_AF = record.get_AF( curr_spl )
-                    vcaller_DP = record.get_DP( curr_spl )
+                    vcaller_AF = record.getAF( curr_spl )
+                    vcaller_DP = record.getDP( curr_spl )
                     for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in in variant
                         record_allele = getAlleleRecord( FH_vcf, record, alt_idx )
                         # Get allele frequency from the variant caller

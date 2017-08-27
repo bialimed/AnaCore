@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.10.0'
+__version__ = '1.11.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -269,6 +269,48 @@ class VCFRecord:
                 raise Exception( 'The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
         return( DP )
 
+    def get_AD( self, spl_name ):
+        """
+        @summary: Returns the list of alleles depths for the specified sample. The reference depth is removed from the result if it exists.
+        @param spl_name: [str] The sample name.
+        @return: [list] The list of alleles depths.
+        """
+        # Retrieve DP
+        DP = None
+        try:
+            DP = self.getDP( spl_name )
+        except:
+            DP = None
+
+        # Retrieve AD from self
+        AD = None
+        if "AD" in self.samples[spl_name]: # The AD is already processed for the sample
+            AD = self.samples[spl_name]["AD"]
+            if isinstance(AD, (list, tuple)) and len(AD) == len(self.alt) + 1: # Skip the reference allele depth
+                AD = AD[1:]
+        elif "AF" in self.samples[spl_name] and DP is not None: # The AD must be processed for the sample
+            AF = self.samples[spl_name]["AF"]
+            if len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
+                AF = AF[1:]
+            AD = [int(curr_AF * DP) for curr_AF in AF]
+        elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info: # Only one sample and AD is already processed for population
+            AD = self.info["AD"]
+            if isinstance(AD, (list, tuple)) and len(AD) == len(self.alt) + 1: # Skip the reference allele depth
+                AD = AD[1:]
+        elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info and DP is not None: # Only one sample and AD must be processed for population
+            AF = self.info["AF"]
+            if len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
+                AF = AF[1:]
+            AD = [int(curr_AF * DP) for curr_AF in AF]
+        else:
+            raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+
+        # Transform AF to list
+        if not isinstance(AD, (list, tuple)):
+            AD = [AD]
+
+        return( AD )
+
     def getAD( self, spl_name ):############################################### test
         AD = None
 
@@ -279,8 +321,8 @@ class VCFRecord:
             AD = self.info["AD"]
         else: # AD must be calculated
             try:
-                AF = self.get_AF( spl_name )
-                DP = self.get_DP( spl_name )
+                AF = self.getAF( spl_name )
+                DP = self.getDP( spl_name )
                 AD = [round(curr_AF * DP, 0) for curr_AF in AF]
             except:
                 raise Exception( 'The alternative alleles depths cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
@@ -341,7 +383,7 @@ class VCFRecord:
 
         return( AF )
 
-    def get_AF( self, spl_name ):
+    def getAF( self, spl_name ):
         """
         @summary: Returns the list of alleles frequencies for the specified sample. The reference frequency is removed from the result if it exists.
         @param spl_name: [str] The sample name.
@@ -350,7 +392,7 @@ class VCFRecord:
         # Retrieve DP
         DP = None
         try:
-            DP = self.get_DP( spl_name )
+            DP = self.getDP( spl_name )
         except:
             DP = None
 
@@ -392,7 +434,7 @@ class VCFRecord:
         # Retrieve DP
         DP = None
         try:
-            DP = self.get_DP( spl_name )
+            DP = self.getDP( spl_name )
         except:
             DP = None
 
@@ -425,7 +467,7 @@ class VCFRecord:
 
         return( AD )
 
-    def get_DP( self, spl_name ):
+    def getDP( self, spl_name ):
         """
         @summary: Returns the depth for the specified sample.
         @param spl_name: [str] The sample name.

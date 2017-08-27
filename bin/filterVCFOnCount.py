@@ -130,10 +130,10 @@ if __name__ == "__main__":
                     DP_is_ok = list()
                     for spl_idx, curr_spl in enumerate(alt_record.samples):
                         AF_is_ok.append( True )
-                        if alt_record.get_AF(curr_spl)[0] < args.AF_threshold:
+                        if alt_record.getAF(curr_spl)[0] < args.AF_threshold:
                             AF_is_ok[spl_idx] = False
                         DP_is_ok.append( True )
-                        if alt_record.get_DP(curr_spl) < args.DP_threshold:
+                        if alt_record.getDP(curr_spl) < args.DP_threshold:
                             DP_is_ok[spl_idx] = False
                     # Apply filters
                     tag = getFilterTag( DP_is_ok, AF_is_ok )
