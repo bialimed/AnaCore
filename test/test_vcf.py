@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -102,6 +102,271 @@ class TestVCFIO(unittest.TestCase):
 
 
 class TestVCFRecord(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+
+        # Temporary files
+        self.tmp_variants = os.path.join( tmp_folder, unique_id + ".vcf")
+
+        # AD, AF and DP evaluation
+        self.freq_data = dict()
+        self.freq_data["wout_spl_rAD_aAF"] = """##fileformat=VCFv4.0
+##INFO=<ID=AD,Number=R,Type=Integer,Description="Allele Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=expModel,Number=1,Type=String,Description="Expected model for variant">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT
+11	1	wout_spl_rAD_aAF_1	A	T	29	PASS	expModel=model_0;AD=90,10;DP=100	.
+11	2	wout_spl_rAD_aAF_2	A	T	29	PASS	expModel=model_0;AF=0.1;AD=90,10	.
+11	3	wout_spl_rAD_aAF_3	A	T	29	PASS	expModel=model_0;AF=0.1;DP=100	.
+11	1	wout_spl_rAD_aAF_4	A	T,G	29	PASS	expModel=model_1;AD=85,10,5;DP=100	.
+11	2	wout_spl_rAD_aAF_5	A	T,G	29	PASS	expModel=model_1;AF=0.1,0.05;AD=85,10,5	.
+11	3	wout_spl_rAD_aAF_6	A	T,G	29	PASS	expModel=model_1;AF=0.1,0.05;DP=100	."""
+        self.freq_data["wout_spl_aAD_rAF"] = """##fileformat=VCFv4.0
+##INFO=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+##INFO=<ID=AF,Number=R,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=expModel,Number=1,Type=String,Description="Expected model for variant">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT
+11	1	wout_spl_aAD_rAF_1	A	T	29	PASS	expModel=model_0;AD=10;DP=100	.
+11	2	wout_spl_aAD_rAF_2	A	T	29	PASS	expModel=model_0;AF=0.9,0.1;AD=10	.
+11	3	wout_spl_aAD_rAF_3	A	T	29	PASS	expModel=model_0;AF=0.9,0.1;DP=100	.
+11	1	wout_spl_aAD_rAF_4	A	T,G	29	PASS	expModel=model_1;AD=10,5;DP=100	.
+11	2	wout_spl_aAD_rAF_5	A	T,G	29	PASS	expModel=model_1;AF=0.85,0.1,0.05;AD=10,5	.
+11	3	wout_spl_aAD_rAF_6	A	T,G	29	PASS	expModel=model_1;AF=0.85,0.1,0.05;DP=100	."""
+        self.freq_data["one_spl_rAD_aAF"] = """##fileformat=VCFv4.0
+##INFO=<ID=AD,Number=R,Type=Integer,Description="Allele Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=expModel,Number=1,Type=String,Description="Expected model for variant">
+##INFO=<ID=skipAD,Number=1,Type=String,Description="Variant must be skipped by AD calculation">
+##INFO=<ID=skipAF,Number=1,Type=String,Description="Variant must be skipped by AF calculation">
+##INFO=<ID=skipDP,Number=1,Type=String,Description="Variant must be skipped by DP calculation">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allele Depth">
+##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA
+11	1	one_spl_rAD_aAF_1	A	T	29	PASS	expModel=model_2;skipAF=True;AD=90,10;DP=100	.	.
+11	2	one_spl_rAD_aAF_2	A	T	29	PASS	expModel=model_2;skipDP=True;AF=0.1;AD=90,10	.	.
+11	3	one_spl_rAD_aAF_3	A	T	29	PASS	expModel=model_2;skipAD=True;AF=0.1;DP=100	.	.
+11	1	one_spl_rAD_aAF_4	A	T	29	PASS	expModel=model_2	AD:DP	90,10:100
+11	2	one_spl_rAD_aAF_5	A	T	29	PASS	expModel=model_2	AF:AD	0.1:90,10
+11	3	one_spl_rAD_aAF_6	A	T	29	PASS	expModel=model_2	AF:DP	0.1:100
+11	1	one_spl_rAD_aAF_7	A	T,G	29	PASS	expModel=model_3;skipAF=True;AD=85,10,5;DP=100	.	.
+11	2	one_spl_rAD_aAF_8	A	T,G	29	PASS	expModel=model_3;skipDP=True;AF=0.1,0.05;AD=85,10,5	.	.
+11	3	one_spl_rAD_aAF_9	A	T,G	29	PASS	expModel=model_3;skipAD=True;AF=0.1,0.05;DP=100	.	.
+11	1	one_spl_rAD_aAF_10	A	T,G	29	PASS	expModel=model_3	AD:DP	85,10,5:100
+11	2	one_spl_rAD_aAF_11	A	T,G	29	PASS	expModel=model_3	AF:AD	0.1,0.05:85,10,5
+11	3	one_spl_rAD_aAF_12	A	T,G	29	PASS	expModel=model_3	AF:DP	0.1,0.05:100"""
+        self.freq_data["one_spl_aAD_rAF"] = """##fileformat=VCFv4.0
+##INFO=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+##INFO=<ID=AF,Number=R,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=expModel,Number=1,Type=String,Description="Expected model for variant">
+##INFO=<ID=skipAD,Number=1,Type=String,Description="Variant must be skipped by AD calculation">
+##INFO=<ID=skipAF,Number=1,Type=String,Description="Variant must be skipped by AF calculation">
+##INFO=<ID=skipDP,Number=1,Type=String,Description="Variant must be skipped by DP calculation">
+##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+##FORMAT=<ID=AF,Number=R,Type=Float,Description="Allele Frequency">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA
+11	1	one_spl_aAD_rAF_1	A	T	29	PASS	expModel=model_2;skipAF=True;AD=10;DP=100	.	.
+11	2	one_spl_aAD_rAF_2	A	T	29	PASS	expModel=model_2;skipDP=True;AF=0.9,0.1;AD=10	.	.
+11	3	one_spl_aAD_rAF_3	A	T	29	PASS	expModel=model_2;skipAD=True;AF=0.9,0.1;DP=100	.	.
+11	1	one_spl_aAD_rAF_4	A	T	29	PASS	expModel=model_2	AD:DP	10:100
+11	2	one_spl_aAD_rAF_5	A	T	29	PASS	expModel=model_2	AF:AD	0.9,0.1:10
+11	3	one_spl_aAD_rAF_6	A	T	29	PASS	expModel=model_2	AF:DP	0.9,0.1:100
+11	1	one_spl_rAD_aAF_7	A	T,G	29	PASS	expModel=model_3;skipAF=True;AD=10,5;DP=100	.	.
+11	2	one_spl_rAD_aAF_8	A	T,G	29	PASS	expModel=model_3;skipDP=True;AF=0.85,0.1,0.05;AD=10,5	.	.
+11	3	one_spl_rAD_aAF_9	A	T,G	29	PASS	expModel=model_3;skipAD=True;AF=0.85,0.1,0.05;DP=100	.	.
+11	1	one_spl_rAD_aAF_10	A	T,G	29	PASS	expModel=model_3	AD:DP	10,5:100
+11	2	one_spl_rAD_aAF_11	A	T,G	29	PASS	expModel=model_3	AF:AD	0.85,0.1,0.05:10,5
+11	3	one_spl_rAD_aAF_12	A	T,G	29	PASS	expModel=model_3	AF:DP	0.85,0.1,0.05:100"""
+        self.freq_data["two_spl_rAD_aAF"] = """##fileformat=VCFv4.0
+##INFO=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+##INFO=<ID=AF,Number=R,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=expModel,Number=1,Type=String,Description="Expected model for variant">
+##INFO=<ID=skipAD,Number=1,Type=String,Description="Variant must be skipped by AD calculation">
+##INFO=<ID=skipAF,Number=1,Type=String,Description="Variant must be skipped by AF calculation">
+##INFO=<ID=skipDP,Number=1,Type=String,Description="Variant must be skipped by DP calculation">
+##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+##FORMAT=<ID=AF,Number=R,Type=Float,Description="Allele Frequency">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA	splB
+11	1	two_spl_rAD_aAF_1	A	T	29	PASS	expModel=model_4	AD:DP	48,2:50	42,8:50
+11	2	two_spl_rAD_aAF_2	A	T	29	PASS	expModel=model_4	AF:AD	0.04:48,2	0.16:42,8
+11	3	two_spl_rAD_aAF_3	A	T	29	PASS	expModel=model_4	AF:DP	0.04:50	0.16:50
+11	1	two_spl_rAD_aAF_4	A	T,G	29	PASS	expModel=model_5	AD:DP	43,2,5:50	41,8,1:50
+11	2	two_spl_rAD_aAF_5	A	T,G	29	PASS	expModel=model_5	AF:AD	0.04,0.1:43,2,5	0.16,0.02:41,8,1
+11	3	two_spl_rAD_aAF_6	A	T,G	29	PASS	expModel=model_5	AF:DP	0.04,0.1:50	0.16,0.02:50"""
+        self.freq_data["two_spl_aAD_rAF"] = """##fileformat=VCFv4.0
+##INFO=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+##INFO=<ID=AF,Number=R,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=expModel,Number=1,Type=String,Description="Expected model for variant">
+##INFO=<ID=skipAD,Number=1,Type=String,Description="Variant must be skipped by AD calculation">
+##INFO=<ID=skipAF,Number=1,Type=String,Description="Variant must be skipped by AF calculation">
+##INFO=<ID=skipDP,Number=1,Type=String,Description="Variant must be skipped by DP calculation">
+##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+##FORMAT=<ID=AF,Number=R,Type=Float,Description="Allele Frequency">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	splA	splB
+11	1	two_spl_rAD_aAF_1	A	T	29	PASS	expModel=model_4	AD:DP	2:50	8:50
+11	2	two_spl_rAD_aAF_2	A	T	29	PASS	expModel=model_4	AF:AD	0.96,0.04:2	0.84,0.16:8
+11	3	two_spl_rAD_aAF_3	A	T	29	PASS	expModel=model_4	AF:DP	0.96,0.04:50	0.84,0.16:50
+11	1	two_spl_rAD_aAF_4	A	T,G	29	PASS	expModel=model_5	AD:DP	2,5:50	8,1:50
+11	2	two_spl_rAD_aAF_5	A	T,G	29	PASS	expModel=model_5	AF:AD	0.96,0.04,0.1:2,5	0.84,0.16,0.02:8,1
+11	3	two_spl_rAD_aAF_6	A	T,G	29	PASS	expModel=model_5	AF:DP	0.96,0.04,0.1:50	0.84,0.16,0.02:50"""
+        self.freq_expected = {
+            "model_0": {
+                "AF": {"pop":[0.1]},
+                "AD": {"pop":[10]},
+                "DP": {"pop":100}
+            },
+            "model_1": {
+                "AF": {"pop":[0.1, 0.05]},
+                "AD": {"pop":[10, 5]},
+                "DP": {"pop":100}
+            },
+            "model_2": {
+                "AF": {"splA":[0.1], "pop":[0.1]},
+                "AD": {"splA":[10], "pop":[10]},
+                "DP": {"splA":100, "pop":100}
+            },
+            "model_3": {
+                "AF": {"splA":[0.1, 0.05], "pop":[0.1, 0.05]},
+                "AD": {"splA":[10, 5], "pop":[10, 5]},
+                "DP": {"splA":100, "pop":100}
+            },
+            "model_4": {
+                "AF": {"splA":[0.04], "splB":[0.16], "pop":[0.1]},
+                "AD": {"splA":[2], "splB":[8], "pop":[10]},
+                "DP": {"splA":50, "splB":50, "pop":100}
+            },
+            "model_5": {
+                "AF": {"splA":[0.04, 0.1], "splB":[0.16, 0.02], "pop":[0.1, 0.06]},
+                "AD": {"splA":[2, 5], "splB":[8, 1], "pop":[10, 6]},
+                "DP": {"splA":50, "splB":50, "pop":100}
+            }
+        }
+
+    def tearDown(self):
+        # Clean temporary files
+        for curr_file in [self.tmp_variants]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testGetAF(self):
+        for curr_dataset in sorted(self.freq_data):
+            if not curr_dataset.startswith("wout_spl"):
+                # Write test data
+                content = self.freq_data[curr_dataset]
+                with open(self.tmp_variants, "w") as FH_variants:
+                    FH_variants.write( content )
+                # Parse
+                expected_records = list()
+                observed_records = list()
+                with VCFIO(self.tmp_variants) as FH_vcf:
+                    for variant in FH_vcf:
+                        if "skipAF" not in variant.info:
+                            try:
+                                for idx_spl, curr_spl in enumerate(FH_vcf.samples):
+                                    expected_AF = self.freq_expected[variant.info["expModel"]]["AF"][curr_spl]
+                                    expected_records.append( "{} {}".format(variant.id, expected_AF) )
+                                    observed_records.append( "{} {}".format(variant.id, variant.getAF(curr_spl)) )
+                            except:
+                                raise Exception('Error in TestVCFRecord.testGetAF() for variant "' + variant.id + '".')
+                # Assert
+                self.assertEqual( expected_records, observed_records )
+
+    def testGetAD(self):
+        for curr_dataset in sorted(self.freq_data):
+            if not curr_dataset.startswith("wout_spl"):
+                # Write test data
+                content = self.freq_data[curr_dataset]
+                with open(self.tmp_variants, "w") as FH_variants:
+                    FH_variants.write( content )
+                # Parse
+                expected_records = list()
+                observed_records = list()
+                with VCFIO(self.tmp_variants) as FH_vcf:
+                    for variant in FH_vcf:
+                        if "skipAD" not in variant.info:
+                            try:
+                                for idx_spl, curr_spl in enumerate(FH_vcf.samples):
+                                    expected_AD = self.freq_expected[variant.info["expModel"]]["AD"][curr_spl]
+                                    expected_records.append( "{} {}".format(variant.id, expected_AD) )
+                                    observed_records.append( "{} {}".format(variant.id, variant.getAD(curr_spl)) )
+                            except:
+                                raise Exception('Error in TestVCFRecord.testGetAD() for variant "' + variant.id + '".')
+                # Assert
+                self.assertEqual( expected_records, observed_records )
+
+    def testGetDP(self):
+        for curr_dataset in sorted(self.freq_data):
+            if not curr_dataset.startswith("wout_spl"):
+                # Write test data
+                content = self.freq_data[curr_dataset]
+                with open(self.tmp_variants, "w") as FH_variants:
+                    FH_variants.write( content )
+                # Parse
+                expected_records = list()
+                observed_records = list()
+                with VCFIO(self.tmp_variants) as FH_vcf:
+                    for variant in FH_vcf:
+                        if "skipDP" not in variant.info:
+                            try:
+                                for curr_spl in FH_vcf.samples:
+                                    expected_DP = self.freq_expected[variant.info["expModel"]]["DP"][curr_spl]
+                                    expected_records.append( "{} {}".format(variant.id, expected_DP) )
+                                    observed_records.append( "{} {}".format(variant.id, variant.getDP(curr_spl)) )
+                            except:
+                                raise Exception('Error in TestVCFRecord.testGetDP() for variant "' + variant.id + '".')
+                # Assert
+                self.assertEqual( expected_records, observed_records )
+
+    def testGetPopAF(self):
+        for curr_dataset in sorted(self.freq_data):
+            # Write test data
+            content = self.freq_data[curr_dataset]
+            with open(self.tmp_variants, "w") as FH_variants:
+                FH_variants.write( content )
+            # Parse
+            expected_records = list()
+            observed_records = list()
+            with VCFIO(self.tmp_variants) as FH_vcf:
+                for variant in FH_vcf:
+                    try:
+                        expected_AF = self.freq_expected[variant.info["expModel"]]["AF"]["pop"]
+                        expected_records.append( "{} {}".format(variant.id, expected_AF) )
+                        observed_records.append( "{} {}".format(variant.id, variant.getPopAF()) )
+                    except:
+                        raise Exception('Error in TestVCFRecord.testGetPopAF() for variant "' + variant.id + '".')
+            # Assert
+            self.assertEqual( expected_records, observed_records )
+
+    def testGetPopDP(self):
+        for curr_dataset in sorted(self.freq_data):
+            # Write test data
+            content = self.freq_data[curr_dataset]
+            with open(self.tmp_variants, "w") as FH_variants:
+                FH_variants.write( content )
+            # Parse
+            expected_records = list()
+            observed_records = list()
+            with VCFIO(self.tmp_variants) as FH_vcf:
+                for variant in FH_vcf:
+                    try:
+                        expected_DP = self.freq_expected[variant.info["expModel"]]["DP"]["pop"]
+                        expected_records.append( "{} {}".format(variant.id, expected_DP) )
+                        observed_records.append( "{} {}".format(variant.id, variant.getPopDP()) )
+                    except:
+                        raise Exception('Error in TestVCFRecord.testGetPopDP() for variant "' + variant.id + '".')
+            # Assert
+            self.assertEqual( expected_records, observed_records )
+
     def testStandardizeSingleAllele(self):
         # Test substitution one nt
         substitution = VCFRecord( "artificial_1", 18, None, "TC", ["TA"], 230 )
