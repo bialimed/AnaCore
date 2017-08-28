@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.11.1'
+__version__ = '1.12.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -253,7 +253,50 @@ class VCFRecord:
                 new_record.alt = [alt]
         return new_record
 
-    def getPopDP( self ):############################################### test
+    def getPopAF( self ):
+        """
+        @summary: Returns the list of alleles frequencies for the population (it is composed by all samples). The reference frequency is removed from the result if it exists.
+        @return: [list] The list of alleles frequencies.
+        """
+        # Retrieve AF from self
+        AF = None
+        if "AF" in self.info: # The AF is already processed for the population
+            AF = self.info["AF"]
+        else:
+            # Get population DP
+            DP = None
+            try:
+                DP = self.getPopDP()
+            except: pass
+            if "AD" in self.info and DP is not None: # The AF can be processed directly from the population information
+                AD = self.info["AD"] if isinstance(self.info["AD"], (list, tuple)) else [self.info["AD"]]
+                AF = [curr_AD/float(DP) for curr_AD in AD]
+            else: # The AF must be calculated from samples information
+                spl_names = list(self.samples.keys())
+                if len(self.samples) == 1 and "AF" in self.samples[spl_names[0]]: # Only one sample and it contains AF
+                    AF = self.samples[spl_names[0]]["AF"]
+                else:
+                    try:
+                        AD = None
+                        for idx_spl, spl_name in enumerate(self.samples):
+                            if idx_spl == 0:
+                                AD = self.getAD( spl_name )
+                            else:
+                                for idx_allele, curr_AD in enumerate( self.getAD(spl_name) ):
+                                    AD[idx_allele] += curr_AD
+                        AF = [curr_AD/float(DP) for curr_AD in AD]
+                    except:
+                        raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+        # Transform AF to list
+        if not isinstance(AF, (list, tuple)):
+            AF = [AF]
+        # Remove the reference allele frequency
+        if len(AF) == len(self.alt) + 1:
+            AF = AF[1:]
+        # Return
+        return( AF )
+
+    def getPopDP( self ):
         """
         @summary: Returns the depth for the population (it is composed by all samples).
         @return: [int] The depth.
@@ -262,126 +305,51 @@ class VCFRecord:
         if "DP" in self.info: # The DP is already processed for the population
             DP = self.info["DP"]
         else:
-            spl_wout_DP = [spl_name for spl_name in self.samples if "DP" not in self.samples[spl_name]]
-            if len(spl_wout_DP) == 0: # All samples have DP
-                DP = sum([self.samples[spl_name]["DP"] for spl_name in self.samples])
+            # Get population AD
+            AD = None
+            if "AD" in self.info:
+                AD = self.info["AD"] if isinstance(self.info["AD"], (list, tuple)) else [self.info["AD"]]
+            # Calculate DP
+            if AD is not None and len(AD) == len(self.alt) + 1: # The DP can be processed from INFO's AD (it contains the depth for all alleles and reference)
+                DP = sum(AD)
+            elif AD is not None and "AF" in self.info: # The DP can be processed from INFO's AD and AF
+                AF = self.info["AF"] if isinstance(self.info["AF"], (list, tuple)) else [self.info["AF"]]
+                if len(AF) == len(self.alt) + 1:
+                    AF = AF[1:]
+                DP = int( round(AD[0]/AF[0], 0) )
+            elif len(self.samples) != 0: # The DP must be calculated from samples information
+                DP = sum([self.getDP(spl_name) for spl_name in self.samples])
             else:
-                raise Exception( 'The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+                raise Exception( 'The population depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
         return( DP )
 
-    def get_AD( self, spl_name ):
+    def getAD( self, spl_name ):
         """
         @summary: Returns the list of alleles depths for the specified sample. The reference depth is removed from the result if it exists.
         @param spl_name: [str] The sample name.
         @return: [list] The list of alleles depths.
         """
-        # Retrieve DP
-        DP = None
-        try:
-            DP = self.getDP( spl_name )
-        except:
-            DP = None
-
-        # Retrieve AD from self
         AD = None
+        # Retrieve AD from self
         if "AD" in self.samples[spl_name]: # The AD is already processed for the sample
             AD = self.samples[spl_name]["AD"]
-            if isinstance(AD, (list, tuple)) and len(AD) == len(self.alt) + 1: # Skip the reference allele depth
-                AD = AD[1:]
-        elif "AF" in self.samples[spl_name] and DP is not None: # The AD must be processed for the sample
-            AF = self.samples[spl_name]["AF"]
-            if len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
-                AF = AF[1:]
-            AD = [int(curr_AF * DP) for curr_AF in AF]
         elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info: # Only one sample and AD is already processed for population
-            AD = self.info["AD"]
-            if isinstance(AD, (list, tuple)) and len(AD) == len(self.alt) + 1: # Skip the reference allele depth
-                AD = AD[1:]
-        elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info and DP is not None: # Only one sample and AD must be processed for population
-            AF = self.info["AF"]
-            if len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
-                AF = AF[1:]
-            AD = [int(curr_AF * DP) for curr_AF in AF]
-        else:
-            raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-
-        # Transform AF to list
-        if not isinstance(AD, (list, tuple)):
-            AD = [AD]
-
-        return( AD )
-
-    def getAD( self, spl_name ):############################################### test
-        AD = None
-
-        # Retrieve AD from self
-        if "AD" in self.samples[spl_name]: # The AD is already processed for the sample
-            AD = self.samples[spl_name]["AD"]
-        elif len(self.samples) == 1 and spl_name in self.samplesend and "AD" in self.info: # Only one sample and AD is already processed for population
             AD = self.info["AD"]
         else: # AD must be calculated
             try:
                 AF = self.getAF( spl_name )
                 DP = self.getDP( spl_name )
-                AD = [round(curr_AF * DP, 0) for curr_AF in AF]
+                AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
             except:
                 raise Exception( 'The alternative alleles depths cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-
         # Transform AD to list
         if not isinstance(AD, (list, tuple)):
             AD = [AD]
-
-        # Remove the reference allele frequency
+        # Remove the reference allele depth
         if len(AD) == len(self.alt) + 1:
             AD = AD[1:]
-
+        # Return
         return( AD )
-
-    def getPopAF( self ):############################################### test
-        """
-        @summary: Returns the list of alleles frequencies for the population (it is composed by all samples). The reference frequency is removed from the result if it exists.
-        @return: [list] The list of alleles frequencies.
-        """
-        # Retrieve DP
-        DP = None
-        try:
-            DP = self.getPopDP()
-        except:
-            DP = None
-
-        # Retrieve AF from self
-        AF = None
-        if "AF" in self.info: # The AF is already processed for the population
-            AF = self.info["AF"]
-        elif "AD" in self.info and DP is not None: # The AF can be processed directly from the population information
-            AD = self.info["AD"]
-            AF = [curr_AD/float(DP) for curr_AD in AD]
-        else: # The AF must be calculated from samples
-            spl_names = list(self.samples.keys())
-            if len(self.samples) == 1 and "AF" in self.samples[spl_names[0]]: # Only one sample and it contains AF
-                AF = self.samples[spl_names[0]]["AF"]
-            else:
-                try:
-                    AD = None
-                    for idx_spl, spl_name in enumerate(self.samples):
-                        if idx_spl == 0:
-                            AD = self.getAD( spl_name )
-                        else:
-                            for idx_allele, curr_AD in self.getAD( spl_name ):
-                                AD[idx_allele] += curr_A
-                    AF = [curr_AD/float(DP) for curr_AD in AD]
-                except:
-                    raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-
-        # Transform AF to list
-        if not isinstance(AF, (list, tuple)):
-            AF = [AF]
-
-        # Remove the reference allele frequency
-        if len(AF) == len(self.alt) + 1:
-            AF = AF[1:]
-
-        return( AF )
 
     def getAF( self, spl_name ):
         """
@@ -389,83 +357,41 @@ class VCFRecord:
         @param spl_name: [str] The sample name.
         @return: [list] The list of alleles frequencies.
         """
-        # Retrieve DP
-        DP = None
-        try:
-            DP = self.getDP( spl_name )
-        except:
-            DP = None
-
         # Retrieve AF from self
         AF = None
         if "AF" in self.samples[spl_name]: # The AF is already processed for the sample
             AF = self.samples[spl_name]["AF"]
-            if isinstance(AF, (list, tuple)) and len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
-                AF = AF[1:]
-        elif "AD" in self.samples[spl_name] and DP is not None: # The AF must be processed for the sample
-            AD = self.samples[spl_name]["AD"]
-            if len(AD) == len(self.alt) + 1: # Skip the reference allele depth
-                AD = AD[1:]
-            AF = [curr_AD/float(DP) for curr_AD in AD]
-        elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info: # Only one sample and AF is already processed for population
-            AF = self.info["AF"]
-            if isinstance(AF, (list, tuple)) and len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
-                AF = AF[1:]
-        elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info and DP is not None: # Only one sample and AF must be processed for population
-            AD = self.info["AD"]
-            if len(AD) == len(self.alt) + 1: # Skip the reference allele depth
-                AD = AD[1:]
-            AF = [curr_AD/float(DP) for curr_AD in AD]
         else:
-            raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-
+            # Get sample AD
+            AD = None
+            if "AD" in self.samples[spl_name]:
+                AD = self.samples[spl_name]["AD"] if isinstance(self.samples[spl_name]["AD"], (list, tuple)) else [self.samples[spl_name]["AD"]]
+            if AD is not None and len(AD) == len(self.alt) + 1: # The AF can be processed from sample's AD (it contains the depth for alleles and reference)
+                DP = sum(AD)
+                AF = [curr_AD/float(DP) for curr_AD in AD]
+            else:
+                # Get sample DP
+                DP = None
+                try:
+                    DP = self.getDP( spl_name )
+                except: pass
+                if AD is not None and DP is not None: # The AF can be processed from sample's AD and DP
+                    AF = [curr_AD/float(DP) for curr_AD in AD]
+                elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info: # Only one sample and AF is already processed for population
+                    AF = self.info["AF"]
+                # elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info and DP is not None: # Only one sample and AF must be processed for population
+                #     AD = self.info["AD"]
+                #     AF = [curr_AD/float(DP) for curr_AD in AD]
+                else:
+                    raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
         # Transform AF to list
         if not isinstance(AF, (list, tuple)):
             AF = [AF]
-
+        # Remove the reference allele frequency
+        if len(AF) == len(self.alt) + 1:
+            AF = AF[1:]
+        # Return
         return( AF )
-
-    def get_AD( self, spl_name ):
-        """
-        @summary: Returns the list of alleles depths for the specified sample. The reference depth is removed from the result if it exists.
-        @param spl_name: [str] The sample name.
-        @return: [list] The list of alleles depths.
-        """
-        # Retrieve DP
-        DP = None
-        try:
-            DP = self.getDP( spl_name )
-        except:
-            DP = None
-
-        # Retrieve AD from self
-        AD = None
-        if "AD" in self.samples[spl_name]: # The AD is already processed for the sample
-            AD = self.samples[spl_name]["AD"]
-            if isinstance(AD, (list, tuple)) and len(AD) == len(self.alt) + 1: # Skip the reference allele depth
-                AD = AD[1:]
-        elif "AF" in self.samples[spl_name] and DP is not None: # The AD must be processed for the sample
-            AF = self.samples[spl_name]["AF"]
-            if len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
-                AF = AF[1:]
-            AD = [int(curr_AF * DP) for curr_AF in AF]
-        elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info: # Only one sample and AD is already processed for population
-            AD = self.info["AD"]
-            if isinstance(AD, (list, tuple)) and len(AD) == len(self.alt) + 1: # Skip the reference allele depth
-                AD = AD[1:]
-        elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info and DP is not None: # Only one sample and AD must be processed for population
-            AF = self.info["AF"]
-            if len(AF) == len(self.alt) + 1: # Skip the reference allele frequency
-                AF = AF[1:]
-            AD = [int(curr_AF * DP) for curr_AF in AF]
-        else:
-            raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-
-        # Transform AF to list
-        if not isinstance(AD, (list, tuple)):
-            AD = [AD]
-
-        return( AD )
 
     def getDP( self, spl_name ):
         """
@@ -478,7 +404,18 @@ class VCFRecord:
             DP = self.samples[spl_name]["DP"]
         elif len(self.samples) == 1 and spl_name in self.samples and "DP" in self.info: # Only one sample and DP is already processed for population
             DP = self.info["DP"]
-        else:
+        elif "AD" in self.samples[spl_name]: # DP can be calculated
+            AD = self.samples[spl_name]["AD"] if isinstance(self.samples[spl_name]["AD"], (list, tuple)) else [self.samples[spl_name]["AD"]]
+            if len(AD) == len(self.alt) + 1: # Sample contains AD for all alleles and reference
+                DP = sum(AD)
+            elif "AF" in self.samples[spl_name]: # Sample contains AD for all alleles and AF
+                AF = self.samples[spl_name]["AF"] if isinstance(self.samples[spl_name]["AF"], (list, tuple)) else [self.samples[spl_name]["AF"]]
+                if len(AF) == len(self.alt) + 1:
+                    AF = AF[1:]
+                DP = int( round(AD[0]/AF[0], 0) )
+            else: # AD does not contain reference AD and AF is missing to calculate DP
+                raise Exception( 'The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+        else: # AD is missing to calculate DP
             raise Exception( 'The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
         return( DP )
 
