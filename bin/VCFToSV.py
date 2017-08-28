@@ -56,7 +56,7 @@ def getAlleleCounts( FH_vcf, record, allele_separator="," ):
         if curr_spl not in record.samples:
             count_by_spl.append("")
         else:
-            AD = record.get_AD(curr_spl)
+            AD = record.getAD(curr_spl)
             DP = record.getDP(curr_spl)
             alleles_count = list()
             for idx_allele, curr_AD in enumerate(AD):

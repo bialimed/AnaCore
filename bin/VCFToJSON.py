@@ -164,7 +164,7 @@ if __name__ == "__main__":
                 curr_json["support"] = {
                     "filters": allele_record.filter,
                     "qual": allele_record.qual,
-                    "libraries": [{"alt_depth":allele_record.get_AD(library)[0], "depth":allele_record.getDP(library), "name":library} for library in FH_vcf.samples]
+                    "libraries": [{"alt_depth":allele_record.getAD(library)[0], "depth":allele_record.getDP(library), "name":library} for library in FH_vcf.samples]
                 }
                 if "CSQ" in allele_record.info:
                     # Identical known variants, AF in populations and annotations
