@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.5.1'
+__version__ = '0.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -43,7 +43,7 @@ class DSVF (Workflow):
         self.add_parameter_list( "pos_ctrl_names", 'Names of the positives controls. These samples contain a known set of variants with a predetermined AF.', group="Control samples" )
         self.add_input_file( "pos_ctrl_expected", 'Variants expected in positives controls (format: VCF).', group="Control samples" )
         # Variant calling
-        self.add_parameter( "min_call_AF", 'Variants with an allele frequency under this value are not emitted by variant caller.', type=float, default=0.01, group="Variant calling" )
+        self.add_parameter( "min_call_AF", 'Variants with an allele frequency under this value are not emitted by variant caller.', type=float, default=0.02, group="Variant calling" )
         self.add_parameter( "min_base_qual", 'The phred score for a base to be considered a good call.', type=int, default=25, group="Variant calling" )
         # Analysis
         self.add_input_file( "RNA_selection", "The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.", group="Analysis" )
@@ -118,14 +118,6 @@ class DSVF (Workflow):
         cleaned_R2 = self.add_component( "Cutadapt", ["a", self.R2_end_adapter, R2, None, 0.01, 10], component_prefix="R2" )
 
         # Align reads by amplicon
-        ################################################################
-        for idx in range(len(R1)):
-            curr_spl_R1 = os.path.basename( cleaned_R1.out_R1[idx] ).split("_")[0]
-            curr_spl_R2 = os.path.basename( cleaned_R2.out_R1[idx] ).split("_")[0]
-            if curr_spl_R1 != curr_spl_R2:
-                print( curr_spl_R1, curr_spl_R2 )
-                raise Exception("Aln list are not consistent")
-        ################################################################
         bwa = self.add_component( "BWAmem", [self.genome_seq, cleaned_R1.out_R1, cleaned_R2.out_R1] )
         idx_aln = self.add_component( "BAMIndex", [bwa.aln_files] )
 
@@ -153,18 +145,6 @@ class DSVF (Workflow):
         libB_spl = [spl["Sample_Name"] for spl in self.samples if spl["Manifest"] == libB["name"]]
         libB["aln"] = [x for (y, x) in sorted(zip(libB_spl, libB["aln"]))]
         libB["vcf"] = [x for (y, x) in sorted(zip(libB_spl, libB["vcf"]))]
-        ################################################################
-        for idx in range(len(libA["aln"])):
-            curr_spl_libA_aln = os.path.basename( libA["aln"][idx] ).split("_")[0]
-            curr_spl_libB_aln = os.path.basename( libB["aln"][idx] ).split("_")[0]
-            curr_spl_libA_vcf = os.path.basename( libA["vcf"][idx] ).split("_")[0]
-            curr_spl_libB_vcf = os.path.basename( libB["vcf"][idx] ).split("_")[0]
-            if curr_spl_libA_aln == curr_spl_libB_aln and curr_spl_libB_aln == curr_spl_libA_vcf and curr_spl_libB_vcf:
-                pass
-            else:
-                print( curr_spl_libA_aln, curr_spl_libB_aln, curr_spl_libA_vcf, curr_spl_libB_vcf)
-                raise Exception("Merge list are not consistent")
-        ################################################################
         spl_merging = self.add_component( "MergeVCFAmpli", [libA["design_wout_primers"], libB["design_wout_primers"], libA["vcf"], libB["vcf"], libA["aln"], libB["aln"]] )
 
         # Variants annotation
