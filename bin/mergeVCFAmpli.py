@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.1'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -170,11 +170,11 @@ def getAlnCost( ref, aln_seq, weights=None ):
                       aln_seq = ["A",  "G", "A", "T", "", "", "G", "G", "CTTA", "C", "C", None]
     @param weights: [dict] The weights of each evenments. Each evenment must be setted.
                     Default:
-                      { "del": 10, "del_ext": 0.5, "ins": 10, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5 }
+                      { "del": 3, "del_ext": 0.5, "ins": 3, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5 }
     @return: [float] The cost of the alignment.
     """
     if weights is None:
-        weights = { "del": 10, "del_ext": 0.5, "ins": 10, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5 }
+        weights = { "del": 3, "del_ext": 0.5, "ins": 3, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5 }
     nb = { "del": 0, "del_ext": 0, "ins": 0, "ins_ext": 0, "miss": 0, "subs": 0, "match": 0 }
     prev = ""
     for idx_nt, nt in enumerate(aln_seq):
