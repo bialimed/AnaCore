@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -61,10 +61,11 @@ def getNonOverlappingThread( selected_areas ):
             ])
     return( non_overlapping_threads )
 
-def getSelectedArea( input_panel ):
+def getSelectedArea( input_panel, margin ):
     """
     @summary: Returns the list of selected areas from a BED file.
     @param input_panel: [str] The path to the selected areas description (format: BED).
+    @param margin: [int] The minimum distance between two areas in same group. With 0 the group contains non-overlapping areas. With 5 the areas in the same group are non-overlapping but also separated by at least 5 nucleotids. This option is used when the sequencing adapter cannot be totally removed to prevent overlap between primer of one area and the adapters of an other.
     @return: [list] The list of BED's areas. Each area is represented by a dictionary with this format: {"region":"chr1", "start":501, "end":608, "id":"gene_98"}.
     """
     selected_areas = list()
@@ -74,8 +75,8 @@ def getSelectedArea( input_panel ):
                 fields = [elt.strip() for elt in line.split("\t")]
                 selected_areas.append({
                     "region": fields[0],
-                    "start": int(fields[1]) +1, # Start in BED is 0-based
-                    "end": int(fields[2]),
+                    "start": max(1, (int(fields[1]) + 1 - margin)), # Start in BED is 0-based
+                    "end": int(fields[2]) + margin,
                     "id": fields[3]
                 })
     return( selected_areas )
@@ -103,6 +104,7 @@ def hasNoOverlap( area_A, area_B ):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser( description='Writes non-overlapping areas groups from a BED file.' )
+    parser.add_argument( '-m', '--margin', default=0, type=int, help='The minimum distance between two areas in same group. With 0 the group contains non-overlapping areas. With 5 the areas in the same group are non-overlapping but also separated by at least 5 nucleotids. This option is used when the sequencing adapter cannot be totally removed to prevent overlap between primer of one area and the adapters of an other. [Default: %(default)s]' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-i', '--input-panel', required=True, help='Path to the list of selected areas (format: BED). Each area must have an unique ID in the name field.' )
     group_output = parser.add_argument_group( 'Inputs' ) # Inputs
@@ -110,7 +112,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Get selected area from BED
-    selected_areas = getSelectedArea(args.input_panel)
+    selected_areas = getSelectedArea( args.input_panel, args.margin )
 
     # Split overlapping area
     non_overlapping_threads = getNonOverlappingThread( selected_areas )
