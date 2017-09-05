@@ -1,8 +1,8 @@
 [Header]	
-Customer Name	Arg 1
-Product Type	Arg 0
-Date Manufactured	22/06/2017
-Lot	Arg 2
+Customer Name	TOULOUSE CANCER CENTER
+Product Type	15026626
+Date Manufactured	27/04/2017
+Lot	20163448
 DesignStudio ID	117224
 Target Plexity	1224
 	

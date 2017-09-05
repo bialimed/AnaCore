@@ -1,9 +1,0 @@
-libA
-/save/fescudie/bin/manifestToBED.py:157: UserWarning: The primer 'TTCTTATCTCAGCCTCTCCTGCACT' is found multiple twice in chr6
-/save/fescudie/bin/manifestToBED.py:157: UserWarning: The primer 'GCTGCTGTTGCTGCTGTTGAAGCTGTT' is found multiple twice in chr12
-/save/fescudie/bin/manifestToBED.py:157: UserWarning: The primer 'CAGACCTCAGCCTCCCCTCCCC' is found multiple twice in chr19
-
-libB
-/save/fescudie/bin/manifestToBED.py:157: UserWarning: The primer 'TTCTTATCTCAGCCTCTCCTGCACT' is found multiple twice in chr6
-/save/fescudie/bin/manifestToBED.py:157: UserWarning: The primer 'GCTGCTGTTGCTGCTGTTGAAGCTGTT' is found multiple twice in chr12
-/save/fescudie/bin/manifestToBED.py:157: UserWarning: The primer 'CAGACCTCAGCCTCCCCTCCCC' is found multiple twice in chr19
