@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.12.1'
+__version__ = '1.12.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -280,7 +280,7 @@ class VCFRecord:
                         AD = None
                         for idx_spl, spl_name in enumerate(self.samples):
                             if idx_spl == 0:
-                                AD = self.getAD( spl_name )
+                                AD = [curr_AD for curr_AD in self.getAD(spl_name)]
                             else:
                                 for idx_allele, curr_AD in enumerate( self.getAD(spl_name) ):
                                     AD[idx_allele] += curr_AD
