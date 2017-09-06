@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.12.0'
+__version__ = '1.12.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -368,7 +368,10 @@ class VCFRecord:
                 AD = self.samples[spl_name]["AD"] if isinstance(self.samples[spl_name]["AD"], (list, tuple)) else [self.samples[spl_name]["AD"]]
             if AD is not None and len(AD) == len(self.alt) + 1: # The AF can be processed from sample's AD (it contains the depth for alleles and reference)
                 DP = sum(AD)
-                AF = [curr_AD/float(DP) for curr_AD in AD]
+                if DP == 0:
+                    AF = [0 for curr_AD in AD]
+                else:
+                    AF = [curr_AD/float(DP) for curr_AD in AD]
             else:
                 # Get sample DP
                 DP = None
@@ -376,7 +379,10 @@ class VCFRecord:
                     DP = self.getDP( spl_name )
                 except: pass
                 if AD is not None and DP is not None: # The AF can be processed from sample's AD and DP
-                    AF = [curr_AD/float(DP) for curr_AD in AD]
+                    if DP == 0:
+                        AF = [0 for curr_AD in AD]
+                    else:
+                        AF = [curr_AD/float(DP) for curr_AD in AD]
                 elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info: # Only one sample and AF is already processed for population
                     AF = self.info["AF"]
                 # elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info and DP is not None: # Only one sample and AF must be processed for population
