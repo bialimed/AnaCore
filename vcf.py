@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.12.2'
+__version__ = '1.12.3'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -277,14 +277,19 @@ class VCFRecord:
                     AF = self.samples[spl_names[0]]["AF"]
                 else:
                     try:
-                        AD = None
+                        pop_AD = None
                         for idx_spl, spl_name in enumerate(self.samples):
                             if idx_spl == 0:
-                                AD = [curr_AD for curr_AD in self.getAD(spl_name)]
+                                pop_AD = [curr_AD for curr_AD in self.getAD(spl_name)]
                             else:
                                 for idx_allele, curr_AD in enumerate( self.getAD(spl_name) ):
-                                    AD[idx_allele] += curr_AD
-                        AF = [curr_AD/float(DP) for curr_AD in AD]
+                                    pop_AD[idx_allele] += curr_AD
+                        if DP == 0:
+                            AF = [0 for curr_AD in pop_AD]
+                            if sum(pop_AD) != 0:
+                                raise Exception( 'popAD and popDP are not compatible for variant "' + self.chrom + ":" + str(self.pos) + '".' )
+                        else:
+                            AF = [curr_AD/float(DP) for curr_AD in pop_AD]
                     except:
                         raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
         # Transform AF to list
