@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -55,8 +55,8 @@ class GATKHaplotypeCaller (Component):
               " --annotateNDA" + \
               " --dontUseSoftClippedBases" + \
               " --reference_sequence " + self.genome_seq + \
-              ("" if self.genome_SNV else " --dbsnp " + self.genome_SNV) + \
-              ("" if self.intervals else " --intervals " + self.intervals) + \
+              ("" if self.genome_SNV == None else " --dbsnp " + self.genome_SNV) + \
+              ("" if self.intervals == None else " --intervals " + self.intervals) + \
               " --input_file $1" + \
               " --out $2" + \
               " 2> $3"
