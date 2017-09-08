@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -30,8 +30,9 @@ from weaver.function import ShellFunction
 
 class FilterVCFOnAnnot (Component):
 
-    def define_parameters(self, in_variants, mode="tag"):
+    def define_parameters(self, in_variants, kept_conseq=None, mode="tag"):
         # Parameters
+        self.add_parameter_list( "kept_conseq", 'The variants without one of these consequences are tagged/removed (see http://www.ensembl.org/info/genome/variation/predicted_data.html).', default=kept_conseq )
         self.add_parameter( "mode", 'Select the filter mode. In mode "tag" if the variant does not fit criteria a tag is added in FILTER field. In mode "remove" if the variant does not fit criteria it is removed from the output.', choices=["tag", "remove"], default=mode )
 
         # Files
@@ -42,6 +43,7 @@ class FilterVCFOnAnnot (Component):
     def process(self):
         cmd = self.get_exec_path("filterVCFOnAnnot.py") + \
             " --mode " + self.mode + \
+            ("" if len(self.kept_conseq) == 0 else " --kept-consequences " + " ".join(self.kept_conseq)) + \
             " --input-variants $1" + \
             " --output-variants $2" + \
             " 2> $3"

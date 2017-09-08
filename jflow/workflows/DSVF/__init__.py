@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'dev'
 
@@ -45,11 +45,15 @@ class DSVF (Workflow):
         # Variant calling
         self.add_parameter( "min_call_AF", 'Variants with an allele frequency under this value are not emitted by variant caller.', type=float, default=0.02, group="Variant calling" )
         self.add_parameter( "min_base_qual", 'The phred score for a base to be considered a good call.', type=int, default=25, group="Variant calling" )
+        # Variant filters
+        self.add_parameter_list( "kept_consequences", "The variants without one of these consequences are removed (see http://www.ensembl.org/info/genome/variation/predicted_data.html).",
+            default=["TFBS_ablation", "TFBS_amplification", "TF_binding_site_variant", "regulatory_region_ablation", "regulatory_region_amplification", "transcript_ablation", "splice_acceptor_variant", "splice_donor_variant", "stop_gained", "frameshift_variant", "stop_lost", "start_lost", "transcript_amplification", "inframe_insertion", "inframe_deletion", "missense_variant", "protein_altering_variant", "splice_region_variant"],
+            group="Variants filters" )
+        self.add_parameter( "min_AF", 'Under this allele frequency the variant is tagged "lowAF".', type=float, default=0.015, group="Variants filters" )
+        self.add_parameter( "min_DP", 'Under this depth in each library the variant is tagged "lowDP". Under this value in one library the variant can be tagged "incomplete" or "invalid".', type=int, default=100, group="Variants filters" )
+        self.add_input_file( "filters", "Parameters to filter variants (format: JSON).", required=True, group="Variants filters" )
         # Analysis
         self.add_input_file( "RNA_selection", "The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.", group="Analysis" )
-        self.add_parameter( "min_AF", 'Under this allele frequency the variant is tagged "lowAF".', type=float, default=0.02, group="Analysis" )
-        self.add_parameter( "min_DP", 'Under this depth in each library the variant is tagged "lowDP". Under this value in one library the variant can be tagged "incomplete" or "invalid".', type=int, default=120, group="Analysis" )
-        self.add_input_file( "filters", "Parameters to filter variants (format: JSON).", required=True, group="Analysis" )
         self.add_parameter( "assembly_version", "Genome assembly version.", default="GRCh37", group="Analysis" )
         self.add_input_file( "genome_seq", "Path to the sequences of the genome (format: FASTA).", file_format="fasta", required=True, group="Analysis" )
         # Cleaning
@@ -151,7 +155,7 @@ class DSVF (Workflow):
         variants_annot = self.add_component( "VEP", [spl_merging.out_variants, "homo_sapiens", self.assembly_version] )
 
         # Filter variants
-        tag_annot_variants = self.add_component( "FilterVCFOnAnnot", [variants_annot.out_variants] ) # tags on consequences and polymorphism
+        tag_annot_variants = self.add_component( "FilterVCFOnAnnot", [variants_annot.out_variants, self.kept_consequences] ) # tags on consequences and polymorphism
         tag_count_variants = self.add_component( "FilterVCFOnCount", [tag_annot_variants.out_variants, self.min_AF, self.min_DP] ) # tags on AF, DP and on presence in two lib
         sorted_variants = self.add_component( "SortVCF", [tag_count_variants.out_variants] )
         final_vcf = sorted_variants.out_variants
