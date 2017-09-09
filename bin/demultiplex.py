@@ -36,7 +36,7 @@ sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from sequenceIO import FastqIO
+from sequenceIO import FastaIO, FastqIO
 
 
 
@@ -45,102 +45,42 @@ from sequenceIO import FastqIO
 # FUNCTIONS
 #
 ########################################################################
-class Amplicon(object):
-    def __init__(self, reference, strand, up_primer, down_primer, start, end, name):
-        self.name = name
-        self.start = start
-        self.end = end
-        self.strand = strand
-        self.reference = reference
-        self.up_primer = up_primer.upper()
-        self.down_primer = down_primer.upper()
-
-    def getInterestStart(self):
-        interest_start = self.start + len(self.up_primer)
-        if self.strand == "-":
-            interest_start = self.start + len(self.down_primer)
-        return( interest_start )
-
-    def getInterestEnd(self):
-        interest_end = self.end - len(self.down_primer)
-        if self.strand == "-":
-            interest_end = self.end - len(self.up_primer)
-        return( interest_end )
-
-def revcom( seq ):
-    """
-    @summary: Returns the reverse complement the sequence.
-    @param seq: [str] The sequence.
-    @return: [str] The reverse complement of the sequence.
-    """
-    complement_rules = {'A':'T','T':'A','G':'C','C':'G','U':'A','N':'N','W':'W','S':'S','M':'K','K':'M','R':'Y','Y':'R','B':'V','V':'B','D':'H','H':'D',
-                        'a':'t','t':'a','g':'c','c':'g','u':'a','n':'n','w':'w','s':'s','m':'k','k':'m','r':'y','y':'r','b':'v','v':'b','d':'h','h':'d'}
-
-    return( "".join([complement_rules[base] for base in seq[::-1]]) )
-
-def getAmpliconsFromManifest( manifest_path ):
+def getBarcodes( in_barcodes ):
     """
     @summary: Returns the list of amplicons from a Illumina's manifest.
     @param manifest_path: [str] Path to the manifest.
     @return: [list] The amplicons information.
     """
-    amplicons = list()
-    with open(manifest_path) as FH_manifest:
-        section_probe = False
-        probes_header = list()
-        for line in FH_manifest:
-            if line.strip() != "":
-                if re.search('^\[\w+\]$', line.strip()) is not None:
-                    if line.strip() != "[Probes]":
-                        section_probe = False
-                    else:
-                        section_probe = True
-                        probes_header = [field.strip().lower().replace(" ", "_") for field in FH_manifest.readline().split("\t")]
-                elif section_probe:
-                    fields = { probes_header[idx]:field.strip() for idx, field in enumerate(line.split("\t"))}
-                    amplicons.append( 
-                        Amplicon(
-                            fields["chromosome"],
-                            fields["probe_strand"],
-                            fields["ulso_sequence"],
-                            fields["dlso_sequence"],
-                            None,
-                            None,
-                            fields["target_region_name"]
-                        )
-                    )
-    return amplicons
+    barcodes = list()
+    with open(in_barcodes) as FH_in:
+        for line in FH_in:
+            if not line.startswith("#"):
+                barcode_id, barcode_fwd, barcode_rvs = [elt.strip() for elt in line.split("\t")]
+                barcodes.append({
+                    "id": barcode_id,
+                    "fwd": barcode_fwd,
+                    "rvs": barcode_rvs
+                })
+    return barcodes
 
 def get_seq_ids( fastq_path ):
     ids = list()
-    #~ with FastqIO( fastq_path ) as FH:
-        #~ for record in FH:
-            #~ ids.append( record.id )
-    FH = FastqIO( fastq_path )
-    for record in FH:
-        ids.append( record.id )
-    FH.close()
+    with FastqIO( fastq_path ) as FH:
+        for record in FH:
+            ids.append( record.id )
     return ids
 
 def pickSequences( in_path, out_path, retained_ids ):
     dict_retained_ids = {curr_id: 1 for curr_id in retained_ids}
-    #~ with FastqIO( out_path, "w" ) as FH_out:
-        #~ with FastqIO( in_path ) as FH_in:
-            #~ for record in FH_in:
-                #~ if record.id in dict_retained_ids:
-                    #~ FH_out.write( record )
-    FH_out = FastqIO( out_path, "w" )
-    FH_in = FastqIO( in_path )
-    for record in FH_in:
-        if record.id in dict_retained_ids:
-            FH_out.write( record )
-    FH_out.close()
-    FH_in.close()
+    with FastqIO( out_path, "w" ) as FH_out:
+        with FastqIO( in_path ) as FH_in:
+            for record in FH_in:
+                if record.id in dict_retained_ids:
+                    FH_out.write( record )
 
 def cutadapt( in_fastq, out_fastq, adapter_seq, error_rate=0.1 ):
     cmd = [
-        #"cutadapt",
-        "/home/fescudie/.local/bin/cutadapt", ##########################"
+        "cutadapt",
         "--error-rate", str(error_rate),
         "-g", adapter_seq,
         "--discard-untrimmed",
@@ -169,10 +109,10 @@ if __name__ == "__main__":
 
     # Manage parameters
     parser = argparse.ArgumentParser( description='**************************************.' )
-    parser.add_argument( '-e', '--error-rate', default=0.01, type=float, help='************************************. [Default: %(default)s]' )
+    parser.add_argument( '-e', '--error-rate', default=0.1, type=float, help='************************************. [Default: %(default)s]' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-m', '--manifest-path', required=True, help='************ (format: Illumina\'s manifest).' )
+    group_input.add_argument( '-b', '--barcodes', required=True, help='************ (format: TSV).' )
     group_input.add_argument( '-R1', '--R1-path', required=True, help='************ (format: fastq).' )
     group_input.add_argument( '-R2', '--R2-path', required=True, help='************ (format: fastq).' )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
@@ -185,30 +125,44 @@ if __name__ == "__main__":
         args.output_filename_pattern = getLibNameFromReadPath(args.R1_path) + "_<AMPLI>_<R>.fastq.gz"
 
     # Load amplicons param
-    amplicons = getAmpliconsFromManifest( args.manifest_path )
+    barcodes = getBarcodes( args.barcodes )
 
     # Demultiplex
-    for amplicon_id, amplicon in enumerate(amplicons):
-        ampl_out_R1 = os.path.join( args.output_dir, args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", str(amplicon_id)) )
-        ampl_out_R2 = os.path.join( args.output_dir, args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", str(amplicon_id)) )
+    ids_by_barcodes = dict()
+    for curr_barcode in barcodes:
+        ampl_out_R1 = os.path.join( args.output_dir, args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", curr_barcode["id"]) )
+        ampl_out_R2 = os.path.join( args.output_dir, args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", curr_barcode["id"]) )
 
         # Find adapter
-        cutadapt_out_R1 = os.path.join( args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", str(amplicon_id)) )
-        cutadapt_out_R2 = os.path.join( args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", str(amplicon_id)) )
-        cutadapt( args.R1_path, cutadapt_out_R1, "^" + amplicon.up_primer, args.error_rate )
-        cutadapt( args.R2_path, cutadapt_out_R2, "^" + revcom(amplicon.down_primer), args.error_rate )
+        cutadapt_out_R1 = os.path.join( args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", curr_barcode["id"]) )
+        cutadapt_out_R2 = os.path.join( args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", curr_barcode["id"]) )
+        cutadapt( args.R1_path, cutadapt_out_R1, "^" + curr_barcode["fwd"], args.error_rate )
+        cutadapt( args.R2_path, cutadapt_out_R2, "^" + curr_barcode["rvs"], args.error_rate )
 
         # Select reads for the amplicon
         R1 = set( get_seq_ids(cutadapt_out_R1) )
         R2 = set( get_seq_ids(cutadapt_out_R2) )
         retained_ids = R1.intersection(R2)
+        ids_by_barcodes[curr_barcode["id"]] = retained_ids
 
         # Filter
-        pickSequences( cutadapt_out_R1, ampl_out_R1, retained_ids )
-        pickSequences( cutadapt_out_R2, ampl_out_R2, retained_ids )
+        pickSequences( args.R1_path, ampl_out_R1, retained_ids )
+        pickSequences( args.R2_path, ampl_out_R2, retained_ids )
 
         # Clean
         os.remove( cutadapt_out_R1 )
         os.remove( cutadapt_out_R2 )
 
-        print( amplicon_id, len(retained_ids), amplicon.up_primer, amplicon.down_primer, amplicon.name, sep="\t" )
+        print( curr_barcode["id"], len(retained_ids), curr_barcode["fwd"], curr_barcode["rvs"], sep="\t" )
+
+    # Check ambiguous
+    ids = dict()
+    non_uniq = dict()
+    for barcode in ids_by_barcodes:
+        for seq_id in ids_by_barcodes[barcode]:
+            if seq_id in ids:
+                if seq_id not in non_uniq:
+                    non_uniq[seq_id] = 1
+                non_uniq[seq_id] += 1
+            ids[seq_id] = 1
+    print( "Ambiguous", len(non_uniq), sep="\t" )
