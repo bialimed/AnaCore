@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -87,17 +87,17 @@ def getSourceRegion( read, regions, anchor_offset=0 ):
     ref_end = read.reference_end
     if read.is_reverse:
         for curr_region in regions:
-            if ref_end < curr_region["start"]:
+            if ref_end < curr_region["start"] - anchor_offset:
                 break
-            if ref_end <= curr_region["end"]:
+            if ref_end <= curr_region["end"] + anchor_offset:
                 if ref_end >= curr_region["end"] - anchor_offset:
                     overlapped_region = curr_region
                     break
     else:
         for curr_region in regions:
-            if ref_start < curr_region["start"]:
+            if ref_start < curr_region["start"] - anchor_offset:
                 break
-            if ref_start >= curr_region["start"]:
+            if ref_start >= curr_region["start"] - anchor_offset:
                 if ref_start <= curr_region["start"] + anchor_offset:
                     overlapped_region = curr_region
                     break
