@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -504,7 +504,9 @@ if __name__ == "__main__":
                     # Get valid RG
                     ref_end = curr_var.pos + len(curr_var.ref) - 1
                     curr_var_region = Region(curr_var.pos, ref_end, None, curr_var.chrom)
-                    overlapped_ampl = design_by_samples[spl][curr_var.chrom].getContainers(curr_var_region)
+                    overlapped_ampl = list()
+                    if curr_var.chrom in design_by_samples[spl]:
+                        overlapped_ampl = design_by_samples[spl][curr_var.chrom].getContainers(curr_var_region)
                     if len(overlapped_ampl) > 0:
                         # Retrieve AD, AF and DP from aln file
                         overlapped_ampl_name = [ampl.name for ampl in overlapped_ampl]
