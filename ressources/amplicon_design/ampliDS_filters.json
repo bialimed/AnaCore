@@ -3,5 +3,5 @@
   "target": "filter",
   "action": "exclude",
   "operator": "at least one in",
-  "values": ["lowDP", "lowAF", "invalid", "libSpe", "CSQ"]
+  "values": ["lowDP", "lowAF", "invalid", "libSpe", "CSQ", "popAF"]
 }
