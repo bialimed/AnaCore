@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -43,21 +43,21 @@ from vcf import VCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
+def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     """
-    @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant.
+    @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     @param chrom: [str] The variant region name.
     @param pos: [int] The variant position.
     @param ref: [str] The reference allele at the position.
     @param alt: [str] The variant allele at the position.
     @param aln_file: [str] The path to the alignment file (format: BAM). The AD and DP are retrieved from reads of this file. This file must be indexed.
     @param selected_RG: [list] The ID of RG used in AD and DP. Default: all read groups.
-    @return: [list] The first element is the AD, the second is the DP.
-    @warning: Reads ID must be unique in SAM.
+    @returns: [list] The first element is the AD, the second is the DP.
+    @warning: Reads ID must be unique in SAM. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     """
     ref_start = pos
     ref_end = pos + len(ref.replace(".", "")) - 1
-    selected_RG = {RG:1 for RG in selected_RG}
+    if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
     # Retrieve reads
     inspect_start = ref_start - 1
     inspect_end = ref_end
@@ -88,6 +88,12 @@ def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
                             reads[read_id].append(
                                 pileupread.alignment.query_sequence[pileupread.query_position].upper()
                             )
+    # Completes downstream positions
+    inspected_len = inspect_end - inspect_start
+    for read_id in reads:
+        read_len = len(reads[read_id])
+        for idx in range(inspected_len - read_len):
+            reads[read_id].append( None )
     # Process AD and DP
     alt = alt if alt != "." else ""
     AD = 0
@@ -99,58 +105,6 @@ def getADP( chrom, pos, ref, alt, aln_file, selected_RG=None ):
                 AD += 1
     # Return
     return( AD, DP )
-
-#~ def getADP( chrom, pos, ref, alt, aln_file ):
-    #~ """
-    #~ @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant.
-    #~ @param chrom: [str] The variant region name.
-    #~ @param pos: [int] The variant position.
-    #~ @param ref: [str] The reference allele at the position.
-    #~ @param alt: [str] The variant allele at the position.
-    #~ @param aln_file: [str] The path to the alignment file. The AD and DP are retrieved from reads of this file.
-    #~ @return: [list] The first element is the AD, the second is the DP.
-    #~ @warning: The sequence is returned as it is stored in the BAM file. Some mappers might have stored a reverse complement of the original read sequence.
-    #~ """
-    #~ ref_start = pos
-    #~ ref_end = pos + len(ref.replace(".", "")) - 1
-
-    #~ samfile = pysam.AlignmentFile( aln_file, "rb" )
-    #~ inspect_start = ref_start - 1
-    #~ inspect_end = ref_end
-    #~ reads = list()
-    #~ for curr_read in samfile.fetch( chrom, inspect_start, inspect_end ): # For each reads overlapping inspected area
-        #~ inspected = [None for pos in range(inspect_start, inspect_end)]
-        #~ prev_pos = None
-        #~ for read_pos, ref_pos in curr_read.get_aligned_pairs(): # For position in the read alignment
-            #~ if ref_pos is not None: # The read pos exists in reference
-                #~ if ref_pos >= inspect_start and ref_pos < inspect_end: # If the pos is in inspected area
-                    #~ inspected_pos = ref_pos - inspect_start
-                    #~ if read_pos is None: # Deletion
-                        #~ inspected[inspected_pos] = ""
-                    #~ else: # Identical or substitution
-                        #~ inspected[inspected_pos] = curr_read.query_sequence[read_pos].upper() # The sequence is returned as it is stored in the BAM file. Some mappers might have stored a reverse complement of the original read sequence.
-            #~ else: # The read pos does not exist in reference
-                #~ if prev_pos is not None: # Read alignment start by clipping
-                    #~ if prev_pos >= inspect_start and prev_pos < inspect_end: # Insertion
-                        #~ inspected_pos = prev_pos - inspect_start
-                        #~ if inspected[inspected_pos] is None:
-                            #~ inspected[inspected_pos] = ""
-                        #~ inspected[inspected_pos] += curr_read.query_sequence[read_pos].upper() # The sequence is returned as it is stored in the BAM file. Some mappers might have stored a reverse complement of the original read sequence.
-            #~ prev_pos = ref_pos if ref_pos is not None else prev_pos
-        #~ reads.append( inspected )
-
-    #~ # Process AD and DP
-    #~ alt = alt if alt != "." else ""
-    #~ AD = 0
-    #~ DP = 0
-    #~ for curr_read in reads:
-        #~ if None not in curr_read: # Skip partial reads
-            #~ DP += 1
-            #~ if "".join(curr_read) == alt:
-                #~ AD += 1
-
-    #~ # Return
-    #~ return( AD, DP )
 
 
 ########################################################################
@@ -236,7 +190,7 @@ if __name__ == "__main__":
                     chrom_pos, ref_alt = allele_id.split("=")
                     chrom, pos = chrom_pos.split(":")
                     ref, alt = ref_alt.split("/")
-                    AD, DP = getADP( chrom, int(pos), ref, alt, aln_by_samples[spl] )
+                    AD, DP = getADPReads( chrom, int(pos), ref, alt, aln_by_samples[spl] )
                     curr_var.samples[spl] = {
                         "AF": [0 if DP == 0 else round(float(AD)/DP, args.AF_precision)],
                         "AD": [AD],
