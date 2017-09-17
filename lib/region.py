@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -38,7 +38,7 @@ class Region:
         self.strand = strand
         self.setReference(reference)
         self.name = name
-        self.annot = annot
+        self.annot = dict() if annot is None else annot
 
     def length( self ):
         """
