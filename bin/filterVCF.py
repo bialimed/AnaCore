@@ -106,7 +106,7 @@ def getStdEvalFct( operator ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Sorts VCF by coordinates.' )
+    parser = argparse.ArgumentParser( description='Filters VCF on criteria described in JSON file.' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     parser.add_argument( '-f', '--filters', required=True, help='The path to the filters file (format: JSON).' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
