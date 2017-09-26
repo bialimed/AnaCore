@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.12.3'
+__version__ = '1.13.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -252,6 +252,47 @@ class VCFRecord:
                 new_record.pos += nb_move
                 new_record.alt = [alt]
         return new_record
+
+    def getPopAD( self ):
+        """
+        @summary: Returns the list of alleles depths for the population (it is composed by all samples). The reference depth is removed from the result if it exists.
+        @return: [list] The list of alleles depths.
+        """
+        # Retrieve AD from self
+        AD = None
+        if "AD" in self.info: # The AD is already processed for the population
+            AD = self.info["AD"]
+        else:
+            # Get population DP
+            DP = None
+            try:
+                DP = self.getPopDP()
+            except: pass
+            if "AF" in self.info and DP is not None: # The AD can be processed directly from the population information
+                AF = self.info["AF"] if isinstance(self.info["AF"], (list, tuple)) else [self.info["AF"]]
+                AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
+            else: # The AD must be calculated from samples information
+                spl_names = list(self.samples.keys())
+                if len(self.samples) == 1 and "AD" in self.samples[spl_names[0]]: # Only one sample and it contains AD
+                    AD = self.samples[spl_names[0]]["AD"]
+                else:
+                    try:
+                        for idx_spl, spl_name in enumerate(self.samples):
+                            if idx_spl == 0:
+                                AD = [curr_AD for curr_AD in self.getAD(spl_name)]
+                            else:
+                                for idx_allele, curr_AD in enumerate( self.getAD(spl_name) ):
+                                    AD[idx_allele] += curr_AD
+                    except:
+                        raise Exception( 'The allele depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+        # Transform AD to list
+        if not isinstance(AD, (list, tuple)):
+            AD = [AD]
+        # Remove the reference allele depth
+        if len(AD) == len(self.alt) + 1:
+            AD = AD[1:]
+        # Return
+        return( AD )
 
     def getPopAF( self ):
         """
