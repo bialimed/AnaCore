@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -326,6 +326,26 @@ class TestVCFRecord(unittest.TestCase):
                                 raise Exception('Error in TestVCFRecord.testGetDP() for variant "' + variant.id + '".')
                 # Assert
                 self.assertEqual( expected_records, observed_records )
+
+    def testGetPopAD(self):
+        for curr_dataset in sorted(self.freq_data):
+            # Write test data
+            content = self.freq_data[curr_dataset]
+            with open(self.tmp_variants, "w") as FH_variants:
+                FH_variants.write( content )
+            # Parse
+            expected_records = list()
+            observed_records = list()
+            with VCFIO(self.tmp_variants) as FH_vcf:
+                for variant in FH_vcf:
+                    try:
+                        expected_AD = self.freq_expected[variant.info["expModel"]]["AD"]["pop"]
+                        expected_records.append( "{} {}".format(variant.id, expected_AD) )
+                        observed_records.append( "{} {}".format(variant.id, variant.getPopAD()) )
+                    except:
+                        raise Exception('Error in TestVCFRecord.testGetPopAD() for variant "' + variant.id + '".')
+            # Assert
+            self.assertEqual( expected_records, observed_records )
 
     def testGetPopAF(self):
         for curr_dataset in sorted(self.freq_data):
