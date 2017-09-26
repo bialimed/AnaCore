@@ -18,12 +18,13 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.7.0'
+__version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'dev'
+__status__ = 'prod'
 
 import os
 import glob
+import shutil
 import warnings
 
 
@@ -31,14 +32,24 @@ from illumina import SampleSheetIO
 from jflow.workflow import Workflow
 
 
-class DSVF (Workflow):
+class ADIVaR (Workflow):
     def get_description(self):
         return "Variant analysis on amplicon double strand librairies."
+
+    def get_cmpt_by_nameid( self, selected_nameid ):
+        selected_cpmt = None
+        for cmpt in self.components:
+            if cmpt.get_nameid() == selected_nameid:
+                selected_cpmt = cmpt
+        return selected_cpmt
 
     def define_parameters(self, parameters_section=None):
         # Inputs data
         self.add_input_file( "samplesheet", "Illumina sheet describing run and samples (format: Illumina's samplesheet).", required=True, group="Inputs data" )
         self.add_input_directory( "samples_dir", "Path to the folder containing reads files. [Default: samplesheet directory]", group="Inputs data" )
+        # Output data
+        self.add_parameter( "metrics_type", 'Type of metrics files: "tsv" for human readable or "json" for machine readable.', choices=["json", "tsv"], default="json", group="Output data" )
+        self.add_input_directory( "output_dir", "Path to the output folder.", required=True, group="Output data" )
         # Control samples
         self.add_parameter_list( "pos_ctrl_names", 'Names of the positives controls. These samples contain a known set of variants with a predetermined AF.', group="Control samples" )
         self.add_input_file( "pos_ctrl_expected", 'Variants expected in positives controls (format: VCF).', group="Control samples" )
@@ -64,8 +75,6 @@ class DSVF (Workflow):
         self.add_input_directory( "libB_folder", "Path to folder containing files describing libB design (regions with primers, regions without primers and groups of non-overlapping amplicons).", required=True, group="Librairies design")
 
     def pre_process(self):
-        self.metrics_type = "tsv"
-
         # Samples
         samples_dir = self.samples_dir if self.samples_dir else os.path.dirname(self.samplesheet)
         samples_dir = samples_dir.replace(" ", "\ ")
@@ -173,3 +182,53 @@ class DSVF (Workflow):
             positive_ctrl_variants = [filtered_variants.out_variants[idx] for idx, spl_name in enumerate(spl_names) if spl_name in self.pos_ctrl_names]
             if len(positive_ctrl_variants) > 0:
                 self.add_component( "VariantsCtrlCheck", [self.pos_ctrl_expected, positive_ctrl_variants, self.metrics_type] )
+
+    def post_process(self):
+        # Move alignment files
+        for curr_lib in self.libraries:
+            aln_lib_folder = os.path.join( self.output_dir, "alignments_" + curr_lib["name"] )
+            if not os.path.exists(aln_lib_folder): os.mkdir(aln_lib_folder)
+            for aln in self.get_cmpt_by_nameid("AddAmpliRG." + curr_lib["name"]).out_aln: # Aln
+                filename = os.path.basename(aln).split("_")[0] + ".bam"
+                shutil.move( aln, os.path.join(aln_lib_folder, filename) )
+            for bai in self.get_cmpt_by_nameid("BAMIndex." + curr_lib["name"]).out_idx: # Aln idx
+                filename = os.path.basename(bai).split("_")[0] + ".bam.bai"
+                shutil.move( bai, os.path.join(aln_lib_folder, filename) )
+
+        # Move variants files
+        variants_folder = os.path.join( self.output_dir, "variants" )
+        if not os.path.exists(variants_folder): os.mkdir(variants_folder)
+        for vcf in self.get_cmpt_by_nameid("SortVCF.default").out_variants: # VCF
+            filename = os.path.basename(vcf).split("_")[0] + ".vcf"
+            shutil.move( vcf, os.path.join(variants_folder, filename) )
+        for vcf_filtered in self.get_cmpt_by_nameid("FilterVCF.default").out_variants: # VCF filtered
+            filename = os.path.basename(vcf_filtered).split("_")[0] + "_filtered.vcf"
+            shutil.move( vcf_filtered, os.path.join(variants_folder, filename) )
+        for tsv in self.get_cmpt_by_nameid("VCFToTSV.default").out_variants: # TSV
+            filename = os.path.basename(tsv).split("_")[0] + "_filtered.tsv"
+            shutil.move( tsv, os.path.join(variants_folder, filename) )
+
+        # Move metrics files
+        data_folder = os.path.join( self.output_dir, "data" )
+        if not os.path.exists(data_folder): os.mkdir(data_folder)
+        for curr_lib in self.libraries:
+            # Reads quality
+            #################################################################### TODO
+            # Alignment statistics
+            for metrics in self.get_cmpt_by_nameid("AddAmpliRG." + curr_lib["name"]).out_summary:
+                filename = os.path.basename(metrics).split("_")[0] + "_" + curr_lib["name"] + "_aln.json"
+                shutil.move( metrics, os.path.join(data_folder, filename) )
+            # Depths
+            for depths in self.get_cmpt_by_nameid("DepthsDistribution." + curr_lib["name"]).out_depths:
+                filename = os.path.basename(depths).split("_")[0] + "_" + curr_lib["name"] + "_depths.json"
+                shutil.move( depths, os.path.join(data_folder, filename) )
+        # Positives control
+        if len(self.pos_ctrl_spl) > 0:
+            for ctrl in self.get_cmpt_by_nameid("VariantsCtrlCheck.default").eval_files:
+                filename = os.path.basename(ctrl).split("_")[0] + "_ctrl.json"
+                shutil.move( ctrl, os.path.join(data_folder, filename) )
+        # Sequencer metrics
+        if self.sequencer_run_dir != None:
+            interop = self.get_cmpt_by_nameid("InterOp.default").summary_file
+            filename = os.path.basename(interop)
+            shutil.move( interop, os.path.join(data_folder, filename) )
