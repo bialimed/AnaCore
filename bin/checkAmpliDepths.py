@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -38,14 +38,14 @@ if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser( description='Parse areas depths distributions to list areas with an depths under the threshold on a sufficient length.' )
     parser.add_argument( '-p', '--percentile', type=int, default=15, help='The evaluated percentile. [Default: %(default)s]' )
-    parser.add_argument( '-d', '--min-depth', type=int, default=400, help='Under this value of depth on the selected percentile the area is reported. [Default: %(default)s]' )    
+    parser.add_argument( '-d', '--min-depth', type=int, default=200, help='Under this value of depth on the selected percentile the area is reported. [Default: %(default)s]' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-i', '--input-depths', required=True, nargs='+', help='For each evaluated sample a file containing the depths by percentile in selected areas (format: JSON outputted by coverageArea.py).')
     args = parser.parse_args()
 
     # Process
-    print("## percentile:", args.percentile, "; min_depth:", args.min_depth)    
+    print("## percentile:", args.percentile, "; min_depth:", args.min_depth)
     print("#Sample", "Area", "Depth", sep="\t")
     for curr_file in args.input_depths:
         spl_name = os.path.basename(curr_file).split("_depths.json")[0]
@@ -53,5 +53,6 @@ if __name__ == "__main__":
             data = json.load( FH )
             for area in data:
                 for name in area["depths"]:
-                    if int(area["depths"][name][str(args.percentile) + "_percentile"]) < args.min_depth:
-                        print(spl_name, area["name"], area["depths"][name]["min"], sep="\t")
+                    curr_depth = int(area["depths"][name][str(args.percentile) + "_percentile"])
+                    if curr_depth < args.min_depth:
+                        print(spl_name, area["name"], curr_depth, sep="\t")
