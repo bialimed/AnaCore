@@ -49,7 +49,7 @@ class BEDRecord(Region):
 
     def __setattr__(self, attr_name, attr_value):
         if attr_name == "chrom":
-            self.setReference( attr_value )
+            self.setReference(attr_value)
         else:
             object.__setattr__(self, attr_name, attr_value)
 
