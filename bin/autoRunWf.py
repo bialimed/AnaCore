@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-l', '--listened-folder', required=True, help="The sequencer output folder." )
     group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    #~ group_output.add_argument( '-s', '--storage-folder', required=True, help='Path to the storage folder. The run folder will be moved to this folder after process.')
+    group_output.add_argument( '-s', '--storage-folder', required=True, help='Path to the storage folder. The run folder will be moved to this folder after process.')
     group_output.add_argument( '-o', '--output-folder', required=True, help='Path to the workflows output folder.')
     args = parser.parse_args()
 
@@ -167,4 +167,8 @@ if __name__ == "__main__":
                     if protocol["workflow"] == "Amplicon - DS":
                         cmd_annot = getRunIlluminaAnnotCmd( in_spl_folder, protocol["design"] )
                         subprocess.check_call( cmd_annot )
+                    # Copy raw data
+                    cmd_copy = ["rsync", "-rptg", in_run_folder, os.path.join(args.storage_folder, filename)]
+                    #subprocess.check_call( cmd_copy )
+                    print( cmd_copy )
         time.sleep( args.roll_time )
