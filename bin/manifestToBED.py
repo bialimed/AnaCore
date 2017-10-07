@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -132,7 +132,7 @@ def getAmplicons( reference_path, manifest_path ):
     FH_ref = SequenceFileReader.factory( reference_path )
     try:
         for record in FH_ref:
-            record.id = "chr" + record.id ###############################################################################################
+            record.id = "chr" + record.id ################################################### TODO: clean management for region_prefix
             if record.id in amplicons_by_chr:
                 chr_str = record.string.upper()
                 for ampli in amplicons_by_chr[record.id]:
@@ -154,9 +154,11 @@ def getAmplicons( reference_path, manifest_path ):
                         raise Exception( "The primers '" + up_primer + "' and '" + down_primer + "' cannot be found in " + record.id )
                     # Check multiple target in chr
                     if len(upstream_matches) > 1:
-                        warnings.warn( "The primer '" + up_primer + "' is found multiple twice in " + record.id )
+                        match_list = ", ".join( [record.id + ":" + curr_match["start"] + "-" + curr_match["end"] for curr_match in upstream_matches] )
+                        warnings.warn( "The primer '" + up_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")" )
                     if len(downstream_matches) > 1:
-                        warnings.warn( "The primer '" + down_primer + "' is found multiple twice in " + record.id )
+                        match_list = ", ".join( [record.id + ":" + curr_match["start"] + "-" + curr_match["end"] for curr_match in downstream_matches] )
+                        warnings.warn( "The primer '" + down_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")" )
                     # Select smaller amplified fragment
                     prev_length = None
                     for curr_up in upstream_matches:
