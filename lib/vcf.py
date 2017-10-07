@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.13.0'
+__version__ = '1.13.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -584,7 +584,7 @@ class VCFIO(AbstractFile):
                 info = dict()
                 for tag_and_value in fields[7].split(';'):
                     if "=" in tag_and_value:
-                        tag, value = tag_and_value.split('=')
+                        tag, value = tag_and_value.split('=', 1)
                         if self.info[tag]["number"] is None:
                             info[tag] = [self.info[tag]["type"](list_elt) for list_elt in value.split(",")]
                         elif self.info[tag]["number"] == 1:
