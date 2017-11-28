@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'frogs@toulouse.inra.fr'
 __status__ = 'prod'
 
@@ -45,10 +45,10 @@ def is_gzip(file):
 class Sequence:
     def __init__(self, id, string, description=None, quality=None):
         """
-        @param id : [str] Id of the sequence.
-        @param string : [str] Sequence of the sequence.
-        @param description : [str] The sequence description.
-        @param quality : [str] The quality of the sequence (same length as string).
+        @param id: [str] Id of the sequence.
+        @param string: [str] Sequence of the sequence.
+        @param description: [str] The sequence description.
+        @param quality: [str] The quality of the sequence (same length as string).
         """
         self.id = id
         self.description = description
@@ -70,8 +70,8 @@ class SequenceFileReader(object):
 class FastqIO:
     def __init__(self, filepath, mode="r"):
         """
-        @param filepath : [str] The filepath.
-        @param mode : [str] Mode to open the file ('r', 'w', 'a').
+        @param filepath: [str] The filepath.
+        @param mode: [str] Mode to open the file ('r', 'w', 'a').
         """
         self.filepath = filepath
         self.mode = mode
@@ -120,31 +120,67 @@ class FastqIO:
 
     def next_seq(self):
         """
-        @summary : Returns the next sequence.
-        @return : [Sequence] The next sequence.
+        @summary: Returns the next sequence.
+        @return: [Sequence] The next sequence or None if it is the end of file.
         """
         seq_record = None
         try:
-            # Header
+            prev_file_pos = self.file_handle.tell()
             header = self.file_handle.readline().strip()
-            fields = header[1:].split(None, 1)
-            seq_id = fields[0]
-            seq_desc = fields[1] if len(fields) == 2 else None
-            self.current_line_nb += 1
-            # Sequence
-            seq_str = self.file_handle.readline().strip()
-            self.current_line_nb += 1
-            # Separator
-            separator = self.file_handle.readline()
-            self.current_line_nb += 1
-            # Quality
-            seq_qual = self.file_handle.readline().strip()
-            self.current_line_nb += 1
-            # Record
-            seq_record = Sequence( seq_id, seq_str, seq_desc, seq_qual )
+            new_file_pos = self.file_handle.tell()
+            if prev_file_pos != new_file_pos:
+                # Header
+                fields = header[1:].split(None, 1)
+                seq_id = fields[0]
+                seq_desc = fields[1] if len(fields) == 2 else None
+                self.current_line_nb += 1
+                # Sequence
+                seq_str = self.file_handle.readline().strip()
+                self.current_line_nb += 1
+                # Separator
+                separator = self.file_handle.readline()
+                self.current_line_nb += 1
+                # Quality
+                seq_qual = self.file_handle.readline().strip()
+                self.current_line_nb += 1
+                # Record
+                seq_record = Sequence( seq_id, seq_str, seq_desc, seq_qual )
         except:
             raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + "." )
         return seq_record
+
+    @staticmethod
+    def qual_offset(filepath):
+        """
+        @summary: Returns the offset used to encode the quality in the file.
+        @filepath: [str] The file path
+        @return: [int] The offset: 33 for sanger and Illumina >=1.8, 64 for Solexa and Illumina <1.8 or None if the offset cannot be determined.
+        """
+        offset = None
+        nb_qual = 0
+        count_by_qual = {elt:0 for elt in range(-5,127)}
+        with FastqIO(filepath) as FH_in:
+            record = FH_in.next_seq()
+            while record and offset is None:
+                for curr_ascii in record.quality:
+                    num_ascii = ord(curr_ascii)
+                    nb_qual += 1
+                    count_by_qual[num_ascii] += 1
+                    if num_ascii < 59:
+                        offset = 33
+                        break
+                record = FH_in.next_seq()
+        if offset is None:
+            checked_idx = int((float(nb_qual)/100)*20) # Index of the 20 percentile in sorted qualities
+            nb_spl = 0
+            curr_idx = 0
+            for curr_ascii in count_by_qual:
+                curr_idx += count_by_qual[curr_ascii]
+                if curr_idx >= checked_idx: # 20% of qualities before this point
+                    if curr_ascii > 84: # 80% of qualities are superior than Q61 with offset 33 and Q20 with offset 64
+                        offset = 64
+                        break
+        return offset
 
     @staticmethod
     def is_valid(filepath):
@@ -181,9 +217,9 @@ class FastqIO:
 
     def seqToFastqLine(self, sequence):
         """
-        @summary : Returns the sequence in fastq format.
-        @param sequence : [Sequence] The sequence to process.
-        @return : [str] The sequence.
+        @summary: Returns the sequence in fastq format.
+        @param sequence: [Sequence] The sequence to process.
+        @return: [str] The sequence.
         """
         seq = "@" + sequence.id + (" " + sequence.description if sequence.description is not None else "")
         seq += "\n" + sequence.string
@@ -195,8 +231,8 @@ class FastqIO:
 class FastaIO:
     def __init__(self, filepath, mode="r"):
         """
-        @param filepath : [str] The filepath.
-        @param mode : [str] Mode to open the file ('r', 'w', 'a').
+        @param filepath: [str] The filepath.
+        @param mode: [str] Mode to open the file ('r', 'w', 'a').
         """
         self.filepath = filepath
         self.mode = mode
@@ -249,8 +285,8 @@ class FastaIO:
 
     def next_seq(self):
         """
-        @summary : Returns the next sequence.
-        @return : [Sequence] The next sequence.
+        @summary: Returns the next sequence.
+        @return: [Sequence] The next sequence.
         """
         seq_record = None
         line = ""
@@ -308,9 +344,9 @@ class FastaIO:
 
     def seqToFastaLine(self, sequence):
         """
-        @summary : Returns the sequence in fasta format.
-        @param sequence : [Sequence] The sequence to process.
-        @return : [str] The sequence.
+        @summary: Returns the sequence in fasta format.
+        @param sequence: [Sequence] The sequence to process.
+        @return: [str] The sequence.
         """
         header = ">" + sequence.id + (" " + sequence.description if sequence.description is not None else "")
         return header + "\n" + sequence.string
