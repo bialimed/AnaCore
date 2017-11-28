@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -41,6 +41,8 @@ def parseFlagStat(flagstat_path):
     @return: [dict] The alignment metrics.
     """
     # Compile regexp
+    supplementary_regex = re.compile( "^(\d+) \+ (\d+) supplementary\s*$" )
+    duplicates_regex = re.compile( "^(\d+) \+ (\d+) duplicates\s*$" )
     total_regex = re.compile( "^(\d+) \+ (\d+) in total \(QC-passed reads \+ QC-failed reads\)\s*$" )
     secondary_regex = re.compile( "^(\d+) \+ (\d+) secondary\s*$" )
     mapped_regex = re.compile( "^(\d+) \+ (\d+) mapped \(" )
@@ -59,6 +61,18 @@ def parseFlagStat(flagstat_path):
         for line in FH_in:
             line = line.strip()
             parsed = False
+            # Supplementary line
+            if not parsed:
+                match = supplementary_regex.match(line)
+                if match is not None:
+                    parsed = True
+                    aln_metrics['supplementary'] = int(match.group(1)) + int(match.group(2))
+            # Duplicates line
+            if not parsed:
+                match = duplicates_regex.match(line)
+                if match is not None:
+                    parsed = True
+                    aln_metrics['duplicates'] = int(match.group(1)) + int(match.group(2))
             # Total line
             if not parsed:
                 match = total_regex.match(line)
