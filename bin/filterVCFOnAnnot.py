@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -47,7 +47,7 @@ def getKeptConsequences( allele_record, VEP_alt, valid_consequences ):
     kept_conseq = list()
     for annot_idx, annot in enumerate(allele_record.info["CSQ"]):
         is_filtered = True
-        if VEP_alt == annot["Allele"]:
+        if VEP_alt == annot["Allele"] and annot["Consequence"] is not None:
             consequences = annot["Consequence"].split("&") # For multi-consequence allele: Example: 'start_lost&NMD_transcript_variant'
             for current_csq in consequences:
                 if current_csq in valid_consequences:
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_filter = parser.add_argument_group( 'Filters' ) # Filters
     group_filter.add_argument( '-m', '--mode', default="tag", choices=["tag", "remove"], help='Select the filter mode. In mode "tag" if the variant does not fit criteria a tag "CSQ" and/or "popAF" is added in FILTER field. In mode "remove" if the variant does not fit criteria it is removed from the output. [Default: %(default)s]' )
-    group_filter.add_argument( '-p', '--polym-populations', default=["AF", "AFR_AF", "AMR_AF", "EAS_AF", "EUR_AF", "SAS_AF", "AA_AF", "EA_AF", "ExAC_AF", "ExAC_Adj_AF", "ExAC_AFR_AF", "ExAC_AMR_AF", "ExAC_EAS_AF", "ExAC_FIN_AF", "ExAC_NFE_AF", "ExAC_OTH_AF", "ExAC_SAS_AF"], help='Populations frequencies used as reference for polymorphism detection. [Default: %(default)s]' )
+    group_filter.add_argument( '-p', '--polym-populations', default=["AF", "AFR_AF", "AMR_AF", "EAS_AF", "EUR_AF", "SAS_AF", "AA_AF", "EA_AF", "ExAC_AF", "ExAC_Adj_AF", "ExAC_AFR_AF", "ExAC_AMR_AF", "ExAC_EAS_AF", "ExAC_FIN_AF", "ExAC_NFE_AF", "ExAC_OTH_AF", "ExAC_SAS_AF", "gnomAD_AF", "gnomAD_AFR_AF", "gnomAD_AMR_AF", "gnomAD_ASJ_AF", "gnomAD_EAS_AF", "gnomAD_FIN_AF", "gnomAD_NFE_AF", "gnomAD_OTH_AF", "gnomAD_SAS_AF"], help='Populations frequencies used as reference for polymorphism detection. [Default: %(default)s]' )
     group_filter.add_argument( '-l', '--polym-threshold', default=0.01, help='Minimum frequency in population to tag allele as polymorphism. [Default: %(default)s]' )
     group_filter.add_argument( '-k', '--kept-consequences', default=["TFBS_ablation", "TFBS_amplification", "TF_binding_site_variant", "regulatory_region_ablation", "regulatory_region_amplification", "transcript_ablation", "splice_acceptor_variant", "splice_donor_variant", "stop_gained", "frameshift_variant", "stop_lost", "start_lost", "transcript_amplification", "inframe_insertion", "inframe_deletion", "missense_variant", "protein_altering_variant"], nargs='+', help='The variants without one of these consequences are tagged as CSQ (see http://www.ensembl.org/info/genome/variation/predicted_data.html). [Default: %(default)s]' )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
