@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.2'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -117,6 +117,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. ote: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     parser.add_argument( '-p', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
+    parser.add_argument( '-s', '--selected-region', help="Only the variants on this region (example: 'chr1') will be kept. [Default: All the regions are kept]" )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).' )
     group_input.add_argument( '-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a VCF.' )
@@ -135,35 +136,36 @@ if __name__ == "__main__":
                 aln_by_samples[curr_spl] = current_aln
             # Manage records
             for record in FH_vcf: # For each variant
-                for curr_spl in FH_vcf.samples: # For each sample in VCF
-                    vcaller_AF = record.getAF( curr_spl )
-                    vcaller_DP = record.getDP( curr_spl )
-                    for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in in variant
-                        record_allele = getAlleleRecord( FH_vcf, record, alt_idx )
-                        # Get allele frequency from the variant caller
-                        vcaller_curr_AF = vcaller_AF[alt_idx]
-                        if len(vcaller_AF) == len(record.alt) + 1: # The AF cointains reference AF
-                            vcaller_curr_AF = vcaller_AF[alt_idx + 1]
-                        #######################################################################################
-                        #~ test_AD, test_DP = getADP( record_allele.chrom, record_allele.pos, record_allele.ref, record_allele.alt[0], current_aln )
-                        #~ test_AF = 0 if test_DP == 0 else float(test_AD)/test_DP
-                        #~ print( record_allele.chrom + ":" + str(record_allele.pos), record_allele.ref + "/" + record_allele.alt[0], round(test_AF, 4), "vs", vcaller_curr_AF )
-                        #~ print()
-                        #######################################################################################
-                        record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
-                        record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
-                        record_allele.samples[curr_spl]["DP"] = vcaller_DP
-                        # Store allele
-                        allele_id = record_allele.chrom + ":" + str(record_allele.pos) + "=" + record_allele.ref + "/" + record_allele.alt[0]
-                        if allele_id not in variants:
-                            variants[allele_id] = record_allele
-                        else:
-                            variants[allele_id].samples[curr_spl] = record_allele.samples[curr_spl]
+                if args.selected_region is None or record.chrom == args.selected_region:
+                    for curr_spl in FH_vcf.samples: # For each sample in VCF
+                        vcaller_AF = record.getAF( curr_spl )
+                        vcaller_DP = record.getDP( curr_spl )
+                        for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in in variant
+                            record_allele = getAlleleRecord( FH_vcf, record, alt_idx )
+                            # Get allele frequency from the variant caller
+                            vcaller_curr_AF = vcaller_AF[alt_idx]
+                            if len(vcaller_AF) == len(record.alt) + 1: # The AF cointains reference AF
+                                vcaller_curr_AF = vcaller_AF[alt_idx + 1]
+                            #######################################################################################
+                            #~ test_AD, test_DP = getADP( record_allele.chrom, record_allele.pos, record_allele.ref, record_allele.alt[0], current_aln )
+                            #~ test_AF = 0 if test_DP == 0 else float(test_AD)/test_DP
+                            #~ print( record_allele.chrom + ":" + str(record_allele.pos), record_allele.ref + "/" + record_allele.alt[0], round(test_AF, 4), "vs", vcaller_curr_AF )
+                            #~ print()
+                            #######################################################################################
+                            record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
+                            record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
+                            record_allele.samples[curr_spl]["DP"] = vcaller_DP
+                            # Store allele
+                            allele_id = record_allele.chrom + ":" + str(record_allele.pos) + "=" + record_allele.ref + "/" + record_allele.alt[0]
+                            if allele_id not in variants:
+                                variants[allele_id] = record_allele
+                            else:
+                                variants[allele_id].samples[curr_spl] = record_allele.samples[curr_spl]
 
     # Completes and writes variants
     with VCFIO(args.output_variants, "w") as FH_out:
         # Header
-        FH_out.copyHeader( FH_in )
+        FH_out.copyHeader( FH_vcf )
         FH_out.info["AF"] = {"type": float, "type_tag": "Float", "number": None, "number_tag": "A", "description": "The alleles frequencies for the group of samples."}
         FH_out.info["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths for the group of samples."}
         FH_out.info["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Combined depth across samples."}
