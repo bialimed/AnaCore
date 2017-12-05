@@ -74,6 +74,7 @@ if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser( description='Converts VCF annotated with VEP in separated value format (CSV, TSV, ...). One line in output file represents an annotation.' )
     parser.add_argument( '-s', '--separator', default='\t', help="Field separator in output file. [Default: tab]")
+    parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the file containing variants annotated with VEP v88+ (format: VCF).' )
     args = parser.parse_args()
