@@ -30,6 +30,10 @@ import tempfile
 import unittest
 import subprocess
 
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+BIN_DIR = os.path.dirname(CURRENT_DIR)
+os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
+
 
 ########################################################################
 #
@@ -47,7 +51,7 @@ class MergeSV(unittest.TestCase):
         self.tmp_output = os.path.join( tmp_folder, unique_id + "_out.csv")
 
         # Exec command
-        self.cmd = ["python3", ##################################################
+        self.cmd = [
             "mergeSV.py",
             "--new-title", "Gene",
             "--links-titles", "Subject", "GeneName",
