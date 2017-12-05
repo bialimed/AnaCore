@@ -21,8 +21,9 @@ __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__status__ = 'dev'
 
+import os
 import sys
 import argparse
 
@@ -41,21 +42,26 @@ from sequenceIO import Sequence, FastqIO
 # FUNCTIONS
 #
 ########################################################################
-def revCom( seq ):
+def nucRevCom( seq ):
     """
-    @summary: Returns the reverse complement the sequence.
-    @param seq: [str] The sequence.
+    @summary: Returns the reverse complementent of the sequence.
+    @param seq: [str] The sequence to process.
     @return: [str] The reverse complement of the sequence.
     """
     complement_rules = {'A':'T','T':'A','G':'C','C':'G','U':'A','N':'N'}
-    return( "".join([complement_rules[base] for base in seq[::-1]]) )
+    return "".join([complement_rules[base] for base in seq[::-1]])
 
-def seqRevCom( seq ):
+def seqRevCom(seq):
+    """
+    @summary: Returns the reverse complement of the object sequence.
+    @param seq: [Sequence] The sequence to process.
+    @return: [Sequence] The reverse complement of the object sequence.
+    """
     return Sequence(
         seq.id,
-        revCom(seq.string),
+        nucRevCom(seq.string),  # Reverse complement sequence
         seq.description,
-        seq.quality[::-1]
+        seq.quality[::-1]  # Reverse quality
     )
 
 
@@ -65,11 +71,10 @@ def seqRevCom( seq ):
 #
 ########################################################################
 if __name__ == "__main__":
-    ################################################# TODO pb qual to long
     # Manage parameters
     parser = argparse.ArgumentParser( description='Combines R1 and R2 by their overlapping segment when sum of read length in pair is superior than the segment length.' )
-    parser.add_argument( '-o', '--min-overlap', default=20, type=int, help='*********************.' )
-    parser.add_argument( '-r', '--max-contradict-ratio', default=0.1, type=float, help='*********************.' )
+    parser.add_argument( '-o', '--min-overlap', default=20, type=int, help='Minimum overlap between R1 and R2. [Default: %(default)s]' )
+    parser.add_argument( '-r', '--max-contradict-ratio', default=0.1, type=float, help='Error ratio in overlap region between R1 and R2. [Default: %(default)s]' )
     parser.add_argument( '-v', '--version', action='version', version=__version__ )
     group_input = parser.add_argument_group( 'Inputs' ) # Inputs
     group_input.add_argument( '-1', '--input-R1', required=True, help='The path to the R1 file (format: fastq).' )
@@ -118,37 +123,20 @@ if __name__ == "__main__":
                                 else:
                                     consensus_seq += nt_R2
                                     consensus_qual += qual_R2
-                        # If R1 start before R2 (insert size > read length)
-                        if R1_start > 0:
-                            consensus_seq = R1.string[0:R1_start] + consensus_seq + R2.string[R2_start+overlap_len:]
-                            consensus_qual = R1.quality[0:R1_start] + consensus_seq + R2.quality[R2_start+overlap_len:]
-                        #~ ####################################################
-                        #~ if R1_start > 0:
-                            #~ print(
-                                #~ "R1: " + R1.string,
-                                #~ "R2: " + " " * R1_start + R2.string,
-                                #~ "=>  " + consensus_seq,
-                                #~ "Score: " + "{}/{}".format(nb_support, nb_contradict+nb_support),
-                                #~ sep="\n"
-                            #~ )
-                        #~ else:
-                            #~ print(
-                                #~ "R1: " + " " * R2_start + R1.string,
-                                #~ "R2: " + R2.string,
-                                #~ "=>  " + consensus_seq,
-                                #~ "Score: " + "{}/{}".format(nb_support, nb_contradict+nb_support),
-                                #~ sep="\n"
-                            #~ )
-                        #~ ####################################################
                         # Filter consensus and select the best
                         if nb_support >= max_nb_support:
                             if float(nb_contradict)/(nb_contradict+nb_support) <= args.max_contradict_ratio:
                                 max_nb_support = nb_support
+                                all_seq = consensus_seq
+                                all_qual = consensus_qual
+                                if R1_start > 0:  # If R1 start before R2 (insert size > read length)
+                                    all_seq = R1.string[0:R1_start] + consensus_seq + R2.string[overlap_len:]
+                                    all_qual = R1.quality[0:R1_start] + consensus_qual + R2.quality[overlap_len:]
                                 consensus_record = Sequence(
                                     R1.id,
-                                    consensus_seq,
+                                    all_seq,
                                     "Support_ratio:{}/{};R1_start:{};R2_start:{}".format(nb_support, nb_contradict+nb_support, R1_start, R2_start),
-                                    consensus_qual
+                                    all_qual
                                 )
                         # Next shift
                         if R1_start == 0:
@@ -163,4 +151,4 @@ if __name__ == "__main__":
                     if consensus_record is not None:
                         combined += 1
                         FH_combined.write( consensus_record )
-    print( "Nb pair:{}\nNb combined{} ({}%)".format(combined, nb_pairs, round(float(combined*100)/nb_pairs, 2))  )
+    print( "Nb pair: {}\nNb combined: {} ({}%)".format(combined, nb_pairs, round(float(combined*100)/nb_pairs, 2)) )
