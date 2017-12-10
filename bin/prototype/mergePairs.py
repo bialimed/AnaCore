@@ -42,13 +42,13 @@ from sequenceIO import Sequence, FastqIO
 # FUNCTIONS
 #
 ########################################################################
-def nucRevCom( seq ):
+def nucRevCom(seq):
     """
     @summary: Returns the reverse complementent of the sequence.
     @param seq: [str] The sequence to process.
     @return: [str] The reverse complement of the sequence.
     """
-    complement_rules = {'A':'T','T':'A','G':'C','C':'G','U':'A','N':'N'}
+    complement_rules = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'U': 'A', 'N': 'N'}
     return "".join([complement_rules[base] for base in seq[::-1]])
 
 def seqRevCom(seq):
@@ -72,26 +72,26 @@ def seqRevCom(seq):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Combines R1 and R2 by their overlapping segment when sum of read length in pair is superior than the segment length.' )
-    parser.add_argument( '-o', '--min-overlap', default=20, type=int, help='Minimum overlap between R1 and R2. [Default: %(default)s]' )
-    parser.add_argument( '-r', '--max-contradict-ratio', default=0.1, type=float, help='Error ratio in overlap region between R1 and R2. [Default: %(default)s]' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-1', '--input-R1', required=True, help='The path to the R1 file (format: fastq).' )
-    group_input.add_argument( '-2', '--input-R2', required=True, help='The path to the R2 file (format: fastq).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-c', '--output-combined', help='The path of the file with combined pairs (format: fastq).')
+    parser = argparse.ArgumentParser(description='Combines R1 and R2 by their overlapping segment when sum of read length in pair is superior than the segment length.')
+    parser.add_argument('-o', '--min-overlap', default=20, type=int, help='Minimum overlap between R1 and R2. [Default: %(default)s]')
+    parser.add_argument('-r', '--max-contradict-ratio', default=0.1, type=float, help='Error ratio in overlap region between R1 and R2. [Default: %(default)s]')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-1', '--input-R1', required=True, help='The path to the R1 file (format: fastq).')
+    group_input.add_argument('-2', '--input-R2', required=True, help='The path to the R2 file (format: fastq).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-c', '--output-combined', help='The path of the file with combined pairs (format: fastq).')
     args = parser.parse_args()
 
     # Process
     nb_pairs = 0
     combined = 0
 
-    with FastqIO( args.output_combined, "w" ) as FH_combined:
-        with FastqIO( args.input_R1 ) as FH_r1:
-            with FastqIO( args.input_R2 ) as FH_r2:
+    with FastqIO(args.output_combined, "w") as FH_combined:
+        with FastqIO(args.input_R1) as FH_r1:
+            with FastqIO(args.input_R2) as FH_r2:
                 for R1 in FH_r1:
-                    R2 = seqRevCom( FH_r2.next_seq() )
+                    R2 = seqRevCom(FH_r2.next_seq())
                     nb_pairs += 1
                     consensus_record = None
                     max_nb_support = -1
@@ -150,5 +150,5 @@ if __name__ == "__main__":
                                 is_valid = False
                     if consensus_record is not None:
                         combined += 1
-                        FH_combined.write( consensus_record )
-    print( "Nb pair: {}\nNb combined: {} ({}%)".format(combined, nb_pairs, round(float(combined*100)/nb_pairs, 2)) )
+                        FH_combined.write(consensus_record)
+    print("Nb pair: {}\nNb combined: {} ({}%)".format(combined, nb_pairs, round(float(combined*100)/nb_pairs, 2)))
