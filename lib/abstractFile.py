@@ -18,20 +18,19 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import gzip
 
-
-def is_gzip(file):
+def isGzip(path):
     """
     @return: [bool] True if the file is gziped.
-    @param file: [str] Path to processed file.
+    @param path: [str] Path to processed file.
     """
     is_gzip = None
-    FH_input = gzip.open( file )
+    FH_input = gzip.open(path)
     try:
         FH_input.readline()
         is_gzip = True
@@ -50,10 +49,10 @@ class AbstractFile(object):
         """
         self.filepath = filepath
         self.mode = mode
-        if (mode in ["w", "a"] and filepath.endswith('.gz')) or (mode not in ["w", "a"] and is_gzip(filepath)):
-            self.file_handle = gzip.open( filepath, mode + "t" )
+        if (mode in ["w", "a"] and filepath.endswith('.gz')) or (mode not in ["w", "a"] and isGzip(filepath)):
+            self.file_handle = gzip.open(filepath, mode + "t")
         else:
-            self.file_handle = open( filepath, mode )
+            self.file_handle = open(filepath, mode)
         self.current_line_nb = 0
         self.current_line = None
 
@@ -93,7 +92,7 @@ class AbstractFile(object):
 
     def __iter__( self ):
         for line in self.file_handle:
-            self.current_line = line.rstrip()
+            self.current_line = line.rstrip("\n")
             self.current_line_nb += 1
             if not self.isRecordLine(self.current_line): # Skip non-record line
                 continue
