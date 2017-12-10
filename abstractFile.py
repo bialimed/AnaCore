@@ -18,11 +18,26 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.2'
+__version__ = '1.2.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
+import os
 import gzip
+
+def isEmpty(path):
+    """
+    @return: [bool] True if the file does not exists or is empty.
+    @param path: [str] Path to processed file.
+    """
+    is_empty = True
+    if os.path.exists(path):
+        if not isGzip(path):
+            is_empty = os.path.getsize(path) == 0
+        else:
+            with gzip.open(path, 'rt') as FH:
+                is_empty = FH.seek(0, 2) == 0
+    return is_empty
 
 def isGzip(path):
     """
