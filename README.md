@@ -2,13 +2,13 @@
 
 ## Description
 Anapath Core contains binaries, libraries and ressources developped for
-Anatomopathologie department on IUCT Oncopole.
+Anatomo-Cytopathologie department on IUCT Oncopole.
 
 ## Installation
 ### Download
 
-* [user way] Downloads the latest released versions from `https://stormbringer:3100/anapath-IUCT/AnaCore/releases`.
-* [developper way] Clones the repository from the latest unreleased version: `git clone https://stormbringer:3100/anapath-IUCT/AnaCore.git`.
+* [user way] Downloads the latest released versions from `https://bitbucket.org/fescudie/anacore/downloads/?tab=tags`.
+* [developper way] Clones the repository from the latest unreleased version: `git clone https://bitbucket.org/fescudie/anacore.git`.
 
 ### AnaCore folder
 The application folder has the following structure:
