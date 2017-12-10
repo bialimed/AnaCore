@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.13.1'
+__version__ = '1.14.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -32,15 +32,15 @@ from abstractFile import AbstractFile
 
 class VCFRecord:
     def __init__(self, region=None, position=None, knownSNPId=None, refAllele=None, altAlleles=None, qual=None, pFilter=None, info=None, pFormat=None, samples=None):
-        self.chrom   = region
-        self.pos     = position
-        self.id      = knownSNPId
-        self.ref     = refAllele
-        self.alt     = altAlleles
-        self.qual    = qual
-        self.filter  = pFilter if pFilter is not None else list()
-        self.info    = info if info is not None else dict()
-        self.format  = pFormat if pFormat is not None else list()
+        self.chrom = region
+        self.pos = position
+        self.id = knownSNPId
+        self.ref = refAllele
+        self.alt = altAlleles
+        self.qual = qual
+        self.filter = pFilter if pFilter is not None else list()
+        self.info = info if info is not None else dict()
+        self.format = pFormat if pFormat is not None else list()
         self.samples = samples if samples is not None else dict()
 
     def containsIndel(self):
@@ -56,6 +56,18 @@ class VCFRecord:
             if len(allele) != len(ref):
                 contains_indel = True
         return contains_indel
+
+    def getName(self):
+        """
+        @summary: Returns an unique name to identified the variant.
+        @return: [str] The variant name.
+        """
+        return "{}:{}={}/{}".format(
+            self.chrom,
+            self.pos,
+            self.ref,
+            "/".join(self.alt)
+        )
 
     def isDeletion(self):
         """
@@ -124,7 +136,7 @@ class VCFRecord:
         @param empty_marker: The value used for the empty allele (example: A/. for a deletion of A).
         @warnings: This method can only be used on record with only one alternative allele.
         """
-        def twoSideTrimming( record ):
+        def twoSideTrimming(record):
             """
             @summary: Removes identical end and start between reference allele and alternative allele (example: ATGACT/ATCT becomes G/). The end is removed first to manage repeat cases.
             @param record: [VCFRecord] The mono-alternative variant.
@@ -151,9 +163,13 @@ class VCFRecord:
                 self.pos += len(self.alt[0])
                 self.alt[0] = empty_marker
             else:
-                twoSideTrimming( self )
+                twoSideTrimming(self)
                 if self.alt[0] != "":
-                    warnings.warn( 'The deletion "' + self.ref + '/' + self.alt[0] + '" at location ' + self.chrom + ':' + str(self.pos) + ' cannot be standardized.' )
+                    warnings.warn(
+                        'The deletion "{}/{}" at location {}:{} cannot be standardized.'.format(
+                            self.ref, self.alt[0], self.chrom, self.pos
+                        )
+                    )
                 else:
                     self.alt[0] = empty_marker
         # Insertion with marker
@@ -168,7 +184,11 @@ class VCFRecord:
             else:
                 twoSideTrimming( self )
                 if self.ref != "":
-                    warnings.warn( 'The insertion "' + self.ref + '/' + self.alt[0] + '" at location ' + self.chrom + ':' + str(self.pos) + ' cannot be standardized.' )
+                    warnings.warn(
+                        'The insertion "{}/{}" at location {}:{} cannot be standardized.'.format(
+                            self.ref, self.alt[0], self.chrom, self.pos
+                        )
+                    )
                 else:
                     self.ref = empty_marker
         # Substitution
@@ -186,7 +206,7 @@ class VCFRecord:
             raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
         new_record = deepcopy(self)
         new_record.standardizeSingleAllele()
-        if new_record.ref == "." or new_record.alt[0] == ".": # Standardized indel
+        if new_record.ref == "." or new_record.alt[0] == ".":  # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
@@ -223,7 +243,7 @@ class VCFRecord:
             raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
         new_record = deepcopy(self)
         new_record.standardizeSingleAllele()
-        if new_record.ref == "." or new_record.alt[0] == ".": # Standardized indel
+        if new_record.ref == "." or new_record.alt[0] == ".":  # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
@@ -253,14 +273,14 @@ class VCFRecord:
                 new_record.alt = [alt]
         return new_record
 
-    def getPopAD( self ):
+    def getPopAD(self):
         """
         @summary: Returns the list of alleles depths for the population (it is composed by all samples). The reference depth is removed from the result if it exists.
         @return: [list] The list of alleles depths.
         """
         # Retrieve AD from self
         AD = None
-        if "AD" in self.info: # The AD is already processed for the population
+        if "AD" in self.info:  # The AD is already processed for the population
             AD = self.info["AD"]
         else:
             # Get population DP
@@ -268,12 +288,12 @@ class VCFRecord:
             try:
                 DP = self.getPopDP()
             except: pass
-            if "AF" in self.info and DP is not None: # The AD can be processed directly from the population information
+            if "AF" in self.info and DP is not None:  # The AD can be processed directly from the population information
                 AF = self.info["AF"] if isinstance(self.info["AF"], (list, tuple)) else [self.info["AF"]]
                 AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
-            else: # The AD must be calculated from samples information
+            else:  # The AD must be calculated from samples information
                 spl_names = list(self.samples.keys())
-                if len(self.samples) == 1 and "AD" in self.samples[spl_names[0]]: # Only one sample and it contains AD
+                if len(self.samples) == 1 and "AD" in self.samples[spl_names[0]]:  # Only one sample and it contains AD
                     AD = self.samples[spl_names[0]]["AD"]
                 else:
                     try:
@@ -281,10 +301,10 @@ class VCFRecord:
                             if idx_spl == 0:
                                 AD = [curr_AD for curr_AD in self.getAD(spl_name)]
                             else:
-                                for idx_allele, curr_AD in enumerate( self.getAD(spl_name) ):
+                                for idx_allele, curr_AD in enumerate(self.getAD(spl_name)):
                                     AD[idx_allele] += curr_AD
                     except:
-                        raise Exception( 'The allele depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+                        raise Exception('The allele depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         # Transform AD to list
         if not isinstance(AD, (list, tuple)):
             AD = [AD]
@@ -292,16 +312,16 @@ class VCFRecord:
         if len(AD) == len(self.alt) + 1:
             AD = AD[1:]
         # Return
-        return( AD )
+        return(AD)
 
-    def getPopAF( self ):
+    def getPopAF(self):
         """
         @summary: Returns the list of alleles frequencies for the population (it is composed by all samples). The reference frequency is removed from the result if it exists.
         @return: [list] The list of alleles frequencies.
         """
         # Retrieve AF from self
         AF = None
-        if "AF" in self.info: # The AF is already processed for the population
+        if "AF" in self.info:  # The AF is already processed for the population
             AF = self.info["AF"]
         else:
             # Get population DP
@@ -309,12 +329,12 @@ class VCFRecord:
             try:
                 DP = self.getPopDP()
             except: pass
-            if "AD" in self.info and DP is not None: # The AF can be processed directly from the population information
+            if "AD" in self.info and DP is not None:  # The AF can be processed directly from the population information
                 AD = self.info["AD"] if isinstance(self.info["AD"], (list, tuple)) else [self.info["AD"]]
                 AF = [curr_AD/float(DP) for curr_AD in AD]
-            else: # The AF must be calculated from samples information
+            else:  # The AF must be calculated from samples information
                 spl_names = list(self.samples.keys())
-                if len(self.samples) == 1 and "AF" in self.samples[spl_names[0]]: # Only one sample and it contains AF
+                if len(self.samples) == 1 and "AF" in self.samples[spl_names[0]]:  # Only one sample and it contains AF
                     AF = self.samples[spl_names[0]]["AF"]
                 else:
                     try:
@@ -323,16 +343,16 @@ class VCFRecord:
                             if idx_spl == 0:
                                 pop_AD = [curr_AD for curr_AD in self.getAD(spl_name)]
                             else:
-                                for idx_allele, curr_AD in enumerate( self.getAD(spl_name) ):
+                                for idx_allele, curr_AD in enumerate(self.getAD(spl_name)):
                                     pop_AD[idx_allele] += curr_AD
                         if DP == 0:
                             AF = [0 for curr_AD in pop_AD]
                             if sum(pop_AD) != 0:
-                                raise Exception( 'popAD and popDP are not compatible for variant "' + self.chrom + ":" + str(self.pos) + '".' )
+                                raise Exception('popAD and popDP are not compatible for variant "' + self.chrom + ":" + str(self.pos) + '".')
                         else:
                             AF = [curr_AD/float(DP) for curr_AD in pop_AD]
                     except:
-                        raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+                        raise Exception('The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         # Transform AF to list
         if not isinstance(AF, (list, tuple)):
             AF = [AF]
@@ -340,15 +360,15 @@ class VCFRecord:
         if len(AF) == len(self.alt) + 1:
             AF = AF[1:]
         # Return
-        return( AF )
+        return AF
 
-    def getPopDP( self ):
+    def getPopDP(self):
         """
         @summary: Returns the depth for the population (it is composed by all samples).
         @return: [int] The depth.
         """
         DP = None
-        if "DP" in self.info: # The DP is already processed for the population
+        if "DP" in self.info:  # The DP is already processed for the population
             DP = self.info["DP"]
         else:
             # Get population AD
@@ -356,20 +376,20 @@ class VCFRecord:
             if "AD" in self.info:
                 AD = self.info["AD"] if isinstance(self.info["AD"], (list, tuple)) else [self.info["AD"]]
             # Calculate DP
-            if AD is not None and len(AD) == len(self.alt) + 1: # The DP can be processed from INFO's AD (it contains the depth for all alleles and reference)
+            if AD is not None and len(AD) == len(self.alt) + 1:  # The DP can be processed from INFO's AD (it contains the depth for all alleles and reference)
                 DP = sum(AD)
-            elif AD is not None and "AF" in self.info: # The DP can be processed from INFO's AD and AF
+            elif AD is not None and "AF" in self.info:  # The DP can be processed from INFO's AD and AF
                 AF = self.info["AF"] if isinstance(self.info["AF"], (list, tuple)) else [self.info["AF"]]
                 if len(AF) == len(self.alt) + 1:
                     AF = AF[1:]
-                DP = int( round(AD[0]/AF[0], 0) )
-            elif len(self.samples) != 0: # The DP must be calculated from samples information
+                DP = int(round(AD[0]/AF[0], 0))
+            elif len(self.samples) != 0:  # The DP must be calculated from samples information
                 DP = sum([self.getDP(spl_name) for spl_name in self.samples])
             else:
-                raise Exception( 'The population depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-        return( DP )
+                raise Exception('The population depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
+        return DP
 
-    def getAD( self, spl_name ):
+    def getAD(self, spl_name):
         """
         @summary: Returns the list of alleles depths for the specified sample. The reference depth is removed from the result if it exists.
         @param spl_name: [str] The sample name.
@@ -377,17 +397,17 @@ class VCFRecord:
         """
         AD = None
         # Retrieve AD from self
-        if "AD" in self.samples[spl_name]: # The AD is already processed for the sample
+        if "AD" in self.samples[spl_name]:  # The AD is already processed for the sample
             AD = self.samples[spl_name]["AD"]
-        elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info: # Only one sample and AD is already processed for population
+        elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info:  # Only one sample and AD is already processed for population
             AD = self.info["AD"]
-        else: # AD must be calculated
+        else:  # AD must be calculated
             try:
-                AF = self.getAF( spl_name )
-                DP = self.getDP( spl_name )
+                AF = self.getAF(spl_name)
+                DP = self.getDP(spl_name)
                 AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
             except:
-                raise Exception( 'The alternative alleles depths cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+                raise Exception('The alternative alleles depths cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         # Transform AD to list
         if not isinstance(AD, (list, tuple)):
             AD = [AD]
@@ -395,9 +415,9 @@ class VCFRecord:
         if len(AD) == len(self.alt) + 1:
             AD = AD[1:]
         # Return
-        return( AD )
+        return AD
 
-    def getAF( self, spl_name ):
+    def getAF(self, spl_name):
         """
         @summary: Returns the list of alleles frequencies for the specified sample. The reference frequency is removed from the result if it exists.
         @param spl_name: [str] The sample name.
@@ -405,14 +425,14 @@ class VCFRecord:
         """
         # Retrieve AF from self
         AF = None
-        if "AF" in self.samples[spl_name]: # The AF is already processed for the sample
+        if "AF" in self.samples[spl_name]:  # The AF is already processed for the sample
             AF = self.samples[spl_name]["AF"]
         else:
             # Get sample AD
             AD = None
             if "AD" in self.samples[spl_name]:
                 AD = self.samples[spl_name]["AD"] if isinstance(self.samples[spl_name]["AD"], (list, tuple)) else [self.samples[spl_name]["AD"]]
-            if AD is not None and len(AD) == len(self.alt) + 1: # The AF can be processed from sample's AD (it contains the depth for alleles and reference)
+            if AD is not None and len(AD) == len(self.alt) + 1:  # The AF can be processed from sample's AD (it contains the depth for alleles and reference)
                 DP = sum(AD)
                 if DP == 0:
                     AF = [0 for curr_AD in AD]
@@ -422,20 +442,20 @@ class VCFRecord:
                 # Get sample DP
                 DP = None
                 try:
-                    DP = self.getDP( spl_name )
+                    DP = self.getDP(spl_name)
                 except: pass
-                if AD is not None and DP is not None: # The AF can be processed from sample's AD and DP
+                if AD is not None and DP is not None:  # The AF can be processed from sample's AD and DP
                     if DP == 0:
                         AF = [0 for curr_AD in AD]
                     else:
                         AF = [curr_AD/float(DP) for curr_AD in AD]
-                elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info: # Only one sample and AF is already processed for population
+                elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info:  # Only one sample and AF is already processed for population
                     AF = self.info["AF"]
                 # elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info and DP is not None: # Only one sample and AF must be processed for population
                 #     AD = self.info["AD"]
                 #     AF = [curr_AD/float(DP) for curr_AD in AD]
                 else:
-                    raise Exception( 'The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
+                    raise Exception('The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         # Transform AF to list
         if not isinstance(AF, (list, tuple)):
             AF = [AF]
@@ -443,46 +463,46 @@ class VCFRecord:
         if len(AF) == len(self.alt) + 1:
             AF = AF[1:]
         # Return
-        return( AF )
+        return AF
 
-    def getDP( self, spl_name ):
+    def getDP(self, spl_name):
         """
         @summary: Returns the depth for the specified sample.
         @param spl_name: [str] The sample name.
         @return: [int] The depth.
         """
         DP = None
-        if "DP" in self.samples[spl_name]: # The DP is already processed for the sample
+        if "DP" in self.samples[spl_name]:  # The DP is already processed for the sample
             DP = self.samples[spl_name]["DP"]
-        elif len(self.samples) == 1 and spl_name in self.samples and "DP" in self.info: # Only one sample and DP is already processed for population
+        elif len(self.samples) == 1 and spl_name in self.samples and "DP" in self.info:  # Only one sample and DP is already processed for population
             DP = self.info["DP"]
-        elif "AD" in self.samples[spl_name]: # DP can be calculated
+        elif "AD" in self.samples[spl_name]:  # DP can be calculated
             AD = self.samples[spl_name]["AD"] if isinstance(self.samples[spl_name]["AD"], (list, tuple)) else [self.samples[spl_name]["AD"]]
-            if len(AD) == len(self.alt) + 1: # Sample contains AD for all alleles and reference
+            if len(AD) == len(self.alt) + 1:  # Sample contains AD for all alleles and reference
                 DP = sum(AD)
-            elif "AF" in self.samples[spl_name]: # Sample contains AD for all alleles and AF
+            elif "AF" in self.samples[spl_name]:  # Sample contains AD for all alleles and AF
                 AF = self.samples[spl_name]["AF"] if isinstance(self.samples[spl_name]["AF"], (list, tuple)) else [self.samples[spl_name]["AF"]]
                 if len(AF) == len(self.alt) + 1:
                     AF = AF[1:]
-                DP = int( round(AD[0]/AF[0], 0) )
-            else: # AD does not contain reference AD and AF is missing to calculate DP
-                raise Exception( 'The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-        else: # AD is missing to calculate DP
-            raise Exception( 'The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".' )
-        return( DP )
+                DP = int(round(AD[0]/AF[0], 0))
+            else:  # AD does not contain reference AD and AF is missing to calculate DP
+                raise Exception('The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
+        else:  # AD is missing to calculate DP
+            raise Exception('The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
+        return DP
 
 
 class VCFIO(AbstractFile):
-    def __init__( self, filepath, mode="r" ):
+    def __init__(self, filepath, mode="r"):
         """
         @param filepath: [str] The filepath.
         @param mode: [str] Mode to open the file ('r', 'w', 'a').
         """
         AbstractFile.__init__(self, filepath, mode)
         self.samples = list()
-        self.filter = dict() # { "q10":"Quality below 10" }
-        self.info = dict() # { "IDREP":{"type": int, "number": 1, "description": "Number of times RU is repeated in indel allele."} }
-        self.format = dict() # { "GT":{"type": str, "number": 1, "description": "Genotype"} }
+        self.filter = dict()  # { "q10":"Quality below 10" }
+        self.info = dict()  # { "IDREP":{"type": int, "number": 1, "description": "Number of times RU is repeated in indel allele."} }
+        self.format = dict()  # { "GT":{"type": str, "number": 1, "description": "Genotype"} }
         if mode == "r":
             self._parseHeader()
 
@@ -497,7 +517,7 @@ class VCFIO(AbstractFile):
             is_record = False
         return is_record
 
-    def _parseHeader( self ):
+    def _parseHeader(self):
         """
         @summary: Parses VCF header to set info, format and samples attributes.
         """
@@ -508,13 +528,13 @@ class VCFIO(AbstractFile):
             is_header = True
         while is_header:
             self._parseHeaderLine()
-            if self.current_line is None or self.current_line.startswith("#CHROM"): # Last header line
+            if self.current_line is None or self.current_line.startswith("#CHROM"):  # Last header line
                 is_header = False
             else:
                 self.current_line_nb += 1
                 self.current_line = self.file_handle.readline().rstrip()
 
-    def _parseHeaderLine( self ):
+    def _parseHeaderLine(self):
         """
         @summary: Parses one VCF header line to update info, filter, format or samples attributes.
         """
@@ -526,7 +546,7 @@ class VCFIO(AbstractFile):
             "Flag": None
         } ################################################################### Flag
         if self.current_line.startswith("##INFO"):
-            line = self.current_line[8:-1] # Remove "##INFO=<" and ">"
+            line = self.current_line[8:-1]  # Remove "##INFO=<" and ">"
             match = re.search('ID=([^,]+)', line)
             id = match.group(1)
             match = re.search('Type=([^,]+)', line)
@@ -538,16 +558,16 @@ class VCFIO(AbstractFile):
             number = None
             if match.group(1) not in [".", "A", "R", "G"]:
                 number = int(match.group(1))
-            self.info[id] = { "type": type_fct[type], "type_tag": type, "number": number, "number_tag": number_tag, "description": description }
+            self.info[id] = {"type": type_fct[type], "type_tag": type, "number": number, "number_tag": number_tag, "description": description}
         elif self.current_line.startswith("##FILTER"):
-            line = self.current_line[8:-1] # Remove "##FILTER=<" and ">"
+            line = self.current_line[8:-1]  # Remove "##FILTER=<" and ">"
             match = re.search('ID=([^,]+)', line)
             id = match.group(1)
             match = re.search('Description="([^"]+)"', line)
             description = match.group(1)
             self.filter[id] = description
         elif self.current_line.startswith("##FORMAT"):
-            line = self.current_line[10:-1] # Remove "##FORMAT=<" and ">"
+            line = self.current_line[10:-1]  # Remove "##FORMAT=<" and ">"
             match = re.search('ID=([^,]+)', line)
             id = match.group(1)
             match = re.search('Type=([^,]+)', line)
@@ -559,23 +579,23 @@ class VCFIO(AbstractFile):
             number = None
             if match.group(1) not in [".", "A", "R", "G"]:
                 number = int(match.group(1))
-            self.format[id] = { "type": type_fct[type], "type_tag": type, "number": number, "number_tag": number_tag, "description": description }
+            self.format[id] = {"type": type_fct[type], "type_tag": type, "number": number, "number_tag": number_tag, "description": description}
         elif self.current_line.startswith("#CHROM\tPOS"):
             self.samples = [spl.strip() for spl in self.current_line.split("\t")[9:]]
 
-    def _parseLine( self ):
+    def _parseLine(self):
         """
         @summary: Returns a structured record from the VCF current line.
         @return: [VCFRecord] The variant described by the current line.
         """
         fields = [elt.strip() for elt in self.current_line.split('\t')]
         variation = VCFRecord()
-        variation.chrom  = fields[0]
-        variation.pos    = int(fields[1])
-        variation.id     = fields[2]
-        variation.ref    = fields[3]
-        variation.alt    = fields[4].split(',')
-        variation.qual   = float(fields[5]) if fields[5] != "." else None
+        variation.chrom = fields[0]
+        variation.pos = int(fields[1])
+        variation.id = fields[2]
+        variation.ref = fields[3]
+        variation.alt = fields[4].split(',')
+        variation.qual = float(fields[5]) if fields[5] != "." else None
         variation.filter = fields[6].split(";") if fields[6] != "." and fields[6] != "" else None
 
         if len(fields) >= 8:
@@ -591,7 +611,7 @@ class VCFIO(AbstractFile):
                             info[tag] = self.info[tag]["type"](value)
                         elif field_format["number"] > 1:
                             info[tag] = [self.info[tag]["type"](list_elt) for list_elt in value.split(",")]
-                        else: # Number == 0
+                        else:  # Number == 0
                             info[tag] = None
                     else:
                         info[tag_and_value] = True
@@ -605,7 +625,7 @@ class VCFIO(AbstractFile):
                 data_by_spl = dict()
                 for spl_idx, spl_cell in enumerate(fields[9:]):
                     spl_data = dict()
-                    if variation.format is not None: # Samples cannot have any data if format is None
+                    if variation.format is not None:  # Samples cannot have any data if format is None
                         for field_idx, field_data in enumerate(spl_cell.split(':')):
                             field_id = variation.format[field_idx]
                             field_format = self.format[field_id]
@@ -613,7 +633,7 @@ class VCFIO(AbstractFile):
                                 spl_data[field_id] = list()
                                 for list_elt in field_data.split(","):
                                     if list_elt == ".":
-                                        spl_data[field_id].append( None )
+                                        spl_data[field_id].append(None)
                                     else:
                                         spl_data[field_id].append( self.format[field_id]["type"](list_elt) )
                             elif field_format["number"] == 1:
@@ -621,7 +641,7 @@ class VCFIO(AbstractFile):
                                     spl_data[field_id] = None
                                 else:
                                     spl_data[field_id] = self.format[field_id]["type"](field_data)
-                            else: # Number == 0
+                            else:  # Number == 0
                                 spl_data[field_id] = None
                     data_by_spl[self.samples[spl_idx]] = spl_data
                 variation.samples = data_by_spl
@@ -633,7 +653,7 @@ class VCFIO(AbstractFile):
         @summary: Writes variant record in VCF.
         @param record: [VCFRecord] The variant record.
         """
-        self.file_handle.write( self.recToVCFLine(record) + "\n" )
+        self.file_handle.write(self.recToVCFLine(record) + "\n")
 
     def recToVCFLine(self, record):
         """
@@ -657,12 +677,12 @@ class VCFIO(AbstractFile):
             info_fields = list()
             for key in sorted(record.info):
                 if self.info[key]["number"] is None or self.info[key]["number"] > 1:
-                    info_fields.append( key + "=" + ",".join(map(str, record.info[key])) )
+                    info_fields.append(key + "=" + ",".join(map(str, record.info[key])))
                 else:
                     if self.info[key]["type"] is None: ############################################## Flag
-                        info_fields.append( key )
+                        info_fields.append(key)
                     else:
-                        info_fields.append( key + "=" + str(record.info[key]) )
+                        info_fields.append(key + "=" + str(record.info[key]))
             line += "\t" + ";".join(info_fields)
         # Format
         if len(self.format) != 0:
@@ -685,18 +705,18 @@ class VCFIO(AbstractFile):
                                 values = list()
                                 for current_val in record.samples[spl][key]:
                                     val = (str(current_val) if current_val is not None else ".")
-                                    values.append( val )
-                                spl_fields.append( ",".join(values) )
+                                    values.append(val)
+                                spl_fields.append(",".join(values))
                             else:
                                 if self.format[key]["type"] is None: ############################################## Flag
-                                    spl_fields.append( key )
+                                    spl_fields.append(key)
                                 else:
                                     val = (str(record.samples[spl][key]) if record.samples[spl][key] is not None else ".")
-                                    spl_fields.append( val )
+                                    spl_fields.append(val)
                     line += "\t" + ":".join(spl_fields)
         return line
 
-    def copyHeader( self, model ):
+    def copyHeader(self, model):
         """
         @summary: Copy header fields from the specified VCF.
         @param model: [VCFIO] The VCF source.
@@ -706,16 +726,17 @@ class VCFIO(AbstractFile):
         self.info = deepcopy(model.info)
         self.samples = deepcopy(model.samples)
 
-    def _writeHeader( self ):
+    def _writeHeader(self):
         """
         @note: Draft
         """
-        self.file_handle.write( "##fileformat=VCFv4.0\n" )
+        self.file_handle.write("##fileformat=VCFv4.0\n")
         for tag in sorted(self.info):
             number_tag = self.info[tag]["number"] if self.info[tag]["number"] is not None else "."
             if "number_tag" in self.info[tag]:
                 number_tag = self.info[tag]["number_tag"]
-            self.file_handle.write( '##INFO=<' + \
+            self.file_handle.write(
+                '##INFO=<' + \
                 'ID=' + tag + ',' + \
                 'Number=' + str(number_tag) + ',' + \
                 'Type=' + self.info[tag]["type_tag"] + ',' + \
@@ -723,7 +744,8 @@ class VCFIO(AbstractFile):
                 '>\n'
             )
         for tag in sorted(self.filter):
-            self.file_handle.write( '##FILTER=<' + \
+            self.file_handle.write(
+                '##FILTER=<' + \
                 'ID=' + tag + ',' + \
                 'Description="' + self.filter[tag] + '"' + \
                 '>\n'
@@ -732,16 +754,17 @@ class VCFIO(AbstractFile):
             number_tag = self.format[tag]["number"] if self.format[tag]["number"] is not None else "."
             if "number_tag" in self.format[tag]:
                 number_tag = self.format[tag]["number_tag"]
-            self.file_handle.write( '##FORMAT=<' + \
+            self.file_handle.write(
+                '##FORMAT=<' + \
                 'ID=' + tag + ',' + \
                 'Number=' + str(number_tag) + ',' + \
                 'Type=' + self.format[tag]["type_tag"] + ',' + \
                 'Description="' + self.format[tag]["description"] + '"' + \
                 '>\n'
             )
-        self.file_handle.write( "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([spl for spl in self.samples]) + "\n" )
+        self.file_handle.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([spl for spl in self.samples]) + "\n")
 
-def getAlleleRecord( FH_vcf, record, idx_alt ):
+def getAlleleRecord(FH_vcf, record, idx_alt):
     """
     @summary: Returns the record corresponding to the specified allele in variant.
     @param record: [VCFRecord] The variant record.
@@ -752,8 +775,8 @@ def getAlleleRecord( FH_vcf, record, idx_alt ):
         region=record.chrom,
         position=record.pos,
         knownSNPId=record.id,
-        refAllele=record.ref.upper(), ########################### pb transfo
-        altAlleles=[record.alt[idx_alt].upper()], ########################### pb transfo
+        refAllele=record.ref.upper(),  ########################### pb transfo
+        altAlleles=[record.alt[idx_alt].upper()],  ########################### pb transfo
         qual=record.qual,
         pFilter=deepcopy(record.filter),
         pFormat=deepcopy(record.format)
@@ -782,3 +805,31 @@ def getAlleleRecord( FH_vcf, record, idx_alt ):
                 else:
                     new_record.samples[spl][key] = record.samples[spl][key]
     return new_record
+
+def getFreqMatrix(vcf_path, missing_replacement=0.0, accept_missing=True):
+    """
+    @summary: Returns a 2D matrix representing variants frequencies by sample.
+    @param vcf_path: [str] The pass to the VCF processed.
+    @param missing_replacement: [*] The value used to replace missing alleles frequencies (example: np.nan).
+    @param accept_missing: [bool] If false and a missing AF is found an exception is raised. If true the missing AF are replaced by missing_replacement.
+    @return: [list] The list of samples, the list of variants names and the 2D matrix of alleles frequencies.
+    """
+    samples = list()
+    variants = list()
+    AF_matrix = list()
+    with VCFIO(vcf_path) as FH_vcf:
+        samples = FH_vcf.samples
+        for record in FH_vcf:
+            for alt_idx, curr_alt in enumerate(record.alt):  # For each alternative allele in variant
+                record_allele = getAlleleRecord(FH_vcf, record, alt_idx)
+                variants.append(record_allele.getName())
+                row_array = list()
+                for curr_spl in samples:
+                    AF = record_allele.getAF(curr_spl)[0]
+                    if AF is None:
+                        AF = missing_replacement
+                        if not accept_missing:
+                            raise Exception("The AF is missing for variant {} in sample {}.".format(curr_spl, variant_id))
+                    row_array.append(AF)
+                AF_matrix.append(row_array)
+    return samples, variants, AF_matrix
