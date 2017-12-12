@@ -14,10 +14,12 @@ Anatomo-Cytopathologie department on IUCT Oncopole.
 The application folder has the following structure:
 
     <APP_DIR>/
-    ├── bin/
-    ├── lib/
+    ├── bin/               # Scripts
+    ├── jflow/
+    │   └── components/    # Wrappers used in workflow manager (jflow)
+    ├── lib/               # Librairies used in binaries
     ├── README.md
-    └── ressources/
+    └── ressources/        # Ressources (panels descriptions, ...)
 
 ## License
 GNU GPL v3

@@ -51,7 +51,7 @@ class ConsensusException(Exception):
     def __str__(self):
         return repr(self.value)
 
-def getADPContig( chrom, pos, ref, alt, aln_file, selected_RG=None ):
+def getADPContig(chrom, pos, ref, alt, aln_file, selected_RG=None):
     """
     @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of contig: if the R1 and the R2 of a sequence has overlaps the variant they only the consensus is counted for the pair.
     @param chrom: [str] The variant region name.
@@ -69,7 +69,7 @@ def getADPContig( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     ref_end = pos + len(ref) - 1
     inspect_start = ref_start - 1
     inspect_end = ref_end
-    reads, quals = getAlnAndQual( aln_file, chrom, inspect_start, inspect_end, selected_RG, 100000 )
+    reads, quals = getAlnAndQual(aln_file, chrom, inspect_start, inspect_end, selected_RG, 100000)
     # Process AD and DP
     alt = alt if alt != "." else ""
     AD = 0
@@ -77,20 +77,20 @@ def getADPContig( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     for read_id in reads:
         consensus = ""
         try:
-            consensus = getSimplePairConsensus( reads[read_id], quals[read_id] )
+            consensus = getSimplePairConsensus(reads[read_id], quals[read_id])
         except ConsensusException:
             # Calculate alignment cost and choose the lowest
-            cost_aln_R1 = getAlnCost( ref, reads[read_id]["R1"] )
-            cost_aln_R2 = getAlnCost( ref, reads[read_id]["R2"] )
+            cost_aln_R1 = getAlnCost(ref, reads[read_id]["R1"])
+            cost_aln_R2 = getAlnCost(ref, reads[read_id]["R2"])
             consensus = reads[read_id]["R1"] if cost_aln_R1 <= cost_aln_R2 else reads[read_id]["R2"]
-        if None not in consensus: # Skip partial reads
+        if None not in consensus:  # Skip partial reads
             DP += 1
             if "".join(consensus) == alt:
                 AD += 1
     # Return
-    return( AD, DP )
+    return AD, DP
 
-def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
+def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     """
     @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     @param chrom: [str] The variant region name.
@@ -174,8 +174,8 @@ def getAlnCost( ref, aln_seq, weights=None ):
     @return: [float] The cost of the alignment.
     """
     if weights is None:
-        weights = { "del": 3, "del_ext": 0.5, "ins": 3, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5 }
-    nb = { "del": 0, "del_ext": 0, "ins": 0, "ins_ext": 0, "miss": 0, "subs": 0, "match": 0 }
+        weights = {"del": 3, "del_ext": 0.5, "ins": 3, "ins_ext": 0.5, "miss": 1, "subs": 1, "match": -0.5}
+    nb = {"del": 0, "del_ext": 0, "ins": 0, "ins_ext": 0, "miss": 0, "subs": 0, "match": 0}
     prev = ""
     for idx_nt, nt in enumerate(aln_seq):
         if nt is None:
@@ -200,7 +200,7 @@ def getAlnCost( ref, aln_seq, weights=None ):
     cost = sum([(nb[category] * weights[category]) for category in nb])
     return cost
 
-def getAlnAndQual( aln_file, chrom, inspect_start, inspect_end, selected_RG, max_depth=100000 ):
+def getAlnAndQual(aln_file, chrom, inspect_start, inspect_end, selected_RG, max_depth=100000):
     """
     @summary: Returns for each reads in inspected area the fragment of the alignment corresponding.
               Two elements are returned: by read ID the sequence alignment fragment for R1 and R2
@@ -262,8 +262,8 @@ def getAlnAndQual( aln_file, chrom, inspect_start, inspect_end, selected_RG, max
     if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
     reads = dict()
     quals = dict()
-    with pysam.AlignmentFile( aln_file, "rb" ) as FH_sam:
-        for pileupcolumn in FH_sam.pileup( chrom, inspect_start, inspect_end, max_depth=max_depth ):
+    with pysam.AlignmentFile(aln_file, "rb") as FH_sam:
+        for pileupcolumn in FH_sam.pileup(chrom, inspect_start, inspect_end, max_depth=max_depth):
             for pileupread in pileupcolumn.pileups:
                 if selected_RG is None or (pileupread.alignment.get_tag("RG") in selected_RG):
                     if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
@@ -280,18 +280,18 @@ def getAlnAndQual( aln_file, chrom, inspect_start, inspect_end, selected_RG, max
                         curr_read = reads[read_id][pair_id]
                         curr_qual = quals[read_id][pair_id]
                         # Store comparison with ref for current position
-                        if pileupread.is_del: # Deletion
-                            curr_read.append( "" )
-                            curr_qual.append( "" )
-                        elif pileupread.indel > 0: # Insertion
+                        if pileupread.is_del:  # Deletion
+                            curr_read.append("")
+                            curr_qual.append("")
+                        elif pileupread.indel > 0:  # Insertion
                             insert = ""
                             insert_qual = list()
                             for insert_idx in range(pileupread.indel + 1):
                                 insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
-                                insert_qual.append( pileupread.alignment.query_qualities[pileupread.query_position + insert_idx] )
-                            curr_read.append( insert )
-                            curr_qual.append( insert_qual )
-                        elif not pileupread.is_refskip: # Substitution
+                                insert_qual.append(pileupread.alignment.query_qualities[pileupread.query_position + insert_idx])
+                            curr_read.append(insert)
+                            curr_qual.append(insert_qual)
+                        elif not pileupread.is_refskip:  # Substitution
                             curr_read.append(
                                 pileupread.alignment.query_sequence[pileupread.query_position].upper()
                             )
@@ -304,11 +304,11 @@ def getAlnAndQual( aln_file, chrom, inspect_start, inspect_end, selected_RG, max
         for pair_id in reads[read_id]:
             read_len = len(reads[read_id][pair_id])
             for idx in range(inspected_len - read_len):
-                reads[read_id][pair_id].append( None )
-                quals[read_id][pair_id].append( None )
+                reads[read_id][pair_id].append(None)
+                quals[read_id][pair_id].append(None)
     return reads, quals
 
-def getAreas( input_areas ):
+def getAreas(input_areas):
     """
     @summary: Returns the list of areas from a BED file.
     @param input_areas: [str] The path to the areas description (format: BED).
@@ -317,9 +317,9 @@ def getAreas( input_areas ):
     areas = RegionList()
     with BEDIO(input_areas) as FH_panel:
         areas = RegionList(FH_panel.read())
-    return( areas )
+    return areas
 
-def getAreasByChr( input_areas ):
+def getAreasByChr(input_areas):
     """
     @summary: Returns from a BED file the list of areas by chromosome.
     @param input_areas: [str] The path to the areas description (format: BED).
@@ -330,10 +330,10 @@ def getAreasByChr( input_areas ):
         chrom = curr_area.reference.name
         if chrom not in areas_by_chr:
             areas_by_chr[chrom] = RegionList()
-        areas_by_chr[chrom].append( curr_area )
-    return( areas_by_chr )
+        areas_by_chr[chrom].append(curr_area)
+    return areas_by_chr
 
-def getRGIdByRGTag( in_aln, tag, selected_value ):
+def getRGIdByRGTag(in_aln, tag, selected_value):
     """
     @summary: Returns the IDs of RG with a tag value in selected values.
     @param in_aln: [str] The path to the alignment file (format: BAM).
@@ -342,13 +342,13 @@ def getRGIdByRGTag( in_aln, tag, selected_value ):
     @returns: [list] IDs of the corresponding reads groups.
     """
     RG_id = list()
-    with pysam.AlignmentFile( in_aln, "rb" ) as FH_sam:
+    with pysam.AlignmentFile(in_aln, "rb") as FH_sam:
         for RG in FH_sam.header["RG"]:
             if RG[tag] in selected_value:
-                RG_id.append( RG["ID"] )
+                RG_id.append(RG["ID"])
     return RG_id
 
-def getSimplePairConsensus( seq, qual ):
+def getSimplePairConsensus(seq, qual):
     """
     @summary: Returns pair consensus between alignment fragments from R1 and R2 of the same matrix. The consensus is based on the best base quality at position.
     @param seq: [dict] The sequence alignment fragment for R1 and R2 (see getAlnAndQual()).
@@ -384,20 +384,20 @@ def getSimplePairConsensus( seq, qual ):
                 consensus = ["A", "G", "A", "T", "", "", "G", "G", "CTTA", "C", "C", "A"],
     """
     consensus = list()
-    if "R1" in seq and "R2" in seq: # R1 and R2 overlap inspected region
+    if "R1" in seq and "R2" in seq:  # R1 and R2 overlap inspected region
         inspect_len = len(seq["R1"])
         for idx in range(inspect_len):
-            if seq["R1"][idx] is not None and seq["R2"][idx] is not None: # R1 and R2 overlap position
-                if seq["R1"][idx] == seq["R2"][idx]: # The sequence at the current position is the same between two reads
-                    consensus.append( seq["R1"][idx] )
-                else: # R1 and R2 differ on position
-                    if len(seq["R1"][idx]) == len(seq["R2"][idx]): # The sequences are different but with the same frame
-                        if len(seq["R1"][idx]) < 2: # Substitution or deletion
-                            if qual["R1"][idx] is None or qual["R1"][idx] >= qual["R2"][idx]: # deletion or qual R1 superior
-                                consensus.append( seq["R1"][idx] )
+            if seq["R1"][idx] is not None and seq["R2"][idx] is not None:  # R1 and R2 overlap position
+                if seq["R1"][idx] == seq["R2"][idx]:  # The sequence at the current position is the same between two reads
+                    consensus.append(seq["R1"][idx])
+                else:  # R1 and R2 differ on position
+                    if len(seq["R1"][idx]) == len(seq["R2"][idx]):  # The sequences are different but with the same frame
+                        if len(seq["R1"][idx]) < 2:  # Substitution or deletion
+                            if qual["R1"][idx] is None or qual["R1"][idx] >= qual["R2"][idx]:  # deletion or qual R1 superior
+                                consensus.append(seq["R1"][idx])
                             else:
-                                consensus.append( seq["R2"][idx] )
-                        else: # Insertion
+                                consensus.append(seq["R2"][idx])
+                        else:  # Insertion
                             insert = ""
                             for idx_ins, qual_R1 in enumerate(qual["R1"][idx]):
                                 qual_R2 = qual["R1"][idx][idx_ins]
@@ -405,18 +405,18 @@ def getSimplePairConsensus( seq, qual ):
                                     insert += seq["R1"][idx][idx_ins]
                                 else:
                                     insert += seq["R2"][idx][idx_ins]
-                            consensus.append( insert )
+                            consensus.append(insert)
                     else:
-                        raise ConsensusException( "Simple consensus cannot be found between {} and {}.".format(seq["R1"], seq["R2"]) )
-            elif seq["R1"][idx] is not None: # Only the R1 overlaps position
-                consensus.append( seq["R1"][idx] )
-            elif seq["R2"][idx] is not None: # Only the R2 overlaps position
-                consensus.append( seq["R2"][idx] )
+                        raise ConsensusException("Simple consensus cannot be found between {} and {}.".format(seq["R1"], seq["R2"]))
+            elif seq["R1"][idx] is not None:  # Only the R1 overlaps position
+                consensus.append(seq["R1"][idx])
+            elif seq["R2"][idx] is not None:  # Only the R2 overlaps position
+                consensus.append(seq["R2"][idx])
             else:
-                consensus.append( None )
-    elif "R1" in seq: # Only R1 overlaps inspected region
+                consensus.append(None)
+    elif "R1" in seq:  # Only R1 overlaps inspected region
         consensus = seq["R1"]
-    else: # Only R2 overlaps inspected region
+    else:  # Only R2 overlaps inspected region
         consensus = seq["R2"]
     return consensus
 
@@ -428,16 +428,16 @@ def getSimplePairConsensus( seq, qual ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. Note: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    parser.add_argument( '-f', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
-    parser.add_argument( '-t', '--RG-tag', default='LB', help='RG tag used to store the area ID. [Default: %(default)s]' )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-p', '--input-designs', nargs='+', required=True, help='The path to the amplicons design (format: BED). The start and end of the amplicons must be without primers.' )
-    group_input.add_argument( '-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).' )
-    group_input.add_argument( '-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a variants file.' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).' )
+    parser = argparse.ArgumentParser(description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. Note: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument('-f', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]")
+    parser.add_argument('-t', '--RG-tag', default='LB', help='RG tag used to store the area ID. [Default: %(default)s]')
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-p', '--input-designs', nargs='+', required=True, help='The path to the amplicons design (format: BED). The start and end of the amplicons must be without primers.')
+    group_input.add_argument('-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).')
+    group_input.add_argument('-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a variants file.')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).')
     args = parser.parse_args()
 
     # Get identified variants from VCF
@@ -446,22 +446,22 @@ if __name__ == "__main__":
     design_by_samples = dict()
     for vcf_idx, current_vcf in enumerate(args.input_variants):
         current_aln = args.input_aln[vcf_idx]
-        current_design = getAreasByChr( args.input_designs[vcf_idx] )
+        current_design = getAreasByChr(args.input_designs[vcf_idx])
         with VCFIO(current_vcf) as FH_vcf:
             # Manage samples
-            for curr_spl in FH_vcf.samples: # For each sample in VCF
+            for curr_spl in FH_vcf.samples:  # For each sample in VCF
                 aln_by_samples[curr_spl] = current_aln
                 design_by_samples[curr_spl] = current_design
             # Manage records
-            for record in FH_vcf: # For each variant
-                for curr_spl in FH_vcf.samples: # For each sample in VCF
-                    vcaller_AF = record.getAF( curr_spl )
-                    vcaller_DP = record.getDP( curr_spl )
-                    for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in variant
-                        record_allele = getAlleleRecord( FH_vcf, record, alt_idx )
+            for record in FH_vcf:  # For each variant
+                for curr_spl in FH_vcf.samples:  # For each sample in VCF
+                    vcaller_AF = record.getAF(curr_spl)
+                    vcaller_DP = record.getDP(curr_spl)
+                    for alt_idx, curr_alt in enumerate(record.alt):  # For each alternative allele in variant
+                        record_allele = getAlleleRecord(FH_vcf, record, alt_idx)
                         # Get allele frequency from the variant caller
                         vcaller_curr_AF = vcaller_AF[alt_idx]
-                        if len(vcaller_AF) == len(record.alt) + 1: # The AF contains reference AF
+                        if len(vcaller_AF) == len(record.alt) + 1:  # The AF contains reference AF
                             vcaller_curr_AF = vcaller_AF[alt_idx + 1]
                         record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
                         record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
@@ -476,7 +476,7 @@ if __name__ == "__main__":
     # Completes and writes variants
     with VCFIO(args.output_variants, "w") as FH_out:
         # Header
-        FH_out.copyHeader( FH_vcf )
+        FH_out.copyHeader(FH_vcf)
         FH_out.info["AF"] = {"type": float, "type_tag": "Float", "number": None, "number_tag": "A", "description": "The alleles frequencies for the group of samples."}
         FH_out.info["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths for the group of samples."}
         FH_out.info["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Combined depth across samples."}
@@ -498,7 +498,7 @@ if __name__ == "__main__":
             curr_var.info["AD"] = [0]
             curr_var.info["DP"] = 0
             for spl in aln_by_samples:
-                if spl not in curr_var.samples: # If the variant has not be seen in sample
+                if spl not in curr_var.samples:  # If the variant has not be seen in sample
                     AD = 0
                     DP = 0
                     # Get valid RG
@@ -510,8 +510,8 @@ if __name__ == "__main__":
                     if len(overlapped_ampl) > 0:
                         # Retrieve AD, AF and DP from aln file
                         overlapped_ampl_name = [ampl.name for ampl in overlapped_ampl]
-                        overlapped_RG = getRGIdByRGTag( aln_by_samples[spl], args.RG_tag, overlapped_ampl_name )
-                        AD, DP = getADPContig( curr_var.chrom, curr_var.pos, curr_var.ref, curr_var.alt[0], aln_by_samples[spl], overlapped_RG )
+                        overlapped_RG = getRGIdByRGTag(aln_by_samples[spl], args.RG_tag, overlapped_ampl_name)
+                        AD, DP = getADPContig(curr_var.chrom, curr_var.pos, curr_var.ref, curr_var.alt[0], aln_by_samples[spl], overlapped_RG)
                     # Store AD, AF and DP for sample
                     curr_var.samples[spl] = {
                         "AF": [0 if DP == 0 else round(float(AD)/DP, args.AF_precision)],
@@ -522,4 +522,4 @@ if __name__ == "__main__":
                 curr_var.info["DP"] += curr_var.samples[spl]["DP"]
             curr_var.info["AF"][0] = curr_var.info["AD"][0] / curr_var.info["DP"]
             # Write variant
-            FH_out.write( curr_var )
+            FH_out.write(curr_var)
