@@ -1,7 +1,8 @@
 {
   "class": "Filter",
-  "target": "filter",
+  "getter": "filter",
   "action": "exclude",
-  "operator": "at least one in",
+  "aggregator": "nb:1",
+  "operator": "in",
   "values": ["lowDP", "lowAF", "invalid", "libSpe", "CSQ", "popAF"]
 }
