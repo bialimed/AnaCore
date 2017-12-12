@@ -40,12 +40,12 @@ class Region:
         self.name = name
         self.annot = dict() if annot is None else annot
 
-    def length( self ):
+    def length(self):
         """
         @summary: Returns the length of the region.
         @return: [int] The length of the region.
         """
-        return( self.end - self.start + 1 )
+        return(self.end - self.start + 1)
 
     def setReference(self, reference):
         """
@@ -59,7 +59,7 @@ class Region:
         elif isinstance(reference, Region):
             self.reference = reference
         else:
-            raise Exception( "The type " + str(type(reference)) + " is not authorized for reference attribute in Region class." )
+            raise Exception("The type " + str(type(reference)) + " is not authorized for reference attribute in Region class.")
 
     def contains(self, eval_region):
         """
@@ -71,7 +71,7 @@ class Region:
         if self.reference.name == eval_region.reference.name:
             if self.start <= eval_region.start and self.end >= eval_region.end:
                 contains = True
-        return( contains )
+        return contains
 
     def strandedContains(self, eval_region):
         """
@@ -81,8 +81,8 @@ class Region:
         """
         contains = False
         if self.reference.strand == eval_region.reference.strand:
-            contains = self.contains( eval_region )
-        return( contains )
+            contains = self.contains(eval_region)
+        return contains
 
     def hasOverlap(self, eval_region):
         """
@@ -94,9 +94,9 @@ class Region:
         if self.reference.name == eval_region.reference.name:
             if not self.start > eval_region.end and not self.end < eval_region.start:
                 has_overlap = True
-        return( has_overlap )
+        return has_overlap
 
-    def strandedHasoverlap(self, eval_region):
+    def strandedHasOverlap(self, eval_region):
         """
         @summary: Returns True if the region has an overlap with eval_region and their are on the same strand.
         @param eval_region: The evaluated region.
@@ -104,8 +104,8 @@ class Region:
         """
         has_overlap = False
         if self.reference.strand == eval_region.reference.strand:
-            has_overlap = self.hasOverlap( eval_region )
-        return( has_overlap )
+            has_overlap = self.hasOverlap(eval_region)
+        return has_overlap
 
     def getMinDist(self, eval_region):
         """
@@ -114,15 +114,15 @@ class Region:
         @return: [int] The distance between the instance and the evaluated region.
         """
         if self.reference.name != eval_region.reference.name:
-            raise Exception( 'The minimal distance between regions cannot be processed because their are located on diffrents reference ("' + self.reference.name+ '" vs "' + eval_region.reference.name + '").' )
+            raise Exception('The minimal distance between regions cannot be processed because their are located on diffrents reference ("' + self.reference.name+ '" vs "' + eval_region.reference.name + '").')
         min_dist = None
-        if self.hasOverlap(eval_region): # Eval region overlaps region
+        if self.hasOverlap(eval_region):  # Eval region overlaps region
             min_dist = 0
-        elif eval_region.end < self.start: # Eval region is located before region
+        elif eval_region.end < self.start:  # Eval region is located before region
             min_dist = self.start - eval_region.end
-        else: # Eval region is located after region
+        else:  # Eval region is located after region
             min_dist = eval_region.start - self.end
-        return( min_dist )
+        return min_dist
 
 
 class RegionList(list):
@@ -132,7 +132,7 @@ class RegionList(list):
         """
         if regions is not None:
             for curr_region in regions:
-                self.append( curr_region )
+                self.append(curr_region)
 
     def getContainers(self, eval_region):
         """
@@ -142,8 +142,8 @@ class RegionList(list):
         """
         containers = list()
         for curr_region in self:
-            if curr_region.contains( eval_region ):
-                containers.append( curr_region )
+            if curr_region.contains(eval_region):
+                containers.append(curr_region)
         return containers
 
     def getOverlapped(self, eval_region):
@@ -154,8 +154,8 @@ class RegionList(list):
         """
         overlapped = list()
         for curr_region in self:
-            if curr_region.hasOverlap( eval_region ):
-                overlapped.append( curr_region )
+            if curr_region.hasOverlap(eval_region):
+                overlapped.append(curr_region)
         return overlapped
 
     def getNearests(self, eval_region, select_fct=None):
@@ -177,5 +177,5 @@ class RegionList(list):
                         if min_dist is None or curr_dist < min_dist:
                             nearests = list()
                         min_dist = curr_dist
-                        nearests.append( curr_region )
-        return( min_dist, nearests )
+                        nearests.append(curr_region)
+        return min_dist, nearests
