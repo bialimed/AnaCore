@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -39,20 +39,20 @@ def bwaWrapper(bwa_exec_path, samtools_exec_path, aln_file, stderr, reference_ge
     tmp_aln = os.path.join(os.path.dirname(aln_file), "tmp_" + str(time.time()) + ".sam")
     # Alignment
     cmd_aln = bwa_exec_path + \
-               ' mem' + \
-               ' "' + reference_genome + '"' + \
-               ' "' + R1 + '"' + \
-               ("" if R2 is None else ' "' + R2 + '"') + \
-               ' > "' + tmp_aln + '"' + \
-               ' 2> ' + stderr
+        ' mem' + \
+        ' "' + reference_genome + '"' + \
+        ' "' + R1 + '"' + \
+        ("" if R2 is None else ' "' + R2 + '"') + \
+        ' > "' + tmp_aln + '"' + \
+        ' 2> ' + stderr
     subprocess.check_output(cmd_aln, shell=True)
     # Sort and conversion to BAM
     cmd_sort = samtools_exec_path + \
-                ' sort' + \
-                ' -O BAM' + \
-                ' -o "' + aln_file + '"' + \
-                ' "' + tmp_aln + '"' + \
-                ' 2>> ' + stderr
+        ' sort' + \
+        ' -O BAM' + \
+        ' -o "' + aln_file + '"' + \
+        ' "' + tmp_aln + '"' + \
+        ' 2>> ' + stderr
     subprocess.check_output(cmd_sort, shell=True)
     # Remove mp
     os.remove(tmp_aln)
@@ -60,15 +60,22 @@ def bwaWrapper(bwa_exec_path, samtools_exec_path, aln_file, stderr, reference_ge
 
 class BWAmem (Component):
 
-    def define_parameters(self, reference_genome, R1, R2=None):
+    def define_parameters(self, reference_genome, R1, R2=None, names=None):
+        # Parameters
+        self.add_parameter_list("names", "The basenames of the output BAM in order of the R1. By default the basename is automatically determined.", default=names, required=True)
+
         # Input files
         self.add_input_file_list("R1", "Which R1 files should be used (format: fasta or fastq).", default=R1, required=True)
         self.add_input_file_list("R2", "Which R2 files should be used (format: fasta or fastq).", default=R2, required=True)
         self.add_input_file("reference_genome", "Which reference file should be used", default=reference_genome, required=True)
 
         # Output files
-        self.add_output_file_list("aln_files", "The path to the alignment file (format: BAM).", pattern='{basename_woext}.bam', items=self.R1)
-        self.add_output_file_list("stderr", "The path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.R1)
+        if self.names == None:
+            self.add_output_file_list("aln_files", "The path to the alignment file (format: BAM).", pattern='{basename_woext}.bam', items=self.R1)
+            self.add_output_file_list("stderr", "The path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.R1)
+        else:
+            self.add_output_file_list("aln_files", "The path to the alignment file (format: BAM).", pattern='{basename}.bam', items=self.names)
+            self.add_output_file_list("stderr", "The path to the stderr file (format: txt).", pattern='{basename}.stderr', items=self.names)
 
     def process(self):
         bwamem = PythonFunction(
