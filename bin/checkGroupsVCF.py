@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -81,7 +81,7 @@ def getGroupsData(groups_path, samples, sample_tag="Sample", group_tag="Group", 
     # Return
     return group_by_spl, spl_by_group, without_group
 
-def writeInvalidsJSON(intruders_by_spl, out_path):
+def writeInvalidsJSON(intruders_by_spl, group_by_spl, out_path):
     """
     @summary: Writes the list of samples with invalid group in JSON file.
     @param intruders_by_spl: [dict] By sample the list of samples coming from others groups and more similar than others samples coming from the valid group.
