@@ -41,7 +41,7 @@ class FilterVCF (Component):
 
     def process(self):
         cmd = self.get_exec_path("filterVCF.py") + \
-            " --filters " + self.in_filters + \
+            " --input-filters " + self.in_filters + \
             " --input-variants $1" + \
             " --output-variants $2" + \
             " 2> $3"

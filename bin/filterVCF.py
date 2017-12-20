@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -48,8 +48,8 @@ if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Filters VCF on criteria described in JSON file.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
-    parser.add_argument('-f', '--filters', required=True, help='The path to the filters file (format: JSON).')
     group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-f', '--input-filters', required=True, help='The path to the filters file (format: JSON).')
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     # Process
     filters = None
-    with open(args.filters) as data_file:
+    with open(args.input_filters) as data_file:
         filters = filtersFromDict(json.load(data_file))
     with VCFIO(args.output_variants, "w") as FH_out:
         with VCFIO(args.input_variants) as FH_in:
