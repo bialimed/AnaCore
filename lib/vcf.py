@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.14.0'
+__version__ = '1.15.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -182,7 +182,7 @@ class VCFRecord:
                 self.pos += len(self.ref)
                 self.ref = empty_marker
             else:
-                twoSideTrimming( self )
+                twoSideTrimming(self)
                 if self.ref != "":
                     warnings.warn(
                         'The insertion "{}/{}" at location {}:{} cannot be standardized.'.format(
@@ -193,7 +193,7 @@ class VCFRecord:
                     self.ref = empty_marker
         # Substitution
         elif len(self.alt[0]) == len(self.ref) and len(self.ref) != 1:
-            twoSideTrimming( self )
+            twoSideTrimming(self)
 
     def getMostUpstream(self, ref_seq):
         """
@@ -417,6 +417,21 @@ class VCFRecord:
         # Return
         return AD
 
+    def getAFBySample(self, missing_replacement=None):
+        """
+        @summary: Returns the list of alleles frequencies by sample name. The reference frequency is removed from the result if it exists.
+        @param missing_replacement: [float] Value used to replace missing AF.
+        @return: [dict] The list of alleles frequencies by sample name.
+        """
+        AF = dict()
+        for curr_spl in self.samples:
+            AF[curr_spl] = list()
+            for curr_AF in self.getAF(curr_spl):
+                if curr_AF is None and missing_replacement is not None:
+                    curr_AF = float(missing_replacement)
+                AF[curr_spl].append(curr_AF)
+        return AF
+
     def getAF(self, spl_name):
         """
         @summary: Returns the list of alleles frequencies for the specified sample. The reference frequency is removed from the result if it exists.
@@ -635,7 +650,7 @@ class VCFIO(AbstractFile):
                                     if list_elt == ".":
                                         spl_data[field_id].append(None)
                                     else:
-                                        spl_data[field_id].append( self.format[field_id]["type"](list_elt) )
+                                        spl_data[field_id].append(self.format[field_id]["type"](list_elt))
                             elif field_format["number"] == 1:
                                 if field_data == ".":
                                     spl_data[field_id] = None
