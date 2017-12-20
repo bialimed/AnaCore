@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -29,6 +29,9 @@ import time
 import argparse
 import subprocess
 from subprocess import Popen, PIPE
+
+BIN_DIR = os.path.dirname(os.path.abspath(__file__))
+os.environ['PATH'] = os.environ['PATH'] + os.pathsep + BIN_DIR
 
 
 
