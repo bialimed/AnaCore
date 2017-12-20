@@ -55,7 +55,7 @@ if __name__ == "__main__":
     group_input.add_argument('-i', '--input-distances', required=True, help='Path to the file containing the distance matrix (format: TSV).')
     group_output = parser.add_argument_group('Outputs')
     group_output.add_argument('-o', '--output-tree', required=True, help='Path to the hierarchical clustering tree (format: see --output-format).')
-    group_output.add_argument('-f', '--output-format', default="newick", choices=["newick", "json", "img"], help='The output format. [Default: %(default)s]')
+    group_output.add_argument('-f', '--output-format', default="newick", choices=["newick", "json", "png"], help='The output format. [Default: %(default)s]')
     args = parser.parse_args()
 
     # Load distance matrix
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         tree = Node.fromClusterNode(hc_tree, id_2_name)
 
     # Write output
-    if args.output_format != "img":  # Text outputs
+    if args.output_format != "png":  # Text outputs
         out_str = None
         if args.output_format == "newick":
             out_str = "{};".format(tree.toNewick())
