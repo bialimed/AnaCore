@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -226,8 +226,19 @@ class Filter:
         # Get value from current key
         value = record
         if key.startswith("m:"):
-            method = value.__getattribute__(key[2:])
-            value = method()
+            method_name = key[2:]
+            method_param = None
+            if "(" in method_name:  # Parameters must be numeric or string
+                if method_name.endswith("()"):
+                    method_name = method_name[:-2]
+                else:
+                    method_name, method_param = method_name.split("(", 1)
+                    method_param = [elt.strip() for elt in method_param[:-1].split(",")]
+            method = value.__getattribute__(method_name)
+            if method_param is None:
+                value = method()
+            else:
+                value = method(*method_param)
         elif key.startswith("i:"):
             if key != "i:":
                 value = value.__getattribute__(key[2:])
