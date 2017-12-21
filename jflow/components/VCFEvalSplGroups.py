@@ -52,7 +52,7 @@ class VCFEvalSplGroups (Component):
             "Path to the hierarchical clustering tree (format: see output_format).",
             filename='samples_HC.{}'.format("png" if self.out_format == "human" else "json")
         )
-        self.add_output_file("stderr", "Path to the stderr files (format: txt).", filename='groupsEval.stderr')
+        self.add_output_file("stderr", "Path to the stderr files (format: txt).", filename='groups_eval.stderr')
 
     def process(self):
         # Write list of inputs variants to prevent bug xith size limitation of command line.
