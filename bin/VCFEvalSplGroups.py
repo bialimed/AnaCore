@@ -30,7 +30,7 @@ import json
 import argparse
 import subprocess
 
-BIN_DIR = os.path.dirname(os.path.abspath(__file__))
+BIN_DIR = os.path.dirname(__file__)
 os.environ['PATH'] = os.environ['PATH'] + os.pathsep + BIN_DIR
 
 
@@ -102,6 +102,13 @@ class TmpFiles:
 
 
 def distToHC(in_distances, out_tree, linkage_method, tree_format):
+    """
+    @summary: Builts hierarchical clustering from the distance matrix.
+    @param in_distances: [str] Path to the file containing the distance matrix (format: TSV).
+    @param out_tree: [str] Path to the hierarchical clustering tree (format: see --output-format).
+    @param linkage_method: [str] Used linkage (see https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html#scipy.cluster.hierarchy.linkage).
+    @param: tree_format: [str] The tree format: "newick" or "json" or "png".
+    """
     cmd = [
         "distToHC.py",
         "--linkage-method", linkage_method,
@@ -113,6 +120,12 @@ def distToHC(in_distances, out_tree, linkage_method, tree_format):
 
 
 def filterVCF(in_variants, out_variants, min_AF):
+    """
+    @summary: Filters variants on their frequencies. Only variants with at least one sample where his AF >= min_AF are kept.
+    @param in_variants: [str] The path to the variants file (format: VCF).
+    @param out_variants: [str] The path to the filtered variants file (format: VCF).
+    @param min_AF: [float] The minimum allele frequency in at least one sample.
+    """
     tmp = TmpFiles(os.path.dirname(out_variants))
     # Writes filters rules
     filters_desc = {
@@ -138,6 +151,14 @@ def filterVCF(in_variants, out_variants, min_AF):
     tmp.deleteAll()
 
 def checkGroups(in_variants, in_groups, out_distances, out_intruders, distance_method):
+    """
+    @summary: Writes the list of samples more similar with samples from another group than others samples coming from the same group.
+    @param in_variants: [str] Path to the variants file containing samples to compare (format: VCF).
+    @param in_groups: [str] Path to the file describing links between samples and groups (format: TSV).
+    @param out_distances: [str] Path to the 2D distances matrix (format: TSV).
+    @param out_intruders: [str] Path to the file listing the samples more similar with samples from another group than others samples coming from the same group. (format: TSV or JSON depends on extension).
+    @param distance_method: [str] Used distance (see https://docs.scipy.org/doc/scipy/reference/spatial.distance.html#module-scipy.spatial.distance).
+    """
     cmd = [
         "checkGroupsVCF.py",
         "--distance-method", distance_method,
@@ -150,6 +171,11 @@ def checkGroups(in_variants, in_groups, out_distances, out_intruders, distance_m
 
 
 def mergeVCF(in_variants, out_variants):
+    """
+    @summary: Merges samples in variants files.
+    @param in_variants: [list] Path to the variants files.
+    @param out_variants: [str] Path to the merged file.
+    """
     cmd = [
         "mergeVCF.py",
         "--deactivate-completion",
