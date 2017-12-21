@@ -30,7 +30,7 @@ import argparse
 import subprocess
 from subprocess import Popen, PIPE
 
-BIN_DIR = os.path.dirname(os.path.abspath(__file__))
+BIN_DIR = os.path.dirname(__file__)
 os.environ['PATH'] = os.environ['PATH'] + os.pathsep + BIN_DIR
 
 

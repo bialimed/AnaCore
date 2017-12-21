@@ -31,7 +31,7 @@ import warnings
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+CURRENT_DIR = os.path.dirname(__file__)
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     group_input.add_argument('-g', '--input-groups', required=True, help='Path to the file describing links between samples and groups (format: TSV).')
     group_output = parser.add_argument_group('Outputs')
     group_output.add_argument('-o', '--output-invalids', required=True, help='Path to the file listing the samples more similar with samples from another group than others samples coming from the same group. (format: TSV or JSON depends on extension).')
-    group_output.add_argument('-od', '--output-distances', help='The 2D distances matrix (format: TSV).')
+    group_output.add_argument('-od', '--output-distances', help='Path to the 2D distances matrix (format: TSV).')
     args = parser.parse_args()
 
     # Get variant matrix from samples
