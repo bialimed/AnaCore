@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,7 +31,7 @@ class Node:
     @summary: A node is an element of a tree structure. It is linked with its
     parent and its children and it is described by several metadata.
     """
-    def __init__(self, name, parent_node=None, children_nodes=None, metadata=None):
+    def __init__(self, name=None, parent_node=None, children_nodes=None, metadata=None):
         """
         @param name: [str] The node name.
         @param parent_node: [Node] The parent node.
@@ -53,7 +53,7 @@ class Node:
         @summary: Returns a string representation of the node.
         @return: [str] The representation of the node.
         """
-        node_str = self.name
+        node_str = if self.name is not None else "-"
         node_str += "\n\tParent=" + (self.parent.name if self.parent is not None else "-")
         node_str += "\n\tChilds=" + ", ".join(self.children.keys())
         metadata = list()
@@ -177,8 +177,8 @@ class Node:
                 curr_node.metadata[met_key] = met_val
         # Chilren
         if "children" in tree and len(tree["children"]) > 0:
-            for child in children:
-                curr_node.addchild(
+            for child in tree["children"]:
+                curr_node.addChild(
                     Node.fromDict(child)
                 )
         return curr_node
