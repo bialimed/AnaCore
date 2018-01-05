@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -53,8 +53,8 @@ class Node:
         @summary: Returns a string representation of the node.
         @return: [str] The representation of the node.
         """
-        node_str = if self.name is not None else "-"
-        node_str += "\n\tParent=" + (self.parent.name if self.parent is not None else "-")
+        node_str = "-" if self.name is None else self.name
+        node_str += "\n\tParent=" + ("-" if self.parent is None or self.parent.name is None else self.parent.name)
         node_str += "\n\tChilds=" + ", ".join(self.children.keys())
         metadata = list()
         for key in sorted(self.metadata.keys()):
