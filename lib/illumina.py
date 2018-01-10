@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -249,3 +249,49 @@ class RunParameters(object):
             "flowcell_id": flowcell_id,
             "reagent_kit_id": reagent_kit_id
         }
+
+
+class CompletedJobInfo(object):
+    def __init__(self, path, date_format='%Y-%m-%dT%H:%M:%S'):
+        self.filepath = path
+        self.date_format = date_format
+        self.start_datetime = None
+        self.end_datetime = None
+        self.version = None
+        self.workflow_name = None
+        self.parameters = None
+        self._parse()
+
+    def _parse(self):
+        # Retrieve information by section
+        tree = ET.parse(self.filepath)
+        root = tree.getroot()
+        # Process information
+        self.end_datetime = root.find("CompletionTime").text  # 2017-11-23T17:19:55.0941558+01:00
+        self.end_datetime = self.end_datetime.split(".")[0]
+        self.end_datetime = datetime.datetime.strptime(self.end_datetime, self.date_format)
+        self.start_datetime = root.find("StartTime").text  # 2017-11-23T17:19:55.0941558+01:00
+        self.start_datetime = self.start_datetime.split(".")[0]
+        self.start_datetime = datetime.datetime.strptime(self.start_datetime, self.date_format)
+        self.version = root.find("Workflow").find("WorkflowVersion").text
+        self.workflow_name = root.find("Workflow").find("Analysis").text
+        amplicon_param = etreeToDict(root.find("Workflow").find("AmpliconSettings"))
+        workflow_param = etreeToDict(root.find("Workflow").find("WorkflowSettings"))
+        self.parameters = {"AmpliconSettings": amplicon_param, "WorkflowSettings": workflow_param}
+
+
+def etreeToDict(node):
+    data = {"name": node.tag}
+    # Attributes
+    if len(node.attrib):
+        data["attributes"] = node.attrib
+    # Children
+    children = list()
+    for child in node:
+        children.append(etreeToDict(child))
+    if len(children):
+        data["children"] = children
+    else:
+        data["val"] = node.text
+    # Return
+    return data
