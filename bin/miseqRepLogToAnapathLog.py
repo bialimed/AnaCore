@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -54,8 +54,8 @@ def writeLog(log_path, log):
             "Workflow={}\n".format(log.workflow_name) + \
             "Version={}\n".format(log.version) + \
             "Parameters={}\n".format(json.dumps(log.parameters)) + \
-            "Start_time={}\n".format(log.start_datetime) + \
-            "End_time={}\n".format(log.end_datetime)
+            "Start_time={}\n".format(log.start_datetime.timestamp()) + \
+            "End_time={}\n".format(log.end_datetime.timestamp())
         )
 
 
