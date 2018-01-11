@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -275,9 +275,10 @@ class CompletedJobInfo(object):
         self.start_datetime = datetime.datetime.strptime(self.start_datetime, self.date_format)
         self.version = root.find("Workflow").find("WorkflowVersion").text
         self.workflow_name = root.find("Workflow").find("Analysis").text
-        amplicon_param = etreeToDict(root.find("Workflow").find("AmpliconSettings"))
         workflow_param = etreeToDict(root.find("Workflow").find("WorkflowSettings"))
-        self.parameters = {"AmpliconSettings": amplicon_param, "WorkflowSettings": workflow_param}
+        self.parameters = {"WorkflowSettings": workflow_param}
+        if self.workflow_name == "Amplicon - DS":
+            self.parameters["AmpliconSettings"] = etreeToDict(root.find("Workflow").find("AmpliconSettings"))
 
 
 def etreeToDict(node):
