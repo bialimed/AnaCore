@@ -19,100 +19,110 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '2.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
-import sys
 import time
-import datetime
+import glob
 import warnings
 import argparse
 import subprocess
+import importlib.util
 
-CURRENT_DIR = os.path.dirname(__file__)
-LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
-sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
+# Load Illumina
+bin_dir = os.path.abspath(os.path.dirname(__file__))
+illumina_lib = os.path.join(os.path.dirname(bin_dir), "lib", "illumina.py")
+spec = importlib.util.spec_from_file_location("illumina", illumina_lib)
+illumina = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(illumina)
 
-from illumina import SampleSheetIO
-
-
-
-ressources_folder = "/save/fescudie/IUCT/dev/ressources/amplicon_design"
-genome = {
-    'assembly': "GRCh37",
-    'sequences': "/work/fescudie/bank/Homo_sapiens/DNA/GRCh37_Ensembl75_std/without_contig/Homo_sapiens.GRCh37.75.dna.woutContigs.fa"
-}
-workflow_path = "/save/fescudie/IUCT/WF_NAME/current/app/bin/jflow_cli.py"
 
 ########################################################################
 #
 # FUNCTIONS
 #
 ########################################################################
-def exec_cmd( cmd ):
-    print( " ".join(cmd) )
-    subprocess.check_call( cmd )
-
-def getProtocol( in_spl_folder ):
+def exec_cmd(cmd):
     """
-    @summary: Returns the command to launch the workflow.******************************************************
+    @summary: Display and submit the command.
+    @param cmd: [list] The command to execute.
+    """
+    print(" ".join(cmd))
+    subprocess.check_call(cmd, stdout=subprocess.DEVNULL)
+
+
+def getProtocol(in_spl_folder):
+    """
+    @summary: Returns the analysis protocol (design and Illumina workflow) declarated in samplesheet.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
-    @return: [None/list] The command if the corresponding workflow exists and None otherwise.
+    @return: [dict] The analysis protocol.
     @warning: For Amplicon - DS the manifests names must be <DESIGN>_A.txt and <DESIGN>_B.txt.
     """
     protocol = {"workflow": None, "design": None}
-    samplesheet = SampleSheetIO( os.path.join(in_spl_folder, "SampleSheet.csv") )
+    samplesheet = illumina.SampleSheetIO(os.path.join(in_spl_folder, "SampleSheet.csv"))
     if samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
         protocol["workflow"] = "Amplicon - DS"
         manifest_A = os.path.basename(samplesheet.manifests["A"])
         protocol["design"] = manifest_A.split("_A.txt")[0]
     return protocol
 
-def getWorkflows( protocol ):
+
+def getWorkflows(protocol):
+    """
+    @summary: Returns the list of workflows to execute on data.
+    @param protocol: [str] The analysis protocol (design and Illumina workflow).
+    @return: [list] The names of the workflows to execute.
+    """
     wf = list()
     if protocol["workflow"] == "Amplicon - DS":
-        wf = ["ADIVaR", "AmpliconDS"]
+        wf = ["ADIVaR", "ADSA"]
     return wf
 
-def getRunCmd( workflow, in_spl_folder, out_run_folder ):
+
+def getRunCmd(workflow, in_spl_folder, out_run_folder):
     """
     @summary: Returns the command to launch the workflow.
-    @param protocol: [dict] **************************************************************************************
+    @param workflow: [str] The name of the workflow.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
     @param out_run_folder: [str] Path to the workflow output folder.
     @return: [None/list] The command if the corresponding workflow exists and None otherwise.
     """
     cmd = None
     if workflow == "ADIVaR":
-        cmd = getADIVaRCmd( in_spl_folder, out_run_folder, protocol["design"] )
-    elif workflow == "AmpliconDS":
-        cmd = getAmpliconDSCmd( in_spl_folder, out_run_folder, protocol["design"] )
+        cmd = getADIVaRCmd(in_spl_folder, out_run_folder, protocol["design"])
+    elif workflow == "ADSA":
+        cmd = getADSACmd(in_spl_folder, out_run_folder, protocol["design"])
     return cmd
 
-def getAmpliconDSCmd( in_spl_folder, out_run_folder, design ):
+
+def getADSACmd(in_spl_folder, out_run_folder, design):
     """
-    @summary: Returns the command to launch the varainst annotation on MiSeq reporter outputs.
+    @summary: Returns the command to launch the variant annotation on MiSeq reporter outputs.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
     @param design: [str] Path to the folder containing the files describing the amplicons.
     @return: [list] The command.
     """
+    ressources_folder = args.design_path_pattern.replace("WF_NAME", "AmpliconDSAnnot")
     cmd = [
-        workflow_path.replace("WF_NAME", "AmpliconDSAnnot"), "amplicondsannot",
+        args.workflow_path_pattern.replace("WF_NAME", "AmpliconDSAnnot"), "amplicondsannot",
         "--RNA-selection", os.path.join(ressources_folder, design, "reference_RNA.tsv"),
-        "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon",
-        "--pos-ctrl-expected", os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf"),
         "--assembly-version", genome["assembly"],
         "--filters", os.path.join(ressources_folder, "ampliDS_filters_wfAmpliconDS.json"),
         "--samplesheet", os.path.join(in_spl_folder, "SampleSheet.csv"),
         "--output-dir", out_run_folder
     ]
+    positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
+    if os.path.exists(positive_ctrl_ref):
+        cmd.extend([
+            "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon", ################################## pb HORIZON
+            "--pos-ctrl-expected", os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
+        ])
     return cmd
 
-def getADIVaRCmd( in_spl_folder, out_run_folder, design ):
+
+def getADIVaRCmd(in_spl_folder, out_run_folder, design):
     """
     @summary: Returns the command to launch the amplicon double strand workflow.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
@@ -120,21 +130,26 @@ def getADIVaRCmd( in_spl_folder, out_run_folder, design ):
     @param design: [str] Path to the folder containing the files describing the amplicons.
     @return: [list] The command.
     """
+    ressources_folder = args.design_path_pattern.replace("WF_NAME", "AmpliconDSAnnot")
     cmd = [
-        workflow_path.replace("WF_NAME", "ADIVaR"), "adivar",
+        args.workflow_path_pattern.replace("WF_NAME", "ADIVaR"), "adivar",
         "--R1-end-adapter", os.path.join(ressources_folder, "adapters", "Illumina_3prim_adapter.fasta"),
         "--R2-end-adapter", os.path.join(ressources_folder, "adapters", "Illumina_5prim_adapter_rvc.fasta"),
-        "--libA-folder", os.path.join(ressources_folder, design, genome["assembly"], "libA"),
-        "--libB-folder", os.path.join(ressources_folder, design, genome["assembly"], "libB"),
+        "--libA", "folderA=" + os.path.join(ressources_folder, design, genome["assembly"], "libA"),
+        "--libB", "folderB=" + os.path.join(ressources_folder, design, genome["assembly"], "libB"),
         "--RNA-selection", os.path.join(ressources_folder, design, "reference_RNA.tsv"),
-        "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon",
-        "--pos-ctrl-expected", os.path.join(ressources_folder, design, genome["assembly"], "pos_ctrl_expected.vcf"),
         "--assembly-version", genome["assembly"],
         "--genome-seq", genome["sequences"],
         "--filters", os.path.join(ressources_folder, "ampliDS_filters.json"),
         "--samplesheet", os.path.join(in_spl_folder, "SampleSheet.csv"),
         "--output-dir", out_run_folder
     ]
+    positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"], "pos_ctrl_expected.vcf")
+    if os.path.exists(positive_ctrl_ref):
+        cmd.extend([
+            "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon", ################################## pb HORIZON
+            "--pos-ctrl-expected", positive_ctrl_ref,
+        ])
     return cmd
 
 
@@ -145,51 +160,75 @@ def getADIVaRCmd( in_spl_folder, out_run_folder, design ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="This script uses an infinite loop to listen the Illumina's sequencer output folder and launch the appropriate workflow when a run is ended." )
-    parser.add_argument( '-r', '--roll-time', type=int, default=(60*20), help="The time between each sequencer output folder evaluation (in seconds). [Default: %(default)s]"  )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-l', '--listened-folder', required=True, help="The sequencer output folder." )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-s', '--storage-folder', required=True, help='Path to the storage folder. The run folder will be moved to this folder after process.')
-    group_output.add_argument( '-a', '--analysis-folder', required=True, help='Path to the workflows output folder ********************.')
+    parser = argparse.ArgumentParser(description="This script uses an infinite loop to listen the Illumina's sequencer output folder and launch the appropriate workflow when a run is ended.")
+    parser.add_argument('-r', '--roll-time', type=int, default=(60*20), help="The time between each sequencer output folder evaluation (in seconds). [Default: %(default)s]")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-l', '--listened-folder', required=True, help="The sequencer output folder.")
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-s', '--storage-folder', help='Path to the storage folder. The run folder will be moved to this folder after process.')
+    group_output.add_argument('-a', '--analysis-folder', required=True, help='Path to the workflows output folder. Each workflow will create a sub-folder in this parent folder (example: for the analysis foler "170101_run01" the result can be two sub-folders 170101_run01/ADIVaR and 170101_run01/AmpliconDS).')
+    group_output = parser.add_argument_group('Ressources')  # Ressources
+    group_output.add_argument('-w', '--workflow-path-pattern', required=True, help='The path to the jflow client of the workflows. The tag WF_NAME is used as placeholder to adapt the command at the workflow. Example: /usr/local/bioinfo/WF_NAME/current/bin/jflow_cli.py.')
+    group_output.add_argument('-d', '--design-path-pattern', required=True, help='The path to the folder containing the designs definitions folders. The tag WF_NAME is used as placeholder to adapt the command at the workflow. Example: /usr/local/bioinfo/WF_NAME/current/ressources.')
+    group_output.add_argument('-g', '--genome', required=True, help='The assembly version and the path to the reference genome used. The two information are separated by ":" like in the following example: GRCh37:/bank/Homo_sapiens/GRCH37/dna.fasta.')
     args = parser.parse_args()
+    genome = {
+        'assembly': args.genome.split(":")[0],
+        'sequences': args.genome.split(":")[1]
+    }
 
     # Process
     while True:
-        for filename in os.listdir( args.listened_folder ):
-            in_run_folder = os.path.join( args.listened_folder, filename )
+        for filename in os.listdir(args.listened_folder):
+            in_run_folder = os.path.join(args.listened_folder, filename)
             if os.path.isdir(in_run_folder):
-                out_run_folder = os.path.join( args.analysis_folder, filename )
-                if os.path.exists(os.path.join(in_run_folder, "CompletedJobInfo.xml")): # The run is ended
-                    if not os.path.exists(out_run_folder):
-                        os.mkdir( out_run_folder )
-                    in_spl_folder = os.path.join( in_run_folder, "Data", "Intensities", "BaseCalls" )
-                    protocol = getProtocol( in_spl_folder )
-                    # Analysis workflows
-                    for curr_wf in getWorkflows(protocol):
-                        out_wf_folder = os.path.join( out_run_folder, curr_wf )
-                        if os.path.exists(out_wf_folder):
-                            warnings.warn( 'The workflow "{}" cannot be run for run "{}".'.format(curr_wf, in_run_folder) )
-                        else:
-                            os.mkdir( out_wf_folder )
-                            cmd_analysis = getRunCmd( curr_wf, in_spl_folder, out_wf_folder )
-                            with open(os.path.join(out_wf_folder, "log.txt"), "w") as FH_log:
-                                FH_log.write( "[START]\t" + datetime.datetime.now().isoformat() + "\n" )
-                                FH_log.write( "[CMD]\t" + " ".join(cmd_analysis) + "\n" )
-                            exec_cmd( cmd_analysis )
-                            with open(os.path.join(out_wf_folder, "log.txt"), "a") as FH_log:
-                                FH_log.write( "[END]\t" + datetime.datetime.now().isoformat() + "\n" )
-                    # Move Illumina analysis
-                    if protocol["workflow"] == "Amplicon - DS":
-                        illumina_analysis_folder = os.path.join( in_spl_folder, "Alignment" )
-                        cmd_copy_analysis = ["rsync", "--recursive", "--perms", "--times", illumina_analysis_folder + os.sep, os.path.join(out_run_folder, "AmpliconDS")]
-                        exec_cmd( cmd_copy_analysis )
-                        cmd_rm_analysis = ["rm", "-r", illumina_analysis_folder]
-                        exec_cmd( cmd_rm_analysis )
-                    # Copy raw data
-                    cmd_copy_raw = ["rsync", "--recursive", "--perms", "--times", in_run_folder + os.sep, os.path.join(args.storage_folder, filename)]
-                    exec_cmd( cmd_copy_raw )
-                    cmd_rm_analysis = ["rm", "-r", in_run_folder]
-                    exec_cmd( cmd_rm_analysis )
-        time.sleep( args.roll_time )
+                out_run_folder = os.path.join(args.analysis_folder, filename)
+                if os.path.exists(os.path.join(in_run_folder, "CompletedJobInfo.xml")):  # The run is ended
+                    in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
+                    protocol = getProtocol(in_basecalls_folder)
+                    # Process Anapath's workflows
+                    if not os.path.exists(out_run_folder):  #################################################### To remove
+                        if not os.path.exists(out_run_folder):
+                            os.mkdir(out_run_folder)
+                        # Analysis workflows
+                        for curr_wf in getWorkflows(protocol):
+                            out_wf_folder = os.path.join(out_run_folder, curr_wf)
+                            if os.path.exists(out_wf_folder):
+                                warnings.warn('The workflow "{}" has already be processed for run "{}".'.format(curr_wf, in_run_folder))
+                            else:
+                                os.mkdir(out_wf_folder)
+                                cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder)
+                                exec_cmd(cmd_analysis)
+                    # Copy raw data if it not already exist
+                    if args.storage_folder is not None:
+                        out_run_storage = os.path.join(args.storage_folder, filename)
+                        if not os.path.exists(out_run_storage):  # The run folder has not been copied in storage folder
+                            cmd_copy_raw = ["rsync", "--recursive", "--perms", "--times", in_run_folder + os.sep, out_run_storage]
+                            exec_cmd(cmd_copy_raw)
+                            # Remove copy of the Illumina's workflows
+                            storage_basecalls_folder = os.path.join(out_run_storage, "Data", "Intensities", "BaseCalls")
+                            alignments_files = glob.glob(os.path.join(storage_basecalls_folder, "Alignment*"))
+                            for curr_file in alignments_files:
+                                if os.path.isdir(curr_file):
+                                    cmd_rm_analysis = ["rm", "-r", curr_file]
+                                    exec_cmd(cmd_rm_analysis)
+                    # Copy Illumina's workflows if they not already exist
+                    if protocol["workflow"] != "GenerateFASTQ":  # Illumina reporter has processed an analysis
+                        # Get workflow name
+                        analysis_basename = protocol["workflow"].replace(" ", "_")
+                        if analysis_basename == "Amplicon_-_DS":
+                            analysis_basename = "AmpliconDS"
+                        # Process workflow results
+                        in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
+                        in_wf_folder_prefix = os.path.join(in_basecalls_folder, "Alignment")
+                        alignments_files = glob.glob(in_wf_folder_prefix + "*")
+                        for in_wf_folder in alignments_files:
+                            if os.path.isdir(in_wf_folder):
+                                out_wf_folder = os.path.join(out_run_folder, analysis_basename)
+                                out_wf_folder += in_wf_folder.replace(in_wf_folder_prefix, "")  # Add workflow suffix (the index of the algnment folder)
+                                log_file = os.path.join(out_wf_folder, "CompletedJobInfo.xml")
+                                if not os.path.exists(log_file):
+                                    cmd_copy_analysis = ["rsync", "--recursive", "--perms", "--times", in_wf_folder + os.sep, out_wf_folder]
+                                    exec_cmd(cmd_copy_analysis)
+        time.sleep(args.roll_time)
