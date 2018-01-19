@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -116,7 +116,7 @@ def getADSACmd(in_spl_folder, out_run_folder, design):
     positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
     if os.path.exists(positive_ctrl_ref):
         cmd.extend([
-            "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon", ################################## pb HORIZON
+            "--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'",
             "--pos-ctrl-expected", os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
         ])
     return cmd
@@ -147,7 +147,7 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design):
     positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"], "pos_ctrl_expected.vcf")
     if os.path.exists(positive_ctrl_ref):
         cmd.extend([
-            "--pos-ctrl-names", "HORIZON", "--pos-ctrl-names", "horizon", "--pos-ctrl-names", "Horizon", ################################## pb HORIZON
+            "--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'",
             "--pos-ctrl-expected", positive_ctrl_ref,
         ])
     return cmd
