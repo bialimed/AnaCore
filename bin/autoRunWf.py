@@ -116,9 +116,9 @@ def getADSACmd(in_spl_folder, out_run_folder, design):
     positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
     if os.path.exists(positive_ctrl_ref):
         if design == "INCa_V1":
-            cmd.extend(["--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'"])
+            cmd.extend(["--pos-ctrl-names", ".*[Hh][Oo][Rr][Ii].*"])
         else:
-            cmd.extend(["--pos-ctrl-names", "'.*[Tt][Ee][Mm][Oo][Ii][Nn].*'"])
+            cmd.extend(["--pos-ctrl-names", ".*[Tt][Ee][Mm][Oo][Ii][Nn].*"])
         cmd.extend(["--pos-ctrl-expected", positive_ctrl_ref])
     return cmd
 
@@ -148,9 +148,9 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design):
     positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"], "pos_ctrl_expected.vcf")
     if os.path.exists(positive_ctrl_ref):
         if design == "INCa_V1":
-            cmd.extend(["--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'"])
+            cmd.extend(["--pos-ctrl-names", ".*[Hh][Oo][Rr][Ii].*"])
         else:
-            cmd.extend(["--pos-ctrl-names", "'.*[Tt][Ee][Mm][Oo][Ii][Nn].*'"])
+            cmd.extend(["--pos-ctrl-names", ".*[Tt][Ee][Mm][Oo][Ii][Nn].*"])
         cmd.extend(["--pos-ctrl-expected", positive_ctrl_ref])
     return cmd
 
