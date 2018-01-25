@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.0'
+__version__ = '2.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -77,7 +77,7 @@ def getWorkflows(protocol):
     """
     wf = list()
     if protocol["workflow"] == "Amplicon - DS":
-        wf = ["ADIVaR", "ADSA"]
+        wf = ["ADIVaR", "AmpliconDS"]
     return wf
 
 
@@ -92,7 +92,7 @@ def getRunCmd(workflow, in_spl_folder, out_run_folder):
     cmd = None
     if workflow == "ADIVaR":
         cmd = getADIVaRCmd(in_spl_folder, out_run_folder, protocol["design"])
-    elif workflow == "ADSA":
+    elif workflow == "AmpliconDS":
         cmd = getADSACmd(in_spl_folder, out_run_folder, protocol["design"])
     return cmd
 
