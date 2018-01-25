@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -115,10 +115,11 @@ def getADSACmd(in_spl_folder, out_run_folder, design):
     ]
     positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
     if os.path.exists(positive_ctrl_ref):
-        cmd.extend([
-            "--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'",
-            "--pos-ctrl-expected", os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
-        ])
+        if design == "INCa_V1":
+            cmd.extend(["--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'"])
+        else:
+            cmd.extend(["--pos-ctrl-names", "'.*[Tt][Ee][Mm][Oo][Ii][Nn].*'"])
+        cmd.extend(["--pos-ctrl-expected", positive_ctrl_ref])
     return cmd
 
 
@@ -127,7 +128,7 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design):
     @summary: Returns the command to launch the amplicon double strand workflow.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
     @param out_run_folder: [str] Path to the workflow output folder.
-    @param design: [str] Path to the folder containing the files describing the amplicons.
+    @param design: [str] The name of the folder containing the files describing the amplicons.
     @return: [list] The command.
     """
     ressources_folder = args.design_path_pattern.replace("WF_NAME", "AmpliconDSAnnot")
@@ -146,10 +147,11 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design):
     ]
     positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"], "pos_ctrl_expected.vcf")
     if os.path.exists(positive_ctrl_ref):
-        cmd.extend([
-            "--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'",
-            "--pos-ctrl-expected", positive_ctrl_ref,
-        ])
+        if design == "INCa_V1":
+            cmd.extend(["--pos-ctrl-names", "'.*[Hh][Oo][Rr][Ii].*'"])
+        else:
+            cmd.extend(["--pos-ctrl-names", "'.*[Tt][Ee][Mm][Oo][Ii][Nn].*'"])
+        cmd.extend(["--pos-ctrl-expected", positive_ctrl_ref])
     return cmd
 
 
