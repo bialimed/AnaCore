@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.1'
+__version__ = '2.2.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -62,10 +62,13 @@ def getProtocol(in_spl_folder):
     """
     protocol = {"workflow": None, "design": None}
     samplesheet = illumina.SampleSheetIO(os.path.join(in_spl_folder, "SampleSheet.csv"))
+    protocol["workflow"] = samplesheet.header["Workflow"]
     if samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
-        protocol["workflow"] = "Amplicon - DS"
         manifest_A = os.path.basename(samplesheet.manifests["A"])
         protocol["design"] = manifest_A.split("_A.txt")[0]
+    elif samplesheet.header["Workflow"] == "Enrichment":
+        manifest_A = os.path.basename(samplesheet.manifests["A"])
+        protocol["design"] = manifest_A.split(".txt")[0]
     return protocol
 
 
