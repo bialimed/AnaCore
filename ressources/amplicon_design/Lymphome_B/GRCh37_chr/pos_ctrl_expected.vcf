@@ -1,5 +1,6 @@
 ##fileformat=VCFv4.1
 ##fileDate=20180115
+##FORMAT=<ID=AF,Number=1,Type=Float,Description="Minor Allele Frequency">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Control
 chr1	117078855	.	A	-	.	PASS	.	AF	0.0490
 chr1	120458270	.	G	C	.	PASS	.	AF	0.0622
