@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.1'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -95,7 +95,7 @@ class ADSSampleSheetIO(SampleSheetIO):
     def _getSamplesFromData(self, data_section):
         samples = super()._getSamplesFromData(data_section)
         for spl_idx, spl in enumerate(samples):
-            spl["Sample_Basename"] = spl["Sample_Name"].replace("_", "-").replace(" ", "-").replace(".", "-")
+            spl["Sample_Basename"] = spl["Sample_Name"].replace("_", "-").replace(" ", "-").replace(".", "-").replace("+", "")
             spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
         return samples
 
