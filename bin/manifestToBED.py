@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -64,9 +64,9 @@ class Amplicon(object):
         interest_end = self.end - len(self.down_primer)
         if self.strand == "-":
             interest_end = self.end - len(self.up_primer)
-        return( interest_end )
+        return(interest_end)
 
-def revcom( seq ):
+def revcom(seq):
     """
     @summary: Returns the reverse complement the sequence.
     @param seq: [str] The sequence.
@@ -75,9 +75,9 @@ def revcom( seq ):
     complement_rules = {'A':'T','T':'A','G':'C','C':'G','U':'A','N':'N','W':'W','S':'S','M':'K','K':'M','R':'Y','Y':'R','B':'V','V':'B','D':'H','H':'D',
                         'a':'t','t':'a','g':'c','c':'g','u':'a','n':'n','w':'w','s':'s','m':'k','k':'m','r':'y','y':'r','b':'v','v':'b','d':'h','h':'d'}
 
-    return( "".join([complement_rules[base] for base in seq[::-1]]) )
+    return("".join([complement_rules[base] for base in seq[::-1]]))
 
-def getAmpliconsFromManifest( manifest_path ):
+def getAmpliconsFromManifest(manifest_path):
     """
     @summary: Returns the list of amplicons from a Illumina's manifest.
     @param manifest_path: [str] Path to the manifest.
@@ -96,11 +96,11 @@ def getAmpliconsFromManifest( manifest_path ):
                         section_probe = True
                         probes_header = [field.strip().lower().replace(" ", "_") for field in FH_manifest.readline().split("\t")]
                 elif section_probe:
-                    fields = { probes_header[idx]:field.strip() for idx, field in enumerate(line.split("\t"))}
-                    amplicons.append( fields )
+                    fields = {probes_header[idx]: field.strip() for idx, field in enumerate(line.split("\t"))}
+                    amplicons.append(fields)
     return amplicons
 
-def getAmplicons( reference_path, manifest_path ):
+def getAmplicons(reference_path, manifest_path):
     """
     @summary: Returns the list of amplicons from a Illumina's manifest.
     @param reference_path: [str] Path to the genome assembly where the amplicon have been defined.
@@ -110,7 +110,7 @@ def getAmplicons( reference_path, manifest_path ):
     complete_amplicons = list()
 
     # Get amplicons by chr
-    amplicons = getAmpliconsFromManifest( manifest_path )
+    amplicons = getAmpliconsFromManifest(manifest_path)
     amplicons_by_chr = dict()
     for ampli_idx, ampli in enumerate(amplicons):
         chr = ampli["chromosome"]
@@ -129,7 +129,7 @@ def getAmplicons( reference_path, manifest_path ):
         )
 
     # Find amplicons coord
-    FH_ref = SequenceFileReader.factory( reference_path )
+    FH_ref = SequenceFileReader.factory(reference_path)
     try:
         for record in FH_ref:
             record.id = "chr" + record.id ################################################### TODO: clean management for region_prefix
@@ -145,20 +145,20 @@ def getAmplicons( reference_path, manifest_path ):
                     upstream_matches = list()
                     up_pattern = re.compile(up_primer)
                     for curr_match in up_pattern.finditer(chr_str):
-                        upstream_matches.append({ "start":curr_match.start()+1, "end":curr_match.end() })
+                        upstream_matches.append({"start": curr_match.start()+1, "end": curr_match.end()})
                     downstream_matches = list()
                     down_pattern = re.compile(down_primer)
                     for curr_match in down_pattern.finditer(chr_str):
-                        downstream_matches.append({ "start":curr_match.start()+1, "end":curr_match.end() })
+                        downstream_matches.append({"start": curr_match.start()+1, "end": curr_match.end()})
                     if len(upstream_matches) == 0 or len(downstream_matches) == 0:
-                        raise Exception( "The primers '" + up_primer + "' and '" + down_primer + "' cannot be found in " + record.id )
+                        raise Exception("The primers '" + up_primer + "' and '" + down_primer + "' cannot be found in " + record.id)
                     # Check multiple target in chr
                     if len(upstream_matches) > 1:
-                        match_list = ", ".join( [record.id + ":" + curr_match["start"] + "-" + curr_match["end"] for curr_match in upstream_matches] )
-                        warnings.warn( "The primer '" + up_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")" )
+                        match_list = ", ".join(["{}:{}-{}".format(record.id, curr_match["start"], curr_match["end"]) for curr_match in upstream_matches])
+                        warnings.warn("The primer '" + up_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")")
                     if len(downstream_matches) > 1:
-                        match_list = ", ".join( [record.id + ":" + curr_match["start"] + "-" + curr_match["end"] for curr_match in downstream_matches] )
-                        warnings.warn( "The primer '" + down_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")" )
+                        match_list = ", ".join(["{}:{}-{}".format(record.id, curr_match["start"], curr_match["end"]) for curr_match in downstream_matches])
+                        warnings.warn("The primer '" + down_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")")
                     # Select smaller amplified fragment
                     prev_length = None
                     for curr_up in upstream_matches:
@@ -166,15 +166,16 @@ def getAmplicons( reference_path, manifest_path ):
                             curr_length = curr_down["start"] - curr_up["end"]
                             if curr_length >= 0:
                                 if prev_length is None or prev_length > curr_length:
+                                    prev_length = curr_length
                                     ampli.start = curr_up["start"]
                                     ampli.end = curr_down["end"]
-                amplicons_on_chr = sorted( amplicons_by_chr[record.id], key=lambda ampl: (ampl.start, ampl.end) )
-                complete_amplicons.extend( amplicons_on_chr )
+                amplicons_on_chr = sorted(amplicons_by_chr[record.id], key=lambda ampl: (ampl.start, ampl.end))
+                complete_amplicons.extend(amplicons_on_chr)
                 del(amplicons_by_chr[record.id])
     finally:
         FH_ref.close()
 
-    return( complete_amplicons )
+    return(complete_amplicons)
 
 
 ########################################################################
@@ -184,37 +185,37 @@ def getAmplicons( reference_path, manifest_path ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Converts an Illumina's amplicons manifest in BED format." )
-    parser.add_argument( '-p', '--without-primers', action='store_true', help='Start and end position include only interest area (primers are excluded).' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-m', '--input-manifest', required=True, help='Path to the definition of the amplicons (format: Illumina manifest).' )
-    group_input.add_argument( '-g', '--input-genome', required=True, help='Path to the genome assembly where the amplicon have been defined (format: fasta).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-BED', default="amplicons.bed", help='The amplicons description (format: BED). [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description="Converts an Illumina's amplicons manifest in BED format.")
+    parser.add_argument('-p', '--without-primers', action='store_true', help='Start and end position include only interest area (primers are excluded).')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-m', '--input-manifest', required=True, help='Path to the definition of the amplicons (format: Illumina manifest).')
+    group_input.add_argument('-g', '--input-genome', required=True, help='Path to the genome assembly where the amplicon have been defined (format: fasta).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-BED', default="amplicons.bed", help='The amplicons description (format: BED). [Default: %(default)s]')
     args = parser.parse_args()
 
-    amplicons = getAmplicons( args.input_genome, args.input_manifest )
+    amplicons = getAmplicons(args.input_genome, args.input_manifest)
     with open(args.output_BED, "w") as FH_out:
         if args.without_primers:
             for ampl in amplicons:
                 print(
                     ampl.reference,
-                    (ampl.getInterestStart() - 1), # In BED start is zero-based starting position
-                    ampl.getInterestEnd(), # In BED end is one-based starting position
+                    (ampl.getInterestStart() - 1),  # In BED start is zero-based starting position
+                    ampl.getInterestEnd(),  # In BED end is one-based starting position
                     ampl.name,
                     0,
                     ampl.strand,
-                    sep="\t", file=FH_out )
+                    sep="\t", file=FH_out)
         else:
             for ampl in amplicons:
                 print(
                     ampl.reference,
-                    (ampl.start - 1), # In BED start is zero-based starting position
-                    ampl.end, # In BED end is one-based starting position
+                    (ampl.start - 1),  # In BED start is zero-based starting position
+                    ampl.end,  # In BED end is one-based starting position
                     ampl.name,
                     0,
                     ampl.strand,
-                    (ampl.getInterestStart() - 1), # In BED start is zero-based starting position
-                    ampl.getInterestEnd(), # In BED end is one-based starting position
-                    sep="\t", file=FH_out )
+                    (ampl.getInterestStart() - 1),  # In BED start is zero-based starting position
+                    ampl.getInterestEnd(),  # In BED end is one-based starting position
+                    sep="\t", file=FH_out)
