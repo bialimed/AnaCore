@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.0'
+__version__ = '1.7.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -95,7 +95,7 @@ class ADSSampleSheetIO(SampleSheetIO):
     def _getSamplesFromData(self, data_section):
         samples = super()._getSamplesFromData(data_section)
         for spl_idx, spl in enumerate(samples):
-            spl["Sample_Basename"] = spl["Sample_Name"].replace("_", "-").replace(" ", "-").replace(".", "-").replace("+", "")
+            spl["Sample_Basename"] = getIlluminaName(spl["Sample_Name"])
             spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
         return samples
 
@@ -282,7 +282,7 @@ class CompletedJobInfo(object):
 
 
 def etreeToDict(node):
-    data = {"name": node.tag}
+    data = {"key": node.tag}
     # Attributes
     if len(node.attrib):
         data["attributes"] = node.attrib
@@ -296,3 +296,12 @@ def etreeToDict(node):
         data["val"] = node.text
     # Return
     return data
+
+
+def getIlluminaName(name):
+    """
+    @sumary: Returns sample name used by Illumina in filename.
+    @param name: [str] The name provided to Illumina process (for example in samplesheet).
+    @return: [str] The sample name used by Illumina as part of filename.
+    """
+    return name.replace("_", "-").replace(" ", "-").replace(".", "-")
