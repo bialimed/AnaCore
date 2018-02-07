@@ -279,11 +279,11 @@ if __name__ == "__main__":
                                         exec_cmd(cmd_copy_analysis)
                         # Log end
                         with open(completed_analyses_file, "w") as FH:
-                            FH.write(time.time())
+                            FH.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                         if send_mail:
                             mail(args.mail_smtp, args.mail_sender, args.mail_recipients, "end", in_run_folder)
                     except:
                         if send_mail:
-                            mail(args.mail_smtp, args.mail_sender, args.mail_recipients, "error", in_run_folder)
+                            mail(args.mail_smtp, args.mail_sender, args.mail_recipients, "fail", in_run_folder)
                         raise
             time.sleep(args.roll_time)
