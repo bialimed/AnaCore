@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.3.0'
+__version__ = '2.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -100,6 +100,25 @@ def getRunCmd(workflow, in_spl_folder, out_run_folder):
         cmd = getADIVaRCmd(in_spl_folder, out_run_folder, protocol["design"])
     elif workflow == "AmpliconDS":
         cmd = getADSACmd(in_spl_folder, out_run_folder, protocol["design"])
+    return cmd
+
+
+def getLoadCmd(raw_folder, out_by_wf):
+    """
+    @summary: Returns the command to load run and workflows data in laboratory database.
+    @param raw_folder: [str] Path to the run folder.
+    @param out_by_wf: [dict] The workflow output path by workflow name.
+    @return: [list] The command to load data.
+    """
+    cmd = [
+        "loadRunToLIS.py",
+        "--results-folder", "/Anapath/Illumina_Run_datas/Routine/database_files",  ################################
+        "--input-raw", raw_folder
+    ]
+    if len(out_by_wf) != 0:
+        cmd.append("--input-workflows")
+        for wf, wf_folder in out_by_wf.items():
+            cmd.append("{}:{}".format(wf, wf_folder))
     return cmd
 
 
@@ -232,6 +251,7 @@ if __name__ == "__main__":
                     try:
                         in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
                         protocol = getProtocol(in_basecalls_folder)
+                        out_folder_by_wf = dict()
                         if not os.path.exists(out_run_folder):
                             os.mkdir(out_run_folder)
                         # Log start
@@ -240,6 +260,7 @@ if __name__ == "__main__":
                         # Launch workflows
                         for curr_wf in getWorkflows(protocol):
                             out_wf_folder = os.path.join(out_run_folder, curr_wf)
+                            out_folder_by_wf[curr_wf] = out_wf_folder
                             if os.path.exists(out_wf_folder):
                                 warnings.warn('The workflow "{}" has already be processed for run "{}".'.format(curr_wf, in_run_folder))
                             else:
@@ -273,10 +294,17 @@ if __name__ == "__main__":
                                 if os.path.isdir(in_wf_folder):
                                     out_wf_folder = os.path.join(out_run_folder, analysis_basename)
                                     out_wf_folder += in_wf_folder.replace(in_wf_folder_prefix, "")  # Add workflow suffix (the index of the algnment folder)
+                                    if analysis_basename not in ["AmpliconDS"]: out_folder_by_wf[analysis_basename] = out_wf_folder
                                     log_file = os.path.join(out_wf_folder, "CompletedJobInfo.xml")
                                     if not os.path.exists(log_file):  # The results have not been copied in workflow folder
                                         cmd_copy_analysis = ["rsync", "--recursive", "--perms", "--times", in_wf_folder + os.sep, out_wf_folder]
                                         exec_cmd(cmd_copy_analysis)
+                        # Save in database
+                        out_run_storage = in_run_folder
+                        if args.storage_folder is not None:
+                            out_run_storage = os.path.join(args.storage_folder, filename)
+                        cmd_load = getLoadCmd(out_run_storage, out_folder_by_wf)
+                        exec_cmd(cmd_load)
                         # Log end
                         with open(completed_analyses_file, "w") as FH:
                             FH.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
