@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.4.0'
+__version__ = '2.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -47,6 +47,53 @@ spec.loader.exec_module(illumina)
 # FUNCTIONS
 #
 ########################################################################
+class Design:
+    """
+    @summary: Class to describe design and his resources.
+    """
+    def __init__(self, name, pos_ctrl_re=None, neg_ctrl_re=None, resources_folder=None):
+        self.name = name
+        self.pos_ctrl_re = pos_ctrl_re
+        self.neg_ctrl_re = neg_ctrl_re
+        self.resources_folder = resources_folder
+
+
+    def getAssemblyFolder(self, assembly):
+        """
+        @summary: Returns the resource folder for the design in the selected assembly.
+        @param assembly: [str] The selected assembly.
+        @return: [str] Path to the resource folder.
+        """
+        return os.path.join(self.resources_folder, assembly)
+
+
+    def getPosCtrlRef(self, assembly):
+        """
+        @summary: Returns the file containing the reference values for the positive control (for eaxmple the VCF containing the expected variants).
+        @param assembly: [str] The selected assembly.
+        @return: [str] Path to the reference values file.
+        """
+        return os.path.join(self.getAssemblyFolder(assembly), "pos_ctrl_expected.vcf")
+
+
+    def getSelectedRef(self, ref_type):
+        """
+        @summary: Returns the file containing the reference selected (for example the list of RNA where the variants are kept).
+        @param ref_type: [str] The type of reference.
+        @return: [str] Path to the file.
+        """
+        return os.path.join(self.resources_folder, "reference_" + ref_type + ".tsv")
+
+
+    def getFilters(self, wf_name):
+        """
+        @summary: Returns the file containing the filters to apply on the workflow results.
+        @param wf_name: [str] The workflow name.
+        @return: [str] Path to the filters description file.
+        """
+        return os.path.join(self.resources_folder, wf_name + "_filters.json")
+
+
 def exec_cmd(cmd):
     """
     @summary: Display and submit the command.
@@ -68,10 +115,16 @@ def getProtocol(in_spl_folder):
     protocol["workflow"] = samplesheet.header["Workflow"]
     if samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
         manifest_A = os.path.basename(samplesheet.manifests["A"])
-        protocol["design"] = manifest_A.split("_A.txt")[0]
+        design_name = manifest_A.split("_A.txt")[0]
+        pos_ctrl_re = ".*[Tt][Ee][Mm][Oo][Ii][Nn].*"
+        if design_name.startswith("INCa"):
+            pos_ctrl_re = ".*[Hh][Oo][Rr][Ii].*"
+        protocol["design"] = Design(design_name, pos_ctrl_re, ".*[Nn][Tt][Cc].*")
     elif samplesheet.header["Workflow"] == "Enrichment":
         manifest_A = os.path.basename(samplesheet.manifests["A"])
-        protocol["design"] = manifest_A.split(".txt")[0]
+        protocol["design"] = Design(
+            manifest_A.split(".txt")[0], None, ".*[Nn][Tt][Cc].*"
+        )
     return protocol
 
 
@@ -87,34 +140,42 @@ def getWorkflows(protocol):
     return wf
 
 
-def getRunCmd(workflow, in_spl_folder, out_run_folder):
+def getRunCmd(workflow, in_spl_folder, out_run_folder, reference):
     """
     @summary: Returns the command to launch the workflow.
     @param workflow: [str] The name of the workflow.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
     @param out_run_folder: [str] Path to the workflow output folder.
+    @param reference: [dict] Reference description: assembly and sequences.
     @return: [None/list] The command if the corresponding workflow exists and None otherwise.
     """
     cmd = None
     if workflow == "ADIVaR":
-        cmd = getADIVaRCmd(in_spl_folder, out_run_folder, protocol["design"])
+        cmd = getADIVaRCmd(in_spl_folder, out_run_folder, protocol["design"], reference)
     elif workflow == "AmpliconDS":
-        cmd = getADSACmd(in_spl_folder, out_run_folder, protocol["design"])
+        cmd = getADSACmd(in_spl_folder, out_run_folder, protocol["design"], reference)
     return cmd
 
 
-def getLoadCmd(raw_folder, out_by_wf):
+def getLoadCmd(design, raw_folder, out_by_wf):
     """
     @summary: Returns the command to load run and workflows data in laboratory database.
+    @param design: [Design] The object describing the design.
     @param raw_folder: [str] Path to the run folder.
     @param out_by_wf: [dict] The workflow output path by workflow name.
     @return: [list] The command to load data.
     """
     cmd = [
-        "loadRunToLIS.py",
+        "lisImportRun.py",
         "--results-folder", "/Anapath/Illumina_Run_datas/Routine/database_files",  ################################
         "--input-raw", raw_folder
     ]
+    # Control samples
+    if design.neg_ctrl_re is not None:
+        cmd.extend(["--negative-ctrl-regexp", design.neg_ctrl_re])
+    if design.pos_ctrl_re is not None:
+        cmd.extend(["--positive-ctrl-regexp", design.pos_ctrl_re])
+    # Workflows data
     if len(out_by_wf) != 0:
         cmd.append("--input-workflows")
         for wf, wf_folder in out_by_wf.items():
@@ -122,61 +183,61 @@ def getLoadCmd(raw_folder, out_by_wf):
     return cmd
 
 
-def getADSACmd(in_spl_folder, out_run_folder, design):
+def getADSACmd(in_spl_folder, out_run_folder, design, reference):
     """
     @summary: Returns the command to launch the variant annotation on MiSeq reporter outputs.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
-    @param design: [str] Path to the folder containing the files describing the amplicons.
+    @param design: [Design] The object describing the design.
+    @param reference: [dict] Reference description: assembly and sequences.
     @return: [list] The command.
     """
-    ressources_folder = args.design_path_pattern.replace("WF_NAME", "AmpliconDSAnnot")
     cmd = [
         args.workflow_path_pattern.replace("WF_NAME", "AmpliconDSAnnot"), "amplicondsannot",
-        "--RNA-selection", os.path.join(ressources_folder, design, "reference_RNA.tsv"),
-        "--assembly-version", genome["assembly"],
-        "--filters", os.path.join(ressources_folder, "ampliDS_filters_wfAmpliconDS.json"),
+        "--RNA-selection", design.getSelectedRef("RNA").replace("WF_NAME", "AmpliconDSAnnot"),
+        "--assembly-version", reference["assembly"],
+        "--filters", design.getFilters("ADSA").replace("WF_NAME", "AmpliconDSAnnot"),
         "--samplesheet", os.path.join(in_spl_folder, "SampleSheet.csv"),
         "--output-dir", out_run_folder
     ]
-    positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"] + "_chr", "pos_ctrl_expected.vcf")
+    positive_ctrl_ref = design.getPosCtrlRef(reference["assembly"] + "_chr").replace("WF_NAME", "AmpliconDSAnnot")
     if os.path.exists(positive_ctrl_ref):
-        if design == "INCa_V1":
-            cmd.extend(["--pos-ctrl-names", ".*[Hh][Oo][Rr][Ii].*"])
-        else:
-            cmd.extend(["--pos-ctrl-names", ".*[Tt][Ee][Mm][Oo][Ii][Nn].*"])
-        cmd.extend(["--pos-ctrl-expected", positive_ctrl_ref])
+        cmd.extend([
+            "--pos-ctrl-names", design.pos_ctrl_re,
+            "--pos-ctrl-expected", positive_ctrl_ref
+        ])
     return cmd
 
 
-def getADIVaRCmd(in_spl_folder, out_run_folder, design):
+def getADIVaRCmd(in_spl_folder, out_run_folder, design, reference):
     """
     @summary: Returns the command to launch the amplicon double strand workflow.
     @param in_spl_folder: [str] Path to the sample folder (containing fastq and the samplesheet).
     @param out_run_folder: [str] Path to the workflow output folder.
-    @param design: [str] The name of the folder containing the files describing the amplicons.
+    @param design: [Design] The object describing the design.
+    @param reference: [dict] Reference description: assembly and sequences.
     @return: [list] The command.
     """
-    ressources_folder = args.design_path_pattern.replace("WF_NAME", "AmpliconDSAnnot")
+    resources_folder = args.design_path_pattern.replace("WF_NAME", "ADIVaR")
+    assembly_folder = design.getAssemblyFolder(reference["assembly"]).replace("WF_NAME", "ADIVaR")
     cmd = [
         args.workflow_path_pattern.replace("WF_NAME", "ADIVaR"), "adivar",
-        "--R1-end-adapter", os.path.join(ressources_folder, "adapters", "Illumina_3prim_adapter.fasta"),
-        "--R2-end-adapter", os.path.join(ressources_folder, "adapters", "Illumina_5prim_adapter_rvc.fasta"),
-        "--libA", "folderA=" + os.path.join(ressources_folder, design, genome["assembly"], "libA"),
-        "--libB", "folderB=" + os.path.join(ressources_folder, design, genome["assembly"], "libB"),
-        "--RNA-selection", os.path.join(ressources_folder, design, "reference_RNA.tsv"),
-        "--assembly-version", genome["assembly"],
-        "--genome-seq", genome["sequences"],
-        "--filters", os.path.join(ressources_folder, "ampliDS_filters.json"),
+        "--R1-end-adapter", os.path.join(resources_folder, "adapters", "Illumina_3prim_adapter.fasta"),
+        "--R2-end-adapter", os.path.join(resources_folder, "adapters", "Illumina_5prim_adapter_rvc.fasta"),
+        "--libA", "folderA=" + os.path.join(assembly_folder, "libA"),
+        "--libB", "folderB=" + os.path.join(assembly_folder, "libB"),
+        "--RNA-selection", design.getSelectedRef("RNA").replace("WF_NAME", "ADIVaR"),
+        "--assembly-version", reference["assembly"],
+        "--genome-seq", reference["sequences"],
+        "--filters", design.getFilters("ADIVaR").replace("WF_NAME", "ADIVaR"),
         "--samplesheet", os.path.join(in_spl_folder, "SampleSheet.csv"),
         "--output-dir", out_run_folder
     ]
-    positive_ctrl_ref = os.path.join(ressources_folder, design, genome["assembly"], "pos_ctrl_expected.vcf")
+    positive_ctrl_ref = design.getPosCtrlRef(reference["assembly"]).replace("WF_NAME", "ADIVaR")
     if os.path.exists(positive_ctrl_ref):
-        if design == "INCa_V1":
-            cmd.extend(["--pos-ctrl-names", ".*[Hh][Oo][Rr][Ii].*"])
-        else:
-            cmd.extend(["--pos-ctrl-names", ".*[Tt][Ee][Mm][Oo][Ii][Nn].*"])
-        cmd.extend(["--pos-ctrl-expected", positive_ctrl_ref])
+        cmd.extend([
+            "--pos-ctrl-names", design.pos_ctrl_re,
+            "--pos-ctrl-expected", positive_ctrl_ref
+        ])
     return cmd
 
 
@@ -251,6 +312,7 @@ if __name__ == "__main__":
                     try:
                         in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
                         protocol = getProtocol(in_basecalls_folder)
+                        protocol["design"].resources_folder = os.path.join(args.design_path_pattern, protocol["design"].name)
                         out_folder_by_wf = dict()
                         if not os.path.exists(out_run_folder):
                             os.mkdir(out_run_folder)
@@ -265,7 +327,7 @@ if __name__ == "__main__":
                                 warnings.warn('The workflow "{}" has already be processed for run "{}".'.format(curr_wf, in_run_folder))
                             else:
                                 os.mkdir(out_wf_folder)
-                                cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder)
+                                cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder, genome)
                                 exec_cmd(cmd_analysis)
                         # Copy raw data if it not already exist
                         if args.storage_folder is not None:
@@ -303,7 +365,7 @@ if __name__ == "__main__":
                         out_run_storage = in_run_folder
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, filename)
-                        cmd_load = getLoadCmd(out_run_storage, out_folder_by_wf)
+                        cmd_load = getLoadCmd(protocol["design"], out_run_storage, out_folder_by_wf)
                         exec_cmd(cmd_load)
                         # Log end
                         with open(completed_analyses_file, "w") as FH:
