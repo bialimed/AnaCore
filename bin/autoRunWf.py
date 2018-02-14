@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.5.0'
+__version__ = '2.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -241,7 +241,49 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design, reference):
     return cmd
 
 
-def mail(smtp_adress, sender, recipients, status, run_folder):
+def getArchiveCmd(profiles_folder, run, workflows):
+    """
+    @summary: Returns the command to archivate run and workflows data.
+    @param profiles_folder: [str] Path to the folder containing profiles describing the data to archivate.
+    @param run: [str] Name of the run folder.
+    @param workflows: [list] The names of the workflows to archivate.
+    @return: [list] The command to archivate data.
+    """
+    cmd = [
+        "archive.py",
+        "--placeholders", "'@YEAR={}' '@RUN={}'".format("20" + run[0:2], run),
+        "--resources-profiles", os.path.join(profiles_folder, "Illumina", "*.yml")
+    ]
+    # Workflows data
+    if len(workflows) != 0:
+        for curr_wf in workflows:
+            wf_profiles_folder = os.path.join(profiles_folder, "workflows", curr_wf)
+            if os.path.exists(wf_profiles_folder):
+                cmd.append(os.path.join(wf_profiles_folder, "*.yml"))
+            else:
+                print("The data for the workflow {} of the run {} cannot be archivated.".format(curr_wf, run))
+    return cmd
+
+
+def sendMail(smtp_adress, sender, recipients, subject, content):
+    """
+    @summary: Send execution log mail.
+    @param smtp_adress: [str] The SMTP server used to send mail.
+    @param sender: [str] Mail of the sender (it may be a not  existing adrsesses).
+    @param recipients: [list] Mails of the recipients.
+    @param subject: [str] The mail subject.
+    @param content: [str] The mail content.
+    """
+    msg = MIMEText(content)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ", ".join(recipients)
+    smtp = smtplib.SMTP(smtp_adress)
+    smtp.send_message(msg)
+    smtp.quit()
+
+
+def sendStatusMail(smtp_adress, sender, recipients, status, run_folder):
     """
     @summary: Send execution log mail.
     @param smtp_adress: [str] The SMTP server used to send mail.
@@ -250,20 +292,14 @@ def mail(smtp_adress, sender, recipients, status, run_folder):
     @param status: [str] The status of the message: start or end or fail.
     @param run_folder: [str] Path to the run folder currently processed.
     """
-    msg = MIMEText(
-        "{}: The sequencer post-processing {} {}ed for {}.".format(
-            datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            ("has" if status == "fail" else "is"),
-            status.lower(),
-            run_folder
-        )
+    subject = "[NGS] {} sequencer post-processing".format(status.capitalize())
+    content = "{}: The sequencer post-processing {} {}ed for {}.".format(
+        datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        ("has" if status == "fail" else "is"),
+        status.lower(),
+        run_folder
     )
-    msg['Subject'] = "[NGS] {} sequencer post-processing".format(status.capitalize())
-    msg['From'] = sender
-    msg['To'] = ", ".join(recipients)
-    smtp = smtplib.SMTP(smtp_adress)
-    smtp.send_message(msg)
-    smtp.quit()
+    sendMail(smtp_adress, sender, recipients, subject, content)
 
 
 ########################################################################
@@ -275,6 +311,7 @@ if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description="This script uses an infinite loop to listen the Illumina's sequencer output folder and launch the appropriate workflow when a run is ended.")
     parser.add_argument('-r', '--roll-time', type=int, default=(60*20), help="The time between each sequencer output folder evaluation (in seconds). [Default: %(default)s]")
+    parser.add_argument('-p', '--archivage-profiles-folder', help='Path to the folder containing profiles describing the data to archivate.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-l', '--listened-folder', required=True, help="The sequencer output folder.")
@@ -302,10 +339,10 @@ if __name__ == "__main__":
 
     # Process
     while True:
-        for filename in os.listdir(args.listened_folder):
-            in_run_folder = os.path.join(args.listened_folder, filename)
+        for run_id in os.listdir(args.listened_folder):
+            in_run_folder = os.path.join(args.listened_folder, run_id)
             if os.path.isdir(in_run_folder):
-                out_run_folder = os.path.join(args.analysis_folder, filename)
+                out_run_folder = os.path.join(args.analysis_folder, run_id)
                 completed_illumina_file = os.path.join(in_run_folder, "CompletedJobInfo.xml")
                 completed_analyses_file = os.path.join(out_run_folder, "processCompleted.txt")
                 if os.path.exists(completed_illumina_file) and not os.path.exists(completed_analyses_file):  # The run is ended
@@ -318,7 +355,7 @@ if __name__ == "__main__":
                             os.mkdir(out_run_folder)
                         # Log start
                         if send_mail:
-                            mail(args.mail_smtp, args.mail_sender, args.mail_recipients, "start", in_run_folder)
+                            sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "start", in_run_folder)
                         # Launch workflows
                         for curr_wf in getWorkflows(protocol):
                             out_wf_folder = os.path.join(out_run_folder, curr_wf)
@@ -329,9 +366,9 @@ if __name__ == "__main__":
                                 os.mkdir(out_wf_folder)
                                 cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder, genome)
                                 exec_cmd(cmd_analysis)
-                        # Copy raw data if it not already exist
+                        # Copy raw data
                         if args.storage_folder is not None:
-                            out_run_storage = os.path.join(args.storage_folder, filename)
+                            out_run_storage = os.path.join(args.storage_folder, run_id)
                             if not os.path.exists(out_run_storage):  # The run folder has not been copied in storage folder
                                 cmd_copy_raw = ["rsync", "--recursive", "--perms", "--times", in_run_folder + os.sep, out_run_storage]
                                 exec_cmd(cmd_copy_raw)
@@ -342,7 +379,7 @@ if __name__ == "__main__":
                                     if os.path.isdir(curr_file):
                                         cmd_rm_analysis = ["rm", "-r", curr_file]
                                         exec_cmd(cmd_rm_analysis)
-                        # Copy Illumina's workflows if they not already exist
+                        # Copy Illumina's workflows
                         if protocol["workflow"] != "GenerateFASTQ":  # Illumina reporter has processed an analysis
                             # Get workflow name
                             analysis_basename = protocol["workflow"].replace(" ", "_")
@@ -364,16 +401,22 @@ if __name__ == "__main__":
                         # Save in database
                         out_run_storage = in_run_folder
                         if args.storage_folder is not None:
-                            out_run_storage = os.path.join(args.storage_folder, filename)
+                            out_run_storage = os.path.join(args.storage_folder, run_id)
                         cmd_load = getLoadCmd(protocol["design"], out_run_storage, out_folder_by_wf)
                         exec_cmd(cmd_load)
-                        # Log end
+                        # Log end process
                         with open(completed_analyses_file, "w") as FH:
                             FH.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                         if send_mail:
-                            mail(args.mail_smtp, args.mail_sender, args.mail_recipients, "end", in_run_folder)
+                            sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "end", in_run_folder)
+                        # Send to archive
+                        if args.archivage_profiles_folder is not None:
+                            cmd_archivage = getArchiveCmd(args.archivage_profiles_folder, run_id, list(out_folder_by_wf.keys()))
+                            exec_cmd(cmd_archivage)
+                            if send_mail:
+                                sendMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "[NGS] Sequencer data archivage", "The run {} has been archived.".format(in_run_folder))
                     except:
                         if send_mail:
-                            mail(args.mail_smtp, args.mail_sender, args.mail_recipients, "fail", in_run_folder)
+                            sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "fail", in_run_folder)
                         raise
             time.sleep(args.roll_time)
