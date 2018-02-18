@@ -19,15 +19,16 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.6.1'
+__version__ = '2.7.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
+import sys
 import time
 import glob
 import smtplib
-import warnings
+import logging
 import argparse
 import datetime
 import subprocess
@@ -94,14 +95,16 @@ class Design:
         return os.path.join(self.resources_folder, wf_name + "_filters.json")
 
 
-def exec_cmd(cmd, shell=False):
+def exec_cmd(cmd, log, shell=False):
     """
-    @summary: Display and submit the command.
+    @summary: Log and submit the command.
     @param cmd: [list] The command to execute.
+    @param log: [Logger] The logger of the script.
     @param shell: [boolean] If shell is True, the specified command will be executed through the shell.
     """
-    print(" ".join(cmd))
+    log.info("Start sub-command: " + " ".join(cmd))
     subprocess.check_call(cmd, stdout=subprocess.DEVNULL, shell=shell)
+    log.info("End sub-command")
 
 
 def getProtocol(in_spl_folder):
@@ -338,6 +341,12 @@ if __name__ == "__main__":
         if not(args.mail_recipients and args.mail_sender and args.mail_smtp):  # At least one mail parameter is not setted
             raise Exception("To send mail all the mail parameters must be set.")
 
+    # Logger
+    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    log = logging.getLogger("autoRunWf")
+    log.info("Command: " + " ".join(sys.argv))
+    log.info("Version: " + str(__version__))
+
     # Process
     while True:
         for run_id in os.listdir(args.listened_folder):
@@ -347,6 +356,9 @@ if __name__ == "__main__":
                 completed_illumina_file = os.path.join(in_run_folder, "CompletedJobInfo.xml")
                 completed_analyses_file = os.path.join(out_run_folder, "processCompleted.txt")
                 if os.path.exists(completed_illumina_file) and not os.path.exists(completed_analyses_file):  # The run is ended
+                    log.info("Start post-process on run {}.".format(run_id))
+                    if send_mail:
+                        sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "start", in_run_folder)
                     try:
                         in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
                         protocol = getProtocol(in_basecalls_folder)
@@ -354,32 +366,29 @@ if __name__ == "__main__":
                         out_folder_by_wf = dict()
                         if not os.path.exists(out_run_folder):
                             os.mkdir(out_run_folder)
-                        # Log start
-                        if send_mail:
-                            sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "start", in_run_folder)
                         # Launch workflows
                         for curr_wf in getWorkflows(protocol):
                             out_wf_folder = os.path.join(out_run_folder, curr_wf)
                             out_folder_by_wf[curr_wf] = out_wf_folder
                             if os.path.exists(out_wf_folder):
-                                warnings.warn('The workflow "{}" has already be processed for run "{}".'.format(curr_wf, in_run_folder))
+                                log.warning('The workflow "{}" has already be processed for run "{}".'.format(curr_wf, in_run_folder))
                             else:
                                 os.mkdir(out_wf_folder)
                                 cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder, genome)
-                                exec_cmd(cmd_analysis)
+                                exec_cmd(cmd_analysis, log)
                         # Copy raw data
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, run_id)
                             if not os.path.exists(out_run_storage):  # The run folder has not been copied in storage folder
                                 cmd_copy_raw = ["rsync", "--recursive", "--perms", "--times", in_run_folder + os.sep, out_run_storage]
-                                exec_cmd(cmd_copy_raw)
+                                exec_cmd(cmd_copy_raw, log)
                                 # Remove copy of the Illumina's workflows
                                 storage_basecalls_folder = os.path.join(out_run_storage, "Data", "Intensities", "BaseCalls")
                                 alignments_files = glob.glob(os.path.join(storage_basecalls_folder, "Alignment*"))
                                 for curr_file in alignments_files:
                                     if os.path.isdir(curr_file):
                                         cmd_rm_analysis = ["rm", "-r", curr_file]
-                                        exec_cmd(cmd_rm_analysis)
+                                        exec_cmd(cmd_rm_analysis, log)
                         # Copy Illumina's workflows
                         if protocol["workflow"] != "GenerateFASTQ":  # Illumina reporter has processed an analysis
                             # Get workflow name
@@ -398,13 +407,13 @@ if __name__ == "__main__":
                                     log_file = os.path.join(out_wf_folder, "CompletedJobInfo.xml")
                                     if not os.path.exists(log_file):  # The results have not been copied in workflow folder
                                         cmd_copy_analysis = ["rsync", "--recursive", "--perms", "--times", in_wf_folder + os.sep, out_wf_folder]
-                                        exec_cmd(cmd_copy_analysis)
+                                        exec_cmd(cmd_copy_analysis, log)
                         # Save in database
                         out_run_storage = in_run_folder
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, run_id)
                         cmd_load = getLoadCmd(protocol["design"], out_run_storage, out_folder_by_wf)
-                        exec_cmd(cmd_load)
+                        exec_cmd(cmd_load, log)
                         # Log end process
                         with open(completed_analyses_file, "w") as FH:
                             FH.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
@@ -413,11 +422,13 @@ if __name__ == "__main__":
                         # Send to archive
                         if args.archivage_profiles_folder is not None:
                             cmd_archivage = getArchiveCmd(args.archivage_profiles_folder, run_id, list(out_folder_by_wf.keys()))
-                            exec_cmd(cmd_archivage, True)
+                            exec_cmd(cmd_archivage, log, True)
                             if send_mail:
                                 sendMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "[NGS] Sequencer data archivage", "The run {} has been archived.".format(in_run_folder))
                     except:
+                        log.error("The post-process on run {} has failed.".format(run_id))
                         if send_mail:
                             sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "fail", in_run_folder)
                         raise
+                    log.info("End post-process on run {}.".format(run_id))
             time.sleep(args.roll_time)
