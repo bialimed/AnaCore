@@ -103,7 +103,10 @@ def exec_cmd(cmd, log, shell=False):
     @param shell: [boolean] If shell is True, the specified command will be executed through the shell.
     """
     log.info("Start sub-command: " + " ".join(cmd))
-    subprocess.check_call(cmd, stdout=subprocess.DEVNULL, shell=shell)
+    if shell:
+        subprocess.check_call(" ".join(cmd), stdout=subprocess.DEVNULL, shell=shell)
+    else:
+        subprocess.check_call(cmd, stdout=subprocess.DEVNULL)
     log.info("End sub-command")
 
 
@@ -344,6 +347,7 @@ if __name__ == "__main__":
     # Logger
     logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
     log = logging.getLogger("autoRunWf")
+    log.setLevel(logging.INFO)
     log.info("Command: " + " ".join(sys.argv))
     log.info("Version: " + str(__version__))
 
