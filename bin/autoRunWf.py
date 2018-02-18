@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.6.0'
+__version__ = '2.6.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -94,13 +94,14 @@ class Design:
         return os.path.join(self.resources_folder, wf_name + "_filters.json")
 
 
-def exec_cmd(cmd):
+def exec_cmd(cmd, shell=False):
     """
     @summary: Display and submit the command.
     @param cmd: [list] The command to execute.
+    @param shell: [boolean] If shell is True, the specified command will be executed through the shell.
     """
     print(" ".join(cmd))
-    subprocess.check_call(cmd, stdout=subprocess.DEVNULL)
+    subprocess.check_call(cmd, stdout=subprocess.DEVNULL, shell=shell)
 
 
 def getProtocol(in_spl_folder):
@@ -412,7 +413,7 @@ if __name__ == "__main__":
                         # Send to archive
                         if args.archivage_profiles_folder is not None:
                             cmd_archivage = getArchiveCmd(args.archivage_profiles_folder, run_id, list(out_folder_by_wf.keys()))
-                            exec_cmd(cmd_archivage)
+                            exec_cmd(cmd_archivage, True)
                             if send_mail:
                                 sendMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "[NGS] Sequencer data archivage", "The run {} has been archived.".format(in_run_folder))
                     except:
