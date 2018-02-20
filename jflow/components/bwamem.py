@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -70,7 +70,7 @@ class BWAmem (Component):
         self.add_input_file("reference_genome", "Which reference file should be used", default=reference_genome, required=True)
 
         # Output files
-        if self.names == None:
+        if len(self.names) == 0:
             self.add_output_file_list("aln_files", "The path to the alignment file (format: BAM).", pattern='{basename_woext}.bam', items=self.R1)
             self.add_output_file_list("stderr", "The path to the stderr file (format: txt).", pattern='{basename_woext}.stderr', items=self.R1)
         else:
