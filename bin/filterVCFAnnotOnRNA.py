@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -42,7 +42,7 @@ from VEPvcf import VEPVCFIO
 # FUNCTIONS
 #
 ########################################################################
-def getGeneByNM( gene_to_id_file, trim_version=False ):
+def getGeneByNM(gene_to_id_file, trim_version=False):
     """
     @summary: Returns gene name by RNA_id.
     @param gene_to_id_file: [str] Path to the file describing the link between genes and RNA_id (format: TSV). Each line has the following format: <GENE>\t<RNA_ID>.
@@ -59,7 +59,7 @@ def getGeneByNM( gene_to_id_file, trim_version=False ):
                 gene_by_NM[NM] = gene
     return gene_by_NM
 
-def filterRecordAnnot( record, kept_id, trim_version=False ):
+def filterRecordAnnot(record, kept_id, trim_version=False):
     """
     @summary: Removes annotations that does not come from a kept id.
     @param record: [VCFRecord] The annotated record.
@@ -69,10 +69,10 @@ def filterRecordAnnot( record, kept_id, trim_version=False ):
     removed_annot_idx = list()
     for annot_idx, annot in enumerate(record.info["CSQ"]):
         RNA_id = annot["Feature"]
-        if trim_version:
+        if RNA_id is not None and trim_version:
             RNA_id = RNA_id.split(".")[0]
         if RNA_id not in kept_id:
-            removed_annot_idx.append( annot_idx )
+            removed_annot_idx.append(annot_idx)
     for curr_idx in sorted(removed_annot_idx, reverse=True):
         del(record.info["CSQ"][curr_idx])
 
@@ -84,26 +84,26 @@ def filterRecordAnnot( record, kept_id, trim_version=False ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Removes annotations that does not come from a list of RNA. The RNA source of one annotation is retrieved from the field "Feature".' )
-    parser.add_argument( '-w', '--without-version', action='store_true', help=' With this option the version number of the NM is not used in filter.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-r', '--reference-RNA', required=True, help='The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.' )
-    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
+    parser = argparse.ArgumentParser(description='Removes annotations that does not come from a list of RNA. The RNA source of one annotation is retrieved from the field "Feature".')
+    parser.add_argument('-w', '--without-version', action='store_true', help=' With this option the version number of the NM is not used in filter.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-r', '--reference-RNA', required=True, help='The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.')
+    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
     args = parser.parse_args()
 
     # Get kept RNA_ID
-    kept_ID = getGeneByNM( args.reference_RNA, args.without_version )
+    kept_ID = getGeneByNM(args.reference_RNA, args.without_version)
 
     # Filter annotations
     with VEPVCFIO(args.input_variants) as FH_in:
         with VEPVCFIO(args.output_variants, "w") as FH_out:
             # Header
-            FH_out.copyHeader( FH_in )
+            FH_out.copyHeader(FH_in)
             FH_out._writeHeader()
             # Records
             for record in FH_in:
-                filterRecordAnnot( record, kept_ID, args.without_version )
-                FH_out.write( record )
+                filterRecordAnnot(record, kept_ID, args.without_version)
+                FH_out.write(record)
