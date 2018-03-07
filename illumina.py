@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.7.0'
+__version__ = '1.7.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -97,6 +97,7 @@ class ADSSampleSheetIO(SampleSheetIO):
         for spl_idx, spl in enumerate(samples):
             spl["Sample_Basename"] = getIlluminaName(spl["Sample_Name"])
             spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
+            spl["Library_Name"] = spl["Library_Basename"]
         return samples
 
 
@@ -152,6 +153,7 @@ class ADSSampleSheetIO(SampleSheetIO):
     def setSplFiles(self, tag, directory, end_pattern, subject="library"):
         """
         @summary: Adds the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.
+        @param tag: [str] The attribute used in self.sample to store the files pathes.
         @param directory: [str] The path to the directory where the files names are evaluated.
         @param end_pattern: [str] File pattern added at the end of each sample basename or library basename to select files.
         @param subject: [str] "library" or "sample" to select files corresponding to libraries or corresponding to samples.
@@ -304,4 +306,4 @@ def getIlluminaName(name):
     @param name: [str] The name provided to Illumina process (for example in samplesheet).
     @return: [str] The sample name used by Illumina as part of filename.
     """
-    return name.replace("_", "-").replace(" ", "-").replace(".", "-")
+    return name.replace("_", "-").replace(" ", "-").replace(".", "-").replace("+", "")
