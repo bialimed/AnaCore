@@ -435,4 +435,4 @@ if __name__ == "__main__":
                             sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "fail", in_run_folder)
                         raise
                     log.info("End post-process on run {}.".format(run_id))
-            time.sleep(args.roll_time)
+        time.sleep(args.roll_time)
