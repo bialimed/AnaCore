@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -43,7 +43,7 @@ from VEPvcf import VEPVCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getAlleleCounts( FH_vcf, record, allele_separator="," ):
+def getAlleleCounts(FH_vcf, record, allele_separator=","):
     """
     @summary: Returns the AD/DP for each allele for each sample.
     @param FH_vcf: [VCFIO] The VCF file object.
@@ -60,9 +60,9 @@ def getAlleleCounts( FH_vcf, record, allele_separator="," ):
             DP = record.getDP(curr_spl)
             alleles_count = list()
             for idx_allele, curr_AD in enumerate(AD):
-                alleles_count.append( str(curr_AD) + "/" + str(DP) )
-            count_by_spl.append( allele_separator.join(alleles_count) )
-    return( count_by_spl )
+                alleles_count.append("{}/{}".format(curr_AD, DP))
+            count_by_spl.append(allele_separator.join(alleles_count))
+    return count_by_spl
 
 
 ########################################################################
@@ -72,11 +72,11 @@ def getAlleleCounts( FH_vcf, record, allele_separator="," ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Converts VCF annotated with VEP in separated value format (CSV, TSV, ...). One line in output file represents an annotation.' )
-    parser.add_argument( '-s', '--separator', default='\t', help="Field separator in output file. [Default: tab]")
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the file containing variants annotated with VEP v88+ (format: VCF).' )
+    parser = argparse.ArgumentParser(description='Converts VCF annotated with VEP in separated value format (CSV, TSV, ...). One line in output file represents an annotation.')
+    parser.add_argument('-s', '--separator', default='\t', help="Field separator in output file. [Default: tab]")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file containing variants annotated with VEP v88+ (format: VCF).')
     args = parser.parse_args()
 
     # Process
@@ -89,32 +89,45 @@ if __name__ == "__main__":
             "Variant_quality",
             "Filters",
             "Alt_alleles_frequencies",
-            args.separator.join( FH_vcf.samples ),
-            args.separator.join( FH_vcf.CSQ_titles ),
+            args.separator.join(FH_vcf.samples),
+            args.separator.join(FH_vcf.CSQ_titles),
             sep=args.separator
         )
         for record in FH_vcf:
-            alt = ",".join(record.alt)
-            qual = "." if record.qual is None else record.qual
-            filters = "." if record.filter is None else ",".join(record.filter)
-            alt_AF = ",".join([str(round(AF, 5)) for AF in record.getPopAF()])
-            spl_counts = args.separator.join( getAlleleCounts(FH_vcf, record) )
-            for idx_csq, csq in enumerate(record.info["CSQ"]):
-                csq_values = list()
-                for title in FH_vcf.CSQ_titles:
-                    if title not in csq or csq[title] is None:
-                        csq_values.append("")
-                    else:
-                        csq_values.append( str(csq[title]) )
+            record_fields = [
+                record.chrom,
+                str(record.pos),
+                record.ref,
+                ",".join(record.alt),  # Alternatives alleles
+                ("." if record.qual is None else str(record.qual)),  # Quality
+                ("." if record.filter is None else ",".join(record.filter)),  # Filters
+                ",".join([str(round(AF, 5)) for AF in record.getPopAF()]),  # Alternatives AF
+            ]
+            record_fields.extend(
+                getAlleleCounts(FH_vcf, record)  # Samples AF/DP
+            )
+            if len(record.info["CSQ"]) == 0:  # Record without consequence
                 print(
-                    (record.chrom if idx_csq == 0 else ""),
-                    (record.pos if idx_csq == 0 else ""),
-                    (record.ref if idx_csq == 0 else ""),
-                    (alt if idx_csq == 0 else ""),
-                    (qual if idx_csq == 0 else ""),
-                    (filters if idx_csq == 0 else ""),
-                    (alt_AF if idx_csq == 0 else ""),
-                    (spl_counts if idx_csq == 0 else args.separator*(len(FH_vcf.samples) - 1)),
-                    args.separator.join( csq_values ),
+                    args.separator.join(record_fields),
+                    args.separator.join(["" for col in FH_vcf.CSQ_titles]),
                     sep=args.separator
                 )
+            else:  # Record with at least one consequence
+                for idx_csq, csq in enumerate(record.info["CSQ"]):  # For each consequence
+                    # Pre-process record display
+                    start_fields = ["" for col in record_fields]
+                    if idx_csq == 0:
+                        start_fields = record_fields
+                    # Pre-process consequence display
+                    csq_values = list()
+                    for title in FH_vcf.CSQ_titles:
+                        if title not in csq or csq[title] is None:
+                            csq_values.append("")
+                        else:
+                            csq_values.append(str(csq[title]))
+                    # Display
+                    print(
+                        args.separator.join(start_fields),
+                        args.separator.join(csq_values),
+                        sep=args.separator
+                    )
