@@ -18,11 +18,11 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
-from region import Region
+from region import Region, RegionList
 from abstractFile import AbstractFile
 
 
@@ -54,7 +54,7 @@ class BEDRecord(Region):
             object.__setattr__(self, attr_name, attr_value)
 
 class BEDIO(AbstractFile):
-    def __init__( self, filepath, mode="r", write_nb_col=3 ):
+    def __init__(self, filepath, mode="r", write_nb_col=3):
         AbstractFile.__init__(self, filepath, mode)
         self._write_nb_col = write_nb_col
 
@@ -106,8 +106,11 @@ class BEDIO(AbstractFile):
                     if record_idx >= 10:
                         break
                     if record.strand is not None and record.strand not in ["+", "-", "."]:
-                        raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".\n" +
-                               "Line content : " + self.current_line )
+                        raise IOError(
+                            "The line {} in \"{}\" cannot be parsed by {}.\nLine content: {}".format(
+                                self.current_line_nb, self.filepath, self.__class__.__name__, self.current_line
+                            )
+                        )
                     #~ if record.itemRgb is not None and len(record.itemRgb.split(",")) != 3:
                         #~ raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".\n" +
                                #~ "Line content : " + self.current_line )
@@ -123,20 +126,20 @@ class BEDIO(AbstractFile):
         @return: [BEDrecord] The record.
         """
         fields = [elt.strip() for elt in self.current_line.split('\t')]
-        fields[1] = int(fields[1]) + 1 # Start in BED is 0-based
+        fields[1] = int(fields[1]) + 1  # Start in BED is 0-based
         fields[2] = int(fields[2])
         if len(fields) >= 5:
-            fields[4] = None if fields[4] == "." else int(fields[4]) # A score between 0 and 1000. If the track line useScore attribute is set to 1 for this annotation data set, the score value will determine the level of gray in which this feature is displayed (higher numbers = darker gray).
+            fields[4] = None if fields[4] == "." else int(fields[4])  # A score between 0 and 1000. If the track line useScore attribute is set to 1 for this annotation data set, the score value will determine the level of gray in which this feature is displayed (higher numbers = darker gray).
             if len(fields) >= 7:
-                fields[6] = int(fields[6]) + 1 # The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.
+                fields[6] = int(fields[6]) + 1  # The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.
                 if len(fields) >= 8:
-                    fields[7] = int(fields[7]) # The ending position at which the feature is drawn thickly (for example the stop codon in gene displays).
+                    fields[7] = int(fields[7])  # The ending position at which the feature is drawn thickly (for example the stop codon in gene displays).
                     if len(fields) >= 10:
-                        fields[9] = int(fields[9]) # The number of blocks (exons) in the BED line.
+                        fields[9] = int(fields[9])  # The number of blocks (exons) in the BED line.
                         if len(fields) >= 11:
-                            fields[10] = [int(block) for block in fields[10].split(",")] # A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.
+                            fields[10] = [int(block) for block in fields[10].split(",")]  # A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.
                             if len(fields) >= 12:
-                                fields[11] = [int(block) for block in fields[11].split(",")] # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
+                                fields[11] = [int(block) for block in fields[11].split(",")]  # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
         return BEDRecord(*fields)
 
     def write(self, bed_record):
@@ -144,5 +147,32 @@ class BEDIO(AbstractFile):
         @summary: Writes record line in file.
         @param bed_record: [BEDRecord] The record.
         """
-        self.file_handle.write( self.BEDRecordToBEDLine(bed_record) + "\n" )
+        self.file_handle.write(self.BEDRecordToBEDLine(bed_record) + "\n")
         self.current_line_nb += 1
+
+
+def getAreas(in_bed):
+    """
+    @summary: Returns the list of areas from a BED file.
+    @param input_areas: [str] The path to the areas description (format: BED).
+    @returns: [RegionList] The list of areas.
+    """
+    areas = RegionList()
+    with BEDIO(in_bed) as FH_panel:
+        areas = RegionList(FH_panel.read())
+    return areas
+
+
+def getAreasByChr(in_bed):
+    """
+    @summary: Returns from a BED file the list of areas by chromosome.
+    @param input_areas: [str] The path to the areas description (format: BED).
+    @returns: [dict] The list of areas by chromosome (each list is an instance of Regionlist).
+    """
+    areas_by_chr = dict()
+    for curr_area in getAreas(in_bed):
+        chrom = curr_area.reference.name
+        if chrom not in areas_by_chr:
+            areas_by_chr[chrom] = RegionList()
+        areas_by_chr[chrom].append(curr_area)
+    return areas_by_chr
