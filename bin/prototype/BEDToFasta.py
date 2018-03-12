@@ -33,8 +33,7 @@ sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from bed import BEDIO
-from region import RegionList
+from bed import getAreasByChr
 from sequenceIO import Sequence, FastaIO
 
 
@@ -55,30 +54,6 @@ def revcom( seq ):
 
     return( "".join([complement_rules[base] for base in seq[::-1]]) )
 
-def getAreas( input_areas ):
-    """
-    @summary: Returns the list of areas from a BED file.
-    @param input_areas: [str] The path to the areas description (format: BED).
-    @returns: [RegionList] The list of areas.
-    """
-    areas = RegionList()
-    with BEDIO(input_areas) as FH_panel:
-        areas = RegionList(FH_panel.read())
-    return( areas )
-
-def getAreasByChr( input_areas ):
-    """
-    @summary: Returns from a BED file the list of areas by chromosome.
-    @param input_areas: [str] The path to the areas description (format: BED).
-    @returns: [dict] The list of areas by chromosome (each list is an instance of Regionlist).
-    """
-    areas_by_chr = dict()
-    for curr_area in getAreas(input_areas):
-        chrom = curr_area.reference.name
-        if chrom not in areas_by_chr:
-            areas_by_chr[chrom] = RegionList()
-        areas_by_chr[chrom].append( curr_area )
-    return( areas_by_chr )
 
 
 ########################################################################

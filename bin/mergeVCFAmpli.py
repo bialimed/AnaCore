@@ -34,8 +34,8 @@ sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from bed import BEDIO
-from region import Region, RegionList
+from bed import getAreasByChr
+from region import Region
 from vcf import VCFIO, getAlleleRecord
 
 
@@ -308,31 +308,6 @@ def getAlnAndQual(aln_file, chrom, inspect_start, inspect_end, selected_RG, max_
                 quals[read_id][pair_id].append(None)
     return reads, quals
 
-def getAreas(input_areas):
-    """
-    @summary: Returns the list of areas from a BED file.
-    @param input_areas: [str] The path to the areas description (format: BED).
-    @returns: [RegionList] The list of areas.
-    """
-    areas = RegionList()
-    with BEDIO(input_areas) as FH_panel:
-        areas = RegionList(FH_panel.read())
-    return areas
-
-def getAreasByChr(input_areas):
-    """
-    @summary: Returns from a BED file the list of areas by chromosome.
-    @param input_areas: [str] The path to the areas description (format: BED).
-    @returns: [dict] The list of areas by chromosome (each list is an instance of Regionlist).
-    """
-    areas_by_chr = dict()
-    for curr_area in getAreas(input_areas):
-        chrom = curr_area.reference.name
-        if chrom not in areas_by_chr:
-            areas_by_chr[chrom] = RegionList()
-        areas_by_chr[chrom].append(curr_area)
-    return areas_by_chr
-
 def getRGIdByRGTag(in_aln, tag, selected_value):
     """
     @summary: Returns the IDs of RG with a tag value in selected values.
@@ -419,6 +394,7 @@ def getSimplePairConsensus(seq, qual):
     else:  # Only R2 overlaps inspected region
         consensus = seq["R2"]
     return consensus
+
 
 
 ########################################################################
