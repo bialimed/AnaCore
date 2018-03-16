@@ -18,12 +18,13 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.7.1'
+__version__ = '1.8.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 
 import os
+import re
 import glob
 import datetime
 import xml.etree.ElementTree as ET
@@ -307,3 +308,20 @@ def getIlluminaName(name):
     @return: [str] The sample name used by Illumina as part of filename.
     """
     return name.replace("_", "-").replace(" ", "-").replace(".", "-").replace("+", "")
+
+
+def getLibNameFromReadsPath(seq_path):
+    """
+    @sumary: Returns library name from the path of the sequences file.
+    @param seq_path: [str] The path of the sequences file.
+    @return: [str] The library name.
+    """
+    library_name, extensions = os.path.basename(seq_path).split(".", 1)
+    for curr_ext in extensions.split("."):
+        if curr_ext not in ["fq", "fastq", "fasta", "fa", "gz", "bz", "bz2", "lz", "zip"]:
+            raise Exception('The file "{}" cannot be processed by getLibNameFromReadsPath because the extension "{}" is not managed.'.format(seq_path, curr_ext))
+    if re.search('_[rR][1-2]$', library_name):
+        library_name = library_name[:-3]
+    elif re.search('_[rR][1-2]_\d\d\d$', library_name):
+        library_name = library_name[:-7]
+    return library_name
