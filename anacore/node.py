@@ -22,7 +22,6 @@ __version__ = '1.0.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
-
 import json
 
 

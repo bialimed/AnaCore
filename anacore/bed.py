@@ -22,8 +22,8 @@ __version__ = '1.2.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
-from region import Region, RegionList
-from abstractFile import AbstractFile
+from anacore.region import Region, RegionList
+from anacore.abstractFile import AbstractFile
 
 
 class BEDRecord(Region):
