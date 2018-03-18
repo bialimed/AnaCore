@@ -22,8 +22,7 @@ __version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-
-from abstractFile import isEmpty, AbstractFile
+from anacore.abstractFile import isEmpty, AbstractFile
 
 
 class SVIO(AbstractFile):

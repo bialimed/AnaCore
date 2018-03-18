@@ -26,7 +26,7 @@ __status__ = 'prod'
 import re
 import warnings
 from copy import deepcopy
-from abstractFile import AbstractFile
+from anacore.abstractFile import AbstractFile
 
 
 

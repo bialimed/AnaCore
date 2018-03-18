@@ -18,11 +18,12 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
-from abstractFile import isGzip
+import gzip
+from anacore.abstractFile import isGzip
 
 
 class MsingsSample:

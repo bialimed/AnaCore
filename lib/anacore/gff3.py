@@ -23,7 +23,7 @@ __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import re
-from abstractFile import AbstractFile
+from anacore.abstractFile import AbstractFile
 
 
 class GFF3Record:

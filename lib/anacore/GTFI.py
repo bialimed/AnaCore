@@ -23,7 +23,7 @@ __status__ = 'prod'
 
 
 import re
-from bioStructures import *
+from anacore.bioStructures import *
 
 class GTFI(object):
     def __init__( self, filepath ):

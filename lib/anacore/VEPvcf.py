@@ -24,7 +24,7 @@ __status__ = 'prod'
 
 import re
 from copy import deepcopy
-from vcf import *
+from anacore.vcf import VCFIO
 
 
 

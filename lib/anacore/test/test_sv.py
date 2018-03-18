@@ -32,12 +32,10 @@ import unittest
 from copy import deepcopy
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-LIB_DIR = os.path.abspath(os.path.dirname(CURRENT_DIR))
+LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from sv import SVIO, HashedSVIO
+from anacore.sv import SVIO, HashedSVIO
 
 
 ########################################################################

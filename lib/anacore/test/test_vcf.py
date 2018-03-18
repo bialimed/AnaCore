@@ -30,12 +30,10 @@ import tempfile
 import unittest
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-LIB_DIR = os.path.abspath(os.path.dirname(CURRENT_DIR))
+LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFRecord, VCFIO
+from anacore.vcf import VCFRecord, VCFIO
 
 
 ########################################################################
@@ -49,7 +47,7 @@ class TestVCFIO(unittest.TestCase):
         unique_id = str(uuid.uuid1())
 
         # Temporary files
-        self.tmp_variants = os.path.join( tmp_folder, unique_id + ".vcf")
+        self.tmp_variants = os.path.join(tmp_folder, unique_id + ".vcf")
 
         # Create VCF
         spec_example = """##fileformat=VCFv4.2
@@ -77,22 +75,22 @@ class TestVCFIO(unittest.TestCase):
 20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:7:56,60	0|0:48:4:51,51	0/0:61:2
 20	1234567	microsat1	GTC	G,GTCT	50	PASS	NS=3;DP=9;AA=G	GT:GQ:DP	0/1:35:4	0/2:17:2	1/1:40:3"""
         with open(self.tmp_variants, "w") as FH_variants:
-            FH_variants.write( spec_example )
+            FH_variants.write(spec_example)
 
     def testIter(self):
         with VCFIO(self.tmp_variants) as FH_vcf:
             # Header
-            self.assertEqual( FH_vcf.samples, ["NA00001", "NA00002", "NA00003"] )
-            self.assertEqual( sorted(list(FH_vcf.format.keys())), sorted(["GT", "GQ", "DP", "HQ"]) )
-            self.assertEqual( sorted(list(FH_vcf.info.keys())), sorted(["NS", "DP", "AF", "AA", "DB", "H2"]) )
+            self.assertEqual(FH_vcf.samples, ["NA00001", "NA00002", "NA00003"])
+            self.assertEqual(sorted(list(FH_vcf.format.keys())), sorted(["GT", "GQ", "DP", "HQ"]))
+            self.assertEqual(sorted(list(FH_vcf.info.keys())), sorted(["NS", "DP", "AF", "AA", "DB", "H2"]))
             # Records
             expected_records = ["20_14370_G_A", "20_17330_T_A", "20_1110696_A_G,T", "20_1230237_T_.", "20_1234567_GTC_G,GTCT"]
             readed_records = list()
             for variant in FH_vcf:
                 readed_records.append(
                     "_".join([variant.chrom, str(variant.pos), variant.ref, ",".join(variant.alt)])
-                )
-            self.assertEqual( expected_records, readed_records )
+               )
+            self.assertEqual(expected_records, readed_records)
 
     def tearDown(self):
         # Clean temporary files
@@ -107,7 +105,7 @@ class TestVCFRecord(unittest.TestCase):
         unique_id = str(uuid.uuid1())
 
         # Temporary files
-        self.tmp_variants = os.path.join( tmp_folder, unique_id + ".vcf")
+        self.tmp_variants = os.path.join(tmp_folder, unique_id + ".vcf")
 
         # AD, AF and DP evaluation
         self.freq_data = dict()
@@ -221,34 +219,34 @@ class TestVCFRecord(unittest.TestCase):
 11	3	two_spl_rAD_aAF_6	A	T,G	29	PASS	expModel=model_5	AF:DP	0.96,0.04,0.1:50	0.84,0.16,0.02:50"""
         self.freq_expected = {
             "model_0": {
-                "AF": {"pop":[0.1]},
-                "AD": {"pop":[10]},
-                "DP": {"pop":100}
+                "AF": {"pop": [0.1]},
+                "AD": {"pop": [10]},
+                "DP": {"pop": 100}
             },
             "model_1": {
-                "AF": {"pop":[0.1, 0.05]},
-                "AD": {"pop":[10, 5]},
-                "DP": {"pop":100}
+                "AF": {"pop": [0.1, 0.05]},
+                "AD": {"pop": [10, 5]},
+                "DP": {"pop": 100}
             },
             "model_2": {
-                "AF": {"splA":[0.1], "pop":[0.1]},
-                "AD": {"splA":[10], "pop":[10]},
-                "DP": {"splA":100, "pop":100}
+                "AF": {"splA": [0.1], "pop": [0.1]},
+                "AD": {"splA": [10], "pop": [10]},
+                "DP": {"splA": 100, "pop": 100}
             },
             "model_3": {
-                "AF": {"splA":[0.1, 0.05], "pop":[0.1, 0.05]},
-                "AD": {"splA":[10, 5], "pop":[10, 5]},
-                "DP": {"splA":100, "pop":100}
+                "AF": {"splA": [0.1, 0.05], "pop": [0.1, 0.05]},
+                "AD": {"splA": [10, 5], "pop": [10, 5]},
+                "DP": {"splA": 100, "pop": 100}
             },
             "model_4": {
-                "AF": {"splA":[0.04], "splB":[0.16], "pop":[0.1]},
-                "AD": {"splA":[2], "splB":[8], "pop":[10]},
-                "DP": {"splA":50, "splB":50, "pop":100}
+                "AF": {"splA": [0.04], "splB": [0.16], "pop": [0.1]},
+                "AD": {"splA": [2], "splB": [8], "pop": [10]},
+                "DP": {"splA": 50, "splB": 50, "pop": 100}
             },
             "model_5": {
-                "AF": {"splA":[0.04, 0.1], "splB":[0.16, 0.02], "pop":[0.1, 0.06]},
-                "AD": {"splA":[2, 5], "splB":[8, 1], "pop":[10, 6]},
-                "DP": {"splA":50, "splB":50, "pop":100}
+                "AF": {"splA": [0.04, 0.1], "splB": [0.16, 0.02], "pop": [0.1, 0.06]},
+                "AD": {"splA": [2, 5], "splB": [8, 1], "pop": [10, 6]},
+                "DP": {"splA": 50, "splB": 50, "pop": 100}
             }
         }
 
@@ -264,7 +262,7 @@ class TestVCFRecord(unittest.TestCase):
                 # Write test data
                 content = self.freq_data[curr_dataset]
                 with open(self.tmp_variants, "w") as FH_variants:
-                    FH_variants.write( content )
+                    FH_variants.write(content)
                 # Parse
                 expected_records = list()
                 observed_records = list()
@@ -274,12 +272,12 @@ class TestVCFRecord(unittest.TestCase):
                             try:
                                 for idx_spl, curr_spl in enumerate(FH_vcf.samples):
                                     expected_AF = self.freq_expected[variant.info["expModel"]]["AF"][curr_spl]
-                                    expected_records.append( "{} {}".format(variant.id, expected_AF) )
-                                    observed_records.append( "{} {}".format(variant.id, variant.getAF(curr_spl)) )
-                            except:
+                                    expected_records.append("{} {}".format(variant.id, expected_AF))
+                                    observed_records.append("{} {}".format(variant.id, variant.getAF(curr_spl)))
+                            except Exception:
                                 raise Exception('Error in TestVCFRecord.testGetAF() for variant "' + variant.id + '".')
                 # Assert
-                self.assertEqual( expected_records, observed_records )
+                self.assertEqual(expected_records, observed_records)
 
     def testGetAD(self):
         for curr_dataset in sorted(self.freq_data):
@@ -287,7 +285,7 @@ class TestVCFRecord(unittest.TestCase):
                 # Write test data
                 content = self.freq_data[curr_dataset]
                 with open(self.tmp_variants, "w") as FH_variants:
-                    FH_variants.write( content )
+                    FH_variants.write(content)
                 # Parse
                 expected_records = list()
                 observed_records = list()
@@ -297,12 +295,12 @@ class TestVCFRecord(unittest.TestCase):
                             try:
                                 for idx_spl, curr_spl in enumerate(FH_vcf.samples):
                                     expected_AD = self.freq_expected[variant.info["expModel"]]["AD"][curr_spl]
-                                    expected_records.append( "{} {}".format(variant.id, expected_AD) )
-                                    observed_records.append( "{} {}".format(variant.id, variant.getAD(curr_spl)) )
-                            except:
+                                    expected_records.append("{} {}".format(variant.id, expected_AD))
+                                    observed_records.append("{} {}".format(variant.id, variant.getAD(curr_spl)))
+                            except Exception:
                                 raise Exception('Error in TestVCFRecord.testGetAD() for variant "' + variant.id + '".')
                 # Assert
-                self.assertEqual( expected_records, observed_records )
+                self.assertEqual(expected_records, observed_records)
 
     def testGetDP(self):
         for curr_dataset in sorted(self.freq_data):
@@ -310,7 +308,7 @@ class TestVCFRecord(unittest.TestCase):
                 # Write test data
                 content = self.freq_data[curr_dataset]
                 with open(self.tmp_variants, "w") as FH_variants:
-                    FH_variants.write( content )
+                    FH_variants.write(content)
                 # Parse
                 expected_records = list()
                 observed_records = list()
@@ -320,19 +318,19 @@ class TestVCFRecord(unittest.TestCase):
                             try:
                                 for curr_spl in FH_vcf.samples:
                                     expected_DP = self.freq_expected[variant.info["expModel"]]["DP"][curr_spl]
-                                    expected_records.append( "{} {}".format(variant.id, expected_DP) )
-                                    observed_records.append( "{} {}".format(variant.id, variant.getDP(curr_spl)) )
-                            except:
+                                    expected_records.append("{} {}".format(variant.id, expected_DP))
+                                    observed_records.append("{} {}".format(variant.id, variant.getDP(curr_spl)))
+                            except Exception:
                                 raise Exception('Error in TestVCFRecord.testGetDP() for variant "' + variant.id + '".')
                 # Assert
-                self.assertEqual( expected_records, observed_records )
+                self.assertEqual(expected_records, observed_records)
 
     def testGetPopAD(self):
         for curr_dataset in sorted(self.freq_data):
             # Write test data
             content = self.freq_data[curr_dataset]
             with open(self.tmp_variants, "w") as FH_variants:
-                FH_variants.write( content )
+                FH_variants.write(content)
             # Parse
             expected_records = list()
             observed_records = list()
@@ -340,19 +338,19 @@ class TestVCFRecord(unittest.TestCase):
                 for variant in FH_vcf:
                     try:
                         expected_AD = self.freq_expected[variant.info["expModel"]]["AD"]["pop"]
-                        expected_records.append( "{} {}".format(variant.id, expected_AD) )
-                        observed_records.append( "{} {}".format(variant.id, variant.getPopAD()) )
-                    except:
+                        expected_records.append("{} {}".format(variant.id, expected_AD))
+                        observed_records.append("{} {}".format(variant.id, variant.getPopAD()))
+                    except Exception:
                         raise Exception('Error in TestVCFRecord.testGetPopAD() for variant "' + variant.id + '".')
             # Assert
-            self.assertEqual( expected_records, observed_records )
+            self.assertEqual(expected_records, observed_records)
 
     def testGetPopAF(self):
         for curr_dataset in sorted(self.freq_data):
             # Write test data
             content = self.freq_data[curr_dataset]
             with open(self.tmp_variants, "w") as FH_variants:
-                FH_variants.write( content )
+                FH_variants.write(content)
             # Parse
             expected_records = list()
             observed_records = list()
@@ -360,19 +358,19 @@ class TestVCFRecord(unittest.TestCase):
                 for variant in FH_vcf:
                     try:
                         expected_AF = self.freq_expected[variant.info["expModel"]]["AF"]["pop"]
-                        expected_records.append( "{} {}".format(variant.id, expected_AF) )
-                        observed_records.append( "{} {}".format(variant.id, variant.getPopAF()) )
-                    except:
+                        expected_records.append("{} {}".format(variant.id, expected_AF))
+                        observed_records.append("{} {}".format(variant.id, variant.getPopAF()))
+                    except Exception:
                         raise Exception('Error in TestVCFRecord.testGetPopAF() for variant "' + variant.id + '".')
             # Assert
-            self.assertEqual( expected_records, observed_records )
+            self.assertEqual(expected_records, observed_records)
 
     def testGetPopDP(self):
         for curr_dataset in sorted(self.freq_data):
             # Write test data
             content = self.freq_data[curr_dataset]
             with open(self.tmp_variants, "w") as FH_variants:
-                FH_variants.write( content )
+                FH_variants.write(content)
             # Parse
             expected_records = list()
             observed_records = list()
@@ -380,138 +378,138 @@ class TestVCFRecord(unittest.TestCase):
                 for variant in FH_vcf:
                     try:
                         expected_DP = self.freq_expected[variant.info["expModel"]]["DP"]["pop"]
-                        expected_records.append( "{} {}".format(variant.id, expected_DP) )
-                        observed_records.append( "{} {}".format(variant.id, variant.getPopDP()) )
-                    except:
+                        expected_records.append("{} {}".format(variant.id, expected_DP))
+                        observed_records.append("{} {}".format(variant.id, variant.getPopDP()))
+                    except Exception:
                         raise Exception('Error in TestVCFRecord.testGetPopDP() for variant "' + variant.id + '".')
             # Assert
-            self.assertEqual( expected_records, observed_records )
+            self.assertEqual(expected_records, observed_records)
 
     def testStandardizeSingleAllele(self):
         # Test substitution one nt
-        substitution = VCFRecord( "artificial_1", 18, None, "TC", ["TA"], 230 )
+        substitution = VCFRecord("artificial_1", 18, None, "TC", ["TA"], 230)
         substitution.standardizeSingleAllele()
-        self.assertTrue( substitution.ref == "C" and substitution.alt[0] == "A" and substitution.pos == 19 )
+        self.assertTrue(substitution.ref == "C" and substitution.alt[0] == "A" and substitution.pos == 19)
         # Test substitution multi nt
-        substitution = VCFRecord( "artificial_1", 18, None, "TCtgA", ["TaGCc"], 230 )
+        substitution = VCFRecord("artificial_1", 18, None, "TCtgA", ["TaGCc"], 230)
         substitution.standardizeSingleAllele()
-        self.assertTrue( substitution.ref == "CTGA" and substitution.alt[0] == "AGCC" and substitution.pos == 19 )
+        self.assertTrue(substitution.ref == "CTGA" and substitution.alt[0] == "AGCC" and substitution.pos == 19)
         # Test substitution multi nt with possible remove
-        substitution = VCFRecord( "artificial_1", 18, None, "TCtgATT", ["TaGGctT"], 230 )
+        substitution = VCFRecord("artificial_1", 18, None, "TCtgATT", ["TaGGctT"], 230)
         substitution.standardizeSingleAllele()
-        self.assertTrue( substitution.ref == "CTGA" and substitution.alt[0] == "AGGC" and substitution.pos == 19 )
+        self.assertTrue(substitution.ref == "CTGA" and substitution.alt[0] == "AGGC" and substitution.pos == 19)
 
         # Test insertion
-        insertion = VCFRecord( "artificial_1", 18, None, "T", ["TA"], 230 )
+        insertion = VCFRecord("artificial_1", 18, None, "T", ["TA"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue( insertion.ref == "." and insertion.alt[0] == "A" and insertion.pos == 19 )
+        self.assertTrue(insertion.ref == "." and insertion.alt[0] == "A" and insertion.pos == 19)
         # Test insertion multi nt and remove upstream and downstream
-        insertion = VCFRecord( "artificial_1", 18, None, "TGAT", ["TCGAGAT"], 230 )
+        insertion = VCFRecord("artificial_1", 18, None, "TGAT", ["TCGAGAT"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue( insertion.ref == "." and insertion.alt[0] == "CGA" and insertion.pos == 19 )
+        self.assertTrue(insertion.ref == "." and insertion.alt[0] == "CGA" and insertion.pos == 19)
         # Test insertion multi nt with possible remove and downstream and without complete standardization
-        insertion = VCFRecord( "artificial_1", 18, None, "TCtgATTAGC", ["TaGGctTATGCGC"], 230 )
+        insertion = VCFRecord("artificial_1", 18, None, "TCtgATTAGC", ["TaGGctTATGCGC"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue( insertion.ref == "CTGATTA" and insertion.alt[0] == "AGGCTTATGC" and insertion.pos == 19 )
+        self.assertTrue(insertion.ref == "CTGATTA" and insertion.alt[0] == "AGGCTTATGC" and insertion.pos == 19)
 
         # Test deletion
-        insertion = VCFRecord( "artificial_1", 18, None, "TA", ["T"], 230 )
+        insertion = VCFRecord("artificial_1", 18, None, "TA", ["T"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue( insertion.ref == "A" and insertion.alt[0] == "." and insertion.pos == 19 )
+        self.assertTrue(insertion.ref == "A" and insertion.alt[0] == "." and insertion.pos == 19)
         # Test insertion multi nt and remove upstream and downstream
-        insertion = VCFRecord( "artificial_1", 18, None, "TCGAGAT", ["TGAT"], 230 )
+        insertion = VCFRecord("artificial_1", 18, None, "TCGAGAT", ["TGAT"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue( insertion.ref == "CGA" and insertion.alt[0] == "." and insertion.pos == 19 )
+        self.assertTrue(insertion.ref == "CGA" and insertion.alt[0] == "." and insertion.pos == 19)
         # Test insertion multi nt with possible remove and downstream and without complete standardization
-        insertion = VCFRecord( "artificial_1", 18, None, "TaGGctTATGCGC", ["TCtgATTAGC"], 230 )
+        insertion = VCFRecord("artificial_1", 18, None, "TaGGctTATGCGC", ["TCtgATTAGC"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue( insertion.ref == "AGGCTTATGC" and insertion.alt[0] == "CTGATTA" and insertion.pos == 19 )
+        self.assertTrue(insertion.ref == "AGGCTTATGC" and insertion.alt[0] == "CTGATTA" and insertion.pos == 19)
 
     def testGetMostUpstream(self):
         ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT" # length: 33
         # Test fix deletion
-        deletion = VCFRecord( "artificial_1", 18, None, "TtTaAGC", ["T"], 230 )
-        upstream = deletion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 19 and upstream.ref == "TTAAGC" and upstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
+        upstream = deletion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 19 and upstream.ref == "TTAAGC" and upstream.alt[0] == ".")
         # Test homopolymer deletion
-        deletion = VCFRecord( "artificial_1", 18, None, "TTT", ["T"], 230 )
-        upstream = deletion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 17 and upstream.ref == "TT" and upstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 18, None, "TTT", ["T"], 230)
+        upstream = deletion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 17 and upstream.ref == "TT" and upstream.alt[0] == ".")
         # Test complex deletion
-        deletion = VCFRecord( "artificial_1", 25, None, "CGAgCC", ["C"], 230 )
-        upstream = deletion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 22 and upstream.ref == "AGCCG" and upstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
+        upstream = deletion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 22 and upstream.ref == "AGCCG" and upstream.alt[0] == ".")
         # Test deletion on start
-        deletion = VCFRecord( "artificial_1", 1, None, ref[0], ["."], 230 )
-        upstream = deletion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 1 and upstream.ref == "N" and upstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["."], 230)
+        upstream = deletion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 1 and upstream.ref == "N" and upstream.alt[0] == ".")
         # Test deletion on end
-        deletion = VCFRecord( "artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230 )
-        upstream = deletion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
+        upstream = deletion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == ".")
         # Test fix insertion
-        insertion = VCFRecord( "artificial_1", 4, None, "N", ["NGGTT"], 230 )
-        upstream = insertion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 5 and upstream.ref == "." and upstream.alt[0] == "GGTT" )
+        insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
+        upstream = insertion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 5 and upstream.ref == "." and upstream.alt[0] == "GGTT")
         # Test homopolymer insertion
-        insertion = VCFRecord( "artificial_1", 18, None, "T", ["TT"], 230 )
-        upstream = insertion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 17 and upstream.ref == "." and upstream.alt[0] == "T" )
+        insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
+        upstream = insertion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 17 and upstream.ref == "." and upstream.alt[0] == "T")
         # Test complex insertion
-        insertion = VCFRecord( "artificial_1", 25, None, "C", ["CGAgCC"], 230 )
-        upstream = insertion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 22 and upstream.ref == "." and upstream.alt[0] == "AGCCG" )
+        insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
+        upstream = insertion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 22 and upstream.ref == "." and upstream.alt[0] == "AGCCG")
         # Test insertion on start
-        insertion = VCFRecord( "artificial_1", 1, None, ".", ["A"], 230 )
-        upstream = insertion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 1 and upstream.ref == "." and upstream.alt[0] == "A" )
+        insertion = VCFRecord("artificial_1", 1, None, ".", ["A"], 230)
+        upstream = insertion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 1 and upstream.ref == "." and upstream.alt[0] == "A")
         # Test insertion on end
-        insertion = VCFRecord( "artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230 )
-        upstream = insertion.getMostUpstream( ref )
-        self.assertTrue( upstream.pos == 34 and upstream.ref == "." and upstream.alt[0] == "G" )
+        insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
+        upstream = insertion.getMostUpstream(ref)
+        self.assertTrue(upstream.pos == 34 and upstream.ref == "." and upstream.alt[0] == "G")
 
     def testGetMostDownstream(self):
         ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT" # length: 33
         # Test fix deletion
-        deletion = VCFRecord( "artificial_1", 18, None, "TtTaAGC", ["T"], 230 )
-        downstream = deletion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 19 and downstream.ref == "TTAAGC" and downstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
+        downstream = deletion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 19 and downstream.ref == "TTAAGC" and downstream.alt[0] == ".")
         # Test homopolymer deletion
-        deletion = VCFRecord( "artificial_1", 18, None, "TTT", ["T"], 230 )
-        downstream = deletion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 19 and downstream.ref == "TT" and downstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 18, None, "TTT", ["T"], 230)
+        downstream = deletion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 19 and downstream.ref == "TT" and downstream.alt[0] == ".")
         # Test complex deletion
-        deletion = VCFRecord( "artificial_1", 25, None, "CGAgCC", ["C"], 230 )
-        downstream = deletion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 28 and downstream.ref == "GCCGA" and downstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
+        downstream = deletion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 28 and downstream.ref == "GCCGA" and downstream.alt[0] == ".")
         # Test deletion on start
-        deletion = VCFRecord( "artificial_1", 1, None, ref[0], ["."], 230 )
-        downstream = deletion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["."], 230)
+        downstream = deletion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == ".")
         # Test deletion on end
-        deletion = VCFRecord( "artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230 )
-        downstream = deletion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == "." )
+        deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
+        downstream = deletion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == ".")
         # Test fix insertion
-        insertion = VCFRecord( "artificial_1", 4, None, "N", ["NGGTT"], 230 )
-        downstream = insertion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 5 and downstream.ref == "." and downstream.alt[0] == "GGTT" )
+        insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
+        downstream = insertion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 5 and downstream.ref == "." and downstream.alt[0] == "GGTT")
         # Test homopolymer insertion
-        insertion = VCFRecord( "artificial_1", 18, None, "T", ["TT"], 230 )
-        downstream = insertion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 21 and downstream.ref == "." and downstream.alt[0] == "T" )
+        insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
+        downstream = insertion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 21 and downstream.ref == "." and downstream.alt[0] == "T")
         # Test complex insertion
-        insertion = VCFRecord( "artificial_1", 25, None, "C", ["CGAgCC"], 230 )
-        downstream = insertion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 33 and downstream.ref == "." and downstream.alt[0] == "GCCGA" )
+        insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
+        downstream = insertion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 33 and downstream.ref == "." and downstream.alt[0] == "GCCGA")
         # Test insertion on start
-        insertion = VCFRecord( "artificial_1", 1, None, ".", ["A"], 230 )
-        downstream = insertion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 1 and downstream.ref == "." and downstream.alt[0] == "A" )
+        insertion = VCFRecord("artificial_1", 1, None, ".", ["A"], 230)
+        downstream = insertion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 1 and downstream.ref == "." and downstream.alt[0] == "A")
         # Test insertion on end
-        insertion = VCFRecord( "artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230 )
-        downstream = insertion.getMostDownstream( ref )
-        self.assertTrue( downstream.pos == 34 and downstream.ref == "." and downstream.alt[0] == "G" )
+        insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
+        downstream = insertion.getMostDownstream(ref)
+        self.assertTrue(downstream.pos == 34 and downstream.ref == "." and downstream.alt[0] == "G")
 
 
 ########################################################################
