@@ -36,12 +36,12 @@ import argparse
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Parse areas depths distributions to list areas with an depths under the threshold on a sufficient length.' )
-    parser.add_argument( '-p', '--percentile', type=int, default=15, help='The evaluated percentile. [Default: %(default)s]' )
-    parser.add_argument( '-d', '--min-depth', type=int, default=200, help='Under this value of depth on the selected percentile the area is reported. [Default: %(default)s]' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-depths', required=True, nargs='+', help='For each evaluated sample a file containing the depths by percentile in selected areas (format: JSON outputted by coverageArea.py).')
+    parser = argparse.ArgumentParser(description='Parse areas depths distributions to list areas with an depths under the threshold on a sufficient length.')
+    parser.add_argument('-p', '--percentile', type=int, default=15, help='The evaluated percentile. [Default: %(default)s]')
+    parser.add_argument('-d', '--min-depth', type=int, default=200, help='Under this value of depth on the selected percentile the area is reported. [Default: %(default)s]')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-depths', required=True, nargs='+', help='For each evaluated sample a file containing the depths by percentile in selected areas (format: JSON outputted by coverageArea.py).')
     args = parser.parse_args()
 
     # Process
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     for curr_file in args.input_depths:
         spl_name = os.path.basename(curr_file).split("_depths.json")[0]
         with open(curr_file, 'r') as FH:
-            data = json.load( FH )
+            data = json.load(FH)
             for area in data:
                 for name in area["depths"]:
                     curr_depth = int(area["depths"][name][str(args.percentile) + "_percentile"])

@@ -27,15 +27,12 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from bed import getAreasByChr
-from sequenceIO import Sequence, FastaIO
-
+from anacore.bed import getAreasByChr
+from anacore.sequenceIO import Sequence, FastaIO
 
 
 ########################################################################
@@ -53,7 +50,6 @@ def revcom(seq):
                         'a':'t','t':'a','g':'c','c':'g','u':'a','n':'n','w':'w','s':'s','m':'k','k':'m','r':'y','y':'r','b':'v','v':'b','d':'h','h':'d'}
 
     return("".join([complement_rules[base] for base in seq[::-1]]))
-
 
 
 ########################################################################

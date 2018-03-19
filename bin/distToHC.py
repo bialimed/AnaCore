@@ -30,15 +30,12 @@ import argparse
 from scipy.cluster.hierarchy import linkage, to_tree
 from scipy.spatial.distance import squareform, is_valid_y
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from node import Node
-from matrix import DistanceMatrixIO
-
+from anacore.node import Node
+from anacore.matrix import DistanceMatrixIO
 
 
 ########################################################################

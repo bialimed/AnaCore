@@ -27,14 +27,11 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from VEPvcf import VEPVCFIO
-
+from anacore.VEPvcf import VEPVCFIO
 
 
 ########################################################################
@@ -42,7 +39,7 @@ from VEPvcf import VEPVCFIO
 # FUNCTIONS
 #
 ########################################################################
-def getGeneByNM( gene_to_NM_file, trim_version=False ):
+def getGeneByNM(gene_to_NM_file, trim_version=False):
     """
     @summary: Returns gene name by NM.
     @param gene_to_NM_file: [str] Path to the file describing the link between genes and NM (format: TSV). Each line has the following format: GENE\tNM.
@@ -59,7 +56,7 @@ def getGeneByNM( gene_to_NM_file, trim_version=False ):
                 gene_by_NM[NM] = gene
     return gene_by_NM
 
-def filterRecordAnnot( record, kept_NM, trim_version=False ):
+def filterRecordAnnot(record, kept_NM, trim_version=False):
     """
     @summary: Removes annotations that does not come from a kept NM.
     @param record: [VCFRecord] The annotated record.
@@ -72,7 +69,7 @@ def filterRecordAnnot( record, kept_NM, trim_version=False ):
         if trim_version:
             NM = NM.split(".")[0]
         if NM not in kept_NM:
-            removed_annot_idx.append( annot_idx )
+            removed_annot_idx.append(annot_idx)
     for curr_idx in sorted(removed_annot_idx, reverse=True):
         del(record.info["CSQ"][curr_idx])
 
@@ -84,26 +81,26 @@ def filterRecordAnnot( record, kept_NM, trim_version=False ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Removes annotations that does not come from a list of NM.' )
-    parser.add_argument( '-w', '--without-version', action='store_true', help=' With this option the version number of the NM is not used in filter.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-r', '--reference-RNA', required=True, help='The path to the file describing the NM kept for each gene (format: TSV).' )
-    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
+    parser = argparse.ArgumentParser(description='Removes annotations that does not come from a list of NM.')
+    parser.add_argument('-w', '--without-version', action='store_true', help=' With this option the version number of the NM is not used in filter.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-r', '--reference-RNA', required=True, help='The path to the file describing the NM kept for each gene (format: TSV).')
+    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
     args = parser.parse_args()
 
     # Get kept NM
-    kept_NM = getGeneByNM( args.reference_RNA, args.without_version )
+    kept_NM = getGeneByNM(args.reference_RNA, args.without_version)
 
     # Filter annotations
     with VEPVCFIO(args.input_variants) as FH_in:
         with VEPVCFIO(args.output_variants, "w") as FH_out:
             # Header
-            FH_out.copyHeader( FH_in )
+            FH_out.copyHeader(FH_in)
             FH_out._writeHeader()
             # Records
             for record in FH_in:
-                filterRecordAnnot( record, kept_NM, args.without_version )
-                FH_out.write( record )
+                filterRecordAnnot(record, kept_NM, args.without_version)
+                FH_out.write(record)

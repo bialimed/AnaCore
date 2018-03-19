@@ -27,14 +27,11 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from sequenceIO import FastqIO
-
+from anacore.sequenceIO import FastqIO
 
 
 ########################################################################
@@ -44,16 +41,16 @@ from sequenceIO import FastqIO
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Change quality offset in fastq file." )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    parser.add_argument( '-n', '--new-offset', default=33, type=int, help="New quality offset. [Default: %(default)s]" )
-    parser.add_argument( '-b', '--old-offset', type=int, help="The current quality offset. [Default: Auto determined]" )
-    parser.add_argument( '-mi', '--min-qual', type=int, help="The minimun quality. [Default: No minimun]" )
-    parser.add_argument( '-ma', '--max-qual', type=int, help="The maximun quality. [Default: No maximun]" )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-file', required=True, help='Path to the sequences file (format: fastq).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-file', required=True, help='Path to the output (format: fastq).' )
+    parser = argparse.ArgumentParser(description="Change quality offset in fastq file.")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument('-n', '--new-offset', default=33, type=int, help="New quality offset. [Default: %(default)s]")
+    parser.add_argument('-b', '--old-offset', type=int, help="The current quality offset. [Default: Auto determined]")
+    parser.add_argument('-mi', '--min-qual', type=int, help="The minimun quality. [Default: No minimun]")
+    parser.add_argument('-ma', '--max-qual', type=int, help="The maximun quality. [Default: No maximun]")
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-file', required=True, help='Path to the sequences file (format: fastq).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-file', required=True, help='Path to the output (format: fastq).')
     args = parser.parse_args()
 
     # Process
@@ -74,4 +71,4 @@ if __name__ == "__main__":
                         new_qual_numer = min(args.new_offset + args.max_qual, new_qual_numer)
                     new_qual += chr(new_qual_numer)
                 record.quality = new_qual
-                FH_out.write( record )
+                FH_out.write(record)

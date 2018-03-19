@@ -24,7 +24,6 @@ __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
-import sys
 import time
 import json
 import argparse
@@ -32,7 +31,6 @@ import subprocess
 
 BIN_DIR = os.path.dirname(__file__)
 os.environ['PATH'] = os.environ['PATH'] + os.pathsep + BIN_DIR
-
 
 
 ########################################################################
@@ -48,9 +46,9 @@ class TmpFiles:
         tmpFiles = TmpFiles(out_dir)
         try:
             ...
-            tmp_seq = tmpFiles.add( "toto.fasta" )
+            tmp_seq = tmpFiles.add("toto.fasta")
             ...
-            tmp_log = tmpFiles.add( "log.txt" )
+            tmp_log = tmpFiles.add("log.txt")
             ...
         finaly:
             tmpFiles.deleteAll()
@@ -149,6 +147,7 @@ def filterVCF(in_variants, out_variants, min_AF):
     subprocess.check_output(cmd)
     # Delete temporary
     tmp.deleteAll()
+
 
 def checkGroups(in_variants, in_groups, out_distances, out_intruders, distance_method):
     """

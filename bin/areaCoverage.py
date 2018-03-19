@@ -34,7 +34,7 @@ import argparse
 # FUNCTIONS
 #
 ########################################################################
-def getDistributionDict( values, percentile_step=25, precision=4 ):
+def getDistributionDict(values, percentile_step=25, precision=4):
     """
     @summary: Returns the distribution of values (min, max and percentiles).
     @param values: [list] The values.
@@ -47,10 +47,10 @@ def getDistributionDict( values, percentile_step=25, precision=4 ):
         "max": round(max(values), precision)
     }
     for curr_percentile in range(percentile_step, 100, percentile_step):
-        distrib['{:02}'.format(curr_percentile) + "_percentile"] = round( numpy.percentile(values, curr_percentile), precision )
+        distrib['{:02}'.format(curr_percentile) + "_percentile"] = round(numpy.percentile(values, curr_percentile), precision)
     return distrib
 
-def getSelectedAreas( input_panel ):
+def getSelectedAreas(input_panel):
     """
     @summary: Returns the list of selected areas from a BED file.
     @param input_panel: [str] The path to the amplicons with their primers (format: BED)
@@ -63,13 +63,13 @@ def getSelectedAreas( input_panel ):
                 fields = [elt.strip() for elt in line.split("\t")]
                 selected_areas.append({
                     "region": fields[0],
-                    "start": int(fields[1]) +1, # Start in BED is 0-based
+                    "start": int(fields[1]) + 1,  # Start in BED is 0-based
                     "end": int(fields[2]),
                     "name": None if len(fields) < 4 else fields[3]
                 })
-    return( selected_areas )
+    return selected_areas
 
-def setDepths( depths_file, selected_areas ):
+def setDepths(depths_file, selected_areas):
     """
     @summary: Adds the list of depths for each area in selected_areas. These depths are stored with the key "data".
     @param depths_file: [str] The path to the depths by position (format: samtools depth output). The file must only contains one sample and it must contains every positions in selected areas (see samtools depth -a option for positions with 0 reads).
@@ -81,33 +81,33 @@ def setDepths( depths_file, selected_areas ):
         pos_id = curr_area["region"] + ":" + str(curr_area["start"])
         if pos_id not in area_by_pos:
             area_by_pos[pos_id] = list()
-        area_by_pos[pos_id].append( curr_area )
+        area_by_pos[pos_id].append(curr_area)
     # Parse depths file
     with open(depths_file) as FH_depths:
         opened_area = list()
         for line in FH_depths:
             fields = line.strip().split("\t")
             region = fields[0]
-            position = int(fields[1]) # Start in depth is 1-based
+            position = int(fields[1])  # Start in depth is 1-based
             depth = int(fields[2])
             # Open areas with start on the current position
             pos_id = region + ":" + str(position)
             if pos_id in area_by_pos:
                 for curr_area in area_by_pos[pos_id]:
                     curr_area["data"] = list()
-                    opened_area.append( curr_area )
+                    opened_area.append(curr_area)
             # Manage position in opened areas
             achieved_idx = list()
             for idx_area, area in enumerate(opened_area):
-                if region == area["region"] and position <= area["end"]: # Current position is in area
-                    area["data"].append( depth )
-                else: # Current position is after the end of the area
-                    achieved_idx.append( idx_area )
+                if region == area["region"] and position <= area["end"]:  # Current position is in area
+                    area["data"].append(depth)
+                else:  # Current position is after the end of the area
+                    achieved_idx.append(idx_area)
             # Close achieved areas
             for idx in sorted(achieved_idx, reverse=True):
                 del opened_area[idx]
 
-def writeOutputTSV( out_path, area_depths, percentile_step ):
+def writeOutputTSV(out_path, area_depths, percentile_step):
     """
     @summary: Writes depths distribution for each area and each sample in TSV format.
     @param out_path: [str] The path to the outputted file (format: TSV).
@@ -134,10 +134,10 @@ def writeOutputTSV( out_path, area_depths, percentile_step ):
             "name",
             "sample",
             "min_depth",
-            "\t".join( [curr_title + "_depth" for curr_title in percentiles_titles] ),
+            "\t".join([curr_title + "_depth" for curr_title in percentiles_titles]),
             "max_depth",
             sep="\t", file=FH_out
-        )    
+        )
         for area in area_depths:
             for spl_name in sorted(area["depths"]):
                 print(
@@ -147,12 +147,12 @@ def writeOutputTSV( out_path, area_depths, percentile_step ):
                     area["name"],
                     spl_name,
                     area["depths"][spl_name]["min"],
-                    "\t".join( [str(area["depths"][spl_name][curr_title]) for curr_title in percentiles_titles] ),
+                    "\t".join([str(area["depths"][spl_name][curr_title]) for curr_title in percentiles_titles]),
                     area["depths"][spl_name]["max"],
                     sep="\t", file=FH_out
                 )
 
-def writeOutputJSON( out_path, area_depths ):
+def writeOutputJSON(out_path, area_depths):
     """
     @summary: Writes depths distribution for each area and each sample in JSON format.
     @param out_path: [str] The path to the outputted file (format: JSON).
@@ -170,8 +170,8 @@ def writeOutputJSON( out_path, area_depths ):
                         }
     """
     with open(out_path, 'w') as FH_out:
-        data = json.dumps( area_depths, default=lambda o: o.__dict__, sort_keys=True, indent=2 )
-        FH_out.write( data )
+        data = json.dumps(area_depths, default=lambda o: o.__dict__, sort_keys=True, indent=2)
+        FH_out.write(data)
 
 
 ########################################################################
@@ -181,28 +181,28 @@ def writeOutputJSON( out_path, area_depths ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Writes depths distribution for specified areas.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    parser.add_argument( '-s', '--percentile-step', type=int, default=5, help='Only the depths for this percentile and his multiples are retained. For example, with 25 only the minimum, the 1st quartile, the 2nd quartile, the 3rd quartile and the maximum depths are retained. [Default: %(default)s]' )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-c', '--inputs-depths', nargs='+', required=True, help='The path to the depths by position (format: samtools depth output). Each file represents only one sample. The file must contains every positions in selected areas (see samtools depth -a option for positions with 0 reads).' )
-    group_input.add_argument( '-r', '--input-regions', required=True, help='Path to the list of evaluated regions (format: BED).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-metrics', default="depths_distrib.json", help='The path to outputted file (format: JSON or TSV according to the extension).' )
+    parser = argparse.ArgumentParser(description='Writes depths distribution for specified areas.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument('-s', '--percentile-step', type=int, default=5, help='Only the depths for this percentile and his multiples are retained. For example, with 25 only the minimum, the 1st quartile, the 2nd quartile, the 3rd quartile and the maximum depths are retained. [Default: %(default)s]')
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-c', '--inputs-depths', nargs='+', required=True, help='The path to the depths by position (format: samtools depth output). Each file represents only one sample. The file must contains every positions in selected areas (see samtools depth -a option for positions with 0 reads).')
+    group_input.add_argument('-r', '--input-regions', required=True, help='Path to the list of evaluated regions (format: BED).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-metrics', default="depths_distrib.json", help='The path to outputted file (format: JSON or TSV according to the extension).')
     args = parser.parse_args()
 
     # Get interest area
-    selected_areas = getSelectedAreas( args.input_regions )
+    selected_areas = getSelectedAreas(args.input_regions)
 
     # Get coverage by area in samples
     for spl_file in args.inputs_depths:
         spl_name = os.path.basename(spl_file)
-        setDepths( spl_file, selected_areas )
+        setDepths(spl_file, selected_areas)
         for curr_area in selected_areas:
             # Transform depths to distribution
             if "data" not in curr_area:
                 curr_area["data"] = [0]
-            spl_distrib = getDistributionDict( curr_area["data"], args.percentile_step, 1 )
+            spl_distrib = getDistributionDict(curr_area["data"], args.percentile_step, 1)
             del(curr_area["data"])
             # Store distribution
             if "depths" not in curr_area:
@@ -211,6 +211,6 @@ if __name__ == "__main__":
 
     # Write output
     if args.output_metrics.endswith("json"):
-        writeOutputJSON( args.output_metrics, selected_areas )
+        writeOutputJSON(args.output_metrics, selected_areas)
     else:
-        writeOutputTSV( args.output_metrics, selected_areas, args.percentile_step )
+        writeOutputTSV(args.output_metrics, selected_areas, args.percentile_step)

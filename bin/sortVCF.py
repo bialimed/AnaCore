@@ -27,14 +27,11 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFIO
-
+from anacore.vcf import VCFIO
 
 
 ########################################################################
@@ -44,19 +41,19 @@ from vcf import VCFIO
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Sorts VCF by coordinates.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
+    parser = argparse.ArgumentParser(description='Sorts VCF by coordinates.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
     args = parser.parse_args()
 
     # Process
     with VCFIO(args.output_variants, "w") as FH_out:
         with VCFIO(args.input_variants) as FH_in:
             # Header
-            FH_out.copyHeader( FH_in )
+            FH_out.copyHeader(FH_in)
             FH_out._writeHeader()
             # Records
             records_by_chr = dict()
@@ -67,4 +64,4 @@ if __name__ == "__main__":
             for chrom in sorted(records_by_chr):
                 sorted_records = sorted(records_by_chr[chrom], key=lambda x: (x.chrom, x.pos))
                 for record in sorted_records:
-                    FH_out.write( record )
+                    FH_out.write(record)

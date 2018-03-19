@@ -29,14 +29,11 @@ import sys
 import warnings
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFIO, getAlleleRecord
-
+from anacore.vcf import VCFIO, getAlleleRecord
 
 
 ########################################################################
@@ -44,25 +41,25 @@ from vcf import VCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getWorkflowVariants( wf_folder ):
+def getWorkflowVariants(wf_folder):
     wf_variants = dict()
-    for file_name in os.listdir( wf_folder ):
-        filepath = os.path.join( wf_folder, file_name )
-        if os.path.isdir( filepath ):
+    for file_name in os.listdir(wf_folder):
+        filepath = os.path.join(wf_folder, file_name)
+        if os.path.isdir(filepath):
             wf_variants[file_name] = dict()
-            variants_folder = os.path.join( filepath, "variants" )
-            if not os.path.exists( variants_folder ):
-                warnings.warn( 'The folder "' + variants_folder + '" does not exist.' )
+            variants_folder = os.path.join(filepath, "variants")
+            if not os.path.exists(variants_folder):
+                warnings.warn('The folder "' + variants_folder + '" does not exist.')
             else:
-                for variants_file_name in os.listdir( variants_folder ):
-                    variants_filepath = os.path.join( variants_folder, variants_file_name )
-                    if variants_filepath.endswith( "_filtered.vcf" ):
+                for variants_file_name in os.listdir(variants_folder):
+                    variants_filepath = os.path.join(variants_folder, variants_file_name)
+                    if variants_filepath.endswith("_filtered.vcf"):
                         spl_name = variants_file_name.split("_filtered.vcf")[0]
                         spl_variants = dict()
-                        with VCFIO( variants_filepath ) as FH_variants:
+                        with VCFIO(variants_filepath) as FH_variants:
                             for record in FH_variants:
                                 for idx in range(len(record.alt)):
-                                    curr_allele = getAlleleRecord( FH_variants, record, idx )
+                                    curr_allele = getAlleleRecord(FH_variants, record, idx)
                                     variant_id = curr_allele.chrom + ":" + str(curr_allele.pos) + "=" + curr_allele.ref + "/" + "/".join(curr_allele.alt)
                                     spl_variants[variant_id] = curr_allele
                         wf_variants[file_name][spl_name] = spl_variants
@@ -77,16 +74,16 @@ def getWorkflowVariants( wf_folder ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Compares DSVF and ADIVaR filtered variants.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-a', '--adivar-folder', required=True, help='The path to the folder containing one folder by run outputs for ADIVaR.' )
-    group_input.add_argument( '-d', '--dsvf-folder', required=True, help='The path to the folder containing one folder by run outputs for DSVF.' )
+    parser = argparse.ArgumentParser(description='Compares DSVF and ADIVaR filtered variants.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-a', '--adivar-folder', required=True, help='The path to the folder containing one folder by run outputs for ADIVaR.')
+    group_input.add_argument('-d', '--dsvf-folder', required=True, help='The path to the folder containing one folder by run outputs for DSVF.')
     args = parser.parse_args()
 
     # Process
-    dsvf_variants = getWorkflowVariants( args.dsvf_folder )
-    adivar_variants = getWorkflowVariants( args.adivar_folder )
+    dsvf_variants = getWorkflowVariants(args.dsvf_folder)
+    adivar_variants = getWorkflowVariants(args.adivar_folder)
 
     print(
       "#Run",
@@ -108,8 +105,8 @@ if __name__ == "__main__":
                     processed = dict()
                     for variant_id in adivar_spl_var:
                         processed[variant_id] = 1
-                        adivar_AF = round( adivar_spl_var[variant_id].getPopAF()[0], 2 )
-                        dsvf_AF = round( (dsvf_spl_var[variant_id].getPopAF()[0] if variant_id in dsvf_spl_var else 0), 2 )
+                        adivar_AF = round(adivar_spl_var[variant_id].getPopAF()[0], 2)
+                        dsvf_AF = round((dsvf_spl_var[variant_id].getPopAF()[0] if variant_id in dsvf_spl_var else 0), 2)
                         print(
                             curr_run,
                             curr_spl,
@@ -124,7 +121,7 @@ if __name__ == "__main__":
                     for variant_id in dsvf_spl_var:
                         if variant_id not in processed:
                             adivar_AF = 0.00
-                            dsvf_AF = round( dsvf_spl_var[variant_id].getPopAF()[0], 2 )
+                            dsvf_AF = round(dsvf_spl_var[variant_id].getPopAF()[0], 2)
                             print(
                                 curr_run,
                                 curr_spl,

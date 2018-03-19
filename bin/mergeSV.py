@@ -26,7 +26,6 @@ __status__ = 'prod'
 import argparse
 
 
-
 ########################################################################
 #
 # MAIN
@@ -34,16 +33,16 @@ import argparse
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Merges several separated values files by a linking column. Only the entry in first file are kept and annotated by entry in others files.' )
-    parser.add_argument( '-t', '--new-title', help='The new title for link column. [Default: link title of the first file merged]' )
-    parser.add_argument( '-l', '--links-titles', nargs='+', default=[], help='For each file the columns used as link between files (in same order as --inputs).' )
-    parser.add_argument( '-is', '--in-separator', default="\t", help='The field separator in input files. [Default: %(default)s]' )
-    parser.add_argument( '-os', '--out-separator', default="\t", help='The field separator in output file. [Default: %(default)s]' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-files', nargs='+', required=True, help='The path of the files to merge (format: separated values files like CSV or TSV).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-file', default='merged.tsv', help='Path of the output file (format: separated values files like CSV or TSV). [Default: %(default)s]')
+    parser = argparse.ArgumentParser(description='Merges several separated values files by a linking column. Only the entry in first file are kept and annotated by entry in others files.')
+    parser.add_argument('-t', '--new-title', help='The new title for link column. [Default: link title of the first file merged]')
+    parser.add_argument('-l', '--links-titles', nargs='+', default=[], help='For each file the columns used as link between files (in same order as --inputs).')
+    parser.add_argument('-is', '--in-separator', default="\t", help='The field separator in input files. [Default: %(default)s]')
+    parser.add_argument('-os', '--out-separator', default="\t", help='The field separator in output file. [Default: %(default)s]')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-files', nargs='+', required=True, help='The path of the files to merge (format: separated values files like CSV or TSV).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-file', default='merged.tsv', help='Path of the output file (format: separated values files like CSV or TSV). [Default: %(default)s]')
     args = parser.parse_args()
 
     new_title = args.new_title
@@ -59,14 +58,14 @@ if __name__ == "__main__":
             # Store titles
             link_idx = 0
             for idx_title, curr_title in enumerate(titles):
-                if curr_title != link_titles[idx_file]: # The current column is not the linking column
-                    out_titles.append( curr_title.replace(args.out_separator, hex(ord(args.out_separator))) ) # Prevent bug in out separator
+                if curr_title != link_titles[idx_file]:  # The current column is not the linking column
+                    out_titles.append(curr_title.replace(args.out_separator, hex(ord(args.out_separator))))  # Prevent bug in out separator
                 else:
                     link_idx = idx_title
-                    if new_title is None: # If no new title has been define for the linking column and this is the first file
-                        new_title = cur_title
+                    if new_title is None:  # If no new title has been define for the linking column and this is the first file
+                        new_title = curr_title
             # Store data
-            for link_id in processed_items: # Reset items processed in current file
+            for link_id in processed_items:  # Reset items processed in current file
                 processed_items[link_id] = False
             for line in FH_in:
                 fields = [field.strip() for field in line.split(args.in_separator)]
@@ -74,20 +73,20 @@ if __name__ == "__main__":
                 if idx_file == 0:
                     data_by_link[link_id] = list()
                     processed_items[link_id] = True
-                if link_id in data_by_link: # Kept only entry present in first file
+                if link_id in data_by_link:  # Kept only entry present in first file
                     processed_items[link_id] = True
                     for idx_field, cur_field in enumerate(fields):
                         if titles[idx_field] != link_titles[idx_file]:
-                            cur_field = cur_field.replace( args.out_separator, hex(ord(args.out_separator)) ) # Prevent bug in out separator
-                            data_by_link[link_id].append( cur_field )
-            for link_id, is_processed in processed_items.items(): # Complete items not in current file
+                            cur_field = cur_field.replace(args.out_separator, hex(ord(args.out_separator)))  # Prevent bug in out separator
+                            data_by_link[link_id].append(cur_field)
+            for link_id, is_processed in processed_items.items():  # Complete items not in current file
                 if not is_processed:
                     data_by_link[link_id].extend(["" for col in range(len(titles) - 1)])
 
     # Writes output
     with open(args.output_file, "w") as FH_out:
         # Titles
-        FH_out.write( 
+        FH_out.write(
             "{}{}{}\n".format(
                 new_title, args.out_separator, args.out_separator.join(out_titles)
             )

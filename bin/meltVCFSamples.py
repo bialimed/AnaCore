@@ -25,17 +25,13 @@ __status__ = 'prod'
 
 import os
 import sys
-import pysam
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFIO, getAlleleRecord
-
+from anacore.vcf import VCFIO, getAlleleRecord
 
 
 ########################################################################
@@ -45,14 +41,14 @@ from vcf import VCFIO, getAlleleRecord
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Melts all the samples contained in VCF in one sample. For the output only the fields AD, AF and DP will be writted in FORMAT.' )
-    parser.add_argument( '-f', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
-    parser.add_argument( '-n', '--new-spl-name', default="all", help="The name of the outputted sample. [Default: %(default)s]" )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the variants file with several samples (format: VCF).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).' )
+    parser = argparse.ArgumentParser(description='Melts all the samples contained in VCF in one sample. For the output only the fields AD, AF and DP will be writted in FORMAT.')
+    parser.add_argument('-f', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]")
+    parser.add_argument('-n', '--new-spl-name', default="all", help="The name of the outputted sample. [Default: %(default)s]")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file with several samples (format: VCF).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).')
     args = parser.parse_args()
 
     # Process
@@ -99,4 +95,4 @@ if __name__ == "__main__":
                 for field in removed_from_info:
                     if field in record.info:
                         del(record.info[field])
-                FH_out.write( record )
+                FH_out.write(record)

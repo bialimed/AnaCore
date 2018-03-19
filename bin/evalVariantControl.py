@@ -30,14 +30,11 @@ import csv
 import json
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFIO, getAlleleRecord
-
+from anacore.vcf import VCFIO, getAlleleRecord
 
 
 ########################################################################
@@ -45,7 +42,7 @@ from vcf import VCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
+def addVCFVariants(variants, vcf_path, vcf_idx, spl_name=None):
     """
     @summary: Add variant from VCF in dict.
     @param variants: [dict] By uniq ID the variants. The content of this variable is set by the call of this function.
@@ -75,14 +72,14 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
     @param vcf_idx: [int] Index used to store the frequency of each vrariants of the VCF in frequencies list (start from 0).
     @param spl_name: [str] The frequency of the variants came from this sample. This parameters is optional when the VCF file contain 0 to 1 sample.
     """
-    with VCFIO( vcf_path ) as FH_vcf:
+    with VCFIO(vcf_path) as FH_vcf:
         if spl_name is None:
             spl_name = FH_vcf.samples[0]
         for record in FH_vcf:
-            allele_freq = record.getAF( spl_name )
+            allele_freq = record.getAF(spl_name)
             # For each alternative allele
             for idx_alt, alt in enumerate(record.alt):
-                allele_record = getAlleleRecord( FH_vcf, record, idx_alt )
+                allele_record = getAlleleRecord(FH_vcf, record, idx_alt)
                 allele_record.standardizeSingleAllele()
                 variant_id = allele_record.chrom + ":" + str(allele_record.pos) + "=" + allele_record.alt[0]
                 if variant_id not in variants:
@@ -103,7 +100,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
         while len(variants[variant_id]["freq"]) <= vcf_idx:
             variants[variant_id]["freq"].append(0)
 
-def filterVarNotIn( variants, vcf_idx ):
+def filterVarNotIn(variants, vcf_idx):
     """
     @summary: Removes all variants not present in the specified VCF.
     @param variants: [dict] By uniq ID the variants (see addVCFVariants).
@@ -112,9 +109,9 @@ def filterVarNotIn( variants, vcf_idx ):
     removed = list()
     for variant_id in variants:
         if variants[variant_id]["freq"][vcf_idx] == 0:
-            removed.append( variant_id )
+            removed.append(variant_id)
     for variant_id in removed:
-        del( variants[variant_id] )
+        del(variants[variant_id])
 
 def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
     """
@@ -135,7 +132,7 @@ def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
     for variant_id in variants:
         current_variant = variants[variant_id]
         error = current_variant["freq"][idx_expec] - current_variant["freq"][idx_detec]
-        error_ratio = abs(1 - (current_variant["freq"][idx_detec]/current_variant["freq"][idx_expec]) )
+        error_ratio = abs(1 - (current_variant["freq"][idx_detec]/current_variant["freq"][idx_expec]))
         # Dissimilarity
         error_values_sum += abs(error)
         error_ratio_sum += error_ratio
@@ -147,8 +144,8 @@ def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
     with open(out_path, "w") as FH_out:
         FH_csv = csv.writer(FH_out, delimiter=separator)
         # Summary section
-        FH_csv.writerow( ["[Summary]"] )
-        FH_csv.writerow( ["#Nb_checked", "Errors_sum", "Errors_ratio_sum", "Error_out_of_threshold_(" + str(error_threshold) + ")"] )
+        FH_csv.writerow(["[Summary]"])
+        FH_csv.writerow(["#Nb_checked", "Errors_sum", "Errors_ratio_sum", "Error_out_of_threshold_(" + str(error_threshold) + ")"])
         FH_csv.writerow([
             nb_checked,
             error_values_sum,
@@ -157,12 +154,12 @@ def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
         # Section separator
         FH_csv.writerow([])
         # Details section
-        FH_csv.writerow( ["[Details]"] )
-        FH_csv.writerow( ["#Chr:Pos", "Ref/Alt", "Expected", "Detected", "Error", "Error_ratio", "Out_of_threshold"] )
+        FH_csv.writerow(["[Details]"])
+        FH_csv.writerow(["#Chr:Pos", "Ref/Alt", "Expected", "Detected", "Error", "Error_ratio", "Out_of_threshold"])
         for variant_id in sorted(variants):
             current_variant = variants[variant_id]
             error = current_variant["freq"][idx_expec] - current_variant["freq"][idx_detec]
-            error_ratio = abs(1 - (current_variant["freq"][idx_detec]/current_variant["freq"][idx_expec]) )
+            error_ratio = abs(1 - (current_variant["freq"][idx_detec]/current_variant["freq"][idx_expec]))
             FH_csv.writerow([
                 current_variant["chrom"] + ":" + str(current_variant["pos"]),
                 current_variant["ref"] + "/" + current_variant["alt"],
@@ -190,7 +187,7 @@ def writeJSONResults(variants, out_path):
             "detected": current_variant["freq"][1]
         })
     with open(out_path, "w") as FH_out:
-        FH_out.write( json.dumps(data, default=lambda o: o.__dict__, sort_keys=True ) )
+        FH_out.write(json.dumps(data, default=lambda o: o.__dict__, sort_keys=True))
 
 
 ########################################################################
@@ -200,22 +197,22 @@ def writeJSONResults(variants, out_path):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Compare variant calling result to expected variants. This comparison is only processed on expected variants.' )
-    parser.add_argument( '-t', '--error-threshold', type=float, default=0.2, help='In TSV output, variants with a percentage difference compared to expected frequency superior than this value are tagged "out of threshold". Difference percentage calculation: abs(1 - detected_freq/expected_freq). Examples: diff=50prct for expected_freq=0.1 and detected_freq=0.05 ; diff=300prct for expected_freq=0.1 and detected_freq=0.4. [Default: %(default)s]' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-e', '--expected-file', required=True, help='The path to the file containing the expected variants (format: VCF).' )
-    group_input.add_argument( '-d', '--detected-file', required=True, help='The path to the file containing the detected variants (format: VCF).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-file', default="results.tsv", help='The path to the file containing the results of the comparison (format: TSV or JSON depends on extension). [Default: %(default)s]')
+    parser = argparse.ArgumentParser(description='Compare variant calling result to expected variants. This comparison is only processed on expected variants.')
+    parser.add_argument('-t', '--error-threshold', type=float, default=0.2, help='In TSV output, variants with a percentage difference compared to expected frequency superior than this value are tagged "out of threshold". Difference percentage calculation: abs(1 - detected_freq/expected_freq). Examples: diff=50prct for expected_freq=0.1 and detected_freq=0.05 ; diff=300prct for expected_freq=0.1 and detected_freq=0.4. [Default: %(default)s]')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-e', '--expected-file', required=True, help='The path to the file containing the expected variants (format: VCF).')
+    group_input.add_argument('-d', '--detected-file', required=True, help='The path to the file containing the detected variants (format: VCF).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-file', default="results.tsv", help='The path to the file containing the results of the comparison (format: TSV or JSON depends on extension). [Default: %(default)s]')
     args = parser.parse_args()
 
     # Process
     all_variants = dict()
-    addVCFVariants( all_variants, args.expected_file, 0 )
-    addVCFVariants( all_variants, args.detected_file, 1 )
-    filterVarNotIn( all_variants, 0 )
+    addVCFVariants(all_variants, args.expected_file, 0)
+    addVCFVariants(all_variants, args.detected_file, 1)
+    filterVarNotIn(all_variants, 0)
     if args.output_file.endswith("json"):
-        writeJSONResults( all_variants, args.output_file )
+        writeJSONResults(all_variants, args.output_file)
     else:
-        writeTSVResults( all_variants, args.output_file, args.error_threshold )
+        writeTSVResults(all_variants, args.output_file, args.error_threshold)

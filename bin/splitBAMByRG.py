@@ -23,11 +23,8 @@ __version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-import os
-import sys
 import pysam
 import argparse
-
 
 
 ########################################################################
@@ -37,15 +34,15 @@ import argparse
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Splits one BAM in groups based on RG. Several RG can be merge in new group. Each new group becomes represented by one alignment file after split.' )
-    parser.add_argument( '-r', '--remove-RG', action='store_true', help='With this parameter the RG are removed from the outputted alignments files.' )
-    parser.add_argument( '-t', '--RG-tag', default='LB', help='RG tag used in link between tag value and group (see input-design parameter). [Default: %(default)s]' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-a', '--input-aln', required=True, help='The path to the alignments files (format: BAM).' )
-    group_input.add_argument( '-d', '--input-design', required=True, help='The path to the file describing RG in each new group (format: TSV). First column is a value for a specific tag in RG, the second is the name of the new group.' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-p', '--output-pattern', default="out_{GP}.bam", help='The path pattern for the outputted alignments files (format: BAM). In this path the keyword "{GP}" is replace by the group name for each group. [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description='Splits one BAM in groups based on RG. Several RG can be merge in new group. Each new group becomes represented by one alignment file after split.')
+    parser.add_argument('-r', '--remove-RG', action='store_true', help='With this parameter the RG are removed from the outputted alignments files.')
+    parser.add_argument('-t', '--RG-tag', default='LB', help='RG tag used in link between tag value and group (see input-design parameter). [Default: %(default)s]')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-a', '--input-aln', required=True, help='The path to the alignments files (format: BAM).')
+    group_input.add_argument('-d', '--input-design', required=True, help='The path to the file describing RG in each new group (format: TSV). First column is a value for a specific tag in RG, the second is the name of the new group.')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-p', '--output-pattern', default="out_{GP}.bam", help='The path pattern for the outputted alignments files (format: BAM). In this path the keyword "{GP}" is replace by the group name for each group. [Default: %(default)s]')
     args = parser.parse_args()
 
     # Get panel regions
@@ -53,13 +50,13 @@ if __name__ == "__main__":
     group_by_tag = dict()
     with open(args.input_design) as FH_design:
         for line in FH_design:
-            if not line.startswith( "#" ):
+            if not line.startswith("#"):
                 read_tag, group = [elt.strip() for elt in line.split("\t")]
                 group_by_tag[read_tag] = group
-                groups_names.add( group )
+                groups_names.add(group)
 
     # Split BAM
-    with pysam.AlignmentFile( args.input_aln, "rb" ) as FH_in:
+    with pysam.AlignmentFile(args.input_aln, "rb") as FH_in:
         # Get new group by read group ID
         group_by_id = dict()
         for RG in FH_in.header["RG"]:
@@ -83,8 +80,8 @@ if __name__ == "__main__":
             if curr_read.has_tag("RG"):
                 RG_id = curr_read.get_tag("RG")
                 if args.remove_RG:
-                    curr_read.set_tag( "RG", None )
-                FH_by_group[group_by_id[RG_id]].write( curr_read )
+                    curr_read.set_tag("RG", None)
+                FH_by_group[group_by_id[RG_id]].write(curr_read)
         # Close FH
         for group in groups_names:
             FH_by_group[group].close()

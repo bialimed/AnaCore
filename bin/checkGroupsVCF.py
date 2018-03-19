@@ -31,15 +31,12 @@ import warnings
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import getFreqMatrix
-from sv import HashedSVIO
-
+from anacore.vcf import getFreqMatrix
+from anacore.sv import HashedSVIO
 
 
 ########################################################################

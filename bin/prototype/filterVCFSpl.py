@@ -25,17 +25,13 @@ __status__ = 'prod'
 
 import os
 import sys
-import json
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFIO
-
+from anacore.vcf import VCFIO
 
 
 ########################################################################
@@ -45,20 +41,20 @@ from vcf import VCFIO
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='***************************************.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    parser.add_argument( '-s', '--samples-names', nargs='+', required=True, help='*************************.' )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
+    parser = argparse.ArgumentParser(description='***************************************.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument('-s', '--samples-names', nargs='+', required=True, help='*************************.')
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
     args = parser.parse_args()
 
     # Process
     with VCFIO(args.input_variants) as FH_in:
         with VCFIO(args.output_variants, "w") as FH_out:
             # Header
-            FH_out.copyHeader( FH_in )
+            FH_out.copyHeader(FH_in)
             idx_removed = [idx_spl for idx_spl, spl_name in enumerate(FH_out.samples) if spl_name in args.samples_names]
             for idx in sorted(idx_removed, reverse=True):
                 del(FH_out.samples[idx])
@@ -90,4 +86,4 @@ if __name__ == "__main__":
                     record.info["AF"] = record.getPopAF()
                 if has_AD:
                     record.info["AD"] = record.getPopAD()
-                FH_out.write( record )
+                FH_out.write(record)

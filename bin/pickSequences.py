@@ -25,15 +25,14 @@ __status__ = 'prod'
 
 import os
 import sys
+import warnings
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from sequenceIO import SequenceFileReader, FastaIO, FastqIO
+from anacore.sequenceIO import SequenceFileReader, FastaIO, FastqIO
 
 
 ########################################################################
@@ -43,36 +42,47 @@ from sequenceIO import SequenceFileReader, FastaIO, FastqIO
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Extract primers sequence from Illumina's amplicons manifest." )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-s', '--input-sequences', required=True, help='*** (format: Fasta).' )
-    group_input.add_argument( '-i', '--input-ids', required=True, help='*** (format: TXT).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output', help='******************************** (format: fasta). [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description="Filter sequence file on list of selected sequences IDs.")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-s', '--input-sequences', required=True, help='Path to the file containing the sequences (format: fasta or fastq).')
+    group_input.add_argument('-i', '--input-ids', required=True, help='Path to the file containing the selected IDs (format: TXT). One ID by line.')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-sequences', help='Path to the filtered file (format: same as input). [Default: %(default)s]')
     args = parser.parse_args()
 
-    # Process
+    # Retrieve kept IDs
     selected_ids = dict()
     with open(args.input_ids) as FH_ids:
         for line in FH_ids:
             selected_ids[line.strip()] = 0
-    FH_seq = SequenceFileReader.factory( args.input_sequences )
+
+    # Filter sequence file
+    FH_seq = SequenceFileReader.factory(args.input_sequences)
     try:
+        # Open output with convenient class
         FH_out = None
         if issubclass(FastqIO, FH_seq.__class__):
             FH_out = FastqIO(args.output, "w")
         else:
             FH_out = FastaIO(args.output, "w")
+        # Filter and write
         try:
             for record in FH_seq:
                 if record.id in selected_ids:
                     selected_ids[record.id] = 1
-                    FH_out.write( record )
+                    FH_out.write(record)
         finally:
             FH_out.close()
     finally:
         FH_seq.close()
+
+    # Check retrieved and missing sequences
+    missing = list()
     for curr_id in selected_ids:
         if selected_ids[curr_id] != 1:
-            print("Pb", curr_id)
+            missing.append(curr_id)
+    if len(missing) != 0:
+        warnings.warn('The following sequences cannot be found in  "{}": {}'.format(
+            args.input_sequences, ", ".join(missing)
+        ))

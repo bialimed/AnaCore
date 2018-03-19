@@ -37,7 +37,7 @@ from email.mime.text import MIMEText
 
 # Load Illumina
 bin_dir = os.path.abspath(os.path.dirname(__file__))
-illumina_lib = os.path.join(os.path.dirname(bin_dir), "lib", "illumina.py")
+illumina_lib = os.path.join(os.path.dirname(bin_dir), "lib", "anacore", "illumina.py")
 spec = importlib.util.spec_from_file_location("illumina", illumina_lib)
 illumina = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(illumina)

@@ -27,16 +27,13 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from bed import BEDIO
-from region import Region, RegionList
-from gff3 import GFF3IO
-
+from anacore.bed import BEDIO
+from anacore.region import Region, RegionList
+from anacore.gff3 import GFF3IO
 
 
 ########################################################################
@@ -72,15 +69,15 @@ from gff3 import GFF3IO
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="**********************************." )
-    parser.add_argument( '-c', '--is-thick-based', action='store_true', help='******************************.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-t', '--input-reference-tr', required=True, help='******************************.' )
-    group_input.add_argument( '-a', '--input-annotation', required=True, help='*****************************.' )
-    group_input.add_argument( '-r', '--input-regions', required=True, help='*****************************.' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-regions', default="amplicons.bed", help='The amplicons description (format: BED). [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description="**********************************.")
+    parser.add_argument('-c', '--is-thick-based', action='store_true', help='******************************.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-t', '--input-reference-tr', required=True, help='******************************.')
+    group_input.add_argument('-a', '--input-annotation', required=True, help='*****************************.')
+    group_input.add_argument('-r', '--input-regions', required=True, help='*****************************.')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-regions', default="amplicons.bed", help='The amplicons description (format: BED). [Default: %(default)s]')
     args = parser.parse_args()
 
     gene_by_tr = dict()
@@ -108,7 +105,7 @@ if __name__ == "__main__":
                             record.strand,
                             record.seq_id,
                             tr_id,
-                            {"exons": RegionList(), "gene":gene_by_tr[tr_id]}
+                            {"exons": RegionList(), "gene": gene_by_tr[tr_id]}
                         )
             if record.type == "exon" and "transcript_id" in record.attributes:
                 tr_id = record.attributes["transcript_id"]
@@ -133,16 +130,16 @@ if __name__ == "__main__":
         # Sort exons by transcript order
         sorted_exons = list()
         if curr_tr.strand == "-":
-            sorted_exons = sorted( curr_tr.annot["exons"], key=lambda exon: (exon.end, exon.start), reverse=True )
+            sorted_exons = sorted(curr_tr.annot["exons"], key=lambda exon: (exon.end, exon.start), reverse=True)
         else:
-            sorted_exons = sorted( curr_tr.annot["exons"], key=lambda exon: (exon.start, exon.end) )
+            sorted_exons = sorted(curr_tr.annot["exons"], key=lambda exon: (exon.start, exon.end))
         for idx_exon, curr_exon in enumerate(sorted_exons):
             curr_exon.annot["exon_idx"] = idx_exon
         # Store regions on chromosome
         chrom = curr_tr.reference.name
         if chrom not in tr_by_chr:
             tr_by_chr[chrom] = RegionList()
-        tr_by_chr[chrom].append( curr_tr )
+        tr_by_chr[chrom].append(curr_tr)
 
     # Write renamed regions
     with BEDIO(args.input_regions) as FH_regions:
@@ -152,13 +149,13 @@ if __name__ == "__main__":
                 if args.is_thick_based and record.thickStart is not None and record.thickEnd is not None:
                     amplicon.start = record.thickStart
                     amplicon.end = record.end
-                overlapped_tr = tr_by_chr[record.chrom].getOverlapped( amplicon )
+                overlapped_tr = tr_by_chr[record.chrom].getOverlapped(amplicon)
                 if len(overlapped_tr) != 1:
                     raise Exception("********************************")
-                overlapped_exons = overlapped_tr[0].annot["exons"].getOverlapped( amplicon )
+                overlapped_exons = overlapped_tr[0].annot["exons"].getOverlapped(amplicon)
                 features = list()
                 for curr_feature in overlapped_exons:
-                    features.append( "ex" + str(curr_feature.annot["exon_idx"] + 1) )
+                    features.append("ex" + str(curr_feature.annot["exon_idx"] + 1))
                 record.name = "_".join([
                     overlapped_tr[0].annot["gene"],
                     "-".join(features),
@@ -166,4 +163,4 @@ if __name__ == "__main__":
                     amplicon.strand,
                     "ampl" + str(record_idx)
                 ])
-                FH_out.write( record )
+                FH_out.write(record)

@@ -27,15 +27,12 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from bed import getAreasByChr
-from sequenceIO import Sequence, FastaIO
-
+from anacore.bed import getAreasByChr
+from anacore.sequenceIO import Sequence, FastaIO
 
 
 ########################################################################
@@ -43,7 +40,7 @@ from sequenceIO import Sequence, FastaIO
 # FUNCTIONS
 #
 ########################################################################
-def revcom( seq ):
+def revcom(seq):
     """
     @summary: Returns the reverse complement the sequence.
     @param seq: [str] The sequence.
@@ -52,7 +49,7 @@ def revcom( seq ):
     complement_rules = {'A':'T','T':'A','G':'C','C':'G','U':'A','N':'N','W':'W','S':'S','M':'K','K':'M','R':'Y','Y':'R','B':'V','V':'B','D':'H','H':'D',
                         'a':'t','t':'a','g':'c','c':'g','u':'a','n':'n','w':'w','s':'s','m':'k','k':'m','r':'y','y':'r','b':'v','v':'b','d':'h','h':'d'}
 
-    return( "".join([complement_rules[base] for base in seq[::-1]]) )
+    return("".join([complement_rules[base] for base in seq[::-1]]))
 
 
 
@@ -63,17 +60,17 @@ def revcom( seq ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Extract primers sequence from Illumina's amplicons manifest." )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-s', '--input-sequences', required=True, help='*** (format: Fasta).' )
-    group_input.add_argument( '-r', '--input-regions', required=True, help='*** (format: BED).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-fasta', default="regions.fasta", help='******************************** (format: fasta). [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description="Extract primers sequence from Illumina's amplicons manifest.")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-s', '--input-sequences', required=True, help='*** (format: Fasta).')
+    group_input.add_argument('-r', '--input-regions', required=True, help='*** (format: BED).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-fasta', default="regions.fasta", help='******************************** (format: fasta). [Default: %(default)s]')
     args = parser.parse_args()
 
     # Process
-    ampl_by_chr = getAreasByChr( args.input_regions )
+    ampl_by_chr = getAreasByChr(args.input_regions)
     with FastaIO(args.input_sequences) as FH_seq:
         for record in FH_seq:
             chrom = record.id

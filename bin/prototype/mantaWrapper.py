@@ -35,38 +35,44 @@ import subprocess
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='******************************************.' )
-    parser.add_argument( '-t', '--nb-threads', type=int, default=4, help='******************************************.' )
-    parser.add_argument( '-m', '--max-mem', type=int, default=10, help='******************************************.' )
-    parser.add_argument( '-r', '--is-RNA', action='store_true', help='**************************************************.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-n', '--input-normal-aln', help='*******************************.' )
-    group_input.add_argument( '-i', '--input-tumor-aln', help='*******************************.' )
-    group_input.add_argument( '-s', '--input-reference-seq', required=True, help='*******************************.' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-folder', default="manta_out", help='*****************************************. [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description='******************************************.')
+    parser.add_argument('-t', '--nb-threads', type=int, default=4, help='******************************************.')
+    parser.add_argument('-m', '--max-mem', type=int, default=10, help='******************************************.')
+    parser.add_argument('-r', '--is-RNA', action='store_true', help='**************************************************.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-n', '--input-normal-aln', help='*******************************.')
+    group_input.add_argument('-i', '--input-tumor-aln', help='*******************************.')
+    group_input.add_argument('-s', '--input-reference-seq', required=True, help='*******************************.')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-folder', default="manta_out", help='*****************************************. [Default: %(default)s]')
     args = parser.parse_args()
 
     # Process configuration
     cmd_cfg = None
     if args.is_RNA:
-        cmd_cfg = [ "configManta.py",
+        cmd_cfg = [
+            "configManta.py",
             "--rna",
-            "--bam", (args.input_tumor_aln if args.input_tumor_aln != None else args.input_normal_aln),
+            "--bam", (args.input_tumor_aln if args.input_tumor_aln is not None else args.input_normal_aln),
             "--referenceFasta", args.input_reference_seq,
-            "--runDir", args.output_folder ]
+            "--runDir", args.output_folder
+        ]
     else:
-        cmd_cfg = [ "configManta.py",
-            ("" if args.input_normal_aln == None else "--normalBam"), ("" if args.input_normal_aln == None else args.input_normal_aln),
+        cmd_cfg = [
+            "configManta.py",
+            ("" if args.input_normal_aln is None else "--normalBam"), ("" if args.input_normal_aln is None else args.input_normal_aln),
             "--tumorBam", args.input_tumor_aln,
             "--referenceFasta", args.input_reference_seq,
-            "--runDir", args.output_folder ]
-    subprocess.check_call( cmd_cfg )
+            "--runDir", args.output_folder
+        ]
+    subprocess.check_call(cmd_cfg)
 
     # Run manta
-    cmd_run = [ os.path.join(args.output_folder, "runWorkflow.py"),
+    cmd_run = [
+        os.path.join(args.output_folder, "runWorkflow.py"),
         "--mode", "local",
         "--jobs", str(args.nb_threads),
-        "--memGb", str(args.max_mem) ]
-    subprocess.check_call( cmd_run )
+        "--memGb", str(args.max_mem)
+    ]
+    subprocess.check_call(cmd_run)

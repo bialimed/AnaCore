@@ -24,13 +24,11 @@ __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
-import sys
 import time
 import logging
 import argparse
 import subprocess
 from subprocess import Popen, PIPE
-
 
 
 ########################################################################
@@ -45,9 +43,9 @@ class TmpFiles:
         tmpFiles = TmpFiles(out_dir)
         try:
             ...
-            tmp_seq = tmpFiles.add( "toto.fasta" )
+            tmp_seq = tmpFiles.add("toto.fasta")
             ...
-            tmp_log = tmpFiles.add( "log.txt" )
+            tmp_log = tmpFiles.add("log.txt")
             ...
         finaly:
             tmpFiles.deleteAll()
@@ -149,7 +147,7 @@ class Cmd:
                 else:
                     return stdout.strip()
             except:
-                raise Exception( "Version cannot be retrieve for the software '" + self.program + "'." )
+                raise Exception("Version cannot be retrieve for the software '" + self.program + "'.")
 
     def parser(self, log_file):
         """
@@ -165,14 +163,14 @@ class Cmd:
         """
         # Log
         if log_file is not None:
-            logger.info( '[' + self.__class__.__name__ + '] DESCRIPTION ' + self.description + ' (' + os.path.basename(self.program) + ' version : ' + self.get_version() + ')' )
-            logger.info( '[' + self.__class__.__name__ + '] COMMAND ' + self.get_cmd() )
-            logger.info( '[' + self.__class__.__name__ + '] START' )
+            logger.info('[' + self.__class__.__name__ + '] DESCRIPTION ' + self.description + ' (' + os.path.basename(self.program) + ' version : ' + self.get_version() + ')')
+            logger.info('[' + self.__class__.__name__ + '] COMMAND ' + self.get_cmd())
+            logger.info('[' + self.__class__.__name__ + '] START')
         # Process
-        subprocess.check_output( self.get_cmd(), shell=True )
+        subprocess.check_output(self.get_cmd(), shell=True)
         # Log
         if log_file is not None:
-            logger.info( '[' + self.__class__.__name__ + '] END' )
+            logger.info('[' + self.__class__.__name__ + '] END')
             # Post-process results
             self.parser(log_file)
 
@@ -200,11 +198,11 @@ class SamtoolsViewCmd(Cmd):
         if filter is not None:
             filter_opt = "-F " + filter + " "
         # Cmd
-        Cmd.__init__( self,
-                      "samtools",
-                      "Filter alignment",
-                      "view -bh " + filter_opt + aln_map_path + " > " + self.output,
-                      "--version" )
+        Cmd.__init__(self,
+                     "samtools",
+                     "Filter alignment",
+                     "view -bh " + filter_opt + aln_map_path + " > " + self.output,
+                     "--version")
 
     def get_version(self):
         """
@@ -227,11 +225,11 @@ class SamtoolsDepthCmd(Cmd):
         if not skip_zero:
             skip_zero_opt = "-a "
         # Cmd
-        Cmd.__init__( self,
-                      "samtools",
-                      "Coverage depth by position",
-                      "depth " + skip_zero_opt + depth_opt + bed_opt + aln_map_path + " > " + self.output,
-                      "--version" )
+        Cmd.__init__(self,
+                     "samtools",
+                     "Coverage depth by position",
+                     "depth " + skip_zero_opt + depth_opt + bed_opt + aln_map_path + " > " + self.output,
+                     "--version")
 
     def get_version(self):
         """
@@ -250,28 +248,27 @@ class SamtoolsDepthCmd(Cmd):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Computes the depth at each position or region.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-bam', required=True, help='The alignment file processed (format: BAM).' )
-    group_input.add_argument( '-b', '--input-bed', help='Compute depth at list of positions or regions in specified file (format: BED).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # outputs
-    group_output.add_argument( '-o', '--output-cov', required=True, help='The coverage file (format: TSV).' )
+    parser = argparse.ArgumentParser(description='Computes the depth at each position or region.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-bam', required=True, help='The alignment file processed (format: BAM).')
+    group_input.add_argument('-b', '--input-bed', help='Compute depth at list of positions or regions in specified file (format: BED).')
+    group_output = parser.add_argument_group('Outputs')  # outputs
+    group_output.add_argument('-o', '--output-cov', required=True, help='The coverage file (format: TSV).')
     args = parser.parse_args()
-    ########################/save/fescudie/softwares/samtools-1.3.1/samtools depth -a -d 100000 -b test.bed 17T001312_S17.bam
 
     # Logger
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s -- [%(name)s][pid:%(process)d][%(levelname)s] -- %(message)s' )
-    logger = logging.getLogger( os.path.basename(__file__) )
+        format='%(asctime)s -- [%(name)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    logger = logging.getLogger(os.path.basename(__file__))
 
     # Process coverage
-    out_dir = os.path.split( args.output_cov )[0]
+    out_dir = os.path.split(args.output_cov)[0]
     tmpFiles = TmpFiles(out_dir)
     try:
-        tmp_bam = tmpFiles.add( "filtered.bam" )
-        SamtoolsViewCmd(args.input_bam, tmp_bam, "256").submit( logger )
-        SamtoolsDepthCmd(tmp_bam, args.output_cov, args.input_bed).submit( logger )
+        tmp_bam = tmpFiles.add("filtered.bam")
+        SamtoolsViewCmd(args.input_bam, tmp_bam, "256").submit(logger)
+        SamtoolsDepthCmd(tmp_bam, args.output_cov, args.input_bed).submit(logger)
     finally:
         tmpFiles.deleteAll()

@@ -27,13 +27,11 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from GTFI import *
+from anacore.GTFI import GTFI
 
 
 ########################################################################
@@ -43,13 +41,13 @@ from GTFI import *
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Write the number of reads by biotype from HTSeq-count gene output.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-g', '--input-gtf', required=True, help='The ensembl GTF used in HTSeq-count (format: GTF).' )
-    group_input.add_argument( '-c', '--input-count', required=True, help='The HTSeq-count output (format: TSV).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-file', required=True, help='The path for the outputed file (format: TSV).')
+    parser = argparse.ArgumentParser(description='Write the number of reads by biotype from HTSeq-count gene output.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-g', '--input-gtf', required=True, help='The ensembl GTF used in HTSeq-count (format: GTF).')
+    group_input.add_argument('-c', '--input-count', required=True, help='The HTSeq-count output (format: TSV).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-file', required=True, help='The path for the outputed file (format: TSV).')
     args = parser.parse_args()
 
     # Get biotype by gene ID
@@ -68,7 +66,7 @@ if __name__ == "__main__":
     finally:
         FH_gff.close()
 
-    # Get count by biotype 
+    # Get count by biotype
     ################################################# Pb gene de diff longueur donne diff de count
     count_by_biotype = dict()
     samples = list()
@@ -88,11 +86,11 @@ if __name__ == "__main__":
 
     # Write output
     with open(args.output_file, "w") as FH_out:
-        FH_out.write( "#Biotype\t" + "\t".join(samples) + "\n" )
+        FH_out.write("#Biotype\t" + "\t".join(samples) + "\n")
         for biotype in count_by_biotype:
             biotype_prct = list()
             for idx_spl, spl in enumerate(samples):
                 biotype_count = count_by_biotype[biotype][idx_spl]
                 prct = float(biotype_count * 100)/count_by_spl[spl]
-                biotype_prct.append( prct )
-            FH_out.write( biotype + "\t" + "\t".join(map(str, biotype_prct)) + "\n" )
+                biotype_prct.append(prct)
+            FH_out.write(biotype + "\t" + "\t".join(map(str, biotype_prct)) + "\n")

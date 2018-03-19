@@ -27,14 +27,11 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import *
-
+from anacore.vcf import VCFIO
 
 
 ########################################################################
@@ -42,7 +39,7 @@ from vcf import *
 # FUNCTIONS
 #
 ########################################################################
-def getKeptFromBed( bed_path ):
+def getKeptFromBed(bed_path):
     """
     @summary: Returns selected regions by chromosome from BED.
     @param bed_path: [str] Path to the file describing selected regions (format: BED).
@@ -54,17 +51,17 @@ def getKeptFromBed( bed_path ):
         for line in FH_in:
             row_data = [elt.strip() for elt in line.split("\t")]
             chrom = row_data[0]
-            start = min( int(row_data[1]) + 1, int(row_data[2]) )
-            end = max( int(row_data[1]) + 1, int(row_data[2]) )
+            start = min(int(row_data[1]) + 1, int(row_data[2]))
+            end = max(int(row_data[1]) + 1, int(row_data[2]))
             if chrom not in kept_by_chr:
                 kept_by_chr[chrom] = list()
-            kept_by_chr[chrom].append( {"start": start, "end": end} )
+            kept_by_chr[chrom].append({"start": start, "end": end})
     # In each chromosome sort by position
     for chrom in kept_by_chr:
         kept_by_chr[chrom] = sorted(kept_by_chr[chrom], key=lambda x: (x["start"], x["end"]))
     return kept_by_chr
 
-def isOverlapping( regions_by_chr, chrom, pos ):
+def isOverlapping(regions_by_chr, chrom, pos):
     """
     @summary: Returns True if the specified position overlap one region in regions_by_chr.
     @param regions_by_chr: [dict] By chromosome the list of selected regions. Each list of region is sorted firstly by start position (1-based) and secondly by end position (1-based). Each region is represented by a dictionary with this format: {"start":501, "end":608}.
@@ -87,24 +84,24 @@ def isOverlapping( regions_by_chr, chrom, pos ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Filters variants by location. Each variant not located on one of the selected regions is removed.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-variants', required=True, help='Path to the variants file (format: VCF).' )
-    group_input.add_argument( '-b', '--selected-regions', required=True, help='Path to the file describing selected regions (format: BED).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', default="filtered.vcf", help='Path to the outputted variants file (format: VCF). [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description='Filters variants by location. Each variant not located on one of the selected regions is removed.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-variants', required=True, help='Path to the variants file (format: VCF).')
+    group_input.add_argument('-b', '--selected-regions', required=True, help='Path to the file describing selected regions (format: BED).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', default="filtered.vcf", help='Path to the outputted variants file (format: VCF). [Default: %(default)s]')
     args = parser.parse_args()
 
     # Process
-    kept_by_chr = getKeptFromBed( args.selected_regions )
+    kept_by_chr = getKeptFromBed(args.selected_regions)
     with VCFIO(args.input_variants) as FH_in:
         with VCFIO(args.output_variants, "w") as FH_out:
             # Writes header
-            FH_out.copyHeader( FH_in )
+            FH_out.copyHeader(FH_in)
             FH_out.filter["REG"] = 'The variant is located on an excluded region (' + args.selected_regions + ').'
             FH_out._writeHeader()
             # Writes variants
             for variant in FH_in:
                 if isOverlapping(kept_by_chr, variant.chrom, variant.pos):
-                    FH_out.write( variant )
+                    FH_out.write(variant)

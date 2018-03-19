@@ -28,7 +28,6 @@ import json
 import argparse
 
 
-
 ########################################################################
 #
 # FUNCTIONS
@@ -41,17 +40,17 @@ def parseFlagStat(flagstat_path):
     @return: [dict] The alignment metrics.
     """
     # Compile regexp
-    supplementary_regex = re.compile( "^(\d+) \+ (\d+) supplementary\s*$" )
-    duplicates_regex = re.compile( "^(\d+) \+ (\d+) duplicates\s*$" )
-    total_regex = re.compile( "^(\d+) \+ (\d+) in total \(QC-passed reads \+ QC-failed reads\)\s*$" )
-    secondary_regex = re.compile( "^(\d+) \+ (\d+) secondary\s*$" )
-    mapped_regex = re.compile( "^(\d+) \+ (\d+) mapped \(" )
-    paired_regex = re.compile( "^(\d+) \+ (\d+) paired in sequencing\s*$" )
-    r1_regex = re.compile( "^(\d+) \+ (\d+) read1\s*$" )
-    r2_regex = re.compile( "^(\d+) \+ (\d+) read2\s*$" )
-    properlyPaired_regex = re.compile( "^(\d+) \+ (\d+) properly paired \(" )
-    mateOtherChr_regex = re.compile( "^(\d+) \+ (\d+) with mate mapped to a different chr \(mapQ>=5\)\s*$" )
-    
+    supplementary_regex = re.compile("^(\d+) \+ (\d+) supplementary\s*$")
+    duplicates_regex = re.compile("^(\d+) \+ (\d+) duplicates\s*$")
+    total_regex = re.compile("^(\d+) \+ (\d+) in total \(QC-passed reads \+ QC-failed reads\)\s*$")
+    secondary_regex = re.compile("^(\d+) \+ (\d+) secondary\s*$")
+    mapped_regex = re.compile("^(\d+) \+ (\d+) mapped \(")
+    paired_regex = re.compile("^(\d+) \+ (\d+) paired in sequencing\s*$")
+    r1_regex = re.compile("^(\d+) \+ (\d+) read1\s*$")
+    r2_regex = re.compile("^(\d+) \+ (\d+) read2\s*$")
+    properlyPaired_regex = re.compile("^(\d+) \+ (\d+) properly paired \(")
+    mateOtherChr_regex = re.compile("^(\d+) \+ (\d+) with mate mapped to a different chr \(mapQ>=5\)\s*$")
+
     # Parse
     aln_metrics = dict()
     nb_lines = None
@@ -103,11 +102,11 @@ def parseFlagStat(flagstat_path):
                 match = r1_regex.match(line)
                 if match is not None:
                     parsed = True
-                    if int(match.group(1)) != 0 and nb_reads != (int(match.group(1)) + int(match.group(2)))*2: # The alignement was processed on paired-end AND single data
+                    if int(match.group(1)) != 0 and nb_reads != (int(match.group(1)) + int(match.group(2)))*2:  # The alignement was processed on paired-end AND single data
                         aln_metrics['nb_r1'] = nb_reads - int(match.group(1)) + int(match.group(2))
-                    elif int(match.group(1)) != 0: # The alignement was processed on paired-end data
+                    elif int(match.group(1)) != 0:  # The alignement was processed on paired-end data
                         aln_metrics['nb_r1'] = int(match.group(1)) + int(match.group(2))
-                    else: # The alignement was processed on single data
+                    else:  # The alignement was processed on single data
                         aln_metrics['nb_r1'] = nb_reads
             # R2 line
             if not parsed:
@@ -127,8 +126,8 @@ def parseFlagStat(flagstat_path):
                 if match is not None:
                     parsed = True
                     aln_metrics['mate_on_other_chr'] = int(match.group(1)) + int(match.group(2))
-    
-    return( aln_metrics )
+
+    return aln_metrics
 
 
 ########################################################################
@@ -138,15 +137,15 @@ def parseFlagStat(flagstat_path):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Converts the TXT output of samtools flagstat in JSON." )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input', required=True, help='Path to the samtools flagstat output (format: TXT).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output', default="flagstat.json", help='Path to the output (format: JSON). [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description="Converts the TXT output of samtools flagstat in JSON.")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input', required=True, help='Path to the samtools flagstat output (format: TXT).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output', default="flagstat.json", help='Path to the output (format: JSON). [Default: %(default)s]')
     args = parser.parse_args()
 
     # Process
     aln_metrics = parseFlagStat(args.input)
     with open(args.output, "w") as FH_out:
-        FH_out.write( json.dumps(aln_metrics, default=lambda o: o.__dict__, sort_keys=True ) )
+        FH_out.write(json.dumps(aln_metrics, default=lambda o: o.__dict__, sort_keys=True))

@@ -25,9 +25,7 @@ __status__ = 'prod'
 
 import os
 import re
-import sys
 import argparse
-
 
 
 ########################################################################
@@ -37,13 +35,13 @@ import argparse
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Merge HTSeq-count outputs for each samples in one.' )
-    parser.add_argument( '-p', '--name-pattern', default='^([^\.]+)\.', help='The regexp used to extract sample name from HTSeq-count outputs filenames.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-files', nargs='+', required=True, help='The HTSeq-count outputs to merge (format: TSV).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-file', required=True, help='The path for the outputed file (format: TSV).')
+    parser = argparse.ArgumentParser(description='Merge HTSeq-count outputs for each samples in one.')
+    parser.add_argument('-p', '--name-pattern', default='^([^\.]+)\.', help='The regexp used to extract sample name from HTSeq-count outputs filenames.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-files', nargs='+', required=True, help='The HTSeq-count outputs to merge (format: TSV).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-file', required=True, help='The path for the outputed file (format: TSV).')
     args = parser.parse_args()
 
     sample_names = list()
@@ -51,11 +49,11 @@ if __name__ == "__main__":
     # Get count by sample by reference
     spl_count_by_ref = dict()
     for sample_file in args.input_files:
-        match = re.search( args.name_pattern, os.path.basename(sample_file) )
+        match = re.search(args.name_pattern, os.path.basename(sample_file))
         if match is None:
-            raise Exception( "The sample name cannot be extracted from the file '" + sample_file + "' with the regexp '" + args.name_pattern + "'" )
+            raise Exception("The sample name cannot be extracted from the file '" + sample_file + "' with the regexp '" + args.name_pattern + "'")
         spl = match.group(1)
-        sample_names.append( spl )
+        sample_names.append(spl)
         with open(sample_file) as FH_spl:
             for line in FH_spl:
                 ref, count = [field.strip() for field in line.split("\t")]
@@ -66,7 +64,7 @@ if __name__ == "__main__":
 
     # Write output
     with open(args.output_file, "w") as FH_out:
-        FH_out.write( "#Reference"  + "\t" + "\t".join(sample_names) + "\n" )
+        FH_out.write("#Reference"  + "\t" + "\t".join(sample_names) + "\n")
         for ref in spl_count_by_ref:
             counts = list()
             for spl in sample_names:
@@ -74,4 +72,4 @@ if __name__ == "__main__":
                     counts.append(0)
                 else:
                     counts.append(spl_count_by_ref[ref][spl])
-            FH_out.write( ref + "\t" + "\t".join(map(str, counts)) + "\n" )
+            FH_out.write(ref + "\t" + "\t".join(map(str, counts)) + "\n")

@@ -28,14 +28,11 @@ import os
 import sys
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from sequenceIO import *
-
+from anacore.sequenceIO import Sequence, FastaIO
 
 
 ########################################################################
@@ -57,15 +54,15 @@ class Amplicon(object):
         interest_start = self.start + len(self.up_primer)
         if self.strand == "-":
             interest_start = self.start + len(self.down_primer)
-        return( interest_start )
+        return interest_start
 
     def getInterestEnd(self):
         interest_end = self.end - len(self.down_primer)
         if self.strand == "-":
             interest_end = self.end - len(self.up_primer)
-        return( interest_end )
+        return interest_end
 
-def revcom( seq ):
+def revcom(seq):
     """
     @summary: Returns the reverse complement the sequence.
     @param seq: [str] The sequence.
@@ -74,9 +71,9 @@ def revcom( seq ):
     complement_rules = {'A':'T','T':'A','G':'C','C':'G','U':'A','N':'N','W':'W','S':'S','M':'K','K':'M','R':'Y','Y':'R','B':'V','V':'B','D':'H','H':'D',
                         'a':'t','t':'a','g':'c','c':'g','u':'a','n':'n','w':'w','s':'s','m':'k','k':'m','r':'y','y':'r','b':'v','v':'b','d':'h','h':'d'}
 
-    return( "".join([complement_rules[base] for base in seq[::-1]]) )
+    return("".join([complement_rules[base] for base in seq[::-1]]))
 
-def getAmpliconsFromManifest( manifest_path ):
+def getAmpliconsFromManifest(manifest_path):
     """
     @summary: Returns the list of amplicons from a Illumina's manifest.
     @param manifest_path: [str] Path to the manifest.
@@ -96,10 +93,10 @@ def getAmpliconsFromManifest( manifest_path ):
                         probes_header = [field.strip().lower().replace(" ", "_") for field in FH_manifest.readline().split("\t")]
                 elif section_probe:
                     fields = { probes_header[idx]:field.strip() for idx, field in enumerate(line.split("\t"))}
-                    amplicons.append( fields )
+                    amplicons.append(fields)
     return amplicons
 
-def getAmplicons(  manifest_path ):
+def getAmplicons(manifest_path):
     """
     @summary: Returns the list of amplicons from a Illumina's manifest.
     @param manifest_path: [str] Path to the manifest.
@@ -108,7 +105,7 @@ def getAmplicons(  manifest_path ):
     amplicons_obj = list()
 
     # Get amplicons by chr
-    amplicons = getAmpliconsFromManifest( manifest_path )
+    amplicons = getAmpliconsFromManifest(manifest_path)
     for ampli_idx, ampli in enumerate(amplicons):
         amplicons_obj.append(
             Amplicon(
@@ -119,10 +116,10 @@ def getAmplicons(  manifest_path ):
                 None,
                 None,
                 "ampl" + str(ampli_idx) + "_" + ampli["target_region_name"].replace(" ", "_")
-            )
+           )
         )
 
-    return( amplicons_obj )
+    return amplicons_obj
 
 
 ########################################################################
@@ -132,23 +129,23 @@ def getAmplicons(  manifest_path ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Extract primers sequence from Illumina's amplicons manifest." )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-m', '--input-manifest', required=True, help='Path to the definition of the amplicons (format: Illumina manifest).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-f', '--fwd-barcodes', default="fwd_barcodes.fasta", help='******************************** (format: fasta). [Default: %(default)s]' )
-    group_output.add_argument( '-r', '--rvs-barcodes', default="rvs_barcodes.fasta", help='******************************** (format: fasta). [Default: %(default)s]' )
+    parser = argparse.ArgumentParser(description="Extract primers sequence from Illumina's amplicons manifest.")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-m', '--input-manifest', required=True, help='Path to the definition of the amplicons (format: Illumina manifest).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-f', '--fwd-barcodes', default="fwd_barcodes.fasta", help='******************************** (format: fasta). [Default: %(default)s]')
+    group_output.add_argument('-r', '--rvs-barcodes', default="rvs_barcodes.fasta", help='******************************** (format: fasta). [Default: %(default)s]')
     args = parser.parse_args()
 
     # Process
-    amplicons = getAmplicons( args.input_manifest )
+    amplicons = getAmplicons(args.input_manifest)
     FH_fwd = FastaIO(args.fwd_barcodes, "w")
     FH_rvs = FastaIO(args.rvs_barcodes, "w")
     for ampl in amplicons:
-        record_fwd = Sequence( ampl.name, ampl.up_primer )
-        FH_fwd.write( record_fwd )
-        record_rvs = Sequence( ampl.name, revcom(ampl.down_primer) )
-        FH_rvs.write( record_rvs )
+        record_fwd = Sequence(ampl.name, ampl.up_primer)
+        FH_fwd.write(record_fwd)
+        record_rvs = Sequence(ampl.name, revcom(ampl.down_primer))
+        FH_rvs.write(record_rvs)
     FH_fwd.close()
     FH_rvs.close()

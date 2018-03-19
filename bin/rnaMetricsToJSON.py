@@ -33,7 +33,7 @@ import argparse
 # FUNCTIONS
 #
 ########################################################################
-def parseMetricsFile( rnaSeqMetrics_output ):
+def parseMetricsFile(rnaSeqMetrics_output):
     metrics_data = dict()
     with open(rnaSeqMetrics_output) as FH_metrics:
         section_metrics = False
@@ -41,7 +41,7 @@ def parseMetricsFile( rnaSeqMetrics_output ):
         for line in FH_metrics:
             if line.strip() == "":
                 section_metrics = False
-            elif line.startswith( "## METRICS CLASS" ):
+            elif line.startswith("## METRICS CLASS"):
                 section_metrics = True
             elif section_metrics:
                 if metrics_titles is None:
@@ -51,7 +51,7 @@ def parseMetricsFile( rnaSeqMetrics_output ):
                     data = dict()
                     for field_idx, field in enumerate(line.split("\t")):
                         if not metrics_titles[field_idx].startswith("pct_"):
-                            data[metrics_titles[field_idx]] = field.strip() 
+                            data[metrics_titles[field_idx]] = field.strip()
                     # Cast numbers
                     for title in data:
                         if title not in ["sample", "library", "read_group"]:
@@ -61,7 +61,7 @@ def parseMetricsFile( rnaSeqMetrics_output ):
                                 data[title] = int(data[title])
                     # Add data
                     if data["sample"] == "":
-                        data["sample"] = os.path.basename( rnaSeqMetrics_output ).split("_")[0]
+                        data["sample"] = os.path.basename(rnaSeqMetrics_output).split("_")[0]
                     metrics_data[data["sample"]] = data
     return metrics_data
 
@@ -73,15 +73,15 @@ def parseMetricsFile( rnaSeqMetrics_output ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description="Converts picard RnaSeqMetrics output in JSON format." )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-metrics', required=True, help='Path to the output of picard RnaSeqMetrics (format: TXT).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-metrics', required=True, help='path to metrics in JSON format (format: JSON).' )
+    parser = argparse.ArgumentParser(description="Converts picard RnaSeqMetrics output in JSON format.")
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-metrics', required=True, help='Path to the output of picard RnaSeqMetrics (format: TXT).')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-metrics', required=True, help='path to metrics in JSON format (format: JSON).')
     args = parser.parse_args()
 
     # Process
-    metrics_data = parseMetricsFile( args.input_metrics )
+    metrics_data = parseMetricsFile(args.input_metrics)
     with open(args.output_metrics, "w") as FH_out:
-        FH_out.write( json.dumps(metrics_data, default=lambda o: o.__dict__, sort_keys=True ) )
+        FH_out.write(json.dumps(metrics_data, default=lambda o: o.__dict__, sort_keys=True))

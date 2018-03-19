@@ -28,16 +28,13 @@ import sys
 import pysam
 import argparse
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from bed import getAreasByChr
-from region import Region
-from vcf import VCFIO, getAlleleRecord
-
+from anacore.bed import getAreasByChr
+from anacore.region import Region
+from anacore.vcf import VCFIO, getAlleleRecord
 
 
 ########################################################################
@@ -109,8 +106,8 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     inspect_start = ref_start - 1
     inspect_end = ref_end
     reads = dict()
-    with pysam.AlignmentFile( aln_file, "rb" ) as FH_sam:
-        for pileupcolumn in FH_sam.pileup( chrom, inspect_start, inspect_end, max_depth=100000 ):
+    with pysam.AlignmentFile(aln_file, "rb") as FH_sam:
+        for pileupcolumn in FH_sam.pileup(chrom, inspect_start, inspect_end, max_depth=100000):
             for pileupread in pileupcolumn.pileups:
                 if selected_RG is None or (pileupread.alignment.get_tag("RG") in selected_RG):
                     if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
@@ -124,14 +121,14 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
                         if read_id not in reads:
                             reads[read_id] = [None for pos in range(inspect_start, pileupcolumn.pos)]
                         # Store comparison with ref for current position
-                        if pileupread.is_del: # Deletion
-                            reads[read_id].append( "" )
-                        elif pileupread.indel > 0: # Insertion
+                        if pileupread.is_del:  # Deletion
+                            reads[read_id].append("")
+                        elif pileupread.indel > 0:  # Insertion
                             insert = ""
                             for insert_idx in range(pileupread.indel + 1):
                                 insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
-                            reads[read_id].append( insert )
-                        elif not pileupread.is_refskip: # Substitution
+                            reads[read_id].append(insert)
+                        elif not pileupread.is_refskip:  # Substitution
                             reads[read_id].append(
                                 pileupread.alignment.query_sequence[pileupread.query_position].upper()
                             )
@@ -140,20 +137,20 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     for read_id in reads:
         read_len = len(reads[read_id])
         for idx in range(inspected_len - read_len):
-            reads[read_id].append( None )
+            reads[read_id].append(None)
     # Process AD and DP
     alt = alt if alt != "." else ""
     AD = 0
     DP = 0
     for read_id in reads:
-        if None not in reads[read_id]: # Skip partial reads
+        if None not in reads[read_id]:  # Skip partial reads
             DP += 1
             if "".join(reads[read_id]) == alt:
                 AD += 1
     # Return
-    return( AD, DP )
+    return AD, DP
 
-def getAlnCost( ref, aln_seq, weights=None ):
+def getAlnCost(ref, aln_seq, weights=None):
     """
     @summary: Returns cost of the alignment for alignment comparison. For two alignments on the
               same area the alignment with the lower cost is the nearest of the reference.

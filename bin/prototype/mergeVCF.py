@@ -29,14 +29,11 @@ import pysam
 import argparse
 import statistics
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFIO, getAlleleRecord
-
+from anacore.vcf import VCFIO, getAlleleRecord
 
 
 ########################################################################
@@ -44,7 +41,7 @@ from vcf import VCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
+def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     """
     @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     @param chrom: [str] The variant region name.
@@ -63,8 +60,8 @@ def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     inspect_start = ref_start - 1
     inspect_end = ref_end
     reads = dict()
-    with pysam.AlignmentFile( aln_file, "rb" ) as FH_sam:
-        for pileupcolumn in FH_sam.pileup( chrom, inspect_start, inspect_end, max_depth=100000 ):
+    with pysam.AlignmentFile(aln_file, "rb") as FH_sam:
+        for pileupcolumn in FH_sam.pileup(chrom, inspect_start, inspect_end, max_depth=100000):
             for pileupread in pileupcolumn.pileups:
                 if selected_RG is None or (pileupread.alignment.get_tag("RG") in selected_RG):
                     if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
@@ -77,12 +74,12 @@ def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
                         # Store new reads
                         if read_id not in reads:
                             pair_strand = None
-                            if pileupread.alignment.is_read2: # R2
+                            if pileupread.alignment.is_read2:  # R2
                                 if pileupread.alignment.is_reverse:
                                     pair_strand = "+"
                                 else:
                                     pair_strand = "-"
-                            else: # R1
+                            else:  # R1
                                 if pileupread.alignment.is_reverse:
                                     pair_strand = "-"
                                 else:
@@ -92,14 +89,14 @@ def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
                                 "pair_strand": pair_strand
                             }
                         # Store comparison with ref for current position
-                        if pileupread.is_del: # Deletion
-                            reads[read_id]["seq"].append( "" )
-                        elif pileupread.indel > 0: # Insertion
+                        if pileupread.is_del:  # Deletion
+                            reads[read_id]["seq"].append("")
+                        elif pileupread.indel > 0:  # Insertion
                             insert = ""
                             for insert_idx in range(pileupread.indel + 1):
                                 insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
-                            reads[read_id]["seq"].append( insert )
-                        elif not pileupread.is_refskip: # Substitution
+                            reads[read_id]["seq"].append(insert)
+                        elif not pileupread.is_refskip:  # Substitution
                             reads[read_id]["seq"].append(
                                 pileupread.alignment.query_sequence[pileupread.query_position].upper()
                             )
@@ -108,7 +105,7 @@ def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     for read_id in reads:
         read_len = len(reads[read_id]["seq"])
         for idx in range(inspected_len - read_len):
-            reads[read_id]["seq"].append( None )
+            reads[read_id]["seq"].append(None)
     # Process AD and DP
     alt = alt if alt != "." else ""
     AD = 0
@@ -116,7 +113,7 @@ def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
     SAF = 0
     SAR = 0
     for read_id in reads:
-        if None not in reads[read_id]["seq"]: # Skip partial reads
+        if None not in reads[read_id]["seq"]:  # Skip partial reads
             DP += 1
             if "".join(reads[read_id]["seq"]) == alt:
                 AD += 1
@@ -124,9 +121,9 @@ def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
                     SAF += 1
                 else:
                     SAR += 1
-                    
+
     # Return
-    return( AD, DP, SAF, SAR )
+    return(AD, DP, SAF, SAR)
 
 
 ########################################################################
@@ -136,15 +133,15 @@ def getADPReads( chrom, pos, ref, alt, aln_file, selected_RG=None ):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser( description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. ote: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    parser.add_argument( '-p', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]" )
-    parser.add_argument( '-s', '--selected-region', help="Only the variants on this region (example: 'chr1') will be kept. [Default: All the regions are kept]" )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).' )
-    group_input.add_argument( '-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a VCF.' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).' )
+    parser = argparse.ArgumentParser(description='Merges variants from several samples. If one variant is missing from a sample his AD, AF and DP are retrieved from the alignment file of this sample. The VCFs must come from the same process with same references. ote: for a common variant all the fields values except for AF, AD and DP are retrieved from the first VCF where it has been found.')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    parser.add_argument('-p', '--AF-precision', type=float, default=5, help="The AF's decimal precision. [Default: %(default)s]")
+    parser.add_argument('-s', '--selected-region', help="Only the variants on this region (example: 'chr1') will be kept. [Default: All the regions are kept]")
+    group_input = parser.add_argument_group('Inputs')  # Inputs
+    group_input.add_argument('-i', '--input-variants', nargs='+', required=True, help='The path to the variants files (format: VCF).')
+    group_input.add_argument('-a', '--input-aln', nargs='+', required=True, help='The path to the alignments files (format: BAM). Each alignment file correspond to a VCF.')
+    group_output = parser.add_argument_group('Outputs')  # Outputs
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).')
     args = parser.parse_args()
 
     # Get identified variants from VCF
@@ -155,26 +152,20 @@ if __name__ == "__main__":
         current_aln = args.input_aln[vcf_idx]
         with VCFIO(current_vcf) as FH_vcf:
             # Manage samples
-            for curr_spl in FH_vcf.samples: # For each sample in VCF
+            for curr_spl in FH_vcf.samples:  # For each sample in VCF
                 aln_by_samples[curr_spl] = current_aln
             # Manage records
-            for record in FH_vcf: # For each variant
+            for record in FH_vcf:  # For each variant
                 if args.selected_region is None or record.chrom == args.selected_region:
-                    for curr_spl in FH_vcf.samples: # For each sample in VCF
-                        vcaller_AF = record.getAF( curr_spl )
-                        vcaller_DP = record.getDP( curr_spl )
-                        for alt_idx, curr_alt in enumerate(record.alt): # For each alternative allele in in variant
-                            record_allele = getAlleleRecord( FH_vcf, record, alt_idx )
+                    for curr_spl in FH_vcf.samples:  # For each sample in VCF
+                        vcaller_AF = record.getAF(curr_spl)
+                        vcaller_DP = record.getDP(curr_spl)
+                        for alt_idx, curr_alt in enumerate(record.alt):  # For each alternative allele in in variant
+                            record_allele = getAlleleRecord(FH_vcf, record, alt_idx)
                             # Get allele frequency from the variant caller
                             vcaller_curr_AF = vcaller_AF[alt_idx]
-                            if len(vcaller_AF) == len(record.alt) + 1: # The AF cointains reference AF
+                            if len(vcaller_AF) == len(record.alt) + 1:  # The AF cointains reference AF
                                 vcaller_curr_AF = vcaller_AF[alt_idx + 1]
-                            #######################################################################################
-                            #~ test_AD, test_DP = getADP( record_allele.chrom, record_allele.pos, record_allele.ref, record_allele.alt[0], current_aln )
-                            #~ test_AF = 0 if test_DP == 0 else float(test_AD)/test_DP
-                            #~ print( record_allele.chrom + ":" + str(record_allele.pos), record_allele.ref + "/" + record_allele.alt[0], round(test_AF, 4), "vs", vcaller_curr_AF )
-                            #~ print()
-                            #######################################################################################
                             record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
                             record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
                             record_allele.samples[curr_spl]["DP"] = vcaller_DP
@@ -193,7 +184,7 @@ if __name__ == "__main__":
     # Completes and writes variants
     with VCFIO(args.output_variants, "w") as FH_out:
         # Header
-        FH_out.copyHeader( FH_vcf )
+        FH_out.copyHeader(FH_vcf)
         FH_out.info["AF"] = {"type": float, "type_tag": "Float", "number": None, "number_tag": "A", "description": "The alleles frequencies for the group of samples."}
         FH_out.info["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths for the group of samples."}
         FH_out.info["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Combined depth across samples."}
@@ -226,12 +217,12 @@ if __name__ == "__main__":
             curr_var.info["AD"] = [0]
             curr_var.info["DP"] = 0
             for spl in aln_by_samples:
-                if spl not in curr_var.samples: # If the variant has not be seen in sample
+                if spl not in curr_var.samples:  # If the variant has not be seen in sample
                     # Retrieve AD, AF and DP from aln file
                     chrom_pos, ref_alt = allele_id.split("=")
                     chrom, pos = chrom_pos.split(":")
                     ref, alt = ref_alt.split("/")
-                    AD, DP, SAF, SAR = getADPReads( chrom, int(pos), ref, alt, aln_by_samples[spl] )
+                    AD, DP, SAF, SAR = getADPReads(chrom, int(pos), ref, alt, aln_by_samples[spl])
                     curr_var.samples[spl] = {
                         "AF": [0 if DP == 0 else round(float(AD)/DP, args.AF_precision)],
                         "AD": [AD],
@@ -246,4 +237,4 @@ if __name__ == "__main__":
             curr_var.info["AF"][0] = curr_var.info["AD"][0] / curr_var.info["DP"]
             curr_var.qual = statistics.median([curr_var.samples[spl]["QUAL"] for spl in curr_var.samples if curr_var.samples[spl]["QUAL"] is not None])
             # Write variant
-            FH_out.write( curr_var )
+            FH_out.write(curr_var)

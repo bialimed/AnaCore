@@ -31,14 +31,11 @@ import uuid
 import argparse
 import subprocess
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from sequenceIO import FastqIO, FastaIO
-
+from anacore.sequenceIO import FastqIO, FastaIO
 
 
 ########################################################################
@@ -120,7 +117,7 @@ if __name__ == "__main__":
     cutadapt_out_R2 = os.path.join( output_dir, tmp_prefix + "_{name}_R2.fastq.gz" )
     cutadapt( args.R1_path, cutadapt_out_R1, fwd_barcodes, args.error_rate )
     cutadapt( args.R2_path, cutadapt_out_R2, rvs_barcodes, args.error_rate )
-    
+
     # Retrieve reads by barcode
     with open(args.output_groups, "w") as FH_out:
         for filename in os.listdir(output_dir):
@@ -134,11 +131,11 @@ if __name__ == "__main__":
                     R1 = set( get_seq_ids(filepath_R1) )
                     R2 = set( get_seq_ids(filepath_R2) )
                     retained_ids = R1.intersection(R2)
-                    
+
                     # Write reads ID
                     for read_id in retained_ids:
                         FH_out.write( read_id + "\t" + barcode_name + "\n" )
-                    
+
                     to_clean.append( filepath_R1 )
                     to_clean.append( filepath_R2 )
     for current_tmp_path in to_clean:

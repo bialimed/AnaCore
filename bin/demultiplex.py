@@ -30,14 +30,11 @@ import sys
 import argparse
 import subprocess
 
-CURRENT_DIR = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from sequenceIO import FastaIO, FastqIO
-
+from anacore.sequenceIO import FastaIO, FastqIO
 
 
 ########################################################################
@@ -45,7 +42,7 @@ from sequenceIO import FastaIO, FastqIO
 # FUNCTIONS
 #
 ########################################################################
-def getBarcodes( in_barcodes ):
+def getBarcodes(in_barcodes):
     """
     @summary: Returns the list of amplicons from a Illumina's manifest.
     @param manifest_path: [str] Path to the manifest.
@@ -63,22 +60,22 @@ def getBarcodes( in_barcodes ):
                 })
     return barcodes
 
-def get_seq_ids( fastq_path ):
+def get_seq_ids(fastq_path):
     ids = list()
-    with FastqIO( fastq_path ) as FH:
+    with FastqIO(fastq_path) as FH:
         for record in FH:
-            ids.append( record.id )
+            ids.append(record.id)
     return ids
 
-def pickSequences( in_path, out_path, retained_ids ):
+def pickSequences(in_path, out_path, retained_ids):
     dict_retained_ids = {curr_id: 1 for curr_id in retained_ids}
-    with FastqIO( out_path, "w" ) as FH_out:
-        with FastqIO( in_path ) as FH_in:
+    with FastqIO(out_path, "w") as FH_out:
+        with FastqIO(in_path) as FH_in:
             for record in FH_in:
                 if record.id in dict_retained_ids:
-                    FH_out.write( record )
+                    FH_out.write(record)
 
-def cutadapt( in_fastq, out_fastq, adapter_seq, error_rate=0.1 ):
+def cutadapt(in_fastq, out_fastq, adapter_seq, error_rate=0.1):
     cmd = [
         "cutadapt",
         "--error-rate", str(error_rate),
@@ -87,9 +84,9 @@ def cutadapt( in_fastq, out_fastq, adapter_seq, error_rate=0.1 ):
         "-o", out_fastq,
         in_fastq
     ]
-    subprocess.check_call( cmd, stdout=subprocess.DEVNULL )
+    subprocess.check_call(cmd, stdout=subprocess.DEVNULL)
 
-def getLibNameFromReadPath( fastq_path ):
+def getLibNameFromReadPath(fastq_path):
     library_name = os.path.basename(fastq_path).split(".")[0]
     if re.search('_[rR][1-2]$', library_name):
         library_name = library_name[:-3]
@@ -108,16 +105,16 @@ if __name__ == "__main__":
     # au moins un primer si non ambigu ? ############################
 
     # Manage parameters
-    parser = argparse.ArgumentParser( description='**************************************.' )
-    parser.add_argument( '-e', '--error-rate', default=0.1, type=float, help='************************************. [Default: %(default)s]' )
-    parser.add_argument( '-v', '--version', action='version', version=__version__ )
-    group_input = parser.add_argument_group( 'Inputs' ) # Inputs
-    group_input.add_argument( '-b', '--barcodes', required=True, help='************ (format: TSV).' )
-    group_input.add_argument( '-R1', '--R1-path', required=True, help='************ (format: fastq).' )
-    group_input.add_argument( '-R2', '--R2-path', required=True, help='************ (format: fastq).' )
-    group_output = parser.add_argument_group( 'Outputs' ) # Outputs
-    group_output.add_argument( '-o', '--output-filename-pattern', help='**********************.')
-    group_output.add_argument( '-d', '--output-dir', default=os.getcwd(), help='**********************. [Default: %(default)s]')
+    parser = argparse.ArgumentParser(description='**************************************.')
+    parser.add_argument('-e', '--error-rate', default=0.1, type=float, help='************************************. [Default: %(default)s]')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
+    group_input = parser.add_argument_group('Inputs') # Inputs
+    group_input.add_argument('-b', '--barcodes', required=True, help='************ (format: TSV).')
+    group_input.add_argument('-R1', '--R1-path', required=True, help='************ (format: fastq).')
+    group_input.add_argument('-R2', '--R2-path', required=True, help='************ (format: fastq).')
+    group_output = parser.add_argument_group('Outputs') # Outputs
+    group_output.add_argument('-o', '--output-filename-pattern', help='**********************.')
+    group_output.add_argument('-d', '--output-dir', default=os.getcwd(), help='**********************. [Default: %(default)s]')
     args = parser.parse_args()
 
     # Set output variables
@@ -125,35 +122,35 @@ if __name__ == "__main__":
         args.output_filename_pattern = getLibNameFromReadPath(args.R1_path) + "_<AMPLI>_<R>.fastq.gz"
 
     # Load amplicons param
-    barcodes = getBarcodes( args.barcodes )
+    barcodes = getBarcodes(args.barcodes)
 
     # Demultiplex
     ids_by_barcodes = dict()
     for curr_barcode in barcodes:
-        ampl_out_R1 = os.path.join( args.output_dir, args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", curr_barcode["id"]) )
-        ampl_out_R2 = os.path.join( args.output_dir, args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", curr_barcode["id"]) )
+        ampl_out_R1 = os.path.join(args.output_dir, args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", curr_barcode["id"]))
+        ampl_out_R2 = os.path.join(args.output_dir, args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", curr_barcode["id"]))
 
         # Find adapter
-        cutadapt_out_R1 = os.path.join( args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", curr_barcode["id"]) )
-        cutadapt_out_R2 = os.path.join( args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", curr_barcode["id"]) )
-        cutadapt( args.R1_path, cutadapt_out_R1, "^" + curr_barcode["fwd"], args.error_rate )
-        cutadapt( args.R2_path, cutadapt_out_R2, "^" + curr_barcode["rvs"], args.error_rate )
+        cutadapt_out_R1 = os.path.join(args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R1").replace("<AMPLI>", curr_barcode["id"]))
+        cutadapt_out_R2 = os.path.join(args.output_dir, "tmp_" + args.output_filename_pattern.replace("<R>", "R2").replace("<AMPLI>", curr_barcode["id"]))
+        cutadapt(args.R1_path, cutadapt_out_R1, "^" + curr_barcode["fwd"], args.error_rate)
+        cutadapt(args.R2_path, cutadapt_out_R2, "^" + curr_barcode["rvs"], args.error_rate)
 
         # Select reads for the amplicon
-        R1 = set( get_seq_ids(cutadapt_out_R1) )
-        R2 = set( get_seq_ids(cutadapt_out_R2) )
+        R1 = set(get_seq_ids(cutadapt_out_R1))
+        R2 = set(get_seq_ids(cutadapt_out_R2))
         retained_ids = R1.intersection(R2)
         ids_by_barcodes[curr_barcode["id"]] = retained_ids
 
         # Filter
-        pickSequences( args.R1_path, ampl_out_R1, retained_ids )
-        pickSequences( args.R2_path, ampl_out_R2, retained_ids )
+        pickSequences(args.R1_path, ampl_out_R1, retained_ids)
+        pickSequences(args.R2_path, ampl_out_R2, retained_ids)
 
         # Clean
-        os.remove( cutadapt_out_R1 )
-        os.remove( cutadapt_out_R2 )
+        os.remove(cutadapt_out_R1)
+        os.remove(cutadapt_out_R2)
 
-        print( curr_barcode["id"], len(retained_ids), curr_barcode["fwd"], curr_barcode["rvs"], sep="\t" )
+        print(curr_barcode["id"], len(retained_ids), curr_barcode["fwd"], curr_barcode["rvs"], sep="\t")
 
     # Check ambiguous
     ids = dict()
@@ -165,4 +162,4 @@ if __name__ == "__main__":
                     non_uniq[seq_id] = 1
                 non_uniq[seq_id] += 1
             ids[seq_id] = 1
-    print( "Ambiguous", len(non_uniq), sep="\t" )
+    print("Ambiguous", len(non_uniq), sep="\t")
