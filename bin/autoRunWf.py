@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.7.0'
+__version__ = '2.8.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -32,15 +32,13 @@ import logging
 import argparse
 import datetime
 import subprocess
-import importlib.util
 from email.mime.text import MIMEText
 
-# Load Illumina
-bin_dir = os.path.abspath(os.path.dirname(__file__))
-illumina_lib = os.path.join(os.path.dirname(bin_dir), "lib", "anacore", "illumina.py")
-spec = importlib.util.spec_from_file_location("illumina", illumina_lib)
-illumina = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(illumina)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
+sys.path.append(LIB_DIR)  # Load libraries for current script but not in bprocess
+
+from anacore.illumina import SampleSheetIO
 
 
 ########################################################################
@@ -118,7 +116,7 @@ def getProtocol(in_spl_folder):
     @warning: For Amplicon - DS the manifests names must be <DESIGN>_A.txt and <DESIGN>_B.txt.
     """
     protocol = {"workflow": None, "design": None}
-    samplesheet = illumina.SampleSheetIO(os.path.join(in_spl_folder, "SampleSheet.csv"))
+    samplesheet = SampleSheetIO(os.path.join(in_spl_folder, "SampleSheet.csv"))
     protocol["workflow"] = samplesheet.header["Workflow"]
     if samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
         manifest_A = os.path.basename(samplesheet.manifests["A"])
