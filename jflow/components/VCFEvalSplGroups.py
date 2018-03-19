@@ -24,8 +24,6 @@ __status__ = 'prod'
 
 import os
 from jflow.component import Component
-from jflow.abstraction import MultiMap
-
 from weaver.function import ShellFunction
 
 

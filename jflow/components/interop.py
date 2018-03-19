@@ -23,8 +23,6 @@ __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 from jflow.component import Component
-from jflow.abstraction import MultiMap
-
 from weaver.function import ShellFunction
 
 
