@@ -19,11 +19,12 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
+import sys
 import time
 import json
 import argparse
@@ -114,6 +115,8 @@ def distToHC(in_distances, out_tree, linkage_method, tree_format):
         "--output-tree", out_tree,
         "--output-format", tree_format
     ]
+    if sys.executable is not None:
+        cmd.insert(0, sys.executable)
     subprocess.check_output(cmd)
 
 
@@ -144,6 +147,8 @@ def filterVCF(in_variants, out_variants, min_AF):
         "--input-variants", in_variants,
         "--output-variants", out_variants
     ]
+    if sys.executable is not None:
+        cmd.insert(0, sys.executable)
     subprocess.check_output(cmd)
     # Delete temporary
     tmp.deleteAll()
@@ -166,6 +171,8 @@ def checkGroups(in_variants, in_groups, out_distances, out_intruders, distance_m
         "--output-distances", out_distances,
         "--output-invalids", out_intruders
     ]
+    if sys.executable is not None:
+        cmd.insert(0, sys.executable)
     subprocess.check_output(cmd)
 
 
@@ -182,6 +189,8 @@ def mergeVCF(in_variants, out_variants):
         "--input-variants"
     ]
     cmd.extend(in_variants)
+    if sys.executable is not None:
+        cmd.insert(0, sys.executable)
     subprocess.check_output(cmd)
 
 

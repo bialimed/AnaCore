@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.2'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -45,7 +45,7 @@ class Cmd:
     @summary: Command wrapper.
     @copyright: FROGS's team INRA.
     """
-    def __init__(self, program, description, exec_parameters, version_parameters=None):
+    def __init__(self, program, description, exec_parameters, version_parameters=None, interpreter=None):
         """
         @param exec_parameters: [str] The parameters to execute the program. Two possibles syntaxes.
                                 If the parameter contains the string '##PROGRAM##', this tag will be replaced by the program parameter before submit.
@@ -53,22 +53,28 @@ class Cmd:
         @param version_parameters: [str] The parameters to get the program version. Two possibles syntaxes.
                                    If the parameter contains the string '##PROGRAM##', this tag will be replaced by the program parameter before submit.
                                    Otherwise the parameters will be added after the program in command line.
+        @param interpreter: [str] The specific interpreter used to call program. For example '/home/user/venv/bin/python3' for a python script with
+                                  dependencies installed in the virtual environment /home/user/venv.
         """
         self.program = program
         self.description = description
         self.exec_parameters = exec_parameters
         self.version_parameters = version_parameters
+        self.interpreter = interpreter
 
     def get_cmd(self):
         """
         @summary : Returns the command line.
         @return : [str] The command line.
         """
+        exec_call = self.program
+        if self.interpreter is not None:
+            exec_call = self.interpreter + " " + exec_call
         cmd = None
         if '##PROGRAM##' in self.exec_parameters:
-            cmd = self.exec_parameters.replace('##PROGRAM##', self.program)
+            cmd = self.exec_parameters.replace('##PROGRAM##', exec_call)
         else:
-            cmd = self.program + ' ' + self.exec_parameters
+            cmd = exec_call + ' ' + self.exec_parameters
         return cmd
 
     def get_version(self, location='stdout'):
@@ -82,8 +88,8 @@ class Cmd:
         else:
             try:
                 cmd = self.program + ' ' + self.version_parameters
-                if '##PROGRAM##' in self.exec_parameters:
-                    cmd = self.version_parameters.replace('##PROGRAM##', self.program)
+                if self.interpreter is not None:
+                    cmd = self.interpreter + ' ' + cmd
                 p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
                 stdout, stderr = p.communicate()
                 if location == 'stderr':
@@ -281,7 +287,8 @@ class SplitBAMByRG(Cmd):
                       "splitBAMByRG.py",
                       "Splits BAM by groups of non-overlapping amplicons.",
                       cmd_param,
-                      "--version" )
+                      "--version",
+                      sys.executable )
 
 class AddRGOnBAM(Cmd):
     """
@@ -306,7 +313,8 @@ class AddRGOnBAM(Cmd):
                       "addRGOnBAM.py",
                       "Adds tag on reads by origin (amplicon ID).",
                       cmd_param,
-                      "--version" )
+                      "--version",
+                      sys.executable )
 
 class GATKHaplotypeCaller(Cmd):
     def __init__(self, in_aln, out_variants, in_reference, in_dbsnp=None, in_intervals=None, min_confidence_calling=30, min_confidence_emitting=30):
@@ -324,10 +332,11 @@ class GATKHaplotypeCaller(Cmd):
             " 2> /dev/null"
 
         Cmd.__init__( self,
-                      "java -Xmx30g -jar /softs/tools/gatk/3.6/GenomeAnalysisTK.jar",
+                      "/softs/tools/gatk/3.6/GenomeAnalysisTK.jar",
                       "Variant calling.",
                       cmd_param,
-                      "--version" )
+                      "--version",
+                      "java -Xmx30g -jar" )
 
 class FreeBayes(Cmd):
     def __init__(self, in_reference, in_aln, out_variants):
@@ -369,8 +378,7 @@ class VarDictStep1(Cmd):
         Cmd.__init__( self,
                       "VarDict",
                       "Dicovers variants.",
-                      cmd_param,
-                      None )
+                      cmd_param )
 
 class VarDictStep2(Cmd):
     """
@@ -389,8 +397,7 @@ class VarDictStep2(Cmd):
         Cmd.__init__( self,
                       "teststrandbias.R",
                       "Filters variants on strand bias.",
-                      cmd_param,
-                      None )
+                      cmd_param )
 
 class VarDictStep3(Cmd):
     """
@@ -413,8 +420,7 @@ class VarDictStep3(Cmd):
         Cmd.__init__( self,
                       "var2vcf_valid.pl",
                       "Filters variants and converts to VCF.",
-                      cmd_param,
-                      None )
+                      cmd_param )
 
 class GatherOverlappingRegions(Cmd):
     """
@@ -437,7 +443,8 @@ class GatherOverlappingRegions(Cmd):
                       "mergeVCFAmpli.py",
                       "Gathers variants from non-overlapping groups.",
                       cmd_param,
-                      "--version" )
+                      "--version",
+                      sys.executable )
 
 class MeltOverlappingRegions(Cmd):
     """
@@ -458,7 +465,8 @@ class MeltOverlappingRegions(Cmd):
                       "meltVCFSamples.py",
                       "Melts all the samples contained in variant file in one sample.",
                       cmd_param,
-                      "--version" )
+                      "--version",
+                      sys.executable )
 
 class FilterVCFPrimers(Cmd):
     """
@@ -481,7 +489,8 @@ class FilterVCFPrimers(Cmd):
                       "filterVCFPrimers.py",
                       "Removes variants located on amplicons primers.",
                       cmd_param,
-                      "--version" )
+                      "--version",
+                      sys.executable )
 
 def filterBED(in_bed, in_names, out_bed, nb_col=None):
     """
