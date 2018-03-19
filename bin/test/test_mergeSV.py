@@ -24,7 +24,6 @@ __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
-import sys
 import uuid
 import tempfile
 import unittest

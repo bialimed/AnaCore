@@ -31,14 +31,14 @@ import unittest
 import subprocess
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-BIN_DIR = os.path.dirname(CURRENT_DIR)
-LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(BIN_DIR), "lib"))
-os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
+APP_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
+LIB_DIR = os.path.join(APP_DIR, "lib")
 sys.path.append(LIB_DIR)
-if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
-else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from vcf import VCFIO, VCFRecord
+from anacore.vcf import VCFIO, VCFRecord
+
+BIN_DIR = os.path.dirname(CURRENT_DIR)
+os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
 
 
 ########################################################################
