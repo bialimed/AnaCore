@@ -19,7 +19,7 @@ The application folder has the following structure:
     │   └── components/    # Wrappers used in workflow manager (jflow)
     ├── lib/               # Librairies used in binaries
     ├── README.md
-    └── ressources/        # Ressources (panels descriptions, ...)
+    └── resources/         # Resources (panels descriptions, ...)
 
 ## License
 GNU GPL v3
