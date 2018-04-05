@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -184,30 +184,41 @@ class Node:
         return curr_node
 
     @staticmethod
-    def fromClusterNode(tree, id_to_name=None, distance_tag="dist", _metadata=None):
+    def fromClusterNode(tree, id_to_name=None, distance_tag="dist", _parent_dist_from_root=0, _root_dist_from_leaves=None):
         """
         @summary: Returns nodes representing the tree.
         @param tree: [ClusterNode] The tree returned by numpy.
         @param id_to_name: [dict] The link between numpy's node id and the node
         name.
         @param distance_tag: [str] Tag used to store distance in metadata.
-        @param _metadata: [dict] Intern param used to pass information between
-        node and children.
+        @param _parent_dist_from_root: [float] Distance between root and parent
+        node. By default the first node provided is view as root.
+        @param _root_dist_from_leaves: [float] Maximum distance between root and
+        leaves. By default the first node provided is view as root.
         @return: [Node] The node representing the root.
         """
+        if _root_dist_from_leaves is None:  # First node is root
+            _root_dist_from_leaves = tree.dist
         # Current node
         node_name = None
         if id_to_name is not None and tree.get_id() in id_to_name:
             node_name = id_to_name[tree.get_id()]
-        curr_node = Node(node_name, metadata=_metadata)
+        curr_dist_from_root = _root_dist_from_leaves - tree.dist
+        curr_node = Node(
+            node_name,
+            metadata={
+                distance_tag: curr_dist_from_root - _parent_dist_from_root,
+                "dist_from_root": curr_dist_from_root
+            }
+        )
         # Chilren
         if tree.get_left():
             curr_node.addChild(
-                Node.fromClusterNode(tree.get_left(), id_to_name, distance_tag, {distance_tag: tree.dist})
+                Node.fromClusterNode(tree.get_left(), id_to_name, distance_tag, curr_dist_from_root, _root_dist_from_leaves)
             )
         if tree.get_right():
             curr_node.addChild(
-                Node.fromClusterNode(tree.get_right(), id_to_name, distance_tag, {distance_tag: tree.dist})
+                Node.fromClusterNode(tree.get_right(), id_to_name, distance_tag, curr_dist_from_root, _root_dist_from_leaves)
             )
         return curr_node
 
