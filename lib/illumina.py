@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.8.0'
+__version__ = '1.8.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -199,9 +199,34 @@ class RunParameters(object):
         root = tree.getroot()
         # Process information
         self.instrument = self._getInstrumentFromRoot(root)
-        self.reads = self._getReadsFromSection(root.find("Reads"))
+        reads_subtree = root.find("Reads")
+        if reads_subtree is not None:
+            self.reads = self._getReadsFromSection(reads_subtree)
+        else:
+            self.reads = self._getReadsFromSetup(root.find("Setup"))
         self.run = self._getRunFromRoot(root)
         self.kit = self._getKitFromRoot(root)
+
+    def _getReadsFromSetup(self, subtree):
+        reads = list()
+        indices = list()
+        for child in subtree:
+            if child.tag.startswith("Read"):
+                reads.append({
+                    "is_index": False,
+                    "nb_cycles": int(child.text)
+                })
+            elif child.tag.startswith("Index"):
+                indices.append({
+                    "is_index": True,
+                    "nb_cycles": int(child.text)
+                })
+        phases = [reads[0]]
+        for curr in indices:
+            phases.append(curr)
+        for curr in reads[1:]:
+            phases.append(curr)
+        return phases
 
     def _getReadsFromSection(self, subtree):
         reads = list()
@@ -222,9 +247,10 @@ class RunParameters(object):
             if nb_occur > max_nb_occur:
                 platform = curr_platform
         # Get instrument serial
-        serial_number = root.find("ScannerID").text
+        serial_number = root.find("ScannerID")
         if serial_number is None:
-            root.find("InstrumentID").text
+            serial_number = root.find("InstrumentID")
+        serial_number = serial_number.text
         # Return
         return {
             "id": serial_number,
@@ -232,9 +258,10 @@ class RunParameters(object):
         }
 
     def _getRunFromRoot(self, root):
-        run_number = root.find("RunNumber").text
+        run_number = root.find("RunNumber")
         if run_number is None:
-            run_number = root.find("ScanNumber").text
+            run_number = root.find("ScanNumber")
+        run_number = run_number.text
         return {
             "number": run_number,
             "id": root.find("RunID").text,
@@ -245,9 +272,10 @@ class RunParameters(object):
         # Flowcell ID
         flowcell_id = self.run["id"].rsplit("_", 1)[1]  # HiSeq: <RunID>141110_D00267_0193_BHAMVRADXX</RunID> ; NextSeq: <FlowCellSerial> ; MiSeq: <FlowcellRFIDTag> > <SerialNumber>
         # Reagent kit ID
-        reagent_kit_id = root.find("ReagentKitBarcode").text
+        reagent_kit_id = root.find("ReagentKitBarcode")
         if reagent_kit_id is None:
-            reagent_kit_id = root.find("ReagentKitSerial").text
+            reagent_kit_id = root.find("ReagentKitSerial")
+        reagent_kit_id = reagent_kit_id.text
         return {
             "flowcell_id": flowcell_id,
             "reagent_kit_id": reagent_kit_id
