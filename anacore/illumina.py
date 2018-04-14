@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.8.1'
+__version__ = '1.9.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -353,3 +353,42 @@ def getLibNameFromReadsPath(seq_path):
     elif re.search('_[rR][1-2]_\d\d\d$', library_name):
         library_name = library_name[:-7]
     return library_name
+
+
+def getInfFromSeqID(seq_id):
+    """
+    @summary: Returns sequencer id, run id, flowcell id and position of the
+    sequence on the sequencer flowcell.
+    @param sequence: [str] The ID of the sequence provided by the sequencer.
+    @return: [dict] The sequencer id, run id, flowcell id and position of the
+    sequence on the sequencer flowcell.
+    """
+    # Illumina's ID: EAS139:136:FC706VJ:2:2104:15343:197393
+    sequencer_id, run_id, flowcell_id, lane_id, tile_id, x_pos, y_pos = seq_id.split(":")
+    return {
+        "sequencer_id": sequencer_id,
+        "run_id": run_id,
+        "flowcell_id": flowcell_id,
+        "lane_id": int(lane_id),
+        "tile_id": int(tile_id),
+        "x_pos": int(x_pos),
+        "y_pos": int(y_pos),
+    }
+
+
+def getInfFromSeqDesc(seq_desc):
+    """
+    @summary: Returns sequencer id, run id, flowcell id and position of the
+    sequence on the sequencer flowcell.
+    @param sequence: [str] The ID of the sequence provided by the sequencer.
+    @return: [dict] The sequencer id, run id, flowcell id and position of the
+    sequence on the sequencer flowcell.
+    """
+    # Illumina's description: 1:Y:18:ATCACG
+    reads_phases, kept_status, control_bits, barcode = seq_desc.split(":")
+    return {
+        "reads_phases": int(reads_phases),
+        "is_kept": kept_status == "N",
+        "control_bits": None if control_bits == "0" else int(control_bits),
+        "barcode": barcode
+    }
