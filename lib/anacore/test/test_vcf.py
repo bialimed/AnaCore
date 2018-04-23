@@ -511,6 +511,50 @@ class TestVCFRecord(unittest.TestCase):
         downstream = insertion.getMostDownstream(ref)
         self.assertTrue(downstream.pos == 34 and downstream.ref == "." and downstream.alt[0] == "G")
 
+    def testRefStart(self):
+        data = [
+            # Substitutions
+            ["artificial_1", 10, "substit_1", "A", ["T"], None, None, {"expected_start": 10, "expected_end": 10}],
+            ["artificial_1", 10, "substit_2", "AA", ["TT"], None, None, {"expected_start": 10, "expected_end": 11}],
+            # Deletions
+            ["artificial_1", 12, "del_1", "A", ["."], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "del_2", "AAA", ["."], None, None, {"expected_start": 10, "expected_end": 12}],
+            ["artificial_1", 10, "del_3", "AAA", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
+            ["artificial_1", 10, "del_4", "AGC", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
+            ["artificial_1", 10, "del_5", "AAAT", ["TG"], None, None, {"expected_start": 10, "expected_end": 13}],
+            # Insertions
+            ["artificial_1", 12, "ins_1", "A", ["TG"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 12, "ins_2", "A", ["AGT"], None, None, {"expected_start": 12.5, "expected_end": 12.5}],
+            ["artificial_1", 11, "ins_3", "AA", ["AGT"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "ins_4", "AAA", ["AAGT"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "ins_5", "AATC", ["AACGT"], None, None, {"expected_start": 12, "expected_end": 13}],
+        ]
+        for curr_data in data:
+            record = VCFRecord(*curr_data)
+            self.assertTrue(record.refStart() == record.info["expected_start"])
+
+    def testRefEnd(self):
+        data = [
+            # Substitutions
+            ["artificial_1", 10, "substit_1", "A", ["T"], None, None, {"expected_start": 10, "expected_end": 10}],
+            ["artificial_1", 10, "substit_2", "AA", ["TT"], None, None, {"expected_start": 10, "expected_end": 11}],
+            # Deletions
+            ["artificial_1", 12, "del_1", "A", ["."], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "del_2", "AAA", ["."], None, None, {"expected_start": 10, "expected_end": 12}],
+            ["artificial_1", 10, "del_3", "AAA", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
+            ["artificial_1", 10, "del_4", "AGC", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
+            ["artificial_1", 10, "del_5", "AAAT", ["TG"], None, None, {"expected_start": 10, "expected_end": 13}],
+            # Insertions
+            ["artificial_1", 12, "ins_1", "A", ["TG"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 12, "ins_2", "A", ["AGT"], None, None, {"expected_start": 12.5, "expected_end": 12.5}],
+            ["artificial_1", 11, "ins_3", "AA", ["AGT"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "ins_4", "AAA", ["AAGT"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "ins_5", "AATC", ["AACGT"], None, None, {"expected_start": 12, "expected_end": 13}],
+        ]
+        for curr_data in data:
+            record = VCFRecord(*curr_data)
+            self.assertTrue(record.refEnd() == record.info["expected_end"])
+
 
 ########################################################################
 #

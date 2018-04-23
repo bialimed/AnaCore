@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.15.1'
+__version__ = '1.16.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -56,6 +56,80 @@ class VCFRecord:
             if len(allele) != len(ref):
                 contains_indel = True
         return contains_indel
+
+    def refStart(self, skip_std=False):
+        """
+        @summary: Returns the first position on reference affected by the alternative allele.
+        @param skip_std: [bool] Use True to save time only if the record has already be standardize by standardizeSingleAllele.
+        @return: [float] the first position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
+        @warnings: This method can only be used on record with only one alternative allele.
+        @examples:
+                # Insertion:
+                chr1  12  A    TG    => returns 12
+                chr1  12  A    AGT   => chr1  13  .   GT  (std) => returns 12.5
+                chr1  11  AA   AGT   => chr1  12  A   GT  (std) => returns 12
+                chr1  10  AAA  AAGT  => chr1  12  A   GT  (std) => returns 12
+                chr1  10  AATC AACGT => chr1  12  TC  CGT (std) => returns 12
+
+                # Substitution:
+                chr1  10  A   T  => returns 10
+                chr1  10  AA  TT => returns 10
+
+                # Deletion:
+                chr1  12  A     .  => returns 12
+                chr1  10  AAA   .  => returns 10
+                chr1  10  AAA   A  => chr1  11  AA  . (std) => returns 11
+                chr1  10  AGC   A  => chr1  11  GC  . (std) => returns 11
+                chr1  10  AAAT  TG => returns 10
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
+        record = self
+        if not skip_std:
+            record = deepcopy(self)
+            record.standardizeSingleAllele()
+        start = record.pos
+        if record.ref in [".", "-", ""]:
+            start -= 0.5
+        return start
+
+    def refEnd(self, skip_std=False):
+        """
+        @summary: Returns the last position on reference affected by the alternative allele.
+        @param skip_std: [bool] Use True to save time only if the record has already be standardize by standardizeSingleAllele.
+        @return: [float] The last position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
+        @warnings: This method can only be used on record with only one alternative allele.
+        @examples:
+                # Insertion:
+                chr1  12  A    TG    => returns 12
+                chr1  12  A    AGT   => chr1  13  .   GT  (std) => returns 12.5
+                chr1  11  AA   AGT   => chr1  12  A   GT  (std) => returns 12
+                chr1  10  AAA  AAGT  => chr1  12  A   GT  (std) => returns 12
+                chr1  10  AATC AACGT => chr1  12  TC  CGT (std) => returns 13
+
+                # Substitution:
+                chr1  10  A   T  => returns 10
+                chr1  10  AA  TT => returns 11
+
+                # Deletion:
+                chr1  12  A     .  => returns 12
+                chr1  10  AAA   .  => returns 12
+                chr1  10  AAA   A  => chr1  11  AA  . (std) => returns 12
+                chr1  10  AGC   A  => chr1  11  GC  . (std) => returns 12
+                chr1  10  AAAT  TG => returns 13
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
+        record = self
+        if not skip_std:
+            record = deepcopy(self)
+            record.standardizeSingleAllele()
+        end = record.pos
+        if record.ref in [".", "-", ""]:
+            end -= 0.5
+        else:
+            end += len(record.ref) - 1
+        return end
 
     def getName(self):
         """
@@ -287,7 +361,7 @@ class VCFRecord:
             DP = None
             try:
                 DP = self.getPopDP()
-            except: pass
+            except Exception: pass
             if "AF" in self.info and DP is not None:  # The AD can be processed directly from the population information
                 AF = self.info["AF"] if isinstance(self.info["AF"], (list, tuple)) else [self.info["AF"]]
                 AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
@@ -303,7 +377,7 @@ class VCFRecord:
                             else:
                                 for idx_allele, curr_AD in enumerate(self.getAD(spl_name)):
                                     AD[idx_allele] += curr_AD
-                    except:
+                    except Exception:
                         raise Exception('The allele depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         # Transform AD to list
         if not isinstance(AD, (list, tuple)):
@@ -328,7 +402,7 @@ class VCFRecord:
             DP = None
             try:
                 DP = self.getPopDP()
-            except: pass
+            except Exception: pass
             if "AD" in self.info and DP is not None:  # The AF can be processed directly from the population information
                 AD = self.info["AD"] if isinstance(self.info["AD"], (list, tuple)) else [self.info["AD"]]
                 AF = [curr_AD/float(DP) for curr_AD in AD]
@@ -351,7 +425,7 @@ class VCFRecord:
                                 raise Exception('popAD and popDP are not compatible for variant "' + self.chrom + ":" + str(self.pos) + '".')
                         else:
                             AF = [curr_AD/float(DP) for curr_AD in pop_AD]
-                    except:
+                    except Exception:
                         raise Exception('The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         # Transform AF to list
         if not isinstance(AF, (list, tuple)):
@@ -406,7 +480,7 @@ class VCFRecord:
                 AF = self.getAF(spl_name)
                 DP = self.getDP(spl_name)
                 AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
-            except:
+            except Exception:
                 raise Exception('The alternative alleles depths cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         # Transform AD to list
         if not isinstance(AD, (list, tuple)):
@@ -458,7 +532,7 @@ class VCFRecord:
                 DP = None
                 try:
                     DP = self.getDP(spl_name)
-                except: pass
+                except Exception: pass
                 if AD is not None and DP is not None:  # The AF can be processed from sample's AD and DP
                     if DP == 0:
                         AF = [0 for curr_AD in AD]
