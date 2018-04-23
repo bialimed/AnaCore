@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -327,10 +327,10 @@ def filtersFromDict(filters):
     """
     if "class" not in filters or filters["class"] == "Filter":
         return Filter.fromDict(filters)
-    elif filters["class"] == "FilterCombiner":
+    elif filters["class"] == "FiltersCombiner":
         cleaned_desc = deepcopy(filters)
         cleaned_desc.pop('class', None)
         cleaned_desc["filters"] = [filtersFromDict(sub_filter) for sub_filter in filters["filters"]]
         return FiltersCombiner(**cleaned_desc)
     else:
-        raise Exception('The class "{}" is invalid for filters dictionary. The value must be "Filter" or "FilterCombiner".'.format(filters["class"]))
+        raise Exception('The class "{}" is invalid for filters dictionary. The value must be "Filter" or "FiltersCombiner".'.format(filters["class"]))
