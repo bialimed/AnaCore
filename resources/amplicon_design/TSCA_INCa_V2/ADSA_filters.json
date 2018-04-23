@@ -1,0 +1,44 @@
+{
+  "class": "FiltersCombiner",
+  "action": "select",
+  "operator": "or",
+  "filters": [
+    {
+      "class": "Filter",
+      "getter": "filter",
+      "action": "exclude",
+      "aggregator": "nb:1",
+      "operator": "in",
+      "values": ["CSQ"]
+    }, {
+      "class": "FiltersCombiner",
+      "action": "select",
+      "description": "Keep variants on TERT's promoter.",
+      "operator": "and",
+      "filters": [
+        {
+          "class": "Filter",
+          "getter": "chrom",
+          "action": "select",
+          "aggregator": "nb:1",
+          "operator": "=",
+          "values": 5
+        }, {
+          "class": "Filter",
+          "getter": "m:refStart",
+          "action": "select",
+          "aggregator": "nb:1",
+          "operator": ">=",
+          "values": 1295195
+        }, {
+          "class": "Filter",
+          "getter": "m:refEnd",
+          "action": "select",
+          "aggregator": "nb:1",
+          "operator": "<=",
+          "values": 1295317
+        }
+      ]
+    }
+  ]
+}
