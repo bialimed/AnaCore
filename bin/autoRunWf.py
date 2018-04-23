@@ -323,9 +323,9 @@ if __name__ == "__main__":
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-s', '--storage-folder', help='Path to the storage folder. The run folder will be moved to this folder after process.')
     group_output.add_argument('-a', '--analysis-folder', required=True, help='Path to the workflows output folder. Each workflow will create a sub-folder in this parent folder (example: for the analysis foler "170101_run01" the result can be two sub-folders 170101_run01/ADIVaR and 170101_run01/AmpliconDS).')
-    group_output = parser.add_argument_group('Ressources')  # Ressources
+    group_output = parser.add_argument_group('Resources')  # Resources
     group_output.add_argument('-w', '--workflow-path-pattern', required=True, help='The path to the jflow client of the workflows. The tag WF_NAME is used as placeholder to adapt the command at the workflow. Example: /usr/local/bioinfo/WF_NAME/current/bin/jflow_cli.py.')
-    group_output.add_argument('-d', '--design-path-pattern', required=True, help='The path to the folder containing the designs definitions folders. The tag WF_NAME is used as placeholder to adapt the command at the workflow. Example: /usr/local/bioinfo/WF_NAME/current/ressources.')
+    group_output.add_argument('-d', '--design-path-pattern', required=True, help='The path to the folder containing the designs definitions folders. The tag WF_NAME is used as placeholder to adapt the command at the workflow. Example: /usr/local/bioinfo/WF_NAME/current/resources.')
     group_output.add_argument('-g', '--genome', required=True, help='The assembly version and the path to the reference genome used. The two information are separated by ":" like in the following example: GRCh37:/bank/Homo_sapiens/GRCH37/dna.fasta.')
     group_mail = parser.add_argument_group('Mail')  # Mail
     group_mail.add_argument('--mail-recipients', nargs='+', help='Mails of the recipients.')

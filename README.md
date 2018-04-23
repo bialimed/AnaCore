@@ -1,7 +1,7 @@
 # AnaCore
 
 ## Description
-Anapath Core contains binaries, libraries and ressources developped for
+Anapath Core contains binaries, libraries and resources developped for
 Anatomo-Cytopathologie department on IUCT Oncopole.
 
 ## Installation
