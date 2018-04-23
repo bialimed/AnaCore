@@ -48,11 +48,11 @@ def getSelectedAreasByChr(input_panel):
     @return: [dict] By chromosome the list of BED's areas. Each area is represented by an instance of Region.
     """
     selected_areas = getAreas(input_panel)
-    selected_areas = sorted(selected_areas, key=lambda x: (x["region"], x["start"], x["end"]))
+    selected_areas = sorted(selected_areas, key=lambda x: (x.chrom, x.start, x.end))
 
     area_by_chr = dict()
     for curr_area in selected_areas:
-        chrom = curr_area["region"]
+        chrom = curr_area.chrom
         if chrom not in area_by_chr:
             area_by_chr[chrom] = list()
         area_by_chr[chrom].append(curr_area)
@@ -215,7 +215,7 @@ if __name__ == "__main__":
                             curr_read.set_tag("RG", RG_id_by_source[source_region.name])
                             if curr_read.query_name in valid_reads_by_id:  # Pair is valid
                                 prev_read = valid_reads_by_id[curr_read.query_name]
-                                if prev_read.get_tag("RG") == RG_id_by_source[source_region.nam]:
+                                if prev_read.get_tag("RG") == RG_id_by_source[source_region.name]:
                                     valid_reads_valid_pair += 2
                                     FH_out.write(prev_read)
                                     FH_out.write(curr_read)
