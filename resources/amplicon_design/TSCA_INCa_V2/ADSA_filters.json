@@ -37,6 +37,62 @@
                     "values": 1295317
                 }
             ]
+        }, {
+            "class": "FiltersCombiner",
+            "description": "Keep variants on MET exon 14 upstream large splice site.",
+            "operator": "and",
+            "filters": [
+                {
+                    "class": "Filter",
+                    "getter": "chrom",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": "==",
+                    "values": "7"
+                }, {
+                    "class": "Filter",
+                    "getter": "m:refStart",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": ">",
+                    "values": 116411737
+                }, {
+                    "class": "Filter",
+                    "getter": "m:refEnd",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": "<",
+                    "values": 116411903
+                }
+            ]
+        }, {
+            "class": "FiltersCombiner",
+            "description": "Keep variants on MET exon 14 downstream large splice site.",
+            "operator": "and",
+            "filters": [
+                {
+                    "class": "Filter",
+                    "getter": "chrom",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": "==",
+                    "values": "7"
+                }, {
+                    "class": "Filter",
+                    "getter": "m:refStart",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": ">",
+                    "values": 116412043
+                }, {
+                    "class": "Filter",
+                    "getter": "m:refEnd",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": "<",
+                    "values": 116412183
+                }
+            ]
         }
     ]
 }
