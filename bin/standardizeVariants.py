@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -53,7 +53,7 @@ def getSeqByChr(genome_path):
     FH_seq.close()
     return genome_by_chr
 
-def stdAndMove(genome_path, in_variant_file, out_variant_file):
+def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard):
     """
     @summary: Writes in a new file the standardized version of each variant. The standardization constists in three steps:
         1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
@@ -62,39 +62,47 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file):
     @param genome_path: [str] Path to the genome file (format: fasta).
     @param in_variant_file: [str] Path to the variants file (format: VCF).
     @param out_variant_file: [str] Path to the standardized variants file (format: VCF).
+    @param trace_unstandard: [bool] True if you want to keep the trace of the variant before standardization in INFO.
     """
     genome_by_chr = getSeqByChr(genome_path)
     with VCFIO(out_variant_file, "w") as FH_out:
         with VCFIO(in_variant_file) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
+            if trace_unstandard:
+                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": None, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
             FH_out._writeHeader()
             # Records
             for record in FH_in:
                 curr_chrom = genome_by_chr[record.chrom]
                 for alt_idx, alt in enumerate(record.alt):
                     alt_record = getAlleleRecord(FH_in, record, alt_idx)
+                    if trace_unstandard:
+                        alt_record.info["UNSTD"] = "{}:{}={}/{}".format(alt_record.chrom, alt_record.pos, alt_record.ref, "/".join(alt_record.alt))
                     FH_out.write(alt_record.getMostUpstream(curr_chrom))
 
-def stdOnly(in_variant_file, out_variant_file):
+def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
     """
     @summary: Writes in a new file the standardized version of each variant. The standardization constists in two steps:
         1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
         2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
     @param in_variant_file: [str] Path to the variants file (format: VCF).
     @param out_variant_file: [str] Path to the standardized variants file (format: VCF).
+    @param trace_unstandard: [bool] True if you want to keep the trace of the variant before standardization in INFO.
     """
     with VCFIO(out_variant_file, "w") as FH_out:
         with VCFIO(in_variant_file) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": None, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
+            if trace_unstandard:
+                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": None, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
             FH_out._writeHeader()
             # Records
             for record in FH_in:
                 for alt_idx, alt in enumerate(record.alt):
                     alt_record = getAlleleRecord(FH_in, record, alt_idx)
-                    alt_record.info["UNSTD"] = "{}:{}={}/{}".format(alt_record.chrom, alt_record.pos, alt_record.ref, "/".join(alt_record.alt))
+                    if trace_unstandard:
+                        alt_record.info["UNSTD"] = "{}:{}={}/{}".format(alt_record.chrom, alt_record.pos, alt_record.ref, "/".join(alt_record.alt))
                     alt_record.standardizeSingleAllele()
                     FH_out.write(alt_record)
 
@@ -108,6 +116,7 @@ def stdOnly(in_variant_file, out_variant_file):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Splits alternatives alleles of one variants in multi-lines and removes unecessary reference and alternative nucleotids and move indel to most upstream position.')
+    parser.add_argument('-t', '--trace-unstandard', action='store_true', help='Use this option to add "UNSTD" tag in record INFO. This tag contains the trace of the variant before standardization: chromosome:position=reference/alternative.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variant file (format: VCF).')
@@ -118,6 +127,6 @@ if __name__ == "__main__":
 
     # Process
     if args.input_genome is None:
-        stdOnly(args.input_variants, args.output_variants)
+        stdOnly(args.input_variants, args.output_variants, args.trace_unstandard)
     else:
-        stdAndMove(args.input_genome, args.input_variants, args.output_variants)
+        stdAndMove(args.input_genome, args.input_variants, args.output_variants, args.trace_unstandard)
