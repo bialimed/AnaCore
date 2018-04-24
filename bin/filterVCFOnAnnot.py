@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -120,8 +120,8 @@ if __name__ == "__main__":
         with VEPVCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.filter["popAF"] = 'The variant is present with more of ' + str(args.polym_threshold * 100) + '% in one of the following population: "' + '" '.join(args.polym_populations) + '".'
-            FH_out.filter["CSQ"] = 'The variant has no consequence corresponding at one in the following list: "' + '" '.join(args.kept_consequences) + '".'
+            FH_out.filter["popAF"] = "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'."
+            FH_out.filter["CSQ"] = "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
             FH_out._writeHeader()
             # Records
             for record in FH_in:
