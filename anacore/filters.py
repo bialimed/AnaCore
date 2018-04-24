@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -76,7 +76,7 @@ class FiltersCombiner:
         @todo: xor.
         """
         is_valid = True
-        nb_filters = self.filters.length
+        nb_filters = len(self.filters)
         if nb_filters > 0:
             is_valid = None
             idx = 0
