@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.16.0'
+__version__ = '1.16.1'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -784,6 +784,8 @@ class VCFIO(AbstractFile):
             for spl in self.samples:
                 if record.samples is None or len(record.samples) == 0:
                     line += "\t" + ":".join(["." for idx in range(len(record.format))])
+                elif record.format is None:  # Current record does not contain information for samples
+                    line += "\t."
                 else:
                     spl_fields = list()
                     for key in record.format:
