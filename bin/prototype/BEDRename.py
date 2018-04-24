@@ -153,9 +153,7 @@ if __name__ == "__main__":
                 overlapped_tr = list()
                 if record.chrom in tr_by_chr:
                     overlapped_tr = tr_by_chr[record.chrom].getOverlapped( amplicon )
-                if len(overlapped_tr) > 1:
-                    raise Exception("The amplicon {}:{}-{} does not overlap a transcript.".format(amplicon.reference.name, amplicon.start, amplicon.end))
-                elif len(overlapped_tr) == 1:
+                if len(overlapped_tr) >= 1:
                     overlapped_exons = overlapped_tr[0].annot["exons"].getOverlapped( amplicon )
                     features = list()
                     for curr_feature in overlapped_exons:
