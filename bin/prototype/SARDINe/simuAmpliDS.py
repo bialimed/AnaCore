@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -28,6 +28,7 @@ import os
 import sys
 import time
 import random
+import warnings
 import logging
 import argparse
 
@@ -156,16 +157,34 @@ def getAmplicons( reference_path, manifest_path ):
                     if ampli.strand == "-":
                         up_primer = revcom(ampli.down_primer)
                         down_primer = revcom(ampli.up_primer)
-                    try:
-                        ampli.start = chr_str.index( up_primer ) + 1
-                        ampli.end = chr_str.index( down_primer ) + len(down_primer)
-                    except:
-                        raise Exception("The primers '" + up_primer + "' and '" + down_primer + "' cannot be found in " + record.id )
+                    # Find positions on chr
+                    upstream_matches = list()
+                    up_pattern = re.compile(up_primer)
+                    for curr_match in up_pattern.finditer(chr_str):
+                        upstream_matches.append({"start": curr_match.start()+1, "end": curr_match.end()})
+                    downstream_matches = list()
+                    down_pattern = re.compile(down_primer)
+                    for curr_match in down_pattern.finditer(chr_str):
+                        downstream_matches.append({"start": curr_match.start()+1, "end": curr_match.end()})
+                    if len(upstream_matches) == 0 or len(downstream_matches) == 0:
+                        raise Exception("The primers '" + up_primer + "' and '" + down_primer + "' cannot be found in " + record.id)
                     # Check multiple target in chr
-                    if chr_str.count(up_primer) > 1:
-                        raise Exception("The primer '" + up_primer + "' is found multiple twice in " + record.id )
-                    if chr_str.count(down_primer) > 1:
-                        raise Exception("The primer '" + down_primer + "' is found multiple twice in " + record.id )
+                    if len(upstream_matches) > 1:
+                        match_list = ", ".join(["{}:{}-{}".format(record.id, curr_match["start"], curr_match["end"]) for curr_match in upstream_matches])
+                        warnings.warn("The primer '" + up_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")")
+                    if len(downstream_matches) > 1:
+                        match_list = ", ".join(["{}:{}-{}".format(record.id, curr_match["start"], curr_match["end"]) for curr_match in downstream_matches])
+                        warnings.warn("The primer '" + down_primer + "' is found multiple twice in " + record.id + " (" + match_list + ")")
+                    # Select smaller amplified fragment
+                    prev_length = None
+                    for curr_up in upstream_matches:
+                        for curr_down in downstream_matches:
+                            curr_length = curr_down["start"] - curr_up["end"]
+                            if curr_length >= 0:
+                                if prev_length is None or prev_length > curr_length:
+                                    prev_length = curr_length
+                                    ampli.start = curr_up["start"]
+                                    ampli.end = curr_down["end"]
                 amplicons_by_chr[record.id] = sorted( amplicons_by_chr[record.id], key=lambda ampl: (ampl.start, ampl.end) )
     finally:
         FH_ref.close()
@@ -479,7 +498,7 @@ if __name__ == "__main__":
     # Generate reads
     logging.info( "\t[GENERATE reads] START" )
     lib = {
-        "A":{ 
+        "A": {
             "R1": FastaIO(getFastaPath(args.output_folder, args.sample_name, "A", 1), "w"),
             "R2": FastaIO(getFastaPath(args.output_folder, args.sample_name, "A", 2), "w")
         }
@@ -521,7 +540,7 @@ if __name__ == "__main__":
                 if amplicon.strand == "-":
                     tmp = rvc_matrix
                     rvc_matrix = matrix
-                    matrix = tmp    
+                    matrix = tmp
                 for idx in range(nb_from_alt):
                     pair_id = "theoritical:" + chrom + "_" + str(amplicon.start) + "-" + str(amplicon.end) + ":" + str(idx_ampli).zfill(10)
                     writeReadsPair( pair_id, matrix, rvc_matrix, args.reads_length, lib["A"]["R1"], lib["A"]["R2"] )

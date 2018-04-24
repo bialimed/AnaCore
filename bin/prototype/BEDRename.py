@@ -80,23 +80,23 @@ if __name__ == "__main__":
     group_output.add_argument('-o', '--output-regions', default="amplicons.bed", help='The amplicons description (format: BED). [Default: %(default)s]')
     args = parser.parse_args()
 
+    # Get gene by transcript ID
     gene_by_tr = dict()
     with open(args.input_reference_tr) as FH_tr:
         for line in FH_tr:
             if not line.startswith("#"):
                 gene, tr_id = [field.strip() for field in line.split("\t")]
-                # #####
-                # tr_id = tr_id.split(".")[0]
-                # #####
-                gene_by_tr[tr_id] = gene
+                if tr_id != "":
+                    tr_id = tr_id.split(".")[0]
+                    gene_by_tr[tr_id] = gene
 
-
+    # Get transcript region by transcript ID (exons are in annot attribute)
     tr_by_id = dict()
     with GFF3IO(args.input_annotation) as FH_annot:
         for record in FH_annot:
             if record.type == "mRNA" and "transcript_id" in record.attributes:
                 tr_id = record.attributes["transcript_id"]
-                # tr_id = record.attributes["transcript_id"].split(".")[0]
+                tr_id = tr_id.split(".")[0]
                 if tr_id in gene_by_tr:
                     if tr_id not in tr_by_id:
                         tr_by_id[tr_id] = Region(
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                         )
             if record.type == "exon" and "transcript_id" in record.attributes:
                 tr_id = record.attributes["transcript_id"]
-                # tr_id = record.attributes["transcript_id"].split(".")[0]
+                tr_id = tr_id.split(".")[0]
                 if tr_id in gene_by_tr:
                     tr_by_id[tr_id].annot["exons"].append(
                         Region(
@@ -122,7 +122,11 @@ if __name__ == "__main__":
                         )
                     )
     if len(gene_by_tr) != len(tr_by_id):
-        raise Exception("********************************")
+        raise Exception("The following transcripts are missing in {}: {}".format(
+            args.input_annotation,
+            set(gene_by_tr.keys()).difference(set(tr_by_id.keys()))
+        ))
+
     # Region list for chr
     tr_by_chr = dict()
     for tr_id in tr_by_id:
@@ -146,21 +150,31 @@ if __name__ == "__main__":
         with BEDIO(args.output_regions, "w", (6 if args.is_thick_based else 8)) as FH_out:
             for record_idx, record in enumerate(FH_regions):
                 amplicon = Region(record.start, record.end, record.strand, record.chrom)
+                overlapped_tr = list()
+                if record.chrom in tr_by_chr:
+                    overlapped_tr = tr_by_chr[record.chrom].getOverlapped( amplicon )
+                if len(overlapped_tr) > 1:
+                    raise Exception("The amplicon {}:{}-{} does not overlap a transcript.".format(amplicon.reference.name, amplicon.start, amplicon.end))
+                elif len(overlapped_tr) == 1:
+                    overlapped_exons = overlapped_tr[0].annot["exons"].getOverlapped( amplicon )
+                    features = list()
+                    for curr_feature in overlapped_exons:
+                        features.append( "ex" + str(curr_feature.annot["exon_idx"] + 1) )
+                    record.name = "_".join([
+                        overlapped_tr[0].annot["gene"],
+                        "-".join(features),
+                        str(amplicon.start),
+                        amplicon.strand,
+                        "ampl" + str(record_idx)
+                    ])
+                else:
+                    record.name = "_".join([
+                        "noFeature",
+                        str(amplicon.start),
+                        amplicon.strand,
+                        "ampl" + str(record_idx)
+                    ])
                 if args.is_thick_based and record.thickStart is not None and record.thickEnd is not None:
-                    amplicon.start = record.thickStart
-                    amplicon.end = record.end
-                overlapped_tr = tr_by_chr[record.chrom].getOverlapped(amplicon)
-                if len(overlapped_tr) != 1:
-                    raise Exception("********************************")
-                overlapped_exons = overlapped_tr[0].annot["exons"].getOverlapped(amplicon)
-                features = list()
-                for curr_feature in overlapped_exons:
-                    features.append("ex" + str(curr_feature.annot["exon_idx"] + 1))
-                record.name = "_".join([
-                    overlapped_tr[0].annot["gene"],
-                    "-".join(features),
-                    str(amplicon.start),
-                    amplicon.strand,
-                    "ampl" + str(record_idx)
-                ])
-                FH_out.write(record)
+                    record.start = record.thickStart
+                    record.end = record.thickEnd
+                FH_out.write( record )
