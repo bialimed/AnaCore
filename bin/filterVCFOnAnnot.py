@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.1'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -64,11 +64,11 @@ def isPolymophism(allele_record, VEP_alt, checked_pop_tags, min_AF=0.01):
                             is_polymorphism = True
     return is_polymorphism
 
-def getVEPAlt(ref, alt):
+def getVEPAlt(ref, alt, empty_marker="."):
     alleles = [ref] + alt
-    # Replace empty by -
+    # Replace empty marker by empty string
     for idx, cur_allele in enumerate(alleles):
-        if cur_allele in [".", "-", ""]:
+        if cur_allele in [".", "-"]:
             alleles[idx] = ""
     # Select shorter allele
     shorter_allele = alleles[0]
@@ -87,10 +87,10 @@ def getVEPAlt(ref, alt):
             shorter_allele = shorter_allele[1:]
             for idx, cur_allele in enumerate(alleles):
                 alleles[idx] = cur_allele[1:]
-    # Replace empty by -
+    # Replace empty by empty_marker
     for idx, cur_allele in enumerate(alleles):
         if cur_allele == "":
-            alleles[idx] = "-"
+            alleles[idx] = empty_marker
     return alleles[1:]
 
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
                 VEP_alt = getVEPAlt(record.ref, record.alt)
                 for alt_idx, alt in enumerate(record.alt):
                     alt_record = getAlleleRecord(FH_in, record, alt_idx)
-                    alt_record.standardizeSingleAllele("-")
+                    alt_record.standardizeSingleAllele()
                     # Evaluates polymorphism
                     is_polymophism = isPolymophism(alt_record, VEP_alt[alt_idx], args.polym_populations, args.polym_threshold)
                     # Evaluates consequences

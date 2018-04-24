@@ -52,7 +52,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
     @param variants: [dict] By uniq ID the variants. The content of this variable is set by the call of this function.
                      Content example:
                      {
-                       "chr1:10=T":{ 
+                       "chr1:10=T":{
                          "chrom":"chr1",
                          "pos":10,
                          "ref":"A",
@@ -87,7 +87,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
             if len(record.samples) <= 1 and "AF" in record.info:
                 allele_freq = record.info["AF"]
             elif "AF" in record.samples[spl_name]:
-                allele_freq = record.samples[spl_name]["AF"]                
+                allele_freq = record.samples[spl_name]["AF"]
             elif "AD" in record.samples[spl_name]:
                 for allele_depth in record.samples[spl_name]["AD"][1:]: # Skip the reference allele depth
                     allele_freq.append( allele_depth/float(record.info["DP"]) )
@@ -100,7 +100,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
                 alt_record = getAlleleRecord( FH_vcf, record, idx_alt )
                 alt_record.ref = record.ref.upper()
                 alt_record.alt[0] = alt_record.alt[0].upper()
-                alt_record.standardizeSingleAllele( "." )
+                alt_record.standardizeSingleAllele()
                 variant_id = alt_record.chrom + ":" + str(alt_record.pos) + "=" + alt_record.ref + "/" + alt_record.alt[0]
                 if variant_id not in variants:
                     variants[variant_id] = {
