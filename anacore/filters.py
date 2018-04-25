@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.2'
+__version__ = '1.3.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -32,8 +32,8 @@ class FiltersCombiner:
     FiltersCombiner.
     @synopsis:
         ...
-        age_filter = Filter(10, "<", "age")
-        treatment_filter = filter(["20ng", "20ng + pc"], "in", "treatment")
+        age_filter = Filter("<", 10, "age")
+        treatment_filter = filter("in", ["20ng", "20ng + pc"], "treatment")
         filters = FiltersCombiner(
             [age_filter, treatment_filter],
             "and",
@@ -110,22 +110,22 @@ class Filter:
             {"age": 30, "treatment": "placebo", "group":["A", "B"]},
         ]
         # Select children
-        children_filter = Filter(13, "<", "age")
+        children_filter = Filter("<", 13, "age")
         for curr in patients:
             if children_filter.eval(curr):
                 print(curr)
         # Select not placebo
-        treatment_filter = Filter("placebo", "=", "treatment", action="exclude")
+        treatment_filter = Filter("=", "placebo", "treatment", action="exclude")
         for curr in patients:
             if treatment_filter.eval(curr):
                 print(curr)
         # Select patients with at least group A or group C
-        group_filter = Filter(["A", "C"], "in", "group", aggregator="nb:1")
+        group_filter = Filter("in", ["A", "C"], "group", aggregator="nb:1")
         for curr in patients:
             if group_filter.eval(curr):
                 print(curr)
     """
-    def __init__(self, values, operator, getter=None, aggregator="ratio:1", name=None, description=None, action="select"):
+    def __init__(self, operator, values, getter=None, aggregator="ratio:1", name=None, description=None, action="select"):
         """
         @param values: [*] The value(s) used as threshold/reference in item
         evaluation.
@@ -163,6 +163,24 @@ class Filter:
             cleaned_desc.pop('class', None)
         return Filter(**cleaned_desc)
 
+    def toDict(self):
+        """
+        @summary: Returns the dictionary corresponding to the instance of Filter.
+        @return: [dict] The dictionary corresponding to the instance of Filter.
+        """
+        obj_dict = {"class": "Filter"}
+        for attr_name in dir(self):
+            if not attr_name.startswith("_"):
+                attr_value = self.__getattribute__(attr_name)
+                if not callable(attr_value):
+                    obj_dict[attr_name] = attr_value
+        return obj_dict
+
+    def __eq__(self, other):
+        self_dict = {key: val for key, val in self.__dict__.items() if not (key.startswith("_") and key.endswith("Fct"))}
+        other_dict = {key: val for key, val in other.__dict__.items() if not (key.startswith("_") and key.endswith("Fct"))}
+        return self_dict == other_dict
+
     def setOperator(self, new):
         """
         @summary: Changes the operator used in evaluation.
@@ -185,11 +203,11 @@ class Filter:
         self.aggregator = new  # nb:X, ratio:X.X
         agg_type, agg_threshold = new.split(":")
         if agg_type == "nb":
-            self._aggregatorEval = lambda nb, length: nb >= int(agg_threshold)
+            self._aggregatorEvalFct = lambda nb, length: nb >= int(agg_threshold)
         elif agg_type == "ratio":
-            self._aggregatorEval = lambda nb, length: nb >= float(agg_threshold) * length
+            self._aggregatorEvalFct = lambda nb, length: nb >= float(agg_threshold) * length
         else:
-            raise Exception('The aggregator "{}" is invalid. An aggregator must start with "nb" or "ratio".'.format(new))
+            raise AttributeError('The aggregator "{}" is invalid. An aggregator must start with "nb" or "ratio".'.format(new))
 
     def setGetter(self, new):
         """
@@ -285,7 +303,7 @@ class Filter:
         value = self._getterFct(item)
         if issubclass(value.__class__, list):
             is_valid_list = [self._evalFct(curr_val, self.values) for curr_val in value]
-            if self._aggregatorEval(is_valid_list.count(True), len(value)):
+            if self._aggregatorEvalFct(is_valid_list.count(True), len(value)):
                 is_valid = True
         else:
             is_valid = self._evalFct(value, self.values)
@@ -313,10 +331,14 @@ class Filter:
             self._evalFct = lambda val, ref: val > ref
         elif self.operator == "in":
             self._evalFct = lambda val, ref: val in ref
+        elif self.operator == "contains":
+            if not issubclass(self.values.__class__, str):
+                raise AttributeError('The reference value in filter must be a string for contains operator. If you want to apply "contains" with several possibility you must declare n filters and combine them with FiltersCombiner.')
+            self._evalFct = lambda val, ref: ref in val
         elif self.operator == "not in":
             self._evalFct = lambda val, ref: val not in ref
         else:
-            raise Exception('The operator "{}" is not implemented.'.format(self.operator))
+            raise AttributeError('The operator "{}" is not implemented.'.format(self.operator))
 
 
 def filtersFromDict(filters):
