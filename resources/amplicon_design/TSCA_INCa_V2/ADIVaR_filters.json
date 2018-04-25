@@ -8,7 +8,7 @@
             "action": "select",
             "aggregator": "ratio:1",
             "operator": "not in",
-            "values": ["lowDP", "lowAF", "invalid", "popAF"]
+            "values": ["lowDP", "lowAF", "libSpe", "invalid", "popAF"]
         }, {
             "class": "FiltersCombiner",
             "operator": "or",
