@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -72,7 +72,7 @@ class TestVCFIO(unittest.TestCase):
 20	14370	rs6054257	G	A	29	PASS	NS=3;DP=14;AF=0.5;DB;H2	GT:GQ:DP:HQ	0|0:48:1:51,51	1|0:48:8:51,51	1/1:43:5:.,.
 20	17330	.	T	A	3	q10	NS=3;DP=11;AF=0.017	GT:GQ:DP:HQ	0|0:49:3:58,50	0|1:3:5:65,3	0/0:41:3
 20	1110696	rs6040355	A	G,T	67	PASS	NS=2;DP=10;AF=0.333,0.667;AA=T;DB	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4
-20	1230237	.	T	.	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:7:56,60	0|0:48:4:51,51	0/0:61:2
+20	1230237	.	T	-	47	PASS	NS=3;DP=13;AA=T	GT:GQ:DP:HQ	0|0:54:7:56,60	0|0:48:4:51,51	0/0:61:2
 20	1234567	microsat1	GTC	G,GTCT	50	PASS	NS=3;DP=9;AA=G	GT:GQ:DP	0/1:35:4	0/2:17:2	1/1:40:3"""
         with open(self.tmp_variants, "w") as FH_variants:
             FH_variants.write(spec_example)
@@ -84,7 +84,7 @@ class TestVCFIO(unittest.TestCase):
             self.assertEqual(sorted(list(FH_vcf.format.keys())), sorted(["GT", "GQ", "DP", "HQ"]))
             self.assertEqual(sorted(list(FH_vcf.info.keys())), sorted(["NS", "DP", "AF", "AA", "DB", "H2"]))
             # Records
-            expected_records = ["20_14370_G_A", "20_17330_T_A", "20_1110696_A_G,T", "20_1230237_T_.", "20_1234567_GTC_G,GTCT"]
+            expected_records = ["20_14370_G_A", "20_17330_T_A", "20_1110696_A_G,T", "20_1230237_T_-", "20_1234567_GTC_G,GTCT"]
             readed_records = list()
             for variant in FH_vcf:
                 readed_records.append(
@@ -402,11 +402,11 @@ class TestVCFRecord(unittest.TestCase):
         # Test insertion
         insertion = VCFRecord("artificial_1", 18, None, "T", ["TA"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue(insertion.ref == "." and insertion.alt[0] == "A" and insertion.pos == 19)
+        self.assertTrue(insertion.ref == "-" and insertion.alt[0] == "A" and insertion.pos == 19)
         # Test insertion multi nt and remove upstream and downstream
         insertion = VCFRecord("artificial_1", 18, None, "TGAT", ["TCGAGAT"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue(insertion.ref == "." and insertion.alt[0] == "CGA" and insertion.pos == 19)
+        self.assertTrue(insertion.ref == "-" and insertion.alt[0] == "CGA" and insertion.pos == 19)
         # Test insertion multi nt with possible remove and downstream and without complete standardization
         insertion = VCFRecord("artificial_1", 18, None, "TCtgATTAGC", ["TaGGctTATGCGC"], 230)
         insertion.standardizeSingleAllele()
@@ -415,11 +415,11 @@ class TestVCFRecord(unittest.TestCase):
         # Test deletion
         insertion = VCFRecord("artificial_1", 18, None, "TA", ["T"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue(insertion.ref == "A" and insertion.alt[0] == "." and insertion.pos == 19)
+        self.assertTrue(insertion.ref == "A" and insertion.alt[0] == "-" and insertion.pos == 19)
         # Test insertion multi nt and remove upstream and downstream
         insertion = VCFRecord("artificial_1", 18, None, "TCGAGAT", ["TGAT"], 230)
         insertion.standardizeSingleAllele()
-        self.assertTrue(insertion.ref == "CGA" and insertion.alt[0] == "." and insertion.pos == 19)
+        self.assertTrue(insertion.ref == "CGA" and insertion.alt[0] == "-" and insertion.pos == 19)
         # Test insertion multi nt with possible remove and downstream and without complete standardization
         insertion = VCFRecord("artificial_1", 18, None, "TaGGctTATGCGC", ["TCtgATTAGC"], 230)
         insertion.standardizeSingleAllele()
@@ -430,86 +430,86 @@ class TestVCFRecord(unittest.TestCase):
         # Test fix deletion
         deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
         upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 19 and upstream.ref == "TTAAGC" and upstream.alt[0] == ".")
+        self.assertTrue(upstream.pos == 19 and upstream.ref == "TTAAGC" and upstream.alt[0] == "-")
         # Test homopolymer deletion
         deletion = VCFRecord("artificial_1", 18, None, "TTT", ["T"], 230)
         upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 17 and upstream.ref == "TT" and upstream.alt[0] == ".")
+        self.assertTrue(upstream.pos == 17 and upstream.ref == "TT" and upstream.alt[0] == "-")
         # Test complex deletion
         deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
         upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 22 and upstream.ref == "AGCCG" and upstream.alt[0] == ".")
+        self.assertTrue(upstream.pos == 22 and upstream.ref == "AGCCG" and upstream.alt[0] == "-")
         # Test deletion on start
-        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["."], 230)
+        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["-"], 230)
         upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 1 and upstream.ref == "N" and upstream.alt[0] == ".")
+        self.assertTrue(upstream.pos == 1 and upstream.ref == "N" and upstream.alt[0] == "-")
         # Test deletion on end
         deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
         upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == ".")
+        self.assertTrue(upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == "-")
         # Test fix insertion
         insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
         upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 5 and upstream.ref == "." and upstream.alt[0] == "GGTT")
+        self.assertTrue(upstream.pos == 5 and upstream.ref == "-" and upstream.alt[0] == "GGTT")
         # Test homopolymer insertion
         insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
         upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 17 and upstream.ref == "." and upstream.alt[0] == "T")
+        self.assertTrue(upstream.pos == 17 and upstream.ref == "-" and upstream.alt[0] == "T")
         # Test complex insertion
         insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
         upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 22 and upstream.ref == "." and upstream.alt[0] == "AGCCG")
+        self.assertTrue(upstream.pos == 22 and upstream.ref == "-" and upstream.alt[0] == "AGCCG")
         # Test insertion on start
-        insertion = VCFRecord("artificial_1", 1, None, ".", ["A"], 230)
+        insertion = VCFRecord("artificial_1", 1, None, "-", ["A"], 230)
         upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 1 and upstream.ref == "." and upstream.alt[0] == "A")
+        self.assertTrue(upstream.pos == 1 and upstream.ref == "-" and upstream.alt[0] == "A")
         # Test insertion on end
         insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
         upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 34 and upstream.ref == "." and upstream.alt[0] == "G")
+        self.assertTrue(upstream.pos == 34 and upstream.ref == "-" and upstream.alt[0] == "G")
 
     def testGetMostDownstream(self):
         ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT" # length: 33
         # Test fix deletion
         deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
         downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 19 and downstream.ref == "TTAAGC" and downstream.alt[0] == ".")
+        self.assertTrue(downstream.pos == 19 and downstream.ref == "TTAAGC" and downstream.alt[0] == "-")
         # Test homopolymer deletion
         deletion = VCFRecord("artificial_1", 18, None, "TTT", ["T"], 230)
         downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 19 and downstream.ref == "TT" and downstream.alt[0] == ".")
+        self.assertTrue(downstream.pos == 19 and downstream.ref == "TT" and downstream.alt[0] == "-")
         # Test complex deletion
         deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
         downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 28 and downstream.ref == "GCCGA" and downstream.alt[0] == ".")
+        self.assertTrue(downstream.pos == 28 and downstream.ref == "GCCGA" and downstream.alt[0] == "-")
         # Test deletion on start
-        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["."], 230)
+        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["-"], 230)
         downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == ".")
+        self.assertTrue(downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == "-")
         # Test deletion on end
         deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
         downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == ".")
+        self.assertTrue(downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == "-")
         # Test fix insertion
         insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
         downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 5 and downstream.ref == "." and downstream.alt[0] == "GGTT")
+        self.assertTrue(downstream.pos == 5 and downstream.ref == "-" and downstream.alt[0] == "GGTT")
         # Test homopolymer insertion
         insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
         downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 21 and downstream.ref == "." and downstream.alt[0] == "T")
+        self.assertTrue(downstream.pos == 21 and downstream.ref == "-" and downstream.alt[0] == "T")
         # Test complex insertion
         insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
         downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 33 and downstream.ref == "." and downstream.alt[0] == "GCCGA")
+        self.assertTrue(downstream.pos == 33 and downstream.ref == "-" and downstream.alt[0] == "GCCGA")
         # Test insertion on start
-        insertion = VCFRecord("artificial_1", 1, None, ".", ["A"], 230)
+        insertion = VCFRecord("artificial_1", 1, None, "-", ["A"], 230)
         downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 1 and downstream.ref == "." and downstream.alt[0] == "A")
+        self.assertTrue(downstream.pos == 1 and downstream.ref == "-" and downstream.alt[0] == "A")
         # Test insertion on end
         insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
         downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 34 and downstream.ref == "." and downstream.alt[0] == "G")
+        self.assertTrue(downstream.pos == 34 and downstream.ref == "-" and downstream.alt[0] == "G")
 
     def testRefStart(self):
         data = [
@@ -517,8 +517,8 @@ class TestVCFRecord(unittest.TestCase):
             ["artificial_1", 10, "substit_1", "A", ["T"], None, None, {"expected_start": 10, "expected_end": 10}],
             ["artificial_1", 10, "substit_2", "AA", ["TT"], None, None, {"expected_start": 10, "expected_end": 11}],
             # Deletions
-            ["artificial_1", 12, "del_1", "A", ["."], None, None, {"expected_start": 12, "expected_end": 12}],
-            ["artificial_1", 10, "del_2", "AAA", ["."], None, None, {"expected_start": 10, "expected_end": 12}],
+            ["artificial_1", 12, "del_1", "A", ["-"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "del_2", "AAA", ["-"], None, None, {"expected_start": 10, "expected_end": 12}],
             ["artificial_1", 10, "del_3", "AAA", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
             ["artificial_1", 10, "del_4", "AGC", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
             ["artificial_1", 10, "del_5", "AAAT", ["TG"], None, None, {"expected_start": 10, "expected_end": 13}],
@@ -539,8 +539,8 @@ class TestVCFRecord(unittest.TestCase):
             ["artificial_1", 10, "substit_1", "A", ["T"], None, None, {"expected_start": 10, "expected_end": 10}],
             ["artificial_1", 10, "substit_2", "AA", ["TT"], None, None, {"expected_start": 10, "expected_end": 11}],
             # Deletions
-            ["artificial_1", 12, "del_1", "A", ["."], None, None, {"expected_start": 12, "expected_end": 12}],
-            ["artificial_1", 10, "del_2", "AAA", ["."], None, None, {"expected_start": 10, "expected_end": 12}],
+            ["artificial_1", 12, "del_1", "A", ["-"], None, None, {"expected_start": 12, "expected_end": 12}],
+            ["artificial_1", 10, "del_2", "AAA", ["-"], None, None, {"expected_start": 10, "expected_end": 12}],
             ["artificial_1", 10, "del_3", "AAA", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
             ["artificial_1", 10, "del_4", "AGC", ["A"], None, None, {"expected_start": 11, "expected_end": 12}],
             ["artificial_1", 10, "del_5", "AAAT", ["TG"], None, None, {"expected_start": 10, "expected_end": 13}],
