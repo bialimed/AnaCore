@@ -68,7 +68,7 @@ def getVEPAlt(ref, alt):
     alleles = [ref] + alt
     # Replace empty marker by empty string
     for idx, cur_allele in enumerate(alleles):
-        if cur_allele == ".":
+        if cur_allele == "-":
             alleles[idx] = ""
     # Select shorter allele
     shorter_allele = alleles[0]

@@ -54,8 +54,8 @@ def getAnnotSummary(allele_record, initial_alt):
     variant_annot = list()
     colocated_annot = list()
     for annot in allele_record.info["CSQ"]:
-        annot_allele = annot["Allele"].replace("-", ".")
-        annot_allele = "." if annot_allele == "" else annot_allele
+        annot_allele = annot["Allele"].replace(".", "-")
+        annot_allele = "-" if annot_allele == "" else annot_allele
         is_self_variant = (annot_allele == initial_alt)
         # Similar knowns variants
         if is_self_variant and annot["Existing_variation"] is not None:

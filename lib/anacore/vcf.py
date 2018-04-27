@@ -43,12 +43,16 @@ class VCFRecord:
         self.format = pFormat if pFormat is not None else list()
         self.samples = samples if samples is not None else dict()
 
+    @staticmethod
+    def getEmptyAlleleMarker():
+        return "-"
+
     def __setattr__(self, name, value):
         if value is not None:
             if name == "ref":
-                value = ("." if value in ["-", ""] else value)
+                value = (VCFRecord.getEmptyAlleleMarker if value == "" else value)
             elif name == "alt":
-                value = [("." if elt in ["-", ""] else elt) for elt in value]
+                value = [(VCFRecord.getEmptyAlleleMarker if elt == "" else elt) for elt in value]
         super(VCFRecord, self).__setattr__(name, value)
 
     def containsIndel(self):
@@ -58,8 +62,8 @@ class VCFRecord:
         @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         contains_indel = False
-        ref = self.ref.replace(".", "")
-        alt = [curr_alt.replace(".", "") for curr_alt in self.alt]
+        ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker, "")
+        alt = [curr_alt.replace(VCFRecord.getEmptyAlleleMarker, "") for curr_alt in self.alt]
         for allele in alt:
             if len(allele) != len(ref):
                 contains_indel = True
@@ -97,7 +101,7 @@ class VCFRecord:
             record = deepcopy(self)
             record.standardizeSingleAllele()
         start = record.pos
-        if record.ref == ".":
+        if record.ref == VCFRecord.getEmptyAlleleMarker:
             start -= 0.5
         return start
 
@@ -133,7 +137,7 @@ class VCFRecord:
             record = deepcopy(self)
             record.standardizeSingleAllele()
         end = record.pos
-        if record.ref == ".":
+        if record.ref == VCFRecord.getEmptyAlleleMarker:
             end -= 0.5
         else:
             end += len(record.ref) - 1
@@ -161,8 +165,8 @@ class VCFRecord:
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
         is_deletion = False
-        ref = self.ref.replace(".", "")
-        alt = self.alt[0].replace(".", "")
+        ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker, "")
+        alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker, "")
         if len(alt) < len(ref):
             is_deletion = True
         return is_deletion
@@ -177,8 +181,8 @@ class VCFRecord:
         if len(self.alt) > 1:
             raise Exception("The function 'isIndel' cannot be used on multi-allelic variant.")
         is_indel = False
-        ref = self.ref.replace(".", "")
-        alt = self.alt[0].replace(".", "")
+        ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker, "")
+        alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker, "")
         if len(alt) != len(ref):
             is_indel = True
         return is_indel
@@ -193,8 +197,8 @@ class VCFRecord:
         if len(self.alt) > 1:
             raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant.")
         is_insertion = False
-        ref = self.ref.replace(".", "")
-        alt = self.alt[0].replace(".", "")
+        ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker, "")
+        alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker, "")
         if len(alt) > len(ref):
             is_insertion = True
         return is_insertion
@@ -236,21 +240,20 @@ class VCFRecord:
 
         if len(self.alt) > 1:
             raise Exception("The function 'standardizeSingleAllele' cannot be used on multi-allelic variant.")
-        empty_marker = "."
         self.ref = self.ref.upper()
         self.alt[0] = self.alt[0].upper()
         # Deletion or insertion with marker
-        if self.alt[0] == empty_marker or self.ref == empty_marker:
+        if self.alt[0] == VCFRecord.getEmptyAlleleMarker or self.ref == VCFRecord.getEmptyAlleleMarker:
             pass
         # Deletion without marker
         elif len(self.alt[0]) < len(self.ref):
             if self.ref.startswith(self.alt[0]):
                 self.ref = self.ref[len(self.alt[0]):]
                 self.pos += len(self.alt[0])
-                self.alt[0] = empty_marker
+                self.alt[0] = VCFRecord.getEmptyAlleleMarker
             else:
                 twoSideTrimming(self)
-                if self.alt[0] != ".":
+                if self.alt[0] != VCFRecord.getEmptyAlleleMarker:
                     warnings.warn(
                         'The deletion "{}/{}" at location {}:{} cannot be standardized.'.format(
                             self.ref, self.alt[0], self.chrom, self.pos
@@ -261,10 +264,10 @@ class VCFRecord:
             if self.alt[0].startswith(self.ref):
                 self.alt[0] = self.alt[0][len(self.ref):]
                 self.pos += len(self.ref)
-                self.ref = empty_marker
+                self.ref = VCFRecord.getEmptyAlleleMarker
             else:
                 twoSideTrimming(self)
-                if self.ref != ".":
+                if self.ref != VCFRecord.getEmptyAlleleMarker:
                     warnings.warn(
                         'The insertion "{}/{}" at location {}:{} cannot be standardized.'.format(
                             self.ref, self.alt[0], self.chrom, self.pos
@@ -285,7 +288,7 @@ class VCFRecord:
             raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
         new_record = deepcopy(self)
         new_record.standardizeSingleAllele()
-        if new_record.ref == "." or new_record.alt[0] == ".":  # Standardized indel
+        if new_record.ref == VCFRecord.getEmptyAlleleMarker or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker:  # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
@@ -322,7 +325,7 @@ class VCFRecord:
             raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
         new_record = deepcopy(self)
         new_record.standardizeSingleAllele()
-        if new_record.ref == "." or new_record.alt[0] == ".":  # Standardized indel
+        if new_record.ref == VCFRecord.getEmptyAlleleMarker or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker:  # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
