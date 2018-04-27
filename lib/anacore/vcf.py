@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.17.0'
+__version__ = '1.18.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -42,6 +42,7 @@ class VCFRecord:
         self.info = info if info is not None else dict()
         self.format = pFormat if pFormat is not None else list()
         self.samples = samples if samples is not None else dict()
+        self._standardized = None
 
     @staticmethod
     def getEmptyAlleleMarker():
@@ -51,8 +52,12 @@ class VCFRecord:
         if value is not None:
             if name == "ref":
                 value = (VCFRecord.getEmptyAlleleMarker if value == "" else value)
+                super(VCFRecord, self).__setattr__("_standardized", None)
             elif name == "alt":
                 value = [(VCFRecord.getEmptyAlleleMarker if elt == "" else elt) for elt in value]
+                super(VCFRecord, self).__setattr__("_standardized", None)
+            elif name == "pos" or name == "chrom":
+                super(VCFRecord, self).__setattr__("_standardized", None)
         super(VCFRecord, self).__setattr__(name, value)
 
     def containsIndel(self):
@@ -69,10 +74,9 @@ class VCFRecord:
                 contains_indel = True
         return contains_indel
 
-    def refStart(self, skip_std=False):
+    def refStart(self):
         """
         @summary: Returns the first position on reference affected by the alternative allele.
-        @param skip_std: [bool] Use True to save time only if the record has already be standardize by standardizeSingleAllele.
         @return: [float] the first position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
         @warnings: This method can only be used on record with only one alternative allele.
         @examples:
@@ -96,19 +100,18 @@ class VCFRecord:
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
-        record = self
-        if not skip_std:
-            record = deepcopy(self)
-            record.standardizeSingleAllele()
+        if self._standardized is None:
+            self._standardized = deepcopy(self)
+            self._standardized.standardizeSingleAllele()
+        record = self._standardized
         start = record.pos
         if record.ref == VCFRecord.getEmptyAlleleMarker:
             start -= 0.5
         return start
 
-    def refEnd(self, skip_std=False):
+    def refEnd(self):
         """
         @summary: Returns the last position on reference affected by the alternative allele.
-        @param skip_std: [bool] Use True to save time only if the record has already be standardize by standardizeSingleAllele.
         @return: [float] The last position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
         @warnings: This method can only be used on record with only one alternative allele.
         @examples:
@@ -132,10 +135,10 @@ class VCFRecord:
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
-        record = self
-        if not skip_std:
-            record = deepcopy(self)
-            record.standardizeSingleAllele()
+        if self._standardized is None:
+            self._standardized = deepcopy(self)
+            self._standardized.standardizeSingleAllele()
+        record = self._standardized
         end = record.pos
         if record.ref == VCFRecord.getEmptyAlleleMarker:
             end -= 0.5
@@ -286,8 +289,10 @@ class VCFRecord:
         """
         if len(self.alt) > 1:
             raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
-        new_record = deepcopy(self)
-        new_record.standardizeSingleAllele()
+        if self._standardized is None:
+            self._standardized = deepcopy(self)
+            self._standardized.standardizeSingleAllele()
+        new_record = self._standardized
         if new_record.ref == VCFRecord.getEmptyAlleleMarker or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker:  # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
@@ -323,8 +328,10 @@ class VCFRecord:
         """
         if len(self.alt) > 1:
             raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
-        new_record = deepcopy(self)
-        new_record.standardizeSingleAllele()
+        if self._standardized is None:
+            self._standardized = deepcopy(self)
+            self._standardized.standardizeSingleAllele()
+        new_record = self._standardized
         if new_record.ref == VCFRecord.getEmptyAlleleMarker or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker:  # Standardized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
