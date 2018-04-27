@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -54,7 +54,9 @@ def getAnnotSummary(allele_record, initial_alt):
     variant_annot = list()
     colocated_annot = list()
     for annot in allele_record.info["CSQ"]:
-        is_self_variant = (annot["Allele"] == initial_alt)
+        annot_allele = annot["Allele"].replace("-", ".")
+        annot_allele = "." if annot_allele == "" else annot_allele
+        is_self_variant = (annot_allele == initial_alt)
         # Similar knowns variants
         if is_self_variant and annot["Existing_variation"] is not None:
             for db_id in annot["Existing_variation"].split("&"):

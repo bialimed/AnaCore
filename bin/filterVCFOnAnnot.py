@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -39,11 +39,11 @@ from anacore.VEPvcf import VEPVCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getKeptConsequences(allele_record, VEP_alt, valid_consequences):
+def getKeptConsequences(allele_record, alt_in_annot_format, valid_consequences):
     kept_conseq = list()
     for annot_idx, annot in enumerate(allele_record.info["CSQ"]):
         is_filtered = True
-        if VEP_alt == annot["Allele"] and annot["Consequence"] is not None:
+        if alt_in_annot_format == annot["Allele"] and annot["Consequence"] is not None:
             consequences = annot["Consequence"].split("&")  # For multi-consequence allele: Example: 'start_lost&NMD_transcript_variant'
             for current_csq in consequences:
                 if current_csq in valid_consequences:
@@ -52,10 +52,10 @@ def getKeptConsequences(allele_record, VEP_alt, valid_consequences):
             kept_conseq.append(annot)
     return kept_conseq
 
-def isPolymophism(allele_record, VEP_alt, checked_pop_tags, min_AF=0.01):
+def isPolymophism(allele_record, alt_in_annot_format, checked_pop_tags, min_AF=0.01):
     is_polymorphism = False
     for collocated_var in allele_record.info["CSQ"]:
-        if VEP_alt == collocated_var["Allele"]:
+        if alt_in_annot_format == collocated_var["Allele"]:
             for pop_freq in checked_pop_tags:
                 if pop_freq in collocated_var and collocated_var[pop_freq] is not None:
                     frequencies = collocated_var[pop_freq].split("&")  # For multi-reference SNP. Example: {'Existing_variation': 'rs7367494&rs34188929', 'Gene': 'ENSG00000184908', 'Allele': 'T', ..., 'ExAC_SAS_AF': '0.9253&0.9253', 'AF': '0.8299', 'EAS_AF': '0.9980&0.9980'}
@@ -64,11 +64,11 @@ def isPolymophism(allele_record, VEP_alt, checked_pop_tags, min_AF=0.01):
                             is_polymorphism = True
     return is_polymorphism
 
-def getVEPAlt(ref, alt, empty_marker="."):
+def getVEPAlt(ref, alt):
     alleles = [ref] + alt
     # Replace empty marker by empty string
     for idx, cur_allele in enumerate(alleles):
-        if cur_allele in [".", "-"]:
+        if cur_allele == ".":
             alleles[idx] = ""
     # Select shorter allele
     shorter_allele = alleles[0]
@@ -90,7 +90,7 @@ def getVEPAlt(ref, alt, empty_marker="."):
     # Replace empty by empty_marker
     for idx, cur_allele in enumerate(alleles):
         if cur_allele == "":
-            alleles[idx] = empty_marker
+            alleles[idx] = "-"
     return alleles[1:]
 
 

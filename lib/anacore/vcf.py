@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.16.1'
+__version__ = '1.17.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -43,6 +43,14 @@ class VCFRecord:
         self.format = pFormat if pFormat is not None else list()
         self.samples = samples if samples is not None else dict()
 
+    def __setattr__(self, name, value):
+        if value is not None:
+            if name == "ref":
+                value = ("." if value in ["-", ""] else value)
+            elif name == "alt":
+                value = [("." if elt in ["-", ""] else elt) for elt in value]
+        super(VCFRecord, self).__setattr__(name, value)
+
     def containsIndel(self):
         """
         @summary: Returns True if the variant contains an allele corresponding to an insertion or a deletion.
@@ -50,8 +58,8 @@ class VCFRecord:
         @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         contains_indel = False
-        ref = self.ref.replace(".", "").replace("-", "")
-        alt = [curr_alt.replace(".", "").replace("-", "") for curr_alt in self.alt]
+        ref = self.ref.replace(".", "")
+        alt = [curr_alt.replace(".", "") for curr_alt in self.alt]
         for allele in alt:
             if len(allele) != len(ref):
                 contains_indel = True
@@ -89,7 +97,7 @@ class VCFRecord:
             record = deepcopy(self)
             record.standardizeSingleAllele()
         start = record.pos
-        if record.ref in [".", "-", ""]:
+        if record.ref == ".":
             start -= 0.5
         return start
 
@@ -125,7 +133,7 @@ class VCFRecord:
             record = deepcopy(self)
             record.standardizeSingleAllele()
         end = record.pos
-        if record.ref in [".", "-", ""]:
+        if record.ref == ".":
             end -= 0.5
         else:
             end += len(record.ref) - 1
@@ -153,8 +161,8 @@ class VCFRecord:
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
         is_deletion = False
-        ref = self.ref.replace(".", "").replace("-", "")
-        alt = self.alt[0].replace(".", "").replace("-", "")
+        ref = self.ref.replace(".", "")
+        alt = self.alt[0].replace(".", "")
         if len(alt) < len(ref):
             is_deletion = True
         return is_deletion
@@ -169,8 +177,8 @@ class VCFRecord:
         if len(self.alt) > 1:
             raise Exception("The function 'isIndel' cannot be used on multi-allelic variant.")
         is_indel = False
-        ref = self.ref.replace(".", "").replace("-", "")
-        alt = self.alt[0].replace(".", "").replace("-", "")
+        ref = self.ref.replace(".", "")
+        alt = self.alt[0].replace(".", "")
         if len(alt) != len(ref):
             is_indel = True
         return is_indel
@@ -185,8 +193,8 @@ class VCFRecord:
         if len(self.alt) > 1:
             raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant.")
         is_insertion = False
-        ref = self.ref.replace(".", "").replace("-", "")
-        alt = self.alt[0].replace(".", "").replace("-", "")
+        ref = self.ref.replace(".", "")
+        alt = self.alt[0].replace(".", "")
         if len(alt) > len(ref):
             is_insertion = True
         return is_insertion
@@ -204,10 +212,9 @@ class VCFRecord:
             record_type = "variation"
         return record_type
 
-    def standardizeSingleAllele(self, empty_marker="."):
+    def standardizeSingleAllele(self):
         """
         @summary: The empty allele marker is replaced by the empty_marker and the alternative and reference allele are reduced to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.
-        @param empty_marker: The value used for the empty allele (example: A/. for a deletion of A).
         @warnings: This method can only be used on record with only one alternative allele.
         """
         def twoSideTrimming(record):
@@ -215,21 +222,26 @@ class VCFRecord:
             @summary: Removes identical end and start between reference allele and alternative allele (example: ATGACT/ATCT becomes G/). The end is removed first to manage repeat cases.
             @param record: [VCFRecord] The mono-alternative variant.
             """
-            while record.ref != "" and record.alt[0] != "" and record.ref[-1] == record.alt[0][-1]:
-                record.ref = record.ref[:-1]
-                record.alt[0] = record.alt[0][:-1]
-            while record.ref != "" and record.alt[0] != "" and record.ref[0] == record.alt[0][0]:
-                record.ref = record.ref[1:]
-                record.alt[0] = record.alt[0][1:]
+            ref = record.ref
+            alt = record.alt[0]
+            while ref != "" and alt != "" and ref[-1] == alt[-1]:
+                ref = ref[:-1]
+                alt = alt[:-1]
+            while ref != "" and alt != "" and ref[0] == alt[0]:
+                ref = ref[1:]
+                alt = alt[1:]
                 record.pos += 1
+            record.ref = ref
+            record.alt = [alt]
 
         if len(self.alt) > 1:
             raise Exception("The function 'standardizeSingleAllele' cannot be used on multi-allelic variant.")
+        empty_marker = "."
         self.ref = self.ref.upper()
         self.alt[0] = self.alt[0].upper()
-        # Deletion with marker
-        if self.alt[0] in [".", "-", ""]:
-            self.alt[0] = empty_marker
+        # Deletion or insertion with marker
+        if self.alt[0] == empty_marker or self.ref == empty_marker:
+            pass
         # Deletion without marker
         elif len(self.alt[0]) < len(self.ref):
             if self.ref.startswith(self.alt[0]):
@@ -238,17 +250,12 @@ class VCFRecord:
                 self.alt[0] = empty_marker
             else:
                 twoSideTrimming(self)
-                if self.alt[0] != "":
+                if self.alt[0] != ".":
                     warnings.warn(
                         'The deletion "{}/{}" at location {}:{} cannot be standardized.'.format(
                             self.ref, self.alt[0], self.chrom, self.pos
                         )
                     )
-                else:
-                    self.alt[0] = empty_marker
-        # Insertion with marker
-        elif self.ref in [".", "-", ""]:
-            self.ref = empty_marker
         # Insertion without marker
         elif len(self.alt[0]) > len(self.ref):
             if self.alt[0].startswith(self.ref):
@@ -257,14 +264,12 @@ class VCFRecord:
                 self.ref = empty_marker
             else:
                 twoSideTrimming(self)
-                if self.ref != "":
+                if self.ref != ".":
                     warnings.warn(
                         'The insertion "{}/{}" at location {}:{} cannot be standardized.'.format(
                             self.ref, self.alt[0], self.chrom, self.pos
                         )
                     )
-                else:
-                    self.ref = empty_marker
         # Substitution
         elif len(self.alt[0]) == len(self.ref) and len(self.ref) != 1:
             twoSideTrimming(self)
