@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Unit testing lib
+`python3 -W ignore -m unittest discover lib/anacore/test > /dev/null`
+if [ $? -ne 0 ] ; then
+	exit 1 ;
+fi
+
+# Unit testing bin
+`python3 -W ignore -m unittest discover bin/test > /dev/null`
+if [ $? -ne 0 ] ; then
+	exit 1 ;
+fi
+
+echo -e "[\e[92mSUCCESS\033[0m] Pre-commit check "
+exit 0
