@@ -54,7 +54,7 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     @warning: Reads ID must be unique in SAM. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     """
     ref_start = pos
-    ref_end = pos + len(ref.replace(".", "")) - 1
+    ref_end = pos + len(ref.replace("-", "")) - 1
     if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
     # Retrieve reads
     inspect_start = ref_start - 1
@@ -107,7 +107,7 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
         for idx in range(inspected_len - read_len):
             reads[read_id]["seq"].append(None)
     # Process AD and DP
-    alt = alt if alt != "." else ""
+    alt = alt if alt != "-" else ""
     AD = 0
     DP = 0
     SAF = 0

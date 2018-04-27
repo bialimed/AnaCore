@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.1'
+__version__ = '2.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -59,8 +59,8 @@ def getADPContig(chrom, pos, ref, alt, aln_file, selected_RG=None):
     @param selected_RG: [list] The ID of RG used in AD and DP. Default: all read groups.
     @returns: [list] The first element is the AD, the second is the DP. These counts are expressed in number of contig: if the R1 and the R2 of a sequence has overlaps the variant they only the consensus is counted for the pair.
     """
-    if ref == ".":
-        raise Exception('The method getADPContig() cannot be used on insertion with dot as reference (instead of "./AGC" prefer an other fromat like "T/TAGC").')
+    if ref == "-":
+        raise Exception('The method getADPContig() cannot be used on insertion with dash as reference (instead of "-/AGC" prefer the standard fromat like "T/TAGC").')
     # Retrieve reads
     ref_start = pos
     ref_end = pos + len(ref) - 1
@@ -68,7 +68,7 @@ def getADPContig(chrom, pos, ref, alt, aln_file, selected_RG=None):
     inspect_end = ref_end
     reads, quals = getAlnAndQual(aln_file, chrom, inspect_start, inspect_end, selected_RG, 100000)
     # Process AD and DP
-    alt = alt if alt != "." else ""
+    alt = alt if alt != "-" else ""
     AD = 0
     DP = 0
     for read_id in reads:
@@ -100,7 +100,7 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     @warning: Reads ID must be unique in SAM. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     """
     ref_start = pos
-    ref_end = pos + len(ref.replace(".", "")) - 1
+    ref_end = pos + len(ref.replace("-", "")) - 1
     if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
     # Retrieve reads
     inspect_start = ref_start - 1
@@ -139,7 +139,7 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
         for idx in range(inspected_len - read_len):
             reads[read_id].append(None)
     # Process AD and DP
-    alt = alt if alt != "." else ""
+    alt = alt if alt != "-" else ""
     AD = 0
     DP = 0
     for read_id in reads:
@@ -440,7 +440,7 @@ if __name__ == "__main__":
                         record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
                         record_allele.samples[curr_spl]["DP"] = vcaller_DP
                         # Store allele
-                        allele_id = record_allele.chrom + ":" + str(record_allele.pos) + "=" + record_allele.ref + "/" + record_allele.alt[0]
+                        allele_id = record_allele.getName()
                         if allele_id not in variants:
                             variants[allele_id] = record_allele
                         else:

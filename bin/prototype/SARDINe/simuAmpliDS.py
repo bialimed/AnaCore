@@ -481,11 +481,11 @@ if __name__ == "__main__":
                         # Apply variant in selected alternatives
                         for amplicon_variant in alterated_amplicons:
                             # Apply variant
-                            if "." in alt_allele or len(alt_allele) < len(ref_allele): # Deletion
+                            if "-" in alt_allele or len(alt_allele) < len(ref_allele): # Deletion
                                 del_length = len(ref_allele)
                                 for idx in range(del_length):
                                     amplicon_variant[(pos + idx) - area["start"]] = ""
-                            elif "." in ref_allele or len(alt_allele) > len(ref_allele): # Insertion
+                            elif "-" in ref_allele or len(alt_allele) > len(ref_allele): # Insertion
                                 amplicon_variant[pos - area["start"]] = alt_allele
                             else: # Substitution
                                 subst_length = len(alt_allele)

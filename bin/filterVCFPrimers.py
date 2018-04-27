@@ -59,14 +59,14 @@ def canBeMovedToInterest(overlapped_region, ref_seq, variant):
     else:
         moved_variant = variant.getMostUpstream(ref_seq)
         if variant.isInsertion():
-            if moved_variant.ref == ".":  # The standardization is ok
+            if moved_variant.ref == "-":  # The standardization is ok
                 if moved_variant.pos <= overlapped_region.start:  # Positions can be equals in case where the insertion end the interest area
                     can_be_moved = True
             else:  # The standardization has failed
                 if moved_variant.pos + len(moved_variant.ref) - 1 < overlapped_region.start:
                     can_be_moved = True
         elif variant.isDeletion():
-            if len(moved_variant.alt[0].replace(".", "")):  # The standardization is ok
+            if len(moved_variant.alt[0].replace("-", "")):  # The standardization is ok
                 if moved_variant.pos + len(variant.ref) - 1 < overlapped_region.start:
                     can_be_moved = True
     return can_be_moved
@@ -138,7 +138,7 @@ def getVariantRegion(variant):
         std_variant.pos + len(std_variant.ref) - 1,  # Works also with standardized insertion
         None,
         std_variant.chrom
-   )
+    )
 
 
 ########################################################################
