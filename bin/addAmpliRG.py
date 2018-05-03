@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -89,6 +89,20 @@ def getSourceRegion(read, regions, anchor_offset=0):
     return overlapped_region
 
 
+def pairHasOverlapOnZOI(amplicon, first_read, second_read, min_cov=10):
+    """
+    @summary: Returns the region where the read come from. Returns None if no region corresponds to the read.
+    @param amplicon: [Region] The amplicon region.
+    @param first_read: [pysam.AlignedSegment] The evaluated read1.
+    @param second_read: [pysam.AlignedSegment] The evaluated read2.
+    @param min_cov: [int] The minimum cumulative length of reads pair in zone of interest (R1 on ZOI + R2 on ZOI).
+    @return: [boolean] The region where the read come from.
+    """
+    zoi_cov_len = first_read.get_overlap(amplicon.thickStart, amplicon.thickEnd)
+    zoi_cov_len += second_read.get_overlap(amplicon.thickStart, amplicon.thickEnd)
+    return zoi_cov_len >= min_cov
+
+
 def hasValidStrand(read, ampl_region):
     """
     @summary: Returns True if the read is stranded like if it comes from the specified region.
@@ -128,6 +142,7 @@ def writeTSVSummary(out_path, data):
             "Out_target\t{}\t{:5f}".format(data["out_target"], data["out_target"]/data["total"]),
             "Cross_panel\t{}\t{:5f}".format(data["cross_panel"], data["cross_panel"]/data["total"]),
             "Invalid_pair\t{}\t{:5f}".format(data["invalid_pair"], data["invalid_pair"]/data["total"]),
+            "Only_primers\t{}\t{:5f}".format(data["only_primers"], data["only_primers"]/data["total"]),
             "Valid\t{}\t{:5f}".format(data["valid"], data["valid"]/data["total"]),
             sep="\n",
             file=FH_summary
@@ -140,7 +155,7 @@ def writeJSONSummary(out_path, data):
     @param out_path: [str] Path to the output file.
     @param data: [dict] The metrics stored in summary.
     """
-    eval_order = ["unpaired", "pair_unmapped", "out_target", "cross_panel", "invalid_pair", "valid"]
+    eval_order = ["unpaired", "pair_unmapped", "out_target", "cross_panel", "invalid_pair", "only_primers", "valid"]
     with open(args.output_summary, "w") as FH_summary:
         FH_summary.write(
             json.dumps({"eval_order": eval_order, "results": data}, default=lambda o: o.__dict__, sort_keys=True)
@@ -157,11 +172,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Adds RG corresponding to the panel amplicon. for a reads pair the amplicon is determined from the position of the first match position of the reads (primers start positions).')
     parser.add_argument('-f', '--summary-format', default='tsv', choices=['json', 'tsv'], help='The summary format. [Default: %(default)s]')
     parser.add_argument('-l', '--anchor-offset', type=int, default=4, help='The alignment of the read can start at N nucleotids after the start of the primer. This parameter allows to take account the possible mismatches on the firsts read positions. [Default: %(default)s]')
+    parser.add_argument('-z', '--min-zoi-cov', type=int, default=10, help='The minimum cumulative length of reads pair in zone of interest. If the number of nucleotids coming from R1 on ZOI + the number of nucleotids coming from R2 on ZOI is lower than this value the pair is counted in "only_primers". [Default: %(default)s]')
     parser.add_argument('-t', '--RG-tag', default='LB', help='RG tag used to store the area ID. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-a', '--input-aln', required=True, help='The path to the alignments files (format: BAM). This file must be sorted by coordinates.')
-    group_input.add_argument('-p', '--input-panel', required=True, help='Path to the list of amplicons with their primers (format: BED). Each area must have an unique ID in the name field and a strand.')
+    group_input.add_argument('-p', '--input-panel', required=True, help='Path to the list of amplicons with their primers (format: BED). Each area must have an unique ID in the name field and a strand. The thickStart field represent the start of ZOI and the thickEnd the end of ZOI.')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-o', '--output-aln', required=True, help='The path to the alignments file (format: BAM).')
     group_output.add_argument('-s', '--output-summary', help='The path to the summary file (format: see --summary-format). It contains information about the number of reads out off target, reversed and valid.')
@@ -174,6 +190,7 @@ if __name__ == "__main__":
     out_target_reads = 0
     reverse_reads = 0
     valid_reads = 0
+    only_primers_reads_valid_pair = 0
     valid_reads_valid_pair = 0
 
     # Get panel regions
@@ -216,10 +233,14 @@ if __name__ == "__main__":
                             if curr_read.query_name in valid_reads_by_id:  # Pair is valid
                                 prev_read = valid_reads_by_id[curr_read.query_name]
                                 if prev_read.get_tag("RG") == RG_id_by_source[source_region.name]:
-                                    valid_reads_valid_pair += 2
-                                    FH_out.write(prev_read)
-                                    FH_out.write(curr_read)
-                                    valid_reads_by_id[curr_read.query_name] = None
+                                    if pairHasOverlapOnZOI(source_region, prev_read, curr_read, args.min_zoi_cov):  # Reads overlap ZOI
+                                        valid_reads_valid_pair += 2
+                                        FH_out.write(prev_read)
+                                        FH_out.write(curr_read)
+                                        valid_reads_by_id[curr_read.query_name] = None
+                                    else:  # Reads are only primers
+                                        only_primers_reads_valid_pair += 2
+                                        valid_reads_by_id[curr_read.query_name] = None
                             else:
                                 valid_reads_by_id[curr_read.query_name] = curr_read
 
@@ -235,7 +256,8 @@ if __name__ == "__main__":
             "pair_unmapped": unmapped_pairs,
             "out_target": out_target_reads,
             "cross_panel": reverse_reads,
-            "invalid_pair": valid_reads - valid_reads_valid_pair,
+            "invalid_pair": valid_reads - only_primers_reads_valid_pair - valid_reads_valid_pair,
+            "only_primers": only_primers_reads_valid_pair,
             "valid": valid_reads_valid_pair
         }
         if args.summary_format == "json":
