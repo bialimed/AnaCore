@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '2.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -76,7 +76,7 @@ def VEPWrapper(exec_path, in_vcf, out_file, stderr, out_format, species, assembl
               " --af" + \
               " --af_1kg" + \
               " --af_esp" + \
-              " --af_exac" + \
+              " --af_gnomad" + \
               " --pubmed" + \
               " --no_stats" + \
               " --merged" + \
