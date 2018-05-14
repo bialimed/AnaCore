@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -102,22 +102,28 @@ class CountMSI(object):
 
     def _parseFileHandle(self, FH):
         # Parse general information
-        samples = [elt.strip() for elt in FH.readline().split("\t")][1:]
-        nb_unstable = [elt.strip() for elt in FH.readline().split("\t")][1:]
-        nb_evaluated = [elt.strip() for elt in FH.readline().split("\t")][1:]
-        scores = [elt.strip() for elt in FH.readline().split("\t")][1:]
-        for idx, elt in enumerate(scores):
-            curr_score = None
-            if elt != "":
-                curr_score = float(elt)
-            scores[idx] = curr_score
-        status = [elt.strip() for elt in FH.readline().split("\t")][1:]
+        samples = [elt.strip() for elt in FH.readline().split("\t")[1:]]
+        nb_unstable = [int(elt.strip()) for elt in FH.readline().split("\t")[1:]]
+        nb_evaluated = [int(elt.strip()) for elt in FH.readline().split("\t")[1:]]
+        line = FH.readline()
+        if not line.startswith("msing_score"):
+            scores = [None for curr_spl in samples]
+        else:
+            scores = [elt.strip() for elt in line.split("\t")][1:]
+            for idx, elt in enumerate(scores):
+                curr_score = None
+                if elt != "":
+                    curr_score = float(elt)
+                scores[idx] = curr_score
+            line = FH.readline()  # To next line
+        status = [elt.strip() for elt in line.split("\t")][1:]
         for idx, elt in enumerate(status):
             is_stable = None
-            if elt == "NEG":
-                is_stable = True
-            elif elt == "POS":
-                is_stable = False
+            if nb_evaluated[idx] > 0:
+                if elt == "NEG":
+                    is_stable = True
+                elif elt == "POS":
+                    is_stable = False
             status[idx] = is_stable
         for spl_idx, curr_spl in enumerate(samples):
             self.samples[curr_spl] = MsingsSample(curr_spl, scores[spl_idx], status[spl_idx])
