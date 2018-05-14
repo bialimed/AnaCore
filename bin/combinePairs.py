@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -193,7 +193,7 @@ def process(args, log):
         "Nb pair: {} ; Nb combined: {} ({}%)".format(
             nb_pairs,
             combined,
-            round(float(combined*100)/nb_pairs, 2)
+            (0 if nb_pairs == 0 else round(float(combined*100)/nb_pairs, 2))
         )
     )
     if args.output_report is not None:
