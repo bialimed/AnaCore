@@ -114,7 +114,6 @@ class ADSSampleSheetIO(SampleSheetIO):
         for manifest_id in sorted(self.manifests):
             manifest_file = self.manifests[manifest_id]
             if manifest_file in selected_manifests:
-                print(manifest_file, selected_manifests)
                 new_manifest_id = chr(ord("A") + new_idx)
                 new_by_old_id[manifest_id] = new_manifest_id
                 new_manifests[new_manifest_id] = self.manifests[manifest_id]
