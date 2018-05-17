@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -30,8 +30,9 @@ from weaver.function import ShellFunction
 
 class AddAmpliRG (Component):
 
-    def define_parameters(self, in_regions, in_aln, summary_format="tsv"):
+    def define_parameters(self, in_regions, in_aln, summary_format="tsv", min_zoi_cov=10):
         # Parameters
+        self.add_parameter("min_zoi_cov", 'The minimum cumulative length of reads pair in zone of interest. If the number of nucleotids coming from R1 on ZOI + the number of nucleotids coming from R2 on ZOI is lower than this value the pair is counted in "only_primers".', type=int, default=min_zoi_cov)
         self.add_parameter("summary_format", "The format of the stdout.", choices=["tsv", "json"], default=summary_format)
 
         # Input files
@@ -54,6 +55,7 @@ class AddAmpliRG (Component):
 
     def process(self):
         cmd = self.get_exec_path("addAmpliRG.py") + \
+            " --min-zoi-cov " + str(self.min_zoi_cov) + \
             " --summary-format " + self.summary_format + \
             " --input-panel " + self.in_regions + \
             " --input-aln $1" + \
