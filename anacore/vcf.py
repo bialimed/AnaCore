@@ -836,7 +836,7 @@ class VCFIO(AbstractFile):
         """
         @note: Draft
         """
-        self.file_handle.write("##fileformat=VCFv4.0\n")
+        self.file_handle.write("##fileformat=VCFv4.1\n")
         for tag in sorted(self.info):
             number_tag = self.info[tag]["number"] if self.info[tag]["number"] is not None else "."
             if "number_tag" in self.info[tag]:
