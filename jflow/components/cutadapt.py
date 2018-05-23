@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -30,7 +30,7 @@ from weaver.function import ShellFunction
 
 class Cutadapt (Component):
 
-    def define_parameters(self, adaptor_type, adaptor_file, R1, R2=None, error_rate=0.01, min_overlap=None, discard_untrimmed=False):
+    def define_parameters(self, adaptor_type, adaptor_file, R1, R2=None, error_rate=0.1, min_overlap=None, discard_untrimmed=False):
         # Parameters
         self.add_parameter("adaptor_type", "Location of adaptor a: 3' end, g: 5' end or b: 3' or 5' end.", default=adaptor_type, choices=["a", "g", "b"])
         self.add_parameter("discard_untrimmed", "With this option reads that do not contain the adapter are discarded.", default=discard_untrimmed, type=bool)
