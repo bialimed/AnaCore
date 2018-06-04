@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.18.1'
+__version__ = '1.18.2'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -27,7 +27,6 @@ import re
 import warnings
 from copy import deepcopy
 from anacore.abstractFile import AbstractFile
-
 
 
 class VCFRecord:
@@ -870,6 +869,7 @@ class VCFIO(AbstractFile):
             )
         self.file_handle.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([spl for spl in self.samples]) + "\n")
 
+
 def getAlleleRecord(FH_vcf, record, idx_alt):
     """
     @summary: Returns the record corresponding to the specified allele in variant.
@@ -912,6 +912,7 @@ def getAlleleRecord(FH_vcf, record, idx_alt):
                     new_record.samples[spl][key] = record.samples[spl][key]
     return new_record
 
+
 def getFreqMatrix(vcf_path, missing_replacement=0.0, accept_missing=True):
     """
     @summary: Returns a 2D matrix representing variants frequencies by sample.
@@ -935,7 +936,7 @@ def getFreqMatrix(vcf_path, missing_replacement=0.0, accept_missing=True):
                     if AF is None:
                         AF = missing_replacement
                         if not accept_missing:
-                            raise Exception("The AF is missing for variant {} in sample {}.".format(curr_spl, variant_id))
+                            raise Exception("The AF is missing for variant {} in sample {}.".format(curr_spl, record_allele.getName()))
                     row_array.append(AF)
                 AF_matrix.append(row_array)
     return samples, variants, AF_matrix
