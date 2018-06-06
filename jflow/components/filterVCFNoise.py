@@ -37,7 +37,7 @@ class FilterVCFNoise (Component):
         self.add_parameter("tag_name", "The name of the tag added on variant if it correspond to noise.", default=tag_name)
 
         # Files
-        self.add_input_file_list("in_noises", 'The path to the file containing artifactual variants with their maximum frequency (format: TSV). The header line of the file must be "#Chromosome<tab>Possition<tab>Reference_allele<tab>Alternative_allele<tab>Noise_rate".', default=in_noises, required=True)
+        self.add_input_file("in_noises", 'The path to the file containing artifactual variants with their maximum frequency (format: TSV). The header line of the file must be "#Chromosome<tab>Possition<tab>Reference_allele<tab>Alternative_allele<tab>Noise_rate".', default=in_noises, required=True)
         self.add_input_file_list("in_variants", "The path to the variants file (format: VCF).", default=in_variants, required=True)
         self.add_output_file_list("out_variants", "Path to the filtered files (format: VCF).", pattern='{basename_woext}.vcf', items=self.in_variants)
         self.add_output_file_list("stderr", "Path to the stderr files (format: txt).", pattern='{basename_woext}.stderr', items=self.in_variants)
