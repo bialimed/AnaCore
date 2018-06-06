@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.18.2'
+__version__ = '1.19.0'
 __email__ = 'frederic.escudie@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -596,10 +596,16 @@ class VCFRecord:
 
 
 class VCFIO(AbstractFile):
+    """Manage VCF file."""
+
     def __init__(self, filepath, mode="r"):
         """
-        @param filepath: [str] The filepath.
-        @param mode: [str] Mode to open the file ('r', 'w', 'a').
+        Return instance of VCFIO.
+
+        :param filepath: The filepath.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
         """
         AbstractFile.__init__(self, filepath, mode)
         self.samples = list()
@@ -611,9 +617,12 @@ class VCFIO(AbstractFile):
 
     def isRecordLine(self, line):
         """
-        @summary: Returns True if the line corresponds to a record (it is not a comment or an header line).
-        @param line: [str] The evaluated line.
-        @return: [bool] True if the line corresponds to a record.
+        Return True if the line corresponds to a record (it is not a comment or an header line).
+
+        :param line: The evaluated line.
+        :type line: str
+        :return: True if the line corresponds to a record.
+        :rtype: bool
         """
         is_record = True
         if line.startswith("#"):
@@ -621,9 +630,7 @@ class VCFIO(AbstractFile):
         return is_record
 
     def _parseHeader(self):
-        """
-        @summary: Parses VCF header to set info, format and samples attributes.
-        """
+        """Parse VCF header to set info, format and samples attributes."""
         if self.current_line_nb == 0:
             self.current_line = self.file_handle.readline().rstrip()
         is_header = False
@@ -638,9 +645,7 @@ class VCFIO(AbstractFile):
                 self.current_line = self.file_handle.readline().rstrip()
 
     def _parseHeaderLine(self):
-        """
-        @summary: Parses one VCF header line to update info, filter, format or samples attributes.
-        """
+        """Parse one VCF header line to update info, filter, format or samples attributes."""
         type_fct = {
             "String": str,
             "Integer": int,
@@ -688,8 +693,10 @@ class VCFIO(AbstractFile):
 
     def _parseLine(self):
         """
-        @summary: Returns a structured record from the VCF current line.
-        @return: [VCFRecord] The variant described by the current line.
+        Return a structured record from the VCF current line.
+
+        :return: The variant described by the current line.
+        :rtype: VCFRecord
         """
         fields = [elt.strip() for elt in self.current_line.split('\t')]
         variation = VCFRecord()
@@ -753,16 +760,21 @@ class VCFIO(AbstractFile):
 
     def write(self, record):
         """
-        @summary: Writes variant record in VCF.
-        @param record: [VCFRecord] The variant record.
+        Write variant record in VCF.
+
+        :param record: The variant record.
+        :type record: VCFRecord
         """
         self.file_handle.write(self.recToVCFLine(record) + "\n")
 
     def recToVCFLine(self, record):
         """
-        @summary: Returns the record in VCF format.
-        @param record: [VCFRecord] The record to process.
-        @return: [str] The VCF line.
+        Return the record in VCF format.
+
+        :param record: The record to process.
+        :type record: VCFRecord
+        :return: The VCF line.
+        :rtype: str
         """
         # Standard columns
         line = "\t".join([
@@ -774,7 +786,7 @@ class VCFIO(AbstractFile):
             ("." if record.qual is None else str(record.qual)),
             ("." if record.filter is None else ";".join(record.filter))])
         # Info
-        if record.info is None:
+        if record.info is None or len(self.info) == 0:
             line += "\t."
         else:
             info_fields = list()
@@ -782,7 +794,7 @@ class VCFIO(AbstractFile):
                 if self.info[key]["number"] is None or self.info[key]["number"] > 1:
                     info_fields.append(key + "=" + ",".join(map(str, record.info[key])))
                 else:
-                    if self.info[key]["type"] is None: ############################################## Flag
+                    if self.info[key]["type"] is None:  ############################################## Flag
                         info_fields.append(key)
                     else:
                         info_fields.append(key + "=" + str(record.info[key]))
@@ -813,7 +825,7 @@ class VCFIO(AbstractFile):
                                     values.append(val)
                                 spl_fields.append(",".join(values))
                             else:
-                                if self.format[key]["type"] is None: ############################################## Flag
+                                if self.format[key]["type"] is None:  ############################################## Flag
                                     spl_fields.append(key)
                                 else:
                                     val = (str(record.samples[spl][key]) if record.samples[spl][key] is not None else ".")
@@ -823,8 +835,10 @@ class VCFIO(AbstractFile):
 
     def copyHeader(self, model):
         """
-        @summary: Copy header fields from the specified VCF.
-        @param model: [VCFIO] The VCF source.
+        Copy header fields from the specified VCF.
+
+        :param model: The VCF source.
+        :type model: VCFIO
         """
         self.filter = deepcopy(model.filter)
         self.format = deepcopy(model.format)
@@ -837,34 +851,40 @@ class VCFIO(AbstractFile):
         """
         self.file_handle.write("##fileformat=VCFv4.1\n")
         for tag in sorted(self.info):
+            if '"' in self.info[tag]["description"]:
+                raise Exception("In a VCF the description in INFO header must not contains double quotes: {}".format(self.info[tag]["description"]))
             number_tag = self.info[tag]["number"] if self.info[tag]["number"] is not None else "."
             if "number_tag" in self.info[tag]:
                 number_tag = self.info[tag]["number_tag"]
             self.file_handle.write(
-                '##INFO=<' + \
-                'ID=' + tag + ',' + \
-                'Number=' + str(number_tag) + ',' + \
-                'Type=' + self.info[tag]["type_tag"] + ',' + \
-                'Description="' + self.info[tag]["description"] + '"' + \
+                '##INFO=<' +
+                'ID=' + tag + ',' +
+                'Number=' + str(number_tag) + ',' +
+                'Type=' + self.info[tag]["type_tag"] + ',' +
+                'Description="' + self.info[tag]["description"] + '"' +
                 '>\n'
             )
         for tag in sorted(self.filter):
+            if '"' in self.filter[tag]:
+                raise Exception("In a VCF the description in FILTER header must not contains double quotes: {}".format(self.filter[tag]))
             self.file_handle.write(
-                '##FILTER=<' + \
-                'ID=' + tag + ',' + \
-                'Description="' + self.filter[tag] + '"' + \
+                '##FILTER=<' +
+                'ID=' + tag + ',' +
+                'Description="' + self.filter[tag] + '"' +
                 '>\n'
             )
         for tag in sorted(self.format):
+            if '"' in self.format[tag]["description"]:
+                raise Exception("In a VCF the description in INFO header must not contains double quotes: {}".format(self.format[tag]["description"]))
             number_tag = self.format[tag]["number"] if self.format[tag]["number"] is not None else "."
             if "number_tag" in self.format[tag]:
                 number_tag = self.format[tag]["number_tag"]
             self.file_handle.write(
-                '##FORMAT=<' + \
-                'ID=' + tag + ',' + \
-                'Number=' + str(number_tag) + ',' + \
-                'Type=' + self.format[tag]["type_tag"] + ',' + \
-                'Description="' + self.format[tag]["description"] + '"' + \
+                '##FORMAT=<' +
+                'ID=' + tag + ',' +
+                'Number=' + str(number_tag) + ',' +
+                'Type=' + self.format[tag]["type_tag"] + ',' +
+                'Description="' + self.format[tag]["description"] + '"' +
                 '>\n'
             )
         self.file_handle.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([spl for spl in self.samples]) + "\n")
@@ -872,10 +892,14 @@ class VCFIO(AbstractFile):
 
 def getAlleleRecord(FH_vcf, record, idx_alt):
     """
-    @summary: Returns the record corresponding to the specified allele in variant.
-    @param record: [VCFRecord] The variant record.
-    @param idx_alt: [int] The index of the allele in alt attribute.
-    @return: [VCFRecord] The record corresponding to the specified allele in variant.
+    Return the record corresponding to the specified allele in variant.
+
+    :param record: The variant record.
+    :type record: VCFRecord
+    :param idx_alt: The index of the allele in alt attribute.
+    :type idx_alt: int
+    :return: The record corresponding to the specified allele in variant.
+    :rtype: VCFRecord
     """
     new_record = VCFRecord(
         region=record.chrom,
@@ -915,11 +939,16 @@ def getAlleleRecord(FH_vcf, record, idx_alt):
 
 def getFreqMatrix(vcf_path, missing_replacement=0.0, accept_missing=True):
     """
-    @summary: Returns a 2D matrix representing variants frequencies by sample.
-    @param vcf_path: [str] The pass to the VCF processed.
-    @param missing_replacement: [*] The value used to replace missing alleles frequencies (example: np.nan).
-    @param accept_missing: [bool] If false and a missing AF is found an exception is raised. If true the missing AF are replaced by missing_replacement.
-    @return: [list] The list of samples, the list of variants names and the 2D matrix of alleles frequencies.
+    Return a 2D matrix representing variants frequencies by sample.
+
+    :param vcf_path: The pass to the VCF processed.
+    :type vcf_path: str
+    :param missing_replacement: The value used to replace missing alleles frequencies (example: np.nan).
+    :type missing_replacement: *
+    :param accept_missing: If false and a missing AF is found an exception is raised. If true the missing AF are replaced by missing_replacement.
+    :type accept_missing: bool
+    :return: The list of samples, the list of variants names and the 2D matrix of alleles frequencies.
+    :rtype: list
     """
     samples = list()
     variants = list()
