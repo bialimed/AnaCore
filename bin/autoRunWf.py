@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.10.0'
+__version__ = '2.10.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -229,7 +229,7 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design, reference):
     @param reference: [dict] Reference description: assembly and sequences.
     @return: [list] The command.
     """
-    resources_folder = os.path.diraname(args.design_path_pattern.replace("WF_NAME", "ADIVaR"))
+    resources_folder = os.path.dirname(args.design_path_pattern.replace("WF_NAME", "ADIVaR"))
     assembly_folder = design.getAssemblyFolder(reference["assembly"]).replace("WF_NAME", "ADIVaR")
     cmd = [
         args.workflow_path_pattern.replace("WF_NAME", "ADIVaR"), "adivar",
