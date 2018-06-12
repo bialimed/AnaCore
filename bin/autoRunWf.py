@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.9.0'
+__version__ = '2.10.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -68,12 +68,19 @@ class Design:
 
     def getPosCtrlRef(self, assembly):
         """
-        @summary: Returns the file containing the reference values for the positive control (for eaxmple the VCF containing the expected variants).
+        @summary: Returns the file containing the reference values for the positive control (for example the VCF containing the expected variants).
         @param assembly: [str] The selected assembly.
         @return: [str] Path to the reference values file.
         """
         return os.path.join(self.getAssemblyFolder(assembly), "pos_ctrl_expected.vcf")
 
+    def getVarNoise(self, assembly):
+        """
+        @summary: Returns the file containing the list of constitutive variants with their maximum AF.
+        @param assembly: [str] The selected assembly.
+        @return: [str] Path to the reference values file.
+        """
+        return os.path.join(self.getAssemblyFolder(assembly), "variants_noise.tsv")
 
     def getSelectedRef(self, ref_type):
         """
@@ -242,6 +249,11 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design, reference):
         cmd.extend([
             "--pos-ctrl-names", design.pos_ctrl_re,
             "--pos-ctrl-expected", positive_ctrl_ref
+        ])
+    constit_variants = design.getVarNoise(reference["assembly"]).replace("WF_NAME", "ADIVaR")
+    if os.path.exists(constit_variants):
+        cmd.extend([
+            "--constit-variants", constit_variants
         ])
     return cmd
 
