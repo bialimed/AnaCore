@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.10.1'
+__version__ = '2.10.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -129,7 +129,7 @@ def getProtocol(in_spl_folder):
         manifest_A = os.path.basename(samplesheet.manifests["A"])
         design_name = manifest_A.split("_A.txt")[0]
         pos_ctrl_re = ".*[Tt][Ee][Mm][Oo][Ii][Nn].*"
-        if design_name.startswith("INCa"):
+        if design_name.startswith("INCa") or design_name.startswith("TSCA_INCa"):
             pos_ctrl_re = ".*[Hh][Oo][Rr][Ii].*"
         protocol["design"] = Design(design_name, pos_ctrl_re, ".*[Nn][Tt][Cc].*")
     elif samplesheet.header["Workflow"] == "Enrichment":
