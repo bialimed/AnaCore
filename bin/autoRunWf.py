@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.10.2'
+__version__ = '2.11.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,6 +31,7 @@ import smtplib
 import logging
 import argparse
 import datetime
+import traceback
 import subprocess
 from email.mime.text import MIMEText
 
@@ -56,7 +57,6 @@ class Design:
         self.neg_ctrl_re = neg_ctrl_re
         self.resources_folder = resources_folder
 
-
     def getAssemblyFolder(self, assembly):
         """
         @summary: Returns the resource folder for the design in the selected assembly.
@@ -64,7 +64,6 @@ class Design:
         @return: [str] Path to the resource folder.
         """
         return os.path.join(self.resources_folder, assembly)
-
 
     def getPosCtrlRef(self, assembly):
         """
@@ -89,7 +88,6 @@ class Design:
         @return: [str] Path to the file.
         """
         return os.path.join(self.resources_folder, "reference_" + ref_type + ".tsv")
-
 
     def getFilters(self, wf_name):
         """
@@ -369,8 +367,10 @@ if __name__ == "__main__":
                 out_run_folder = os.path.join(args.analysis_folder, run_id)
                 completed_illumina_file = os.path.join(in_run_folder, "CompletedJobInfo.xml")
                 completed_analyses_file = os.path.join(out_run_folder, "processCompleted.txt")
-                if os.path.exists(completed_illumina_file) and not os.path.exists(completed_analyses_file):  # The run is ended
+                failed_analyses_file = os.path.join(out_run_folder, "processFailed.txt")
+                if os.path.exists(completed_illumina_file) and not os.path.exists(completed_analyses_file) and not os.path.exists(failed_analyses_file):  # The run is ended
                     log.info("Start post-process on run {}.".format(run_id))
+                    step = "start"
                     if send_mail:
                         sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "start", in_run_folder)
                     try:
@@ -381,6 +381,7 @@ if __name__ == "__main__":
                         if not os.path.exists(out_run_folder):
                             os.mkdir(out_run_folder)
                         # Launch workflows
+                        step = "Launch analysis workflows"
                         for curr_wf in getWorkflows(protocol):
                             out_wf_folder = os.path.join(out_run_folder, curr_wf)
                             out_folder_by_wf[curr_wf] = out_wf_folder
@@ -391,6 +392,7 @@ if __name__ == "__main__":
                                 cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder, genome)
                                 exec_cmd(cmd_analysis, log)
                         # Copy raw data
+                        step = "Copy raw"
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, run_id)
                             if not os.path.exists(out_run_storage):  # The run folder has not been copied in storage folder
@@ -404,6 +406,7 @@ if __name__ == "__main__":
                                         cmd_rm_analysis = ["rm", "-r", curr_file]
                                         exec_cmd(cmd_rm_analysis, log)
                         # Copy Illumina's workflows
+                        step = "Copy Illumina's workflows"
                         if protocol["workflow"] != "GenerateFASTQ":  # Illumina reporter has processed an analysis
                             # Get workflow name
                             analysis_basename = protocol["workflow"].replace(" ", "_")
@@ -423,6 +426,7 @@ if __name__ == "__main__":
                                         cmd_copy_analysis = ["rsync", "--recursive", "--perms", "--times", in_wf_folder + os.sep, out_wf_folder]
                                         exec_cmd(cmd_copy_analysis, log)
                         # Save in database
+                        step = "Database storage"
                         out_run_storage = in_run_folder
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, run_id)
@@ -434,15 +438,21 @@ if __name__ == "__main__":
                         if send_mail:
                             sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "end", in_run_folder)
                         # Send to archive
+                        step = "Send to archive"
                         if args.archivage_profiles_folder is not None:
                             cmd_archivage = getArchiveCmd(args.archivage_profiles_folder, run_id, list(out_folder_by_wf.keys()))
                             exec_cmd(cmd_archivage, log, True)
                             if send_mail:
                                 sendMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "[NGS] Sequencer data archivage", "The run {} has been archived.".format(in_run_folder))
-                    except:
+                    except Exception:
                         log.error("The post-process on run {} has failed.".format(run_id))
                         if send_mail:
                             sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "fail", in_run_folder)
-                        raise
+                        with open(failed_analyses_file, "w") as FH:
+                            FH.write('{}: error in step "{}"\n\nStacktrace:\n{}'.format(
+                                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                                step,
+                                traceback.print_exc()
+                            )
                     log.info("End post-process on run {}.".format(run_id))
         time.sleep(args.roll_time)
