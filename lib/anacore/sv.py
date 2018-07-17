@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -26,24 +26,31 @@ from anacore.abstractFile import isEmpty, AbstractFile
 
 
 class SVIO(AbstractFile):
-    """
-    @summary: Class to read and write in separated value files like TSV, CSV,
-    etc. Each rows is view as a list.
-    """
+    """Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a list."""
+
     def __init__(self, filepath, mode="r", separator="\t", title_starter="#", has_title=True):
         """
-        @param filepath: [str] The filepath.
-        @param mode: [str] Mode to open the file ('r', 'w', 'a').
-        @param separator: [str] Separator used between values.
-        @param title_starter: [str] The string used to introduce the title line.
-        @param has_title: [bool] If the first line contains the titles of columns.
+        Build and return an instance of SVIO.
+
+        :param filepath: The filepath.
+        :type filepath: str.
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str.
+        :param separator: Separator used between values.
+        :type separator: str.
+        :param title_starter: The string used to introduce the title line.
+        :type title_starter: str.
+        :param has_title: If the first line contains the titles of columns.
+        :type has_title: bool.
+        :return: The new instance.
+        :rtype: SVIO
         """
         # Convert mode for append in empty file
         if mode == "a" and isEmpty(filepath):
             mode = "w"
         # Get existing titles if the file is in append mode
         pre_titles = None
-        if mode == "a" and has_title: # Get titles from existing file
+        if mode == "a" and has_title:  # Get titles from existing file
             with SVIO(filepath, "r", separator, title_starter) as FH_read:
                 pre_titles = FH_read.titles
         # Initialise instance
@@ -57,9 +64,7 @@ class SVIO(AbstractFile):
             self.current_line_nb = 1
 
     def _parseHeader(self):
-        """
-        @summary: Parses SV header to set the attribute titles.
-        """
+        """Parse SV header to set the attribute titles."""
         if self.current_line_nb == 0:
             self.current_line = self.file_handle.readline().rstrip()
             self.current_line_nb += 1
@@ -72,9 +77,12 @@ class SVIO(AbstractFile):
 
     def isRecordLine(self, line):
         """
-        @summary: Returns True if the line corresponds to a record (it is not a comment or an header line).
-        @param line: [str] The evaluated line.
-        @return: [bool] True if the line corresponds to a record.
+        Return True if the line corresponds to a record (it is not a comment or an header line).
+
+        :param line: The evaluated line.
+        :type line: str.
+        :return: True if the line corresponds to a record.
+        :rtype: bool
         """
         is_record = True
         if line.startswith("#"):
@@ -83,8 +91,10 @@ class SVIO(AbstractFile):
 
     def _parseLine(self):
         """
-        @summary: Returns a structured record from the current line.
-        @return: [list] The record described by the current line.
+        Return a structured record from the current line.
+
+        :return: The record defined by the current line.
+        :rtype: list
         """
         fields = [field.strip() for field in self.current_line.split(self.separator)]
         return fields
@@ -92,11 +102,13 @@ class SVIO(AbstractFile):
     @staticmethod
     def isValid(filepath, separator="\t"):
         """
-        @summary: Returns True is the file can be a SV file.
-        @return: [bool] True if the file can be a SV file.
+        Return True is the file can be a SV file.
+
+        :return: True if the file can be a SV file.
+        :rtype: bool
         """
         is_valid = False
-        nb_fields = list() # The number of fields for each row
+        nb_fields = list()  # The number of fields for each row
         FH_in = SVIO(filepath, separator=separator, title_starter="")
         try:
             # Read the 10 first lines
@@ -112,7 +124,7 @@ class SVIO(AbstractFile):
                     line_idx += 1
                 if len(set(nb_fields)) == 1 and nb_fields[0] > 1:  # All lines have the same number of columns
                     is_valid = True
-        except:
+        except Exception:
             pass
         finally:
             FH_in.close()
@@ -120,8 +132,10 @@ class SVIO(AbstractFile):
 
     def write(self, record):
         """
-        @summary: Writes record line in file.
-        @param record: [list] The record.
+        Write record line in file.
+
+        :param record: The record.
+        :type record: list.
         """
         if self.current_line_nb == 0 and self.titles is not None:
             self.file_handle.write(
@@ -133,32 +147,43 @@ class SVIO(AbstractFile):
 
     def recordToLine(self, record):
         """
-        @summary: Returns the record in SV format.
-        @param record: [list] The record to process.
-        @return: [str] The SV line corresponding to the record.
+        Return the record in SV format.
+
+        :param record: The record to process.
+        :type record: list.
+        :return: The SV line corresponding to the record.
+        :rtype: str
         """
-        line = self.separator.join(record)
+        line = self.separator.join([str(elt) for elt in record])
         return(line)
 
 
 class HashedSVIO(SVIO):
-    """
-    @summary: Class to read and write in separated value files like TSV, CSV,
-    etc. Each rows is view as a dict indexed by columns titles.
-    """
+    """Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a dict indexed by columns titles."""
+
     def __init__(self, filepath, mode="r", separator="\t", title_starter="#"):
         """
-        @param filepath: [str] The filepath.
-        @param mode: [str] Mode to open the file ('r', 'w', 'a').
-        @param separator: [str] Separator used between values.
-        @param title_starter: [str] The string used to introduce the title line.
+        Build and return an instance of HashedSVIO.
+
+        :param filepath: The filepath.
+        :type filepath: str.
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str.
+        :param separator: Separator used between values.
+        :type separator: str.
+        :param title_starter: The string used to introduce the title line.
+        :type title_starter: str.
+        :return: The new instance.
+        :rtype: HashedSVIO
         """
         super().__init__(filepath, mode, separator, title_starter, True)
 
     def _parseLine(self):
         """
-        @summary: Returns a structured record from the current line.
-        @return: [dict] The record described by the current line.
+        Return a structured record from the current line.
+
+        :return: The record defined by the current line.
+        :rtype: dict
         """
         fields = super()._parseLine()
         record = {self.titles[idx]: val for idx, val in enumerate(fields)}
@@ -166,10 +191,13 @@ class HashedSVIO(SVIO):
 
     def recordToLine(self, record):
         """
-        @summary: Returns the record in SV format.
-        @param record: [dict] The record to process.
-        @return: [str] The SV line corresponding to the record.
+        Return the record in SV format.
+
+        :param record: The record to process.
+        :type record: dict.
+        :return: The SV line corresponding to the record.
+        :rtype: str
         """
         fields = [record[curr_title] for curr_title in self.titles]
-        line = self.separator.join(fields)
+        line = self.separator.join([str(elt) for elt in fields])
         return(line)
