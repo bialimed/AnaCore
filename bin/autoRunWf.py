@@ -452,7 +452,7 @@ if __name__ == "__main__":
                             FH.write('{}: error in step "{}"\n\nStacktrace:\n{}'.format(
                                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                 step,
-                                traceback.print_exc()
+                                traceback.format_exc()
                             ))
                     log.info("End post-process on run {}.".format(run_id))
         time.sleep(args.roll_time)
