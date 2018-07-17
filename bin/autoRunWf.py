@@ -450,9 +450,9 @@ if __name__ == "__main__":
                             sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "fail", in_run_folder)
                         with open(failed_analyses_file, "w") as FH:
                             FH.write('{}: error in step "{}"\n\nStacktrace:\n{}'.format(
-                                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                 step,
                                 traceback.print_exc()
-                            )
+                            ))
                     log.info("End post-process on run {}.".format(run_id))
         time.sleep(args.roll_time)
