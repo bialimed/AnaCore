@@ -1,8 +1,35 @@
 {
-  "class": "Filter",
-  "getter": "filter",
-  "action": "exclude",
-  "aggregator": "nb:1",
-  "operator": "in",
-  "values": ["lowDP", "lowAF", "invalid", "libSpe", "CSQ", "popAF"]
+    "class": "FiltersCombiner",
+    "operator": "and",
+    "filters": [
+        {
+            "class": "Filter",
+            "getter": "filter",
+            "action": "exclude",
+            "aggregator": "nb:1",
+            "operator": "in",
+            "values": ["lowDP", "lowAF", "invalid", "libSpe", "CSQ", "popAF", "popConst"]
+        }, {
+            "class": "FiltersCombiner",
+            "description": "Keep incomplete only if the AF is upper to 0.03.",
+            "operator": "or",
+            "filters": [
+                {
+                    "class": "Filter",
+                    "getter": "filter",
+                    "action": "select",
+                    "aggregator": "ratio:1",
+                    "operator": "not in",
+                    "values": ["incomplete"]
+                }, {
+                    "class": "Filter",
+                    "getter": "m:getPopAF.0",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": ">=",
+                    "values": 0.03
+                }
+            ]
+        }
+    ]
 }

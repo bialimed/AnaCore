@@ -8,7 +8,28 @@
             "action": "select",
             "aggregator": "ratio:1",
             "operator": "not in",
-            "values": ["lowDP", "lowAF", "libSpe", "invalid", "popAF"]
+            "values": ["lowDP", "lowAF", "libSpe", "invalid", "popAF", "popConst"]
+        }, {
+            "class": "FiltersCombiner",
+            "description": "Keep incomplete only if the AF is upper to 0.03.",
+            "operator": "or",
+            "filters": [
+                {
+                    "class": "Filter",
+                    "getter": "filter",
+                    "action": "select",
+                    "aggregator": "ratio:1",
+                    "operator": "not in",
+                    "values": ["incomplete"]
+                }, {
+                    "class": "Filter",
+                    "getter": "m:getPopAF.0",
+                    "action": "select",
+                    "aggregator": "nb:1",
+                    "operator": ">=",
+                    "values": 0.03
+                }
+            ]
         }, {
             "class": "FiltersCombiner",
             "operator": "or",
