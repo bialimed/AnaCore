@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.9.0'
+__version__ = '1.10.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,6 +31,8 @@ import xml.etree.ElementTree as ET
 
 
 class SampleSheetIO(object):
+    SECTIONS = ["Header", "Manifests", "Reads", "Settings", "Data"]
+
     def __init__(self, path):
         self.filepath = path
         self.run = None
@@ -45,13 +47,16 @@ class SampleSheetIO(object):
             sections_by_title = dict()
             section_title = None
             for line in FH_sheet:
-                if line.strip() in ["[Header]", "[Manifests]", "[Reads]", "[Settings]", "[Data]"]:
-                    section_title = line.strip()[1:-1]
+                striped_line = line.strip()
+                if any([re.fullmatch("\[" + elt + "\],*", striped_line) for elt in SampleSheetIO.SECTIONS]):
+                    while striped_line.endswith(","):  # Removes invalid comma used in CSV to obtain the same number of columns in whole file
+                        striped_line = striped_line[:-1]
+                    section_title = striped_line[1:-1]
                     sections_by_title[section_title] = list()
-                elif line.strip() == "":
+                elif re.fullmatch(",*", striped_line):
                     section_title = None
                 else:
-                    sections_by_title[section_title].append(line.strip())
+                    sections_by_title[section_title].append(striped_line)
         # Process information
         self.samples = self._getSamplesFromData(sections_by_title["Data"])
         self.header = self._getInfoFromSection(sections_by_title["Header"])
@@ -71,6 +76,8 @@ class SampleSheetIO(object):
         info = dict()
         for line in section:
             key, value = [field.strip() for field in line.split(",", 1)]
+            while value.endswith(","):  # Removes invalid comma used in CSV to obtain the same number of columns in whole file
+                value = value[:-1]
             info[key] = value
         return info
 
@@ -78,12 +85,17 @@ class SampleSheetIO(object):
         run = dict()
         # Header
         for line in header_section:
-            key, value = line.split(",")
+            key, value = line.split(",", 1)
+            while value.endswith(","):  # Removes invalid comma used in CSV to obtain the same number of columns in whole file
+                value = value[:-1]
             run[key] = value
         # Reads
         read_idx = 1
         for line in reads_section:
-            run["nb_cycles_R" + str(read_idx)] = int(line.strip())
+            striped_line = line.strip()
+            while striped_line.endswith(","):  # Removes invalid comma used in CSV to obtain the same number of columns in whole file
+                striped_line = striped_line[:-1]
+            run["nb_cycles_R" + str(read_idx)] = int(striped_line)
             read_idx += 1
         return run
 
