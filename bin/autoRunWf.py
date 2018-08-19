@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.12.0'
+__version__ = '2.12.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -372,12 +372,12 @@ if __name__ == "__main__":
                     if send_mail:
                         sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "start", in_run_folder)
                     try:
+                        if not os.path.exists(out_run_folder):
+                            os.mkdir(out_run_folder)
                         in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
                         protocol = getProtocol(in_basecalls_folder)
                         protocol["design"].resources_folder = os.path.join(args.design_path_pattern, protocol["design"].name)
                         out_folder_by_wf = dict()
-                        if not os.path.exists(out_run_folder):
-                            os.mkdir(out_run_folder)
                         # Launch workflows
                         step = "Launch analysis workflows"
                         for curr_wf in getWorkflows(protocol):
