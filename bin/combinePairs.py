@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -51,17 +51,17 @@ def writeReport(combined, R1, out_report):
     report = {
         "nb_combined_pairs": 0,
         "nb_uncombined_pairs": 0,
-        "nb_by_lengths": dict()
+        "nb_by_length": dict()
     }
     # Get nb combined and lengths distribution
     with FastqIO(combined) as FH_comb:
         for record in FH_comb:
             report["nb_combined_pairs"] += 1
             curr_len = len(record.string)
-            if curr_len not in report["nb_by_lengths"]:
-                report["nb_by_lengths"][curr_len] = 1
+            if curr_len not in report["nb_by_length"]:
+                report["nb_by_length"][curr_len] = 1
             else:
-                report["nb_by_lengths"][curr_len] += 1
+                report["nb_by_length"][curr_len] += 1
     # Get nb uncombined
     nb_total_pairs = 0
     with FastqIO(R1) as FH_R1:
@@ -170,30 +170,42 @@ def process(args, log):
                                 if R1_len - R1_start < args.min_overlap:
                                     is_valid = False
                     if best_overlap is not None:  # Current pair has valid combination
-                        combined += 1
-                        complete_seq = best_overlap["consensus_seq"]
-                        complete_qual = best_overlap["consensus_qual"]
-                        if best_overlap["R1_start"] > 0:  # If R1 start before R2 (insert size > read length)
-                            complete_seq = R1.string[0:best_overlap["R1_start"]] + complete_seq + R2.string[best_overlap["length"]:]
-                            complete_qual = R1.quality[0:best_overlap["R1_start"]] + complete_qual + R2.quality[best_overlap["length"]:]
-                        consensus_record = Sequence(
-                            R1.id,
-                            complete_seq,
-                            "Support_ratio:{}/{};R1_start:{};R2_start:{}".format(
-                                best_overlap["nb_support"],
-                                best_overlap["length"],
-                                best_overlap["R1_start"],
-                                best_overlap["R2_start"]
-                            ),
-                            complete_qual
-                        )
-                        FH_combined.write(consensus_record)
+                        # Filter fragment on length
+                        valid_frag_len = True
+                        if args.max_frag_length is not None or args.min_frag_length is not None:
+                            curr_frag_len = curr_overlap_len
+                            if best_overlap["R1_start"] != 0:  # R1 is first
+                                curr_frag_len = R1_len + R2_len - curr_overlap_len
+                            if args.min_frag_length is not None:
+                                valid_frag_len = curr_frag_len >= args.min_frag_length
+                            if args.max_frag_length is not None:
+                                valid_frag_len = curr_frag_len <= args.max_frag_length
+                        # Write combined sequence
+                        if valid_frag_len:
+                            combined += 1
+                            complete_seq = best_overlap["consensus_seq"]
+                            complete_qual = best_overlap["consensus_qual"]
+                            if best_overlap["R1_start"] > 0:  # If R1 start before R2 (insert size > read length)
+                                complete_seq = R1.string[0:best_overlap["R1_start"]] + complete_seq + R2.string[best_overlap["length"]:]
+                                complete_qual = R1.quality[0:best_overlap["R1_start"]] + complete_qual + R2.quality[best_overlap["length"]:]
+                            consensus_record = Sequence(
+                                R1.id,
+                                complete_seq,
+                                "Support_ratio:{}/{};R1_start:{};R2_start:{}".format(
+                                    best_overlap["nb_support"],
+                                    best_overlap["length"],
+                                    best_overlap["R1_start"],
+                                    best_overlap["R2_start"]
+                                ),
+                                complete_qual
+                            )
+                            FH_combined.write(consensus_record)
     # Log
     log.info(
         "Nb pair: {} ; Nb combined: {} ({}%)".format(
             nb_pairs,
             combined,
-            (0 if nb_pairs == 0 else round(float(combined*100)/nb_pairs, 2))
+            (0 if nb_pairs == 0 else round(float(combined * 100) / nb_pairs, 2))
         )
     )
     if args.output_report is not None:
@@ -208,6 +220,8 @@ def process(args, log):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Combines R1 and R2 by their overlapping segment.')
+    parser.add_argument('-l', '--min-frag-length', type=int, help='Minimum length for the resulting fragment. This filter is applied after best overlap selection.')
+    parser.add_argument('-u', '--max-frag-length', type=int, help='Maximum length for the resulting fragment. This filter is applied after best overlap selection.')
     parser.add_argument('-o', '--min-overlap', default=20, type=int, help='Minimum overlap between R1 and R2. [Default: %(default)s]')
     parser.add_argument('-m', '--max-contradict-ratio', default=0.1, type=float, help='Error ratio in overlap region between R1 and R2. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)

@@ -147,6 +147,50 @@ HGHHHHGGGGGGGGGGGGGGGGFFFFFFFGFFFEEEEEEEEEEEEEEEECCCCCCCCCCCCCCCCCCCCCCCCCCCCCCB
         )
 
 
+    def testMaxFragLength(self):
+        # Execute command
+        custom_cmd = [elt for elt in self.cmd]
+        custom_cmd.extend(["--max-frag-length", "175"])
+        subprocess.check_call(custom_cmd, stderr=subprocess.DEVNULL)
+
+        # Validate results
+        expected = """@seq_4 Support_ratio:113/116;R1_start:0;R2_start:34
+CACTAAATAGCAGCATTCAGAAAGTTAATGAGTGGTTTTCCAGAAGTGATGAACTGTTAGGTTCTGATGACTCACATGATGGGGAGTCTGAATCAAATGCCAAAGTAGCTGATGTA
++
+HGHHHHGGGGGGGGGGGGGGGGFFFFFFFGFFFEEEEEEEEEEEEEEEECCCCCCCCCCCCCCCCCCEEEEEEEEEEEEEEEEFFFGFFFFFFFGGGGGGGGGGGGGGGGHHHHGH
+@seq_6 Support_ratio:19/20;R1_start:75;R2_start:0
+CACTAAATAGCAGCATTCAGAAAGTTAATGAGTGGTTTTCCAGAAGTGATGAACTGTTAGGTTCTGATGACTCACAAAAAAAAAAAAAAAATTGTGTTCTGATGACTCACATGATGGGGAGTCTGAATCAAATGCCAAAGTAGCTGATGTATTGGACGTTCTAAATGAGG
++
+HGHHHHGGGGGGGGGGGGGGGGFFFFFFFGFFFEEEEEEEEEEEEEEEECCCCCCCCCCCCCCCCCCCCCCCCCCCCCCBCCCCCCCCCCCCCCCCCACCCCCCCCCCCCCCCCCCCCCCCEEEEEEEEEEEEEEEEFFFGFFFFFFFGGGGGGGGGGGGGGGGHHHHGH"""
+        observed = ""
+        with open(self.tmp_output) as FH_results:
+            observed = FH_results.read().strip()
+        self.assertEqual(
+            sorted(expected.split("\n")),
+            sorted(observed.split("\n"))
+        )
+
+
+    def testMinFragLength(self):
+        # Execute command
+        custom_cmd = [elt for elt in self.cmd]
+        custom_cmd.extend(["--min-frag-length", "180"])
+        subprocess.check_call(custom_cmd, stderr=subprocess.DEVNULL)
+
+        # Validate results
+        expected = """@seq_3 Support_ratio:85/90;R1_start:60;R2_start:0
+CACTAAATAGCAGCATTCAGAAAGTTAATGAGTGGTTTTCCAGAAGTGATGAACTGTTAGGTTCTGATGACTCACATGATGGGGAGTCTGAATCAAATGCCAAAGTAGCTGATGTATTGGACGATCTAAATGAGGTAGATGAATATTCTGGTTCTTCAGAGAAAATAGACTTACTGGCCAGTGATCCTCATGAGGCTTTAATATGTAAAA
++
+HGHHHHGGGGGGGGGGGGGGGGFFFFFFFGFFFEEEEEEEEEEEEEEEECCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC<BBBAA@@@@@@@@AABBBBCCCCCCCC=CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCEEEEEEEEEEEEEEEEFFFGFFFFFFFGGGGGGGGGGGGGGGGHHHHGH"""
+        observed = ""
+        with open(self.tmp_output) as FH_results:
+            observed = FH_results.read().strip()
+        self.assertEqual(
+            sorted(expected.split("\n")),
+            sorted(observed.split("\n"))
+        )
+
+
 ########################################################################
 #
 # MAIN
