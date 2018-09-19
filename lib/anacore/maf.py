@@ -39,7 +39,7 @@ class MAFIO(HashedSVIO):
         :return: The new instance.
         :rtype: MAFIO
         """
-        self.verion = "2.4"
+        self.version = "2.4"
         super().__init__(filepath, mode, "\t", "")
 
     def _parseHeader(self):
