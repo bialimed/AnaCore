@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.13.0'
+__version__ = '2.13.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -626,7 +626,7 @@ if __name__ == "__main__":
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, run_id)
                         cmd_load = getLoadCmd(protocol["design"], out_run_storage, out_folder_by_wf)
-                        Cmd(cmd_load).run(log)
+                        cmd_load.run(log)
                         # Log end process
                         with open(completed_analyses_file, "w") as FH:
                             FH.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
