@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.13.1'
+__version__ = '2.14.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -28,12 +28,14 @@ import sys
 import yaml
 import time
 import glob
+import hashlib
 import smtplib
 import logging
 import argparse
 import datetime
 import traceback
 import subprocess
+from threading import Thread
 from email.mime.text import MIMEText
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +50,34 @@ from anacore.illumina import SampleSheetIO
 # FUNCTIONS
 #
 ########################################################################
+class ThreadWrapper(Thread):
+    """Thread wrapper to manage exit code like multiprocessig.Process."""
+
+    def run(self):
+        """
+        Method representing the thread’s activity.
+
+        You may override this method in a subclass. The standard run() method invokes the callable object passed to the object’s constructor as the target argument, if any, with sequential and keyword arguments taken from the args and kwargs arguments, respectively.
+        """
+        self.errcode = None
+        try:
+            Thread.run(self)
+        except Exception:
+            self.errcode = -1
+            raise
+        else:
+            self.errcode = 0
+
+    def exitcode(self):
+        """
+        Return the thread’s exit code.
+
+        :return: This will be None if the process has not yet terminated. A negative value -N indicates that the child was terminated by signal N.
+        :rtype: int
+        """
+        return self.errcode
+
+
 class Design:
     """Class to describe design and his resources."""
 
@@ -144,17 +174,24 @@ class Cmd:
         self.cmd = cmd
         self.is_shell = is_shell
 
-    def run(self, log):
+    def run(self, log, cmd_id=None):
         """
-        @summary: Log and submit the command.
-        @param log: [Logger] The logger of the script.
+        Log and submit the command.
+
+        :param log: The logger of the script.
+        :type log: Logger
+        :param cmd_id: The ID used to identify command in log.
+        :type cmd_id: str
         """
-        log.info("Start sub-command: " + " ".join([str(elt) for elt in self.cmd]))
+        cmd_str = " ".join([str(elt) for elt in self.cmd])
+        if cmd_id is None:
+            cmd_id = hashlib.md5(cmd_str.encode()).hexdigest()
+        log.info("Start sub-command {}: {}".format(cmd_id, cmd_str))
         if self.is_shell:
             subprocess.check_call(" ".join([str(elt) for elt in self.cmd]), stdout=subprocess.DEVNULL, shell=True)
         else:
             subprocess.check_call(self.cmd, stdout=subprocess.DEVNULL)
-        log.info("End sub-command")
+        log.info("End sub-command {}".format(cmd_id))
 
 
 def getProtocol(in_spl_folder):
@@ -577,6 +614,7 @@ if __name__ == "__main__":
                         out_folder_by_wf = dict()
                         # Launch workflows
                         step = "Launch analysis workflows"
+                        parallel_processes = []
                         for curr_wf in getWorkflows(protocol, analyses_cfg):
                             out_wf_folder = os.path.join(out_run_folder, curr_wf)
                             out_folder_by_wf[curr_wf] = out_wf_folder
@@ -585,7 +623,14 @@ if __name__ == "__main__":
                             else:
                                 os.mkdir(out_wf_folder)
                                 cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder, analyses_cfg)
-                                cmd_analysis.run(log)
+                                wf_process = ThreadWrapper(name=curr_wf, target=cmd_analysis.run, args=[log, curr_wf])
+                                parallel_processes.append(wf_process)
+                                wf_process.start()
+                        for wf_process in parallel_processes:  # Wait end of all workflows
+                            wf_process.join()
+                        wf_failed = [wf._name for wf in parallel_processes if wf.exitcode() != 0]  # Check workflows end status
+                        if len(wf_failed) > 0:
+                            raise Exception("Error in workflow(s): {}.".format(wf_failed))
                         # Copy raw data
                         step = "Copy raw"
                         if args.storage_folder is not None:
