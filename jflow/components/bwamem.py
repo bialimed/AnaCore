@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -33,10 +33,16 @@ def bwaWrapper(bwa_exec_path, samtools_exec_path, aln_file, stderr, reference_ge
     """
     import os
     import time
+    import socket
     import subprocess
     R1 = reads[0]
     R2 = None if len(reads) == 1 else reads[1]
-    tmp_aln = os.path.join(os.path.dirname(aln_file), "tmp_" + str(time.time()) + ".sam")
+    tmp_aln = os.path.join(
+        os.path.dirname(aln_file),
+        "tmp_{}_{}_{}.sam".format(
+            socket.gethostname(), os.getpid(), time.time()
+        )
+    )
     # Alignment
     cmd_aln = bwa_exec_path + \
         ' mem' + \
