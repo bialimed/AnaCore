@@ -18,21 +18,35 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 
 class Region:
+    """Class to manage region on a sequence."""
+
     def __init__(self, start=None, end=None, strand=None, reference=None, name=None, annot=None):
         """
-        @param start: [int] The start position on the reference. This position is 1-based and ascending (start <= end).
-        @param end: [int] The end position on the reference. This position is 1-based and ascending (start <= end). [Default: start]
-        @param strand: [str] The strand of the instance ("+" or "-").
-        @param reference: [Region|str] The region object or the region name of the reference.
-        @param name: [str] The name of the region.
-        @param annot: [dict] The annotations of the region.
+        Build and return an instance of Region.
+
+        :param start: The start position on the reference. This position is 1-based and ascending (start <= end).
+        :type start: int
+        :param end: The end position on the reference. This position is 1-based and ascending (start <= end). [Default: start]
+        :type end: int
+        :param strand: The strand of the instance ("+" or "-").
+        :type strand: str
+        :param reference: The region object or the region name of the reference.
+        :type reference: Region | str
+        :param name: The name of the region.
+        :type name: str
+        :param annot: The annotations of the region.
+        :type annot: dict
+        :return: The new instance.
+        :rtype: Region
         """
+        if start is not None and end is not None and start > end:
+            raise Exception("Start must be inferior to end.")
         self.start = None if start is None else int(start)
         self.end = self.start if end is None else int(end)
         self.strand = strand
@@ -40,17 +54,36 @@ class Region:
         self.name = name
         self.annot = dict() if annot is None else annot
 
+    def __str__(self):
+        """
+        Return the “informal” or nicely printable string representation of the object.
+
+        :return: The printable string representation of the object.
+        :rtype: str
+        """
+        clean_str = self.name
+        if clean_str is None:
+            if self.reference is not None:
+                clean_str = self.reference.name
+            if self.start is not None:
+                clean_str = "{}:{}-{}".format(clean_str, self.start, self.end)
+        return clean_str
+
     def length(self):
         """
-        @summary: Returns the length of the region.
-        @return: [int] The length of the region.
+        Return length of the region.
+
+        :return: The length of the region.
+        :rtype: int
         """
         return(self.end - self.start + 1)
 
     def setReference(self, reference):
         """
-        @summary: Changes the reference region of the instance.
-        @param reference: [Region|str] The region object or the region name of the reference.
+        Change the reference region of the instance.
+
+        :param reference: The region object or the region name of the reference.
+        :type regreferenceion_pos: Region | str
         """
         if reference is None:
             self.reference = None
@@ -61,11 +94,58 @@ class Region:
         else:
             raise Exception("The type " + str(type(reference)) + " is not authorized for reference attribute in Region class.")
 
+    def getPosOnRef(self, region_pos):
+        """
+        Returns coordinate on reference sequence from the coordinate on self.
+
+        :param region_pos: Coordinate on region (1-based).
+        :type region_pos: int.
+        :return: The coordinate on reference sequence (1-based).
+        :rtype: int
+        """
+        if self.strand is None:
+            raise Exception("Cannot return a reference position from the region position because the strand is None in {} {}:{}-{}.".format(
+                self.name, self.reference.name, self.start, self.end
+            ))
+        reference_pos = None
+        if self.strand == '+':
+            reference_pos = region_pos + self.start - 1
+        else:
+            reference_pos = self.end - region_pos + 1
+        return reference_pos
+
+    def getPosOnRegion(self, ref_pos):
+        """
+        Returns coordinate on region from the coordinate on reference sequence.
+
+        :param ref_pos: The coordinate on reference sequence (1-based).
+        :type ref_pos: int
+        :return: Coordinate on region (1-based).
+        :rtype: int
+        """
+        if self.strand is None:
+            raise Exception("Cannot return a region position from the reference position because the strand is None in {}.".format(
+                self.name
+            ))
+        if ref_pos < self.start or ref_pos > self.end:
+            raise ValueError("The region {} does not contains the position {}.".format(
+                self, ref_pos
+            ))
+        region_pos = None
+        if self.strand == '+':
+            region_pos = ref_pos - self.start + 1
+        else:
+            region_pos = self.end - ref_pos + 1
+        return region_pos
+
     def contains(self, eval_region):
         """
-        @summary: Returns True if the region contains the eval_region.
-        @param eval_region: The evaluated region.
-        @return: [bool] True if the region contains the evaluated region.
+        Return True if the region contains the eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: True if the region contains the evaluated region.
+        :rtype: bool
         """
         contains = False
         if self.reference.name == eval_region.reference.name:
@@ -75,20 +155,26 @@ class Region:
 
     def strandedContains(self, eval_region):
         """
-        @summary: Returns True if the region contains the eval_region and their are on the same strand.
-        @param eval_region: The evaluated region.
-        @return: [bool] True if the region contains the evaluated region.
+        Return True if the region contains the eval_region and their are on the same strand.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: True if the region contains the evaluated region.
+        :rtype: bool
         """
         contains = False
-        if self.reference.strand == eval_region.reference.strand:
+        if self.strand == eval_region.strand:
             contains = self.contains(eval_region)
         return contains
 
     def hasOverlap(self, eval_region):
         """
-        @summary: Returns True if the region has an overlap with eval_region.
-        @param eval_region: The evaluated region.
-        @return: [bool] True if the region has an overlap with evaluated region.
+        Return True if the region has an overlap with eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: True if the region has an overlap with evaluated region.
+        :rtype: bool
         """
         has_overlap = False
         if self.reference.name == eval_region.reference.name:
@@ -96,22 +182,28 @@ class Region:
                 has_overlap = True
         return has_overlap
 
-    def strandedHasOverlap(self, eval_region):
+    def hasStrandedOverlap(self, eval_region):
         """
-        @summary: Returns True if the region has an overlap with eval_region and their are on the same strand.
-        @param eval_region: The evaluated region.
-        @return: [bool] True if the region has an overlap with evaluated region.
+        Return True if the region has an overlap with eval_region and their are on the same strand.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: True if the region has an overlap with evaluated region.
+        :rtype: bool
         """
         has_overlap = False
-        if self.reference.strand == eval_region.reference.strand:
+        if self.strand == eval_region.strand:
             has_overlap = self.hasOverlap(eval_region)
         return has_overlap
 
     def getMinDist(self, eval_region):
         """
-        @summary: Returns the distance with the eval_region.
-        @param eval_region: The evaluated region.
-        @return: [int] The distance between the instance and the evaluated region.
+        Return the distance with the eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return:The distance between the instance and the evaluated region.
+        :rtype: int
         """
         if self.reference.name != eval_region.reference.name:
             raise Exception('The minimal distance between regions cannot be processed because their are located on diffrents reference ("' + self.reference.name+ '" vs "' + eval_region.reference.name + '").')
@@ -125,10 +217,109 @@ class Region:
         return min_dist
 
 
+class RegionTree(Region):
+    """Class to manage region with hierarchical relations (example: gene -> transcript -> exons)."""
+
+    def __init__(self, start=None, end=None, strand=None, reference=None, name=None, annot=None, parent=None, children=None):
+        """
+        Build and return an instance of RegionTree.
+
+        :param start: The start position on the reference. This position is 1-based and ascending (start <= end).
+        :type start: int
+        :param end: The end position on the reference. This position is 1-based and ascending (start <= end). [Default: start]
+        :type end: int
+        :param strand: The strand of the instance ("+" or "-").
+        :type strand: str
+        :param reference: The region object or the region name of the reference.
+        :type reference: Region | str
+        :param name: The name of the region.
+        :type name: str
+        :param annot: The annotations of the region.
+        :type annot: dict
+        :param parent: The parent region (example: transcript for an exon).
+        :type parent: RegionTree
+        :param children: The list of sub-regions (example: exons in transcript).
+        :type children: list
+        :return: The new instance.
+        :rtype: RegionTree
+        """
+        self.children = RegionList()
+        if children is not None:
+            for child in children:
+                self.addChild(child)
+        Region.__init__(self, start, end, strand, reference, name, annot)
+        self.parent = parent
+        if parent is not None:
+            parent.addChild(self)
+
+    def __str__(self):
+        """
+        Return the “informal” or nicely printable string representation of the object.
+
+        :return: The printable string representation of the object.
+        :rtype: str
+        """
+        clean_str = Region.__str__(self)
+        clean_str = "{} [{} children]".format(clean_str, len(self.children))
+        if "feature" in self.annot and self.annot["feature"] is not None:
+            clean_str = "{} {}".format(self.annot["feature"], clean_str)
+        return clean_str
+
+    def __getattribute__(self, name):
+        """
+        Return the value of the selected attribute.
+
+        :param name: The name of the selected attribute.
+        :type name: str
+        :return: The value of the attribute.
+        :rtype: *
+        """
+        value = object.__getattribute__(self, name)
+        if value is None:
+            if name == "start":
+                if len(self.children) > 0:
+                    value = min([self.children[0].start, self.children[-1].start])
+            elif name == "end":
+                if len(self.children) > 0:
+                    value = max([self.children[0].end, self.children[-1].end])
+            elif name == "strand":
+                if len(self.children) > 0:
+                    value = self.children[0].strand
+        return value
+
+    def addChild(self, child):
+        """
+        Add child region in region.
+
+        :param child: The added region.
+        :type child: RegionTree
+        """
+        # Check compatibility
+        if self.strand is not None and child.strand is not None:
+            if self.strand != child.strand:
+                raise ValueError("The sub-region {} cannot be added to {} because their strands are different.".format(child, self))
+        if self.reference is not None:
+            if self.reference.name != child.reference.name:
+                raise ValueError("The sub-region {} cannot be added to {} because their reference region are different.".format(child, self))
+        # Process
+        child.parent = self
+        self.children.append(child)
+        self.children = sorted(self.children, key=lambda x: (x.start, x.end))
+        if self.strand == "-":
+            self.children.reverse()
+
+
 class RegionList(list):
+    """Class to manage regions list. for example all the gene on a chromosome."""
+
     def __init__(self, regions=None):
         """
-        @param regions: [list] The list of regions.
+        Build and return an instance of RegionList.
+
+        :param regions: List of regions.
+        :type regions: list
+        :return: The new instance.
+        :rtype: RegionList
         """
         if regions is not None:
             for curr_region in regions:
@@ -136,9 +327,12 @@ class RegionList(list):
 
     def getContainers(self, eval_region):
         """
-        @summary: Returns all the regions that contains the eval_region.
-        @param eval_region: The evaluated region.
-        @return: [list] The regions that contains the evaluated region.
+        Return all the regions that contains the eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: Regions containing the evaluated region.
+        :rtype: list
         """
         containers = list()
         for curr_region in self:
@@ -148,9 +342,12 @@ class RegionList(list):
 
     def getOverlapped(self, eval_region):
         """
-        @summary: Returns all the regions that have an overlap with eval_region.
-        @param eval_region: The evaluated region.
-        @return: [list] The regions that have an overlap with evaluated region.
+        Return all the regions that have an overlap with eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: Regions having an overlap with evaluated region.
+        :rtype: list
         """
         overlapped = list()
         for curr_region in self:
@@ -160,9 +357,12 @@ class RegionList(list):
 
     def getNearests(self, eval_region, select_fct=None):
         """
-        @summary: Returns the nearest region to eval_region.
-        @param eval_region: The evaluated region.
-        @return: [list] The distance with the nearest region and the nearest region himself.
+        Return the nearest region to eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: The distance between the nearest region and self.
+        :rtype: list
         """
         nearests = list()
         min_dist = None
@@ -179,3 +379,21 @@ class RegionList(list):
                         min_dist = curr_dist
                         nearests.append(curr_region)
         return min_dist, nearests
+
+
+def splittedByRef(region_list):
+    """
+    Return regions list by reference.
+
+    :param region_list: The list of regions.
+    :type region_list: RegionList
+    :return: Regions list by reference.
+    :rtype: dict
+    """
+    regions_by_ref = {}
+    for curr_region in region_list:
+        ref_name = curr_region.reference.name
+        if ref_name not in regions_by_ref:
+            regions_by_ref[ref_name] = RegionList()
+        regions_by_ref[ref_name].append(curr_region)
+    return regions_by_ref
