@@ -1,0 +1,345 @@
+#!/usr/bin/env python3
+#
+# Copyright (C) 2018 IUCT-O
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+__author__ = 'Frederic Escudie'
+__copyright__ = 'Copyright (C) 2018 IUCT-O'
+__license__ = 'GNU General Public License'
+__version__ = '1.0.0'
+__email__ = 'escudie.frederic@iuct-oncopole.fr'
+__status__ = 'prod'
+
+import os
+import sys
+import unittest
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
+sys.path.append(LIB_DIR)
+
+from anacore.genomicRegion import Gene, Transcript, Exon, Protein, CDS
+
+
+########################################################################
+#
+# FUNCTIONS
+#
+########################################################################
+class TestTranscript(unittest.TestCase):
+    def setUp(self):
+        # Forward
+        self.fwd = {
+            "exon_1": Exon(10, 30, "+", "chr1"),
+            "exon_2": Exon(40, 70, "+", "chr1"),
+            "exon_3": Exon(80, 100, "+", "chr1")
+        }
+        self.fwd["transcript"] = Transcript(
+            10, 100, "+", "chr1", children=[
+                self.fwd["exon_1"], self.fwd["exon_3"], self.fwd["exon_2"]
+            ]
+        )
+        # Reverse
+        self.rvs = {
+            "exon_1": Exon(10, 30, "-", "chr1"),
+            "exon_2": Exon(40, 70, "-", "chr1"),
+            "exon_3": Exon(80, 100, "-", "chr1")
+        }
+        self.rvs["transcript"] = Transcript(
+            children=[
+                self.rvs["exon_1"], self.rvs["exon_3"], self.rvs["exon_2"]
+            ]
+        )
+
+    def testSetProteins(self):
+        # By init
+        protein_1 = Protein(10, 30, "+", "chr1", "p1")
+        protein_2 = Protein(32, 50, "+", "chr1", "p2")
+        transcript_1 = Transcript(name="tr1", proteins=[protein_1, protein_2])
+        self.assertEqual(
+            [prot.name for prot in transcript_1.proteins],
+            [protein_1.name, protein_2.name]
+        )
+        self.assertEqual(
+            [protein_1.transcript.name, protein_2.transcript.name],
+            [transcript_1.name, transcript_1.name]
+        )
+        # By method
+        protein_1 = Protein(10, 30, "+", "chr1", "p1")
+        protein_2 = Protein(32, 50, "+", "chr1", "p2")
+        transcript_1 = Transcript(name="tr1")
+        transcript_1.setProteins([protein_1, protein_2])
+        self.assertEqual(
+            [prot.name for prot in transcript_1.proteins],
+            [protein_1.name, protein_2.name]
+        )
+        self.assertEqual(
+            [protein_1.transcript.name, protein_2.transcript.name],
+            [transcript_1.name, transcript_1.name]
+        )
+        # Replace proteins
+        protein_1 = Protein(10, 30, "+", "chr1", "p1")
+        protein_2 = Protein(32, 50, "+", "chr1", "p2")
+        protein_3 = Protein(54, 70, "+", "chr1", "p3")
+        transcript_1 = Transcript(name="tr1", proteins=[protein_1, protein_3])
+        transcript_1.setProteins([protein_2, protein_3])
+        self.assertIsNone(protein_1.transcript)
+        self.assertNotIn(protein_1, transcript_1.proteins)
+        self.assertEqual(protein_2.transcript, transcript_1)
+        self.assertIn(protein_2, transcript_1.proteins)
+        self.assertEqual(protein_3.transcript, transcript_1)
+        self.assertIn(protein_3, transcript_1.proteins)
+
+    def testLength(self):
+        self.assertEqual(self.fwd["transcript"].length(), 73)
+        self.assertEqual(self.rvs["transcript"].length(), 73)
+
+    def testGetSubFromRegionPos(self):
+        # Forward
+        self.assertEqual(
+            self.fwd["transcript"].getSubFromRegionPos(54),
+            (self.fwd["exon_3"], 2)
+        )
+        # Reverse
+        self.assertEqual(
+            self.rvs["transcript"].getSubFromRegionPos(73),
+            (self.rvs["exon_1"], 21)
+        )
+
+    def testGetPosOnRef(self):
+        # Forward
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(1), 10)
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(10), 19)
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(21), 30)
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(22), 40)
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(35), 53)
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(52), 70)
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(53), 80)
+        self.assertEqual(self.fwd["transcript"].getPosOnRef(73), 100)
+        # Reverse
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(1), 100)
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(10), 91)
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(21), 80)
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(22), 70)
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(35), 57)
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(52), 40)
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(53), 30)
+        self.assertEqual(self.rvs["transcript"].getPosOnRef(73), 10)
+
+
+class TestProtein(unittest.TestCase):
+    def setUp(self):
+        # Forward
+        self.fwd = {
+            "cds_1": CDS(10, 30, "+", "chr1"),
+            "cds_2": CDS(40, 70, "+", "chr1"),
+            "cds_3": CDS(80, 99, "+", "chr1")
+        }
+        self.fwd["protein"] = Protein(
+            children=[
+                self.fwd["cds_1"], self.fwd["cds_3"], self.fwd["cds_2"]
+            ]
+        )
+        # Reverse
+        self.rvs = {
+            "cds_1": CDS(10, 30, "-", "chr1"),
+            "cds_2": CDS(40, 70, "-", "chr1"),
+            "cds_3": CDS(80, 99, "-", "chr1")
+        }
+        self.rvs["protein"] = Protein(
+            children=[
+                self.rvs["cds_1"], self.rvs["cds_3"], self.rvs["cds_2"]
+            ]
+        )
+
+    def testLength(self):
+        self.assertEqual(self.fwd["protein"].length(), 72)
+
+    def testAaLength(self):
+        self.assertEqual(self.fwd["protein"].aaLength(), 24)
+
+    def testGetPosOnRef(self):
+        # Forward
+        self.assertEqual(self.fwd["protein"].getPosOnRef(1, 1), 10)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(1, 3), 12)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(2, 1), 13)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(7, 3), 30)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(8, 1), 40)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(18, 1), 70)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(18, 2), 80)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(24, 1), 97)
+        self.assertEqual(self.fwd["protein"].getPosOnRef(24, 3), 99)
+        # Reverse
+        self.assertEqual(self.rvs["protein"].getPosOnRef(1, 1), 99)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(1, 3), 97)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(2, 1), 96)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(7, 2), 80)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(7, 3), 70)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(17, 3), 40)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(18, 1), 30)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(24, 1), 12)
+        self.assertEqual(self.rvs["protein"].getPosOnRef(24, 3), 10)
+
+    def testGetPosOnRegion(self):
+        # Forward
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(10), (1, 1))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(12), (1, 3))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(13), (2, 1))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(30), (7, 3))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(40), (8, 1))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(70), (18, 1))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(80), (18, 2))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(97), (24, 1))
+        self.assertEqual(self.fwd["protein"].getPosOnRegion(99), (24, 3))
+        # Reverse
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(99), (1, 1))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(97), (1, 3))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(96), (2, 1))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(80), (7, 2))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(70), (7, 3))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(40), (17, 3))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(30), (18, 1))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(12), (24, 1))
+        self.assertEqual(self.rvs["protein"].getPosOnRegion(10), (24, 3))
+
+    def testGetNtPosFromRegionPos(self):
+        # Forward
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(1, 1), 1)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(1, 3), 3)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(2, 1), 4)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(7, 3), 21)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(8, 1), 22)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(18, 1), 52)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(18, 2), 53)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(24, 1), 70)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRegionPos(24, 3), 72)
+        # Reverse
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(1, 1), 1)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(1, 3), 3)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(2, 1), 4)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(7, 2), 20)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(7, 3), 21)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(17, 3), 51)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(18, 1), 52)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(24, 1), 70)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRegionPos(24, 3), 72)
+
+    def testGetNtPosFromRefPos(self):
+        # Forward
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(10), 1)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(12), 3)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(13), 4)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(30), 21)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(40), 22)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(70), 52)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(80), 53)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(97), 70)
+        self.assertEqual(self.fwd["protein"].getNtPosFromRefPos(99), 72)
+        # Reverse
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(99), 1)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(97), 3)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(96), 4)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(80), 20)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(70), 21)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(40), 51)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(30), 52)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(12), 70)
+        self.assertEqual(self.rvs["protein"].getNtPosFromRefPos(10), 72)
+
+    def testGetSubFromRegionPos(self):
+        # Forward
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(1, 1),
+            (self.fwd["cds_1"], 1)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(1, 3),
+            (self.fwd["cds_1"], 3)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(2, 1),
+            (self.fwd["cds_1"], 4)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(7, 3),
+            (self.fwd["cds_1"], 21)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(8, 1),
+            (self.fwd["cds_2"], 1)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(18, 1),
+            (self.fwd["cds_2"], 31)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(18, 2),
+            (self.fwd["cds_3"], 1)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(24, 1),
+            (self.fwd["cds_3"], 18)
+        )
+        self.assertEqual(
+            self.fwd["protein"].getSubFromRegionPos(24, 3),
+            (self.fwd["cds_3"], 20)
+        )
+        # Reverse
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(1, 1),
+            (self.rvs["cds_3"], 1)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(1, 3),
+            (self.rvs["cds_3"], 3)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(2, 1),
+            (self.rvs["cds_3"], 4)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(7, 2),
+            (self.rvs["cds_3"], 20)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(7, 3),
+            (self.rvs["cds_2"], 1)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(17, 3),
+            (self.rvs["cds_2"], 31)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(18, 1),
+            (self.rvs["cds_1"], 1)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(24, 1),
+            (self.rvs["cds_1"], 19)
+        )
+        self.assertEqual(
+            self.rvs["protein"].getSubFromRegionPos(24, 3),
+            (self.rvs["cds_1"], 21)
+        )
+
+
+########################################################################
+#
+# MAIN
+#
+########################################################################
+if __name__ == "__main__":
+    unittest.main()
