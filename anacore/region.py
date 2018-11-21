@@ -43,7 +43,7 @@ class Region:
         :param annot: The annotations of the region.
         :type annot: dict
         :return: The new instance.
-        :rtype: Region
+        :rtype: region.Region
         """
         if start is not None and end is not None and start > end:
             raise Exception("Start must be inferior to end.")
@@ -83,7 +83,7 @@ class Region:
         Change the reference region of the instance.
 
         :param reference: The region object or the region name of the reference.
-        :type regreferenceion_pos: Region | str
+        :type regreferenceion_pos: region.Region | str
         """
         if reference is None:
             self.reference = None
@@ -96,7 +96,7 @@ class Region:
 
     def getPosOnRef(self, region_pos):
         """
-        Returns coordinate on reference sequence from the coordinate on self.
+        Return coordinate on reference sequence from the coordinate on self.
 
         :param region_pos: Coordinate on region (1-based).
         :type region_pos: int.
@@ -104,8 +104,8 @@ class Region:
         :rtype: int
         """
         if self.strand is None:
-            raise Exception("Cannot return a reference position from the region position because the strand is None in {} {}:{}-{}.".format(
-                self.name, self.reference.name, self.start, self.end
+            raise Exception("Cannot return a reference position from the region position because the strand is None in {}.".format(
+                self
             ))
         reference_pos = None
         if self.strand == '+':
@@ -116,7 +116,7 @@ class Region:
 
     def getPosOnRegion(self, ref_pos):
         """
-        Returns coordinate on region from the coordinate on reference sequence.
+        Return coordinate on region from the coordinate on reference sequence.
 
         :param ref_pos: The coordinate on reference sequence (1-based).
         :type ref_pos: int
@@ -231,23 +231,23 @@ class RegionTree(Region):
         :param strand: The strand of the instance ("+" or "-").
         :type strand: str
         :param reference: The region object or the region name of the reference.
-        :type reference: Region | str
+        :type reference: region.Region | str
         :param name: The name of the region.
         :type name: str
         :param annot: The annotations of the region.
         :type annot: dict
-        :param parent: The parent region (example: transcript for an exon).
-        :type parent: RegionTree
+        :param parent: The parent region (example: gene for a transcript).
+        :type parent: region.RegionTree
         :param children: The list of sub-regions (example: exons in transcript).
-        :type children: list
+        :type children: region.RegionList
         :return: The new instance.
-        :rtype: RegionTree
+        :rtype: region.RegionTree
         """
         self.children = RegionList()
+        Region.__init__(self, start, end, strand, reference, name, annot)
         if children is not None:
             for child in children:
                 self.addChild(child)
-        Region.__init__(self, start, end, strand, reference, name, annot)
         self.parent = parent
         if parent is not None:
             parent.addChild(self)
@@ -292,7 +292,7 @@ class RegionTree(Region):
         Add child region in region.
 
         :param child: The added region.
-        :type child: RegionTree
+        :type child: region.RegionTree
         """
         # Check compatibility
         if self.strand is not None and child.strand is not None:
@@ -319,7 +319,7 @@ class RegionList(list):
         :param regions: List of regions.
         :type regions: list
         :return: The new instance.
-        :rtype: RegionList
+        :rtype: region.RegionList
         """
         if regions is not None:
             for curr_region in regions:

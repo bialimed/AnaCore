@@ -230,7 +230,14 @@ class TestRegion(unittest.TestCase):
 
 
 class TestRegionTree(unittest.TestCase):
-    def tesStart(self):
+    def testInit(self):
+        exon1 = RegionTree(10, 30, "+", "chr1")
+        exon2 = RegionTree(40, 70, "+", "chr1")
+        exon3 = RegionTree(80, 100, "+", "chr1")
+        RegionTree(children=[exon2, exon3, exon1])
+        RegionTree(10, 100, "+", "chr1", children=[exon2, exon3, exon1])
+
+    def testStart(self):
         tr1_region = RegionTree(10, 100, "+", "chr1")
         tr2_region = RegionTree(None, None, None, "chr1")
         exon1_region = RegionTree(10, 30, "+", "chr1")
