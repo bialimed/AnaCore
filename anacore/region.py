@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -68,6 +68,20 @@ class Region:
             if self.start is not None:
                 clean_str = "{}:{}-{}".format(clean_str, self.start, self.end)
         return clean_str
+
+    def getCoordinatesStr(self):
+        """
+        Return printable string representation of the coordinates.
+
+        :return: The printable representation of the coordinates.
+        :rtype: str
+        """
+        return "{}:{}-{}[{}]".format(
+            (None if self.reference is None else self.reference.name),
+            self.start,
+            self.end,
+            self.strand
+        )
 
     def length(self):
         """
@@ -278,10 +292,10 @@ class RegionTree(Region):
         if value is None:
             if name == "start":
                 if len(self.children) > 0:
-                    value = min([self.children[0].start, self.children[-1].start])
+                    value = min([child.start for child in self.children])
             elif name == "end":
                 if len(self.children) > 0:
-                    value = max([self.children[0].end, self.children[-1].end])
+                    value = max([child.end for child in self.children])
             elif name == "strand":
                 if len(self.children) > 0:
                     value = self.children[0].strand
@@ -303,10 +317,18 @@ class RegionTree(Region):
                 raise ValueError("The sub-region {} cannot be added to {} because their reference region are different.".format(child, self))
         # Process
         child.parent = self
-        self.children.append(child)
-        self.children = sorted(self.children, key=lambda x: (x.start, x.end))
+        self.children.insert(0, child)
+        if child.start is not None:
+            self.sortChildren()
+
+    def sortChildren(self):
+        """Sort children in order of their apparition on self strand."""
+        if self.strand is None:
+            raise Exception("Cannot sort sub-regions because the strand is None in {}.".format(self))
         if self.strand == "-":
-            self.children.reverse()
+            self.children = sorted(self.children, key=lambda x: (x.end, x.start), reverse=True)
+        else:
+            self.children = sorted(self.children, key=lambda x: (x.start, x.end))
 
 
 class RegionList(list):
