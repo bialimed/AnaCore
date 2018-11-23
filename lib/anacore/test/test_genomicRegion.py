@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 sys.path.append(LIB_DIR)
 
-from anacore.genomicRegion import Gene, Transcript, Exon, Protein, CDS
+from anacore.genomicRegion import Gene, Transcript, Exon, Intron, Protein, CDS
 
 
 ########################################################################
@@ -45,7 +45,9 @@ class TestTranscript(unittest.TestCase):
         self.fwd = {
             "exon_1": Exon(10, 30, "+", "chr1"),
             "exon_2": Exon(40, 70, "+", "chr1"),
-            "exon_3": Exon(80, 100, "+", "chr1")
+            "exon_3": Exon(80, 100, "+", "chr1"),
+            "intron_1": Intron(31, 39, "+", "chr1"),
+            "intron_2": Intron(71, 79, "+", "chr1")
         }
         self.fwd["transcript"] = Transcript(
             10, 100, "+", "chr1", children=[
@@ -56,9 +58,12 @@ class TestTranscript(unittest.TestCase):
         self.rvs = {
             "exon_1": Exon(10, 30, "-", "chr1"),
             "exon_2": Exon(40, 70, "-", "chr1"),
-            "exon_3": Exon(80, 100, "-", "chr1")
+            "exon_3": Exon(80, 100, "-", "chr1"),
+            "intron_1": Intron(31, 39, "-", "chr1"),
+            "intron_2": Intron(71, 79, "-", "chr1")
         }
         self.rvs["transcript"] = Transcript(
+            reference="chr1",
             children=[
                 self.rvs["exon_1"], self.rvs["exon_3"], self.rvs["exon_2"]
             ]
@@ -138,6 +143,58 @@ class TestTranscript(unittest.TestCase):
         self.assertEqual(self.rvs["transcript"].getPosOnRef(52), 40)
         self.assertEqual(self.rvs["transcript"].getPosOnRef(53), 30)
         self.assertEqual(self.rvs["transcript"].getPosOnRef(73), 10)
+
+    def testGetSubFromRefPos(self):
+        # Forward
+        fw_tests = [
+            [10, (self.fwd["exon_1"], 1)],
+            [20, (self.fwd["exon_1"], 1)],
+            [30, (self.fwd["exon_1"], 1)],
+            [31, (self.fwd["intron_1"], 1)],
+            [35, (self.fwd["intron_1"], 1)],
+            [39, (self.fwd["intron_1"], 1)],
+            [40, (self.fwd["exon_2"], 2)],
+            [50, (self.fwd["exon_2"], 2)],
+            [70, (self.fwd["exon_2"], 2)],
+            [71, (self.fwd["intron_2"], 2)],
+            [75, (self.fwd["intron_2"], 2)],
+            [79, (self.fwd["intron_2"], 2)],
+            [80, (self.fwd["exon_3"], 3)],
+            [90, (self.fwd["exon_3"], 3)],
+            [100, (self.fwd["exon_3"], 3)]
+        ]
+        for param, expected in fw_tests:
+            observed = self.fwd["transcript"].getSubFromRefPos(param)
+            if isinstance(expected[0], Exon):
+                self.assertEqual(observed, expected)
+            else:
+                self.assertEqual(observed[1], expected[1])
+                self.assertEqual(observed[0].getCoordinatesStr(), expected[0].getCoordinatesStr())
+        # Reverse
+        rvs_tests = [
+            [10, (self.rvs["exon_1"], 3)],
+            [20, (self.rvs["exon_1"], 3)],
+            [30, (self.rvs["exon_1"], 3)],
+            [31, (self.rvs["intron_1"], 2)],
+            [35, (self.rvs["intron_1"], 2)],
+            [39, (self.rvs["intron_1"], 2)],
+            [40, (self.rvs["exon_2"], 2)],
+            [50, (self.rvs["exon_2"], 2)],
+            [70, (self.rvs["exon_2"], 2)],
+            [71, (self.rvs["intron_2"], 1)],
+            [75, (self.rvs["intron_2"], 1)],
+            [79, (self.rvs["intron_2"], 1)],
+            [80, (self.rvs["exon_3"], 1)],
+            [90, (self.rvs["exon_3"], 1)],
+            [100, (self.rvs["exon_3"], 1)]
+        ]
+        for param, expected in rvs_tests:
+            observed = self.rvs["transcript"].getSubFromRefPos(param)
+            if isinstance(expected[0], Exon):
+                self.assertEqual(observed, expected)
+            else:
+                self.assertEqual(observed[1], expected[1])
+                self.assertEqual(observed[0].getCoordinatesStr(), expected[0].getCoordinatesStr())
 
 
 class TestProtein(unittest.TestCase):

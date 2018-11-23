@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,6 +31,34 @@ class Gene(RegionTree):
 
 class Exon(RegionTree):
     pass
+
+
+class Intron(RegionTree):
+    def __init__(self, start=None, end=None, strand=None, reference=None, name=None, annot=None, parent=None, children=None):
+        """
+        Build and return an instance of Intron.
+
+        :param start: The start position on the reference. This position is 1-based and ascending (start <= end).
+        :type start: int
+        :param end: The end position on the reference. This position is 1-based and ascending (start <= end). [Default: start]
+        :type end: int
+        :param strand: The strand of the instance ("+" or "-").
+        :type strand: str
+        :param reference: The region object or the region name of the reference.
+        :type reference: region.Region | str
+        :param name: The name of the region.
+        :type name: str
+        :param annot: The annotations of the region.
+        :type annot: dict
+        :param parent: The parent region (example: gene for a transcript).
+        :type parent: region.RegionTree
+        :param children: The list of sub-regions (example: exons in transcript).
+        :type children: region.RegionList
+        :return: The new instance.
+        :rtype: region.Intron
+        """
+        RegionTree.__init__(self, start, end, strand, reference, name, annot, None, children)
+        self.parent = parent  # Prevent add of this intron as child of transcript
 
 
 class CDS(RegionTree):
@@ -156,47 +184,48 @@ class Transcript(RegionTree):
         pos_on_child = transcript_pos - walk_pos
         return child, pos_on_child
 
-    # def getPosOnSubFromRefPos(self, chr_pos): ##################################################################
-    #     if self.strand is None:
-    #         raise Exception("Cannot return a region position from the reference position because the strand is None ({}).".format(
-    #             self
-    #         ))
-    #     returned_info = [None, None, None]  # type of the region, idx of the region (1-based), position in region
-    #     exons = self.children
-    #     exon_idx = 0
-    #     if exons[exon_idx].strand == "+":
-    #         while chr_pos > exons[exon_idx].end:
-    #             exon_idx += 1
-    #         if chr_pos < exons[exon_idx].start:
-    #             intron_start = exons[exon_idx - 1].end + 1
-    #             returned_info = [
-    #                 "intron",
-    #                 exon_idx,
-    #                 chr_pos - intron_start + 1
-    #             ]
-    #         else:
-    #             returned_info = [
-    #                 "exon",
-    #                 exon_idx + 1,
-    #                 chr_pos - exons[exon_idx].start + 1
-    #             ]
-    #     else:
-    #         while chr_pos < exons[exon_idx].start:
-    #             exon_idx += 1
-    #         if chr_pos > exons[exon_idx].end:
-    #             intron_end = exons[exon_idx].start - 1
-    #             returned_info = [
-    #                 "intron",
-    #                 exon_idx,
-    #                 intron_end - chr_pos + 1
-    #             ]
-    #         else:
-    #             returned_info = [
-    #                 "exon",
-    #                 exon_idx + 1,
-    #                 exons[exon_idx].end - chr_pos + 1
-    #             ]
-    #     return returned_info
+    def getSubFromRefPos(self, chr_pos):
+        """
+        Return exon on intron where the chr_pos is located.
+
+        :param chr_pos: The coordinate on reference sequence (1-based).
+        :type chr_pos: int
+        :return: The index of the sub-region containing the chr_pos (1-based) and the object of this sub-region.
+        :rtype: int, (Intron | Exon)
+        """
+        if self.strand is None:
+            raise Exception("Cannot return a region position from the reference position because the strand is None ({}).".format(
+                self
+            ))
+        if chr_pos < self.start or chr_pos > self.end:
+            raise ValueError("The position {} is out of transcript {}.".format(chr_pos, self))
+        sub_region_idx = None
+        sub_region = None
+        exons = self.children
+        exon_idx = 0
+        if self.strand == "+":
+            while chr_pos > exons[exon_idx].end:
+                exon_idx += 1
+            if chr_pos < exons[exon_idx].start:
+                intron_start = exons[exon_idx - 1].end + 1
+                intron_end = exons[exon_idx].start - 1
+                sub_region_idx = exon_idx
+                sub_region = Intron(intron_start, intron_end, self.strand, self.reference, "intron_{}".format(sub_region_idx), parent=self)
+            else:
+                sub_region_idx = exon_idx + 1
+                sub_region = exons[exon_idx]
+        else:
+            while chr_pos < exons[exon_idx].start:
+                exon_idx += 1
+            if chr_pos > exons[exon_idx].end:
+                intron_end = exons[exon_idx - 1].start - 1
+                intron_start = exons[exon_idx].end + 1
+                sub_region_idx = exon_idx
+                sub_region = Intron(intron_start, intron_end, self.strand, self.reference, "intron_{}".format(sub_region_idx), parent=self)
+            else:
+                sub_region_idx = exon_idx + 1
+                sub_region = exons[exon_idx]
+        return sub_region, sub_region_idx
 
 
 class Protein(RegionTree):
