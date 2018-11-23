@@ -45,7 +45,7 @@ class Region:
         :return: The new instance.
         :rtype: region.Region
         """
-        if start is not None and end is not None and start > end:
+        if start is not None and end is not None and int(start) > int(end):
             raise Exception("Start must be inferior to end.")
         self.start = None if start is None else int(start)
         self.end = self.start if end is None else int(end)
@@ -326,9 +326,9 @@ class RegionTree(Region):
         if self.strand is None:
             raise Exception("Cannot sort sub-regions because the strand is None in {}.".format(self))
         if self.strand == "-":
-            self.children = sorted(self.children, key=lambda x: (x.end, x.start), reverse=True)
+            self.children = RegionList(sorted(self.children, key=lambda x: (x.end, x.start), reverse=True))
         else:
-            self.children = sorted(self.children, key=lambda x: (x.start, x.end))
+            self.children = RegionList(sorted(self.children, key=lambda x: (x.start, x.end)))
 
 
 class RegionList(list):
