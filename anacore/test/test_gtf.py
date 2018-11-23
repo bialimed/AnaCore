@@ -49,7 +49,10 @@ class TestGTFIO(unittest.TestCase):
         unique_id = str(uuid.uuid1())
 
         # Temporary files
-        self.tmp_ensembl_gtf = os.path.join(tmp_folder, unique_id + "_ensembl.gtf")
+        self.tmp_ensembl_in_gtf = os.path.join(tmp_folder, unique_id + "_ensembl_in.gtf")
+        self.tmp_ensembl_out_gtf = os.path.join(tmp_folder, unique_id + "_ensembl_out.gtf")
+        self.tmp_ncbi_in_gtf = os.path.join(tmp_folder, unique_id + "_ncbi_in.gtf")
+        self.tmp_ncbi_out_gtf = os.path.join(tmp_folder, unique_id + "_ncbi_out.gtf")
 
         # Ensembl GTF
         self.ensembl_expected = [
@@ -124,9 +127,9 @@ class TestGTFIO(unittest.TestCase):
                         )
                     ]
                 )
-            ]),
+            ])
         ]
-        with open(self.tmp_ensembl_gtf, "w") as FH_gtf:
+        with open(self.tmp_ensembl_in_gtf, "w") as FH_gtf:
             FH_gtf.write("""#!genome-build GRCh38.p12
 #!genome-version GRCh38
 #!genome-date 2013-12
@@ -191,19 +194,154 @@ class TestGTFIO(unittest.TestCase):
 12	havana	five_prime_utr	25245385	25245395	.	-	.	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic\"; transcript_support_level \"1\";
 12	havana	three_prime_utr	25233819	25235205	.	-	.	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic\"; transcript_support_level \"1\";""")
 
-    def testLoadModel(self):
-        ensembl_genes = loadModel(self.tmp_ensembl_gtf, "genes")
+
+        # NCBI GTF
+        self.ncbi_expected = [
+            Gene(54635272, 54640529, "+", "6", "KRASP1", {"id": "3844"}, None, [
+                Transcript(54635272, 54640529, "+", "6", "gene14201", {"id": "gene14201"}, None, [
+                    Exon(54635272, 54640529, "+", "6", "gene14201_e1")
+                ])
+            ]),
+            Gene(25357723, 25403865, "-", "12", "KRAS", {"id": "3845"}, None, [
+                Transcript(25357723, 25403865, "-", "12", "rna36549", {"id": "rna36549"}, None,
+                    [
+                        Exon(25357723, 25362845, "-", "12", "rna36549_e1"),
+                        Exon(25378548, 25378707, "-", "12", "rna36549_e2"),
+                        Exon(25380168, 25380346, "-", "12", "rna36549_e3"),
+                        Exon(25398208, 25398329, "-", "12", "rna36549_e5"),
+                        Exon(25403685, 25403865, "-", "12", "rna36549_e6")
+                    ], [
+                        Protein(25362729, 25398318, "-", "12", None, None, None,
+                            [
+                                CDS(25362729, 25362845, "-", "12", ""),
+                                CDS(25378548, 25378707, "-", "12", ""),
+                                CDS(25380168, 25380346, "-", "12", ""),
+                                CDS(25398208, 25398318, "-", "12", "")
+                            ]
+                        )
+                    ]
+                ),
+                Transcript(25357723, 25403865, "-", "12", "rna36550", {"id": "rna36550"}, None,
+                    [
+                        Exon(25357723, 25362845, "-", "12", "rna36550_e1"),
+                        Exon(25368371, 25368494, "-", "12", "rna36550_e2"),
+                        Exon(25378548, 25378707, "-", "12", "rna36550_e3"),
+                        Exon(25380168, 25380346, "-", "12", "rna36550_e4"),
+                        Exon(25398208, 25398329, "-", "12", "rna36550_e5"),
+                        Exon(25403685, 25403865, "-", "12", "rna36550_e6")
+                    ], [
+                        Protein(25368375, 25398318, "-", "12", None, None, None,
+                            [
+                                CDS(25368375, 25368494, "-", "12", ""),
+                                CDS(25378548, 25378707, "-", "12", ""),
+                                CDS(25380168, 25380346, "-", "12", ""),
+                                CDS(25398208, 25398318, "-", "12", ""),
+                            ]
+                        )
+                    ]
+                )
+            ])
+        ]
+        with open(self.tmp_ncbi_in_gtf, "w") as FH_gtf:
+            FH_gtf.write("""6	Curated Genomic	exon	54635272	54640529	.	+	.	transcript_id \"gene14201\"; gene_id \"3844\"; gene_name \"KRASP1\";
+12	BestRefSeq	exon	25357723	25362845	.	-	.	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25378548	25378707	.	-	.	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25380168	25380346	.	-	.	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25398208	25398329	.	-	.	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25403685	25403865	.	-	.	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25362729	25362845	.	-	0	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25378548	25378707	.	-	1	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25380168	25380346	.	-	0	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25398208	25398318	.	-	0	transcript_id \"rna36549\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25357723	25362845	.	-	.	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25368371	25368494	.	-	.	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25378548	25378707	.	-	.	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25380168	25380346	.	-	.	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25398208	25398329	.	-	.	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	exon	25403685	25403865	.	-	.	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25368375	25368494	.	-	0	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25378548	25378707	.	-	1	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25380168	25380346	.	-	0	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+12	BestRefSeq	CDS	25398208	25398318	.	-	0	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";""")
+
+
+    def testLoadModelEnsembl(self):
+        ensembl_genes = loadModel(self.tmp_ensembl_in_gtf, "genes")
         self.assertEqual(
             toBracketTree(self.ensembl_expected),
             toBracketTree(ensembl_genes)
         )
 
+    def testLoadModelNCBI(self):
+        ncbi_genes = loadModel(self.tmp_ncbi_in_gtf, "genes")
+        self.assertEqual(
+            toBracketTree(self.ncbi_expected),
+            toBracketTree(ncbi_genes)
+        )
+
+    def testWriteEnsembl(self):
+        # Read expected
+        in_records = None
+        with GTFIO(self.tmp_ensembl_in_gtf) as FH_in:
+            in_records = FH_in.read()
+        # Write
+        with GTFIO(self.tmp_ensembl_out_gtf, "w") as FH_out:
+            for record in in_records:
+                FH_out.write(record)
+        # Read writted
+        out_records = None
+        with GTFIO(self.tmp_ensembl_in_gtf) as FH_in:
+            out_records = FH_in.read()
+        # Compare expected and observed
+        for exp_rec, obs_rec in zip(in_records, out_records):
+            self.assertEqual(
+                recordToStr(exp_rec),
+                recordToStr(obs_rec)
+            )
+
+    def testWriteNCBI(self):
+        # Read expected
+        in_records = None
+        with GTFIO(self.tmp_ncbi_in_gtf) as FH_in:
+            in_records = FH_in.read()
+        # Write
+        with GTFIO(self.tmp_ncbi_out_gtf, "w") as FH_out:
+            for record in in_records:
+                FH_out.write(record)
+        # Read writted
+        out_records = None
+        with GTFIO(self.tmp_ncbi_in_gtf) as FH_in:
+            out_records = FH_in.read()
+        # Compare expected and observed
+        for exp_rec, obs_rec in zip(in_records, out_records):
+            self.assertEqual(
+                recordToStr(exp_rec),
+                recordToStr(obs_rec)
+            )
+
     def tearDown(self):
         # Clean temporary files
-        for curr_file in [self.tmp_ensembl_gtf]:
+        for curr_file in [self.tmp_ensembl_in_gtf, self.tmp_ensembl_out_gtf, self.tmp_ncbi_in_gtf, self.tmp_ncbi_out_gtf]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 
+
+def recordToStr(record):
+    attributes = []
+    for key, val in sorted(record.annot.items()):
+        if key not in ["source", "feature", "score", "frame"]:
+            attributes.append('{} "{}"'.format(key, val))
+    return "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+        ("." if record.reference is None else record.reference.name),
+        ("." if "source" not in record.annot else record.annot["source"]),
+        ("." if "feature" not in record.annot else record.annot["feature"]),
+        record.start,
+        record.end,
+        ("." if "score" not in record.annot else record.annot["score"]),
+        ("." if record.strand is None else record.strand),
+        ("." if "frame" not in record.annot else record.annot["frame"]),
+        "; ".join(attributes)
+    )
 
 def toBracketTree(node):
     node_btree = ""

@@ -29,7 +29,15 @@ from anacore.genomicRegion import Gene, Transcript, Protein, Exon, CDS
 
 
 class GTFIO(AbstractFile):
+    """Class to manage read and write in GTF file."""
+
     def _parseLine(self):
+        """
+        Return a structured record from the GTF current line.
+
+        :return: The record.
+        :rtype: region.Region
+        """
         chrom, source, feature, start, end, score, strand, frame, attributes = [elt.strip() for elt in self.current_line.split('\t')]
         # Core
         record = RegionTree(
@@ -55,16 +63,67 @@ class GTFIO(AbstractFile):
         return record
 
     def isRecordLine(self, line):
+        """
+        Return True if the line corresponds to a record (it is not a comment or an header line).
+
+        :param line: The evaluated line.
+        :type line: str
+        :return: True if the line corresponds to a record.
+        :rtype: bool
+        """
         is_record = True
         if line.startswith("#"):
             is_record = False
         return is_record
 
-    #~ def write(self, record):
-        #~ self.file_handle.write(self.RecordToGTFLine(bed_record) + "\n")
-        #~ self.current_line_nb += 1
+    def recordToLine(self, record):
+        """
+        Return the record in GTF format.
+
+        :param record: The region to process.
+        :type record: region.Region
+        :return: The GTF line.
+        :rtype: str
+        """
+        attributes = []
+        for key, val in sorted(record.annot.items()):
+            if key not in ["source", "feature", "score", "frame"]:
+                attributes.append('{} "{}"'.format(key, val))
+        line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+            ("" if record.reference is None else record.reference.name),
+            ("." if "source" not in record.annot else record.annot["source"]),
+            ("." if "feature" not in record.annot else record.annot["feature"]),
+            record.start,
+            record.end,
+            ("." if "score" not in record.annot else record.annot["score"]),
+            ("." if record.strand is None else record.strand),
+            ("." if "frame" not in record.annot else record.annot["frame"]),
+            "; ".join(attributes)
+        )
+        return line
+
+    def write(self, record):
+        """
+        Write one line on GTF file.
+
+        :param record: The object to write.
+        :type record: region.Region
+        """
+        self.file_handle.write(self.recordToLine(record) + "\n")
+        self.current_line_nb += 1
+
 
 def _castedRegionTree(region, new_class):
+    """
+    Return the region casted in the selected class of genomicRegion.
+
+    :param region: The region to cast.
+    :type region: region.RegionTree
+    :param new_class: The new class for the object.
+    :type new_class: genomicRegion.*
+    :return: The list of regions corresponding to the selected feature.
+    :rtype: region.RegionList
+    """
     casted_obj = new_class(
         start=region.start,
         end=region.end,
@@ -78,16 +137,25 @@ def _castedRegionTree(region, new_class):
     return casted_obj
 
 
-def loadModel(gtf_path, rtype="exons"):
-    if rtype not in ["genes", "exons", "transcripts", "proteins", "cds"]:
-        raise Exception("The retrun type {} for loadModel is invalid.".format(rtype))
+def loadModel(gtf_path, feature_handle="exons"):
+    """
+    Return genomic model from a GTF. A genomic model is a tree where nodes are genes, transcripts, protein, exons and CDS.
+
+    :param gtf_path: Path to the GTF containing the annotations.
+    :type gtf_path: str
+    :param feature_handle: The type of objects directly accessible in returned list. Authorized values: genes, exons, transcripts, proteins, cds.
+    :type feature_handle: str
+    :return: The list of regions corresponding to the selected feature.
+    :rtype: region.RegionList
+    """
+    if feature_handle not in ["genes", "exons", "transcripts", "proteins", "cds"]:
+        raise Exception("The retrun type {} for loadModel is invalid.".format(feature_handle))
     genes = {}
     transcripts = {}
     proteins = {}
     exons = RegionList()
     cds = RegionList()
-
-    curr_gene = None
+    # Build model from GTF
     with GTFIO(gtf_path) as FH_in:
         for record in FH_in:
             if record.annot["feature"] == "exon":
@@ -99,14 +167,12 @@ def loadModel(gtf_path, rtype="exons"):
                     transcripts[transcript_id] = Transcript(
                         None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
                     )
-                    if curr_gene is None:
-                        gene_id = record.annot["gene_id"]
-                        if gene_id not in genes:
-                            gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
-                            gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
-                            genes[gene_id] = gene
-                        curr_gene = genes[gene_id]
-                    curr_gene.addChild(transcripts[transcript_id])
+                    gene_id = record.annot["gene_id"]
+                    if gene_id not in genes:
+                        gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
+                        gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
+                        genes[gene_id] = gene
+                    genes[gene_id].addChild(transcripts[transcript_id])
                 transcript = transcripts[transcript_id]
                 # Exon
                 record.name = record.annot["transcript_id"] + "_e" + str(len(transcript.children))
@@ -122,14 +188,12 @@ def loadModel(gtf_path, rtype="exons"):
                     transcripts[transcript_id] = Transcript(
                         None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
                     )
-                    if curr_gene is None:
-                        gene_id = record.annot["gene_id"]
-                        if gene_id not in genes:
-                            gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
-                            gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
-                            genes[gene_id] = gene
-                        curr_gene = genes[gene_id]
-                    curr_gene.addChild(transcripts[transcript_id])
+                    gene_id = record.annot["gene_id"]
+                    if gene_id not in genes:
+                        gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
+                        gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
+                        genes[gene_id] = gene
+                    genes[gene_id].addChild(transcripts[transcript_id])
                 transcript = transcripts[transcript_id]
                 # Protein
                 protein_id = record.annot["protein_id"] if "protein_id" in record.annot else "prot:None_tr:" + record.annot["transcript_id"]
@@ -148,20 +212,19 @@ def loadModel(gtf_path, rtype="exons"):
                     gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
                     gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
                     genes[gene_id] = gene
-                curr_gene = genes[gene_id]
     # Sort transcripts because reverse strand are added without exons information and coordinate are initially None
     for gene in genes.values():
         gene.sortChildren()
     # Select the right handler
     return_obj = None
-    if rtype == "genes":
+    if feature_handle == "genes":
         return_obj = RegionList(genes.values())
-    elif rtype == "exons":
+    elif feature_handle == "exons":
         return_obj = exons
-    elif rtype == "transcripts":
+    elif feature_handle == "transcripts":
         return_obj = RegionList(transcripts.values())
-    elif rtype == "proteins":
+    elif feature_handle == "proteins":
         return_obj = RegionList(proteins.values())
-    elif rtype == "cds":
+    elif feature_handle == "cds":
         return_obj = cds
     return return_obj
