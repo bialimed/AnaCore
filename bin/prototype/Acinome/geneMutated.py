@@ -8,7 +8,7 @@ if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
 from GTFI import *
-from VEPvcf import VEPVCFIO, getAlleleRecord
+from annotVcf import VEPVCFIO, getAlleleRecord
 
 def getGenesByChrom( gtf_file ):
     genes_by_chr = dict()
@@ -59,7 +59,7 @@ for idx_vcf, current_vcf in enumerate(sys.argv[2:]):
                     if "AF" in allele_record.samples[spl_name]:
                         frequencies = allele_record.samples[spl_name]["AF"]
                         print(frequencies)
-                        if FH_vcf.info["AF"]["number_tag"] == "R": 
+                        if FH_vcf.info["AF"]["number_tag"] == "R":
                             allele_freq = frequencies[1]
                         else:
                             allele_freq = frequencies[0]

@@ -10,7 +10,7 @@ sys.path.append(LIB_DIR)
 if os.getenv('PYTHONPATH') is None: os.environ['PYTHONPATH'] = LIB_DIR
 else: os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + os.pathsep + LIB_DIR
 
-from VEPvcf import VEPVCFIO, getAlleleRecord
+from annotVcf import VEPVCFIO, getAlleleRecord
 
 
 if __name__ == "__main__":
@@ -35,7 +35,7 @@ if __name__ == "__main__":
                         "chrom": chrom,
                         "pos": pos,
                         "alleles": [],
-                        "coverage": dict()                   
+                        "coverage": dict()
                     }
                 variants[pos_id]["alleles"].append( allele_id )
 
