@@ -1,0 +1,144 @@
+#
+# Copyright (C) 2018 IUCT-O
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+__author__ = 'Frederic Escudie'
+__copyright__ = 'Copyright (C) 2018 IUCT-O'
+__license__ = 'GNU General Public License'
+__version__ = '1.0.0'
+__email__ = 'escudie.frederic@iuct-oncopole.fr'
+__status__ = 'prod'
+
+import re
+from copy import deepcopy
+from anacore.vcf import *
+
+
+class AnnotVCFIO(VCFIO):
+    """Manage VCF file containing variants annotations."""
+
+    def __init__(self, filepath, mode="r", annot_field="ANN"):
+        """
+        Return instance of AnnotVCFIO.
+
+        :param filepath: The filepath.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
+        :param annot_field: The tag for the field used to store annotations. [Default: ANN]
+        :type annot_field: str
+        :return: The new instance.
+        :rtype: AnnotVCFIO
+        """
+        self.annot_field = annot_field
+        self.ANN_titles = list()
+        super().__init__(filepath, mode)
+
+    def copyHeader(self, model):
+        """
+        Copy header fields from the specified VCF.
+
+        :param model: The source.
+        :type model: vcf.VCFIO
+        """
+        super().copyHeader(model)
+        if hasattr(model, 'ANN_titles'):
+            self.ANN_titles = model.ANN_titles
+
+    def _parseAnnot(self, record):
+        """
+        Transform annotations stored as string in record to a structured annotations (list of dict).
+
+        :param record: The record containing the annotations.
+        :type record: vcf.VCFRecord
+        """
+        if self.annot_field in self.info:
+            if self.annot_field not in record.info or record.info[self.annot_field] is None:  # ANN is empty
+                record.info[self.annot_field] = list()
+            else:  # The variant has consequence(s)
+                for annot_idx, annot in enumerate(record.info[self.annot_field]):
+                    annot_val = dict()
+                    for field_idx, field_value in enumerate(annot.split("|")):
+                        csq_key = self.ANN_titles[field_idx]
+                        if field_value.strip() != "":
+                            annot_val[csq_key] = field_value.strip()
+                        else:
+                            annot_val[csq_key] = None
+                    record.info[self.annot_field][annot_idx] = annot_val
+
+    def _parseHeader(self):
+        """Retrieve and store annotations subfields titles and order from the annotation description in INFO header."""
+        super()._parseHeader()
+        if self.annot_field in self.info:
+            # Get ANN fields
+            match = re.search("Format: ([^ ]+)", self.info[self.annot_field]["description"])
+            if match is None:
+                raise Exception("The {} description cannot be parsed in file {}.".format(self.annot_field, self.filepath))
+            self.ANN_titles = match.group(1).split("|")
+
+    def _parseLine(self):
+        """
+        Return the record corresponding to the current line.
+
+        :return: The record corresponding to the current line.
+        :rtype: vcf.VCFRecord
+        """
+        record = super()._parseLine()
+        self._parseAnnot(record)
+        return record
+
+    def recToVCFLine(self, record):
+        """
+        Return the record in VCF format.
+
+        :param record: The record to process.
+        :type record: VCFRecord
+        :return: The VCF line.
+        :rtype: str
+        """
+        std_record = deepcopy(record)
+        if self.annot_field in record.info:
+            if record.info[self.annot_field] is None or len(record.info[self.annot_field]) == 0:  # ANN is empty
+                std_record.info.pop(self.annot_field, None)
+            else:  # The variant has consequence(s)
+                csq_fields = list()
+                for annot in record.info[self.annot_field]:
+                    annot_fields = list()
+                    for csq_key in self.ANN_titles:
+                        if annot[csq_key] is None:
+                            annot_fields.append("")
+                        else:
+                            annot_fields.append(str(annot[csq_key]))
+                    csq_fields.append("|".join(annot_fields))
+                std_record.info[self.annot_field] = csq_fields
+        return super().recToVCFLine(std_record)
+
+
+class VEPVCFIO(AnnotVCFIO):
+    """Manage VCF file containing variants annotations produced by VEP and stored in CSQ field."""
+
+    def __init__(self, filepath, mode="r"):
+        """
+        Return instance of VEPVCFIO.
+
+        :param filepath: The filepath.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
+        :return: The new instance.
+        :rtype: VEPVCFIO
+        """
+        super().__init__(filepath, mode, "CSQ")
