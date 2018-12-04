@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,6 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 sys.path.append(LIB_DIR)
 
+from anacore.region import Region
 from anacore.genomicRegion import Gene, Transcript, Exon, Intron, Protein, CDS
 
 
@@ -391,6 +392,197 @@ class TestProtein(unittest.TestCase):
             self.rvs["protein"].getSubFromRegionPos(24, 3),
             (self.rvs["cds_1"], 21)
         )
+
+    def testHasOverlap(self):
+        # Forward
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(8, 9, "+", "chr1")), False)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(9, 9, "+", "chr1")), False)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(9, 10, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(10, 10, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(12, 12, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(12, 29, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(30, 30, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(30, 31, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(31, 31, "+", "chr1")), False)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(37, 39, "+", "chr1")), False)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(39, 39, "+", "chr1")), False)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(39, 40, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(40, 40, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(98, 99, "+", "chr1")), True)
+        self.assertEqual(self.fwd["protein"].hasOverlap(Region(100, 102, "+", "chr1")), False)
+        # Reverse
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(8, 9, "-", "chr1")), False)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(9, 9, "-", "chr1")), False)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(9, 10, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(10, 10, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(12, 12, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(12, 29, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(30, 30, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(30, 31, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(31, 31, "-", "chr1")), False)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(37, 39, "-", "chr1")), False)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(39, 39, "-", "chr1")), False)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(39, 40, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(40, 40, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(98, 99, "-", "chr1")), True)
+        self.assertEqual(self.rvs["protein"].hasOverlap(Region(100, 102, "-", "chr1")), False)
+
+    def testGetCDSFromTranscript(self):
+        res = []
+        # One exon forward
+        transcript_1 = Transcript(None, None, "+", "chr1", children=[
+            Exon(100, 150, "+", "chr1")
+        ])
+        res.append({
+            "expected": [CDS(100, 150, "+", "chr1")],
+            "observed": Protein(100, 150, "+", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 140, "+", "chr1")],
+            "observed": Protein(110, 140, "+", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 150, "+", "chr1")],
+            "observed": Protein(110, 150, "+", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 140, "+", "chr1")],
+            "observed": Protein(100, 140, "+", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        # Three exons forward
+        transcript_2 = Transcript(None, None, "+", "chr1", children=[
+            Exon(30, 80, "+", "chr1"),
+            Exon(100, 150, "+", "chr1"),
+            Exon(170, 200, "+", "chr1")
+        ])
+        res.append({
+            "expected": [CDS(100, 150, "+", "chr1")],
+            "observed": Protein(100, 150, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 140, "+", "chr1")],
+            "observed": Protein(110, 140, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 150, "+", "chr1")],
+            "observed": Protein(110, 150, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 140, "+", "chr1")],
+            "observed": Protein(100, 140, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(30, 80, "+", "chr1"), CDS(100, 150, "+", "chr1")],
+            "observed": Protein(30, 150, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(60, 80, "+", "chr1"), CDS(100, 150, "+", "chr1")],
+            "observed": Protein(60, 150, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(80, 80, "+", "chr1"), CDS(100, 150, "+", "chr1")],
+            "observed": Protein(80, 150, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(80, 80, "+", "chr1"), CDS(100, 150, "+", "chr1"), CDS(170, 170, "+", "chr1")],
+            "observed": Protein(80, 170, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 150, "+", "chr1"), CDS(170, 200, "+", "chr1")],
+            "observed": Protein(100, 200, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 150, "+", "chr1"), CDS(170, 190, "+", "chr1")],
+            "observed": Protein(100, 190, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 150, "+", "chr1"), CDS(170, 200, "+", "chr1")],
+            "observed": Protein(110, 200, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 150, "+", "chr1"), CDS(170, 190, "+", "chr1")],
+            "observed": Protein(110, 190, "+", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        # One exon reverse
+        transcript_1 = Transcript(None, None, "-", "chr1", children=[
+            Exon(100, 150, "-", "chr1")
+        ])
+        res.append({
+            "expected": [CDS(100, 150, "-", "chr1")],
+            "observed": Protein(100, 150, "-", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 140, "-", "chr1")],
+            "observed": Protein(110, 140, "-", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 150, "-", "chr1")],
+            "observed": Protein(110, 150, "-", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 140, "-", "chr1")],
+            "observed": Protein(100, 140, "-", "chr1", transcript=transcript_1).getCDSFromTranscript()
+        })
+        # Three exons reverse
+        transcript_2 = Transcript(None, None, "-", "chr1", children=[
+            Exon(170, 200, "-", "chr1"),
+            Exon(100, 150, "-", "chr1"),
+            Exon(30, 80, "-", "chr1")
+        ])
+        res.append({
+            "expected": [CDS(100, 150, "-", "chr1")],
+            "observed": Protein(100, 150, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 140, "-", "chr1")],
+            "observed": Protein(110, 140, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(110, 150, "-", "chr1")],
+            "observed": Protein(110, 150, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 140, "-", "chr1")],
+            "observed": Protein(100, 140, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 150, "-", "chr1"), CDS(30, 80, "-", "chr1")],
+            "observed": Protein(30, 150, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 150, "-", "chr1"), CDS(60, 80, "-", "chr1")],
+            "observed": Protein(60, 150, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(100, 150, "-", "chr1"), CDS(80, 80, "-", "chr1")],
+            "observed": Protein(80, 150, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(170, 170, "-", "chr1"), CDS(100, 150, "-", "chr1"), CDS(80, 80, "-", "chr1")],
+            "observed": Protein(80, 170, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(170, 200, "-", "chr1"), CDS(100, 150, "-", "chr1")],
+            "observed": Protein(100, 200, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(170, 190, "-", "chr1"), CDS(100, 150, "-", "chr1")],
+            "observed": Protein(100, 190, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(170, 200, "-", "chr1"), CDS(110, 150, "-", "chr1")],
+            "observed": Protein(110, 200, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        res.append({
+            "expected": [CDS(170, 190, "-", "chr1"), CDS(110, 150, "-", "chr1")],
+            "observed": Protein(110, 190, "-", "chr1", transcript=transcript_2).getCDSFromTranscript()
+        })
+        # Launch evaluation
+        for eval_pair in res:
+            self.assertEqual(
+                ", ".join([curr_cds.getCoordinatesStr() for curr_cds in eval_pair["expected"]]),
+                ", ".join([curr_cds.getCoordinatesStr() for curr_cds in eval_pair["observed"]]),
+            )
 
 
 ########################################################################
