@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -408,19 +408,58 @@ class Protein(RegionTree):
         pos_on_child = chained_cds_pos - walk_pos
         return child, pos_on_child
 
-    #~ def getFivePrimUTRLength(self):
-        #~ first_CDS_start = self.getCDS()[0].getPosOnRef(1)
-        #~ find = False
-        #~ five_prim_UTR_length = 0
-        #~ exon_idx = 0
-        #~ while not find:
-            #~ if first_CDS_start >= self.transcript.regions[exon_idx].start and first_CDS_start <= self.transcript.regions[exon_idx].end:
-                #~ find = True
-                #~ if self.transcript.regions[exon_idx].strand == "+":
-                    #~ five_prim_UTR_length += first_CDS_start - self.transcript.regions[exon_idx].start
-                #~ else:
-                    #~ five_prim_UTR_length += self.transcript.regions[exon_idx].end - first_CDS_start
-            #~ else:
-                #~ five_prim_UTR_length += self.transcript.regions[exon_idx].length()
-                #~ exon_idx += 1
-        #~ return five_prim_UTR_length
+    def getCDSFromTranscript(self):
+        """
+        Return CDS of the protein from the transcript and his exons. This function is used when CDS are not defined in the protein but exons and protein start and end are defined.
+
+        :return: The list of CDS of the protein in protein strand order.
+        :rtype: region.Regionlist
+        """
+        # Check information completion
+        if self.transcript is None:
+            raise Exception("A link with a transcript is required to return CDS for {}.".format(self))
+        if self.start is None or self.end is None:
+            raise Exception("Start and end for {} are required to return CDS from transcript {}.".format(self, self.transcript))
+        # Exons to CDS
+        exons = sorted(self.transcript.children, key=lambda x: (x.start, x.end))
+        nb_exons = len(exons)
+        idx_exon = 0
+        curr_exon = exons[idx_exon]
+        while self.start > curr_exon.end:
+            idx_exon += 1
+            curr_exon = exons[idx_exon]
+        cds = RegionList()
+        while curr_exon is not None and self.end >= curr_exon.start:
+            cds_start = max(self.start, curr_exon.start)
+            cds_end = min(self.end, curr_exon.end)
+            cds.append(CDS(cds_start, cds_end, self.strand, self.reference))
+            idx_exon += 1
+            curr_exon = None
+            if idx_exon < nb_exons:
+                curr_exon = exons[idx_exon]
+        # Sort by strand order
+        if self.strand == "-":
+            cds = RegionList(sorted(cds, key=lambda x: (x.end, x.start), reverse=True))
+        # Return
+        return cds
+
+    def hasOverlap(self, eval_region):
+        """
+        Return True if at least one CDS has an overlap with eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: True if the protein has an overlap with evaluated region.
+        :rtype: bool
+        """
+        has_overlap = False
+        if self.reference.name == eval_region.reference.name:
+            cds = None
+            if len(self.children) > 0:
+                cds = self.children
+            else:
+                cds = self.getCDSFromTranscript()
+            for cds in self.children:
+                if not cds.start > eval_region.end and not cds.end < eval_region.start:
+                    has_overlap = True
+        return has_overlap
