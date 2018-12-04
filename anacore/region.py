@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -299,6 +299,9 @@ class RegionTree(Region):
             elif name == "strand":
                 if len(self.children) > 0:
                     value = self.children[0].strand
+            elif name == "reference":
+                if len(self.children) > 0:
+                    value = self.children[0].reference
         return value
 
     def addChild(self, child):
