@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 sys.path.append(LIB_DIR)
 
-from anacore.region import Region, RegionTree, RegionList, splittedByRef
+from anacore.region import Region, RegionTree, RegionList, splittedByRef, iterOverlapped
 
 
 ########################################################################
@@ -227,6 +227,230 @@ class TestRegion(unittest.TestCase):
         )
         with self.assertRaises(Exception):
             region.getMinDist(Region(1, 5, "+", "chr2"))
+
+    def testIterOverlapped_1(self):
+        """Case where it does not exist any overlap between subjects."""
+        # Init test data
+        sbjct_1 = Region(7, 10, "+", "chr1", "sbjct_1")
+        sbjct_2 = Region(14, 17, "+", "chr1", "sbjct_2")
+        sbjct_3 = Region(24, 29, "+", "chr1", "sbjct_3")
+        subjects = RegionList([sbjct_1, sbjct_2, sbjct_3])
+        queries_info = [
+            {"query": Region(11, 11, "+", "chr1", "query_l1_01"), "overlapped": []},
+            {"query": Region(12, 12, "+", "chr1", "query_l1_02"), "overlapped": []},
+            {"query": Region(13, 13, "+", "chr1", "query_l1_03"), "overlapped": []},
+            {"query": Region(14, 14, "+", "chr1", "query_l1_04"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 15, "+", "chr1", "query_l1_05"), "overlapped": [sbjct_2]},
+            {"query": Region(16, 16, "+", "chr1", "query_l1_06"), "overlapped": [sbjct_2]},
+            {"query": Region(17, 17, "+", "chr1", "query_l1_07"), "overlapped": [sbjct_2]},
+            {"query": Region(18, 18, "+", "chr1", "query_l1_08"), "overlapped": []},
+            {"query": Region(19, 19, "+", "chr1", "query_l1_09"), "overlapped": []},
+            {"query": Region(20, 20, "+", "chr1", "query_l1_10"), "overlapped": []},
+            {"query": Region(21, 21, "+", "chr1", "query_l1_11"), "overlapped": []},
+            {"query": Region(22, 22, "+", "chr1", "query_l1_12"), "overlapped": []},
+            {"query": Region(11, 13, "+", "chr1", "query_l3_01"), "overlapped": []},
+            {"query": Region(12, 14, "+", "chr1", "query_l3_02"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 15, "+", "chr1", "query_l3_03"), "overlapped": [sbjct_2]},
+            {"query": Region(14, 16, "+", "chr1", "query_l3_04"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 17, "+", "chr1", "query_l3_05"), "overlapped": [sbjct_2]},
+            {"query": Region(16, 18, "+", "chr1", "query_l3_06"), "overlapped": [sbjct_2]},
+            {"query": Region(17, 19, "+", "chr1", "query_l3_07"), "overlapped": [sbjct_2]},
+            {"query": Region(18, 20, "+", "chr1", "query_l3_08"), "overlapped": []},
+            {"query": Region(19, 21, "+", "chr1", "query_l3_09"), "overlapped": []},
+            {"query": Region(20, 22, "+", "chr1", "query_l3_10"), "overlapped": []},
+            {"query": Region(21, 23, "+", "chr1", "query_l3_11"), "overlapped": []},
+            {"query": Region(13, 17, "+", "chr1", "query_l5_01"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 19, "+", "chr1", "query_l5_02"), "overlapped": [sbjct_2]},
+            {"query": Region(17, 21, "+", "chr1", "query_l5_03"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 19, "+", "chr1", "query_l5_04"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 18, "+", "chr1", "query_l6_01"), "overlapped": [sbjct_2]},
+            {"query": Region(14, 19, "+", "chr1", "query_l6_02"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 20, "+", "chr1", "query_l6_03"), "overlapped": [sbjct_2]},
+            {"query": Region(16, 21, "+", "chr1", "query_l6_04"), "overlapped": [sbjct_2]},
+            {"query": Region(17, 22, "+", "chr1", "query_l6_05"), "overlapped": [sbjct_2]},
+            {"query": Region(18, 23, "+", "chr1", "query_l6_06"), "overlapped": []},
+            {"query": Region(13, 19, "+", "chr1", "query_l7_01"), "overlapped": [sbjct_2]},
+            {"query": Region(14, 20, "+", "chr1", "query_l7_02"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 21, "+", "chr1", "query_l7_03"), "overlapped": [sbjct_2]},
+            {"query": Region(16, 22, "+", "chr1", "query_l7_04"), "overlapped": [sbjct_2]},
+            {"query": Region(17, 23, "+", "chr1", "query_l7_05"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 20, "+", "chr1", "query_l8_01"), "overlapped": [sbjct_2]},
+            {"query": Region(14, 21, "+", "chr1", "query_l8_02"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 22, "+", "chr1", "query_l8_03"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 21, "+", "chr1", "query_l9_01"), "overlapped": [sbjct_2]},
+            {"query": Region(14, 22, "+", "chr1", "query_l9_02"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 22, "+", "chr1", "query_l10_01"), "overlapped": [sbjct_2]}
+        ]
+        queries_info = sorted(queries_info, key=lambda x: (x["query"].start, x["query"].end))
+        # Independant evaluation
+        for curr_eval in queries_info:
+            obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped([curr_eval["query"]], subjects)]
+            self.assertEqual(obs_overlapped, [curr_eval["overlapped"]])
+        # Grouped evaluation
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+        # Grouped evaluation and overlapped subject start the list of subject
+        subjects.pop(0)
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+
+    def testIterOverlapped_2(self):
+        """Case where it exists a partial overlap between two subjects."""
+        # Init test datas
+        sbjct_1 = Region(7, 10, "+", "chr1", "sbjct_1")
+        sbjct_2 = Region(14, 18, "+", "chr1", "sbjct_2")
+        sbjct_3 = Region(16, 20, "+", "chr1", "sbjct_3")
+        sbjct_4 = Region(24, 29, "+", "chr1", "sbjct_4")
+        subjects = RegionList([sbjct_1, sbjct_2, sbjct_3, sbjct_4])
+        queries_info = [
+            {"query": Region(11, 11, "+", "chr1", "query_l1_01"), "overlapped": []},
+            {"query": Region(12, 12, "+", "chr1", "query_l1_02"), "overlapped": []},
+            {"query": Region(13, 13, "+", "chr1", "query_l1_03"), "overlapped": []},
+            {"query": Region(14, 14, "+", "chr1", "query_l1_04"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 15, "+", "chr1", "query_l1_05"), "overlapped": [sbjct_2]},
+            {"query": Region(16, 16, "+", "chr1", "query_l1_06"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 17, "+", "chr1", "query_l1_07"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 18, "+", "chr1", "query_l1_08"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 19, "+", "chr1", "query_l1_09"), "overlapped": [sbjct_3]},
+            {"query": Region(20, 20, "+", "chr1", "query_l1_10"), "overlapped": [sbjct_3]},
+            {"query": Region(21, 21, "+", "chr1", "query_l1_11"), "overlapped": []},
+            {"query": Region(22, 22, "+", "chr1", "query_l1_12"), "overlapped": []},
+            {"query": Region(23, 23, "+", "chr1", "query_l1_13"), "overlapped": []},
+            {"query": Region(24, 24, "+", "chr1", "query_l1_14"), "overlapped": [sbjct_4]},
+            {"query": Region(11, 13, "+", "chr1", "query_l3_01"), "overlapped": []},
+            {"query": Region(12, 14, "+", "chr1", "query_l3_02"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 15, "+", "chr1", "query_l3_03"), "overlapped": [sbjct_2]},
+            {"query": Region(14, 16, "+", "chr1", "query_l3_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 17, "+", "chr1", "query_l3_05"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(16, 18, "+", "chr1", "query_l3_06"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 19, "+", "chr1", "query_l3_07"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 20, "+", "chr1", "query_l3_08"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 21, "+", "chr1", "query_l3_09"), "overlapped": [sbjct_3]},
+            {"query": Region(20, 22, "+", "chr1", "query_l3_10"), "overlapped": [sbjct_3]},
+            {"query": Region(21, 23, "+", "chr1", "query_l3_11"), "overlapped": []},
+            {"query": Region(13, 17, "+", "chr1", "query_l5_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 19, "+", "chr1", "query_l5_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 21, "+", "chr1", "query_l5_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 22, "+", "chr1", "query_l5_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 23, "+", "chr1", "query_l5_05"), "overlapped": [sbjct_3]},
+            {"query": Region(20, 24, "+", "chr1", "query_l5_06"), "overlapped": [sbjct_3, sbjct_4]},
+            {"query": Region(13, 18, "+", "chr1", "query_l6_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 19, "+", "chr1", "query_l6_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 20, "+", "chr1", "query_l6_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(16, 21, "+", "chr1", "query_l6_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 22, "+", "chr1", "query_l6_05"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 23, "+", "chr1", "query_l6_06"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 24, "+", "chr1", "query_l6_07"), "overlapped": [sbjct_3, sbjct_4]},
+            {"query": Region(13, 19, "+", "chr1", "query_l7_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 20, "+", "chr1", "query_l7_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 21, "+", "chr1", "query_l7_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(16, 22, "+", "chr1", "query_l7_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 23, "+", "chr1", "query_l7_05"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 24, "+", "chr1", "query_l7_06"), "overlapped": [sbjct_2, sbjct_3, sbjct_4]},
+            {"query": Region(19, 25, "+", "chr1", "query_l7_07"), "overlapped": [sbjct_3, sbjct_4]},
+            {"query": Region(13, 20, "+", "chr1", "query_l8_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 21, "+", "chr1", "query_l8_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 22, "+", "chr1", "query_l8_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(13, 21, "+", "chr1", "query_l9_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 22, "+", "chr1", "query_l9_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(13, 22, "+", "chr1", "query_l10_01"), "overlapped": [sbjct_2, sbjct_3]}
+        ]
+        queries_info = sorted(queries_info, key=lambda x: (x["query"].start, x["query"].end))
+        # Independant evaluation
+        for curr_eval in queries_info:
+            obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped([curr_eval["query"]], subjects)]
+            self.assertEqual(obs_overlapped, [curr_eval["overlapped"]])
+        # Grouped evaluation
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+        # Grouped evaluation and overlap between subjects start the list of subjects
+        subjects.pop(0)
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+
+    def testIterOverlapped_3(self):
+        """Case where a subject is included in another."""
+        # Init test data
+        sbjct_1 = Region(7, 10, "+", "chr1", "sbjct_1")
+        sbjct_2 = Region(14, 20, "+", "chr1", "sbjct_2")
+        sbjct_3 = Region(16, 18, "+", "chr1", "sbjct_3")
+        sbjct_4 = Region(24, 29, "+", "chr1", "sbjct_4")
+        subjects = RegionList([sbjct_1, sbjct_2, sbjct_3, sbjct_4])
+        queries_info = [
+            {"query": Region(11, 11, "+", "chr1", "query_l1_01"), "overlapped": []},
+            {"query": Region(12, 12, "+", "chr1", "query_l1_02"), "overlapped": []},
+            {"query": Region(13, 13, "+", "chr1", "query_l1_03"), "overlapped": []},
+            {"query": Region(14, 14, "+", "chr1", "query_l1_04"), "overlapped": [sbjct_2]},
+            {"query": Region(15, 15, "+", "chr1", "query_l1_05"), "overlapped": [sbjct_2]},
+            {"query": Region(16, 16, "+", "chr1", "query_l1_06"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 17, "+", "chr1", "query_l1_07"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 18, "+", "chr1", "query_l1_08"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 19, "+", "chr1", "query_l1_09"), "overlapped": [sbjct_2]},
+            {"query": Region(20, 20, "+", "chr1", "query_l1_10"), "overlapped": [sbjct_2]},
+            {"query": Region(21, 21, "+", "chr1", "query_l1_11"), "overlapped": []},
+            {"query": Region(22, 22, "+", "chr1", "query_l1_12"), "overlapped": []},
+            {"query": Region(11, 13, "+", "chr1", "query_l3_01"), "overlapped": []},
+            {"query": Region(12, 14, "+", "chr1", "query_l3_02"), "overlapped": [sbjct_2]},
+            {"query": Region(13, 15, "+", "chr1", "query_l3_03"), "overlapped": [sbjct_2]},
+            {"query": Region(14, 16, "+", "chr1", "query_l3_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 17, "+", "chr1", "query_l3_05"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(16, 18, "+", "chr1", "query_l3_06"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 19, "+", "chr1", "query_l3_07"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 20, "+", "chr1", "query_l3_08"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 21, "+", "chr1", "query_l3_09"), "overlapped": [sbjct_2]},
+            {"query": Region(20, 22, "+", "chr1", "query_l3_10"), "overlapped": [sbjct_2]},
+            {"query": Region(21, 23, "+", "chr1", "query_l3_11"), "overlapped": []},
+            {"query": Region(13, 17, "+", "chr1", "query_l5_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 19, "+", "chr1", "query_l5_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 21, "+", "chr1", "query_l5_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 22, "+", "chr1", "query_l5_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 23, "+", "chr1", "query_l5_05"), "overlapped": [sbjct_2]},
+            {"query": Region(20, 24, "+", "chr1", "query_l5_06"), "overlapped": [sbjct_2, sbjct_4]},
+            {"query": Region(13, 18, "+", "chr1", "query_l6_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 19, "+", "chr1", "query_l6_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 20, "+", "chr1", "query_l6_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(16, 21, "+", "chr1", "query_l6_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 22, "+", "chr1", "query_l6_05"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 23, "+", "chr1", "query_l6_06"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(19, 24, "+", "chr1", "query_l6_07"), "overlapped": [sbjct_2, sbjct_4]},
+            {"query": Region(13, 19, "+", "chr1", "query_l7_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 20, "+", "chr1", "query_l7_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 21, "+", "chr1", "query_l7_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(16, 22, "+", "chr1", "query_l7_04"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(17, 23, "+", "chr1", "query_l7_05"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(18, 24, "+", "chr1", "query_l7_06"), "overlapped": [sbjct_2, sbjct_3, sbjct_4]},
+            {"query": Region(19, 24, "+", "chr1", "query_l7_07"), "overlapped": [sbjct_2, sbjct_4]},
+            {"query": Region(13, 20, "+", "chr1", "query_l8_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 21, "+", "chr1", "query_l8_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(15, 22, "+", "chr1", "query_l8_03"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(13, 21, "+", "chr1", "query_l9_01"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(14, 22, "+", "chr1", "query_l9_02"), "overlapped": [sbjct_2, sbjct_3]},
+            {"query": Region(13, 22, "+", "chr1", "query_l10_01"), "overlapped": [sbjct_2, sbjct_3]}
+        ]
+        queries_info = sorted(queries_info, key=lambda x: (x["query"].start, x["query"].end))
+        # Independant evaluation
+        for curr_eval in queries_info:
+            obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped([curr_eval["query"]], subjects)]
+            self.assertEqual(obs_overlapped, [curr_eval["overlapped"]])
+        # Grouped evaluation
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+        # Grouped evaluation and inclusion between subjects start the list of subjects
+        subjects.pop(0)
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
 
 
 class TestRegionTree(unittest.TestCase):

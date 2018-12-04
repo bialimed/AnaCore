@@ -422,3 +422,62 @@ def splittedByRef(region_list):
             regions_by_ref[ref_name] = RegionList()
         regions_by_ref[ref_name].append(curr_region)
     return regions_by_ref
+
+
+def iterOverlapped(queries, subjects, check_ref=True):
+    """
+    Return a generator on query and his overlapped subjects. For example you can provide a list of variant (queries) and search the genes overlapped by each variant in the list of genes (subjects).
+
+    :param queries: The queries. They must be defined on the same reference.
+    :type queries: list
+    :param subjects: The regions where the overlap is searched. They must be defined on the same reference.
+    :type subjects: list
+    :param check_ref: If True all the queries and subjects are checked to ensure they care defined on the same reference. Use False to gain computation time if you are certain that all elements are defined on the same reference.
+    :type check_ref: bool
+    :return: Each iteration return one query and the list of subjects overlapped by it. The queries are ordered by ascending coordinates.
+    :rtype: A generator on couple (Region, RegionList)
+    """
+    if check_ref:
+        references = set()
+        for elt in subjects + queries:
+            if elt.reference is None:
+                references.add(None)
+            else:
+                references.add(elt.reference.name)
+        if len(references) > 1:
+            raise Exception("All the queries and subjects in iterOverlapped are not defined on the same reference.")
+    subjects = sorted(subjects, key=lambda x: (x.start, x.end))
+    queries = sorted(queries, key=lambda x: (x.start, x.end))
+    subject_idx = 0
+    nb_subjects = len(subjects)
+    for curr_query in queries:
+        # Find overlapping transcripts
+        while subject_idx < nb_subjects and curr_query.start > subjects[subject_idx].end:
+            subject_idx += 1
+        first_subject_idx = None
+        overlapping_subjects = []
+        while subject_idx < nb_subjects and curr_query.end >= subjects[subject_idx].start:
+            curr_subject = subjects[subject_idx]
+            if not curr_query.start > curr_subject.end:
+                overlapping_subjects.append(curr_subject)
+                if first_subject_idx is None:
+                    first_subject_idx = subject_idx
+            subject_idx += 1
+        subject_idx = (subject_idx if first_subject_idx is None else first_subject_idx)  # Return to the first subject overlapping the query
+        # Return current query and his overlaps
+        yield(curr_query, overlapping_subjects)
+
+
+def iterOverlappedByRegion(queries_by_chr, subject_by_chr):
+    """
+    Return a generator on query and his overlapped subjects. For example you can provide a list of variant (queries) and search the genes overlapped by each variant in the list of genes (subjects).
+
+    :param queries_by_chr: By chromosome the queries.
+    :type queries_by_chr: dict
+    :param subject_by_chr: By chromosome the regions where the overlap is searched.
+    :type subject_by_chr: dict
+    :return: Each iteration return the chromosome name, one query and the list of subjects overlapped by it. The queries are ordered by ascending coordinates.
+    :rtype: A generator on couple (str, Region, RegionList)
+    """
+    for chrom in sorted(queries_by_chr):
+        yield(chrom, iterOverlapped(queries_by_chr[chrom], subject_by_chr[chrom], False))
