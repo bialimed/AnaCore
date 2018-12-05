@@ -291,11 +291,17 @@ class TestRegion(unittest.TestCase):
         expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
         obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
         self.assertEqual(obs_overlapped, expec_overlapped)
-        # Grouped evaluation and overlapped subject start the list of subject
-        subjects.pop(0)
+        # Grouped evaluation and overlapped subject starts the list of subject
+        shift_subjects = subjects[1:]
         queries = [curr_info["query"] for curr_info in queries_info]
         expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
-        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, shift_subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+        # Grouped evaluation and overlapped subject ends the list of subject
+        pop_subjects = subjects[:-1]
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, pop_subjects)]
         self.assertEqual(obs_overlapped, expec_overlapped)
 
     def testIterOverlapped_2(self):
@@ -369,11 +375,19 @@ class TestRegion(unittest.TestCase):
         expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
         obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
         self.assertEqual(obs_overlapped, expec_overlapped)
-        # Grouped evaluation and overlap between subjects start the list of subjects
-        subjects.pop(0)
+        # Grouped evaluation and overlap between subjects starts the list of subjects
+        shifted_subjects = subjects[1:]
         queries = [curr_info["query"] for curr_info in queries_info]
         expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
-        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, shifted_subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+        # Grouped evaluation and overlap between subjects ends the list of subjects
+        poped_subjects = subjects[:-1]
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = []
+        for curr_info in queries_info:
+            expec_overlapped.append([elt for elt in curr_info["overlapped"] if elt != sbjct_4])
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, poped_subjects)]
         self.assertEqual(obs_overlapped, expec_overlapped)
 
     def testIterOverlapped_3(self):
@@ -445,11 +459,19 @@ class TestRegion(unittest.TestCase):
         expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
         obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
         self.assertEqual(obs_overlapped, expec_overlapped)
-        # Grouped evaluation and inclusion between subjects start the list of subjects
-        subjects.pop(0)
+        # Grouped evaluation and inclusion between subjects starts the list of subjects
+        shifted_subjects = subjects[1:]
         queries = [curr_info["query"] for curr_info in queries_info]
         expec_overlapped = [curr_info["overlapped"] for curr_info in queries_info]
-        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, subjects)]
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, shifted_subjects)]
+        self.assertEqual(obs_overlapped, expec_overlapped)
+        # Grouped evaluation and inclusion between subjects ends the list of subjects
+        poped_subjects = subjects[:-1]
+        queries = [curr_info["query"] for curr_info in queries_info]
+        expec_overlapped = []
+        for curr_info in queries_info:
+            expec_overlapped.append([elt for elt in curr_info["overlapped"] if elt != sbjct_4])
+        obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, poped_subjects)]
         self.assertEqual(obs_overlapped, expec_overlapped)
 
 
