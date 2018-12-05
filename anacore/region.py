@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -220,7 +220,7 @@ class Region:
         :rtype: int
         """
         if self.reference.name != eval_region.reference.name:
-            raise Exception('The minimal distance between regions cannot be processed because their are located on diffrents reference ("' + self.reference.name+ '" vs "' + eval_region.reference.name + '").')
+            raise Exception('The minimal distance between regions cannot be processed because their are located on diffrents reference ("' + self.reference.name + '" vs "' + eval_region.reference.name + '").')
         min_dist = None
         if self.hasOverlap(eval_region):  # Eval region overlaps region
             min_dist = 0
@@ -480,4 +480,5 @@ def iterOverlappedByRegion(queries_by_chr, subject_by_chr):
     :rtype: A generator on couple (str, Region, RegionList)
     """
     for chrom in sorted(queries_by_chr):
-        yield(chrom, iterOverlapped(queries_by_chr[chrom], subject_by_chr[chrom], False))
+        for query, overlapping_subjects in iterOverlapped(queries_by_chr[chrom], subject_by_chr[chrom], False):
+            yield(chrom, query, overlapping_subjects)
