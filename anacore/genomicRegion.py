@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -443,6 +443,18 @@ class Protein(RegionTree):
         # Return
         return cds
 
+    def contains(self, eval_region):
+        """
+        Return True if at least one CDS has an overlap with eval_region.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: True if the region contains the evaluated region.
+        :rtype: bool
+        """
+        cds = self.children if len(self.children) > 0 else self.getCDSFromTranscript()
+        return len(cds.getContainers(eval_region)) > 0
+
     def hasOverlap(self, eval_region):
         """
         Return True if at least one CDS has an overlap with eval_region.
@@ -454,12 +466,8 @@ class Protein(RegionTree):
         """
         has_overlap = False
         if self.reference.name == eval_region.reference.name:
-            cds = None
-            if len(self.children) > 0:
-                cds = self.children
-            else:
-                cds = self.getCDSFromTranscript()
-            for cds in self.children:
-                if not cds.start > eval_region.end and not cds.end < eval_region.start:
+            cds = self.children if len(self.children) > 0 else self.getCDSFromTranscript()
+            for curr_cds in cds:
+                if not curr_cds.start > eval_region.end and not curr_cds.end < eval_region.start:
                     has_overlap = True
         return has_overlap
