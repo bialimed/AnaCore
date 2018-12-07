@@ -298,7 +298,7 @@ class Protein(RegionTree):
         :return: The length of the protein.
         :rtype: int
         """
-        return self.length() / 3
+        return int(self.length() / 3)
 
     def getPosOnRef(self, protein_pos, codon_pos):
         """
