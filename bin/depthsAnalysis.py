@@ -34,7 +34,7 @@ from anacore.genomicRegion import Intron
 from anacore.bed import getAreas
 from anacore.gtf import loadModel
 from anacore.vcf import VCFIO
-from anacore.gff3 import GFF3IO, GFF3Record
+from anacore.gff import GFF3IO, GFF3Record
 
 
 ########################################################################
@@ -330,27 +330,20 @@ def writeOutput(out_path, shallow):
                 "depthAnalysis",
                 "experimental_feature",
                 curr_shallow.start,
-                curr_shallow.end,
-                attributes={}
+                curr_shallow.end
             )
             if args.input_annotations is not None:
                 for idx, annot in enumerate(curr_shallow.annot["ANN"]):
                     fields = []
                     for k, v in sorted(annot.items()):
                         fields.append("{}:{}".format(k, v))
-                    record.setAttribute(
-                        "ann_{}".format(idx + 1),
-                        "|".join(fields)
-                    )
+                    record.annot["ann_{}".format(idx + 1)] = "|".join(fields)
             if len(args.inputs_variants) > 0:
                 for idx, var_region in enumerate(curr_shallow.annot["VAR"]):
                     fields = []
                     for k, v in sorted(var_region.annot.items()):
                         fields.append("{}:{}".format(k, v))
-                    record.setAttribute(
-                        "var_{}".format(idx + 1),
-                        "|".join(fields)
-                    )
+                    record.annot["var_{}".format(idx + 1)] = "|".join(fields)
             FH_out.write(record)
 
 

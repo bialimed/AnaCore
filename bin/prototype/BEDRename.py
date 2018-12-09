@@ -33,7 +33,7 @@ sys.path.append(LIB_DIR)
 
 from anacore.bed import BEDIO
 from anacore.region import Region, RegionList
-from anacore.gff3 import GFF3IO
+from anacore.gff import GFF3IO
 
 
 ########################################################################
@@ -94,8 +94,8 @@ if __name__ == "__main__":
     tr_by_id = dict()
     with GFF3IO(args.input_annotation) as FH_annot:
         for record in FH_annot:
-            if record.type == "mRNA" and "transcript_id" in record.attributes:
-                tr_id = record.attributes["transcript_id"]
+            if record.type == "mRNA" and "transcript_id" in record.annot:
+                tr_id = record.annot["transcript_id"]
                 tr_id = tr_id.split(".")[0]
                 if tr_id in gene_by_tr:
                     if tr_id not in tr_by_id:
@@ -107,8 +107,8 @@ if __name__ == "__main__":
                             tr_id,
                             {"exons": RegionList(), "gene": gene_by_tr[tr_id]}
                         )
-            if record.type == "exon" and "transcript_id" in record.attributes:
-                tr_id = record.attributes["transcript_id"]
+            if record.type == "exon" and "transcript_id" in record.annot:
+                tr_id = record.annot["transcript_id"]
                 tr_id = tr_id.split(".")[0]
                 if tr_id in gene_by_tr:
                     tr_by_id[tr_id].annot["exons"].append(
@@ -118,7 +118,7 @@ if __name__ == "__main__":
                             record.strand,
                             record.seq_id,
                             None,
-                            {"exon_idx": None, "type":"exon"}
+                            {"exon_idx": None, "type": "exon"}
                         )
                     )
     if len(gene_by_tr) != len(tr_by_id):
