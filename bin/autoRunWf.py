@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.14.0'
+__version__ = '2.14.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -338,10 +338,11 @@ def getLoadCmd(design, raw_folder, out_by_wf):
         "--input-raw", raw_folder
     ]
     # Control samples
-    if design.neg_ctrl_re is not None:
-        cmd.extend(["--negative-ctrl-regexp", design.neg_ctrl_re])
-    if design.pos_ctrl_re is not None:
-        cmd.extend(["--positive-ctrl-regexp", design.pos_ctrl_re])
+    if design is not None:
+        if design.neg_ctrl_re is not None:
+            cmd.extend(["--negative-ctrl-regexp", design.neg_ctrl_re])
+        if design.pos_ctrl_re is not None:
+            cmd.extend(["--positive-ctrl-regexp", design.pos_ctrl_re])
     # Workflows data
     if len(out_by_wf) != 0:
         cmd.append("--input-workflows")
@@ -631,6 +632,7 @@ if __name__ == "__main__":
                         wf_failed = [wf._name for wf in parallel_processes if wf.exitcode() != 0]  # Check workflows end status
                         if len(wf_failed) > 0:
                             raise Exception("Error in workflow(s): {}.".format(wf_failed))
+                        out_folder_by_wf.pop("GenerateFASTQ", None)  # Remove unanalysed workflow
                         # Copy raw data
                         step = "Copy raw"
                         if args.storage_folder is not None:
