@@ -25,6 +25,7 @@ __status__ = 'prod'
 
 import os
 import sys
+import warnings
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -32,7 +33,8 @@ LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
 from anacore.bed import BEDIO
-from anacore.region import Region, RegionList
+from anacore.region import Region, RegionList, splittedByRef
+from anacore.genomicRegion import Transcript, Gene, Exon
 from anacore.gff import GFF3IO
 
 
@@ -41,25 +43,76 @@ from anacore.gff import GFF3IO
 # FUNCTIONS
 #
 ########################################################################
-#~ name_by_acc = dict()
-#~ with open(sys.argv[1]) as FH_names:
-    #~ for line in FH_names:
-        #~ if not line.startswith("#"):
-            #~ fields = [field.strip() for field in line.split("\t")]
-            #~ name_by_acc[fields[1]] = fields[0]
+def getGeneByRefTr(in_ref_tr, trim_version=True):
+    """
+    Return gene object by RNA_id.
 
-#~ with open(sys.argv[2]) as FH_names:
-    #~ for line in FH_names:
-        #~ if line.startswith("#"):
-            #~ print(line.strip())
-        #~ elif line.startswith("NC"):
-            #~ fields = [field.strip() for field in line.split("\t")]
-            #~ if fields[8].endswith(";"):
-                #~ fields[8] += "chrAcc=" + fields[0] + ";"
-            #~ else:
-                #~ fields[8] += ";chrAcc=" + fields[0]
-            #~ fields[0] = name_by_acc[fields[0]]
-            #~ print("\t".join(fields))
+    :param in_ref_tr: Path to the file describing the link between genes and RNA_id (format: TSV). Each line has the following format: <GENE>\t<RNA_ID>.
+    :type in_ref_tr: str
+    :param trim_version: With True the version number is removed from the id.
+    :type trim_version: boolean
+    :return: The genes by RNA_id.
+    :rtype: dict
+    """
+    gene_by_tr = dict()
+    with open(in_ref_tr) as FH_tr:
+        for line in FH_tr:
+            if not line.startswith("#"):
+                gene, tr_id = [field.strip() for field in line.split("\t")]
+                if tr_id != "":
+                    if trim_version:
+                        tr_id = tr_id.split(".")[0]
+                    gene_by_tr[tr_id] = Gene(name=gene)
+    return gene_by_tr
+
+
+def getTranscriptAnnot(in_annot, gene_by_tr):
+    """
+    Get genomic model (genes, transcripts and exons) for the selected transcripts.
+
+    :param in_annot: Path to the genomic annotations (format: GFF3).
+    :type in_annot: str
+    :param gene_by_tr: Gene by selected transcripts.
+    :type gene_by_tr: dict
+    :return: The list of selected transcripts.
+    :rtype: anacore.region.RegionList
+    """
+    tr_by_id = dict()
+    with GFF3IO(in_annot) as FH_annot:
+        for record in FH_annot:
+            if record.type == "mRNA" and "transcript_id" in record.annot:
+                tr_id = record.annot["transcript_id"]
+                tr_id = tr_id.split(".")[0]  # Remove transcript version
+                if tr_id in gene_by_tr:  # Transcript is in panel
+                    if tr_id not in tr_by_id:
+                        tr_by_id[tr_id] = Transcript(
+                            record.start,
+                            record.end,
+                            record.strand,
+                            record.seq_id,
+                            tr_id,
+                            {},
+                            gene_by_tr[tr_id]
+                        )
+            if record.type == "exon" and "transcript_id" in record.annot:
+                tr_id = record.annot["transcript_id"]
+                tr_id = tr_id.split(".")[0]  # Remove transcript version
+                if tr_id in gene_by_tr:  # Transcript is in panel
+                    # Store the exon
+                    tr_by_id[tr_id].addChild(
+                        Exon(
+                            record.start,
+                            record.end,
+                            record.strand,
+                            record.seq_id
+                        )
+                    )
+    if len(gene_by_tr) != len(tr_by_id):
+        raise Exception("The following transcripts are missing in {}: {}".format(
+            args.input_annotation,
+            set(gene_by_tr.keys()).difference(set(tr_by_id.keys()))
+        ))
+    return RegionList(tr_by_id.values())
 
 
 ########################################################################
@@ -69,110 +122,52 @@ from anacore.gff import GFF3IO
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser(description="**********************************.")
-    parser.add_argument('-c', '--is-thick-based', action='store_true', help='******************************.')
+    parser = argparse.ArgumentParser(description="Rename the BED's entries with annotations information (gene and exon) for the selected transcripts.")
+    parser.add_argument('-c', '--is-thick-based', action='store_true', help='With this option the annotation is only based on thick coordinates of the entry if they exist.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
-    group_input.add_argument('-t', '--input-reference-tr', required=True, help='******************************.')
-    group_input.add_argument('-a', '--input-annotation', required=True, help='*****************************.')
-    group_input.add_argument('-r', '--input-regions', required=True, help='*****************************.')
+    group_input.add_argument('-t', '--input-reference-tr', required=True, help='Path to the file containing the link between selected genes and transcripts (format: TSV). Each line contains 2 fields: gene_name and transcript_id.')
+    group_input.add_argument('-a', '--input-annotation', required=True, help='Path to the file containing the genomic annotations (format: GFF3).')
+    group_input.add_argument('-r', '--input-regions', required=True, help='Path to the file where the regions will be renamed (format: BED).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
-    group_output.add_argument('-o', '--output-regions', default="amplicons.bed", help='The amplicons description (format: BED). [Default: %(default)s]')
+    group_output.add_argument('-o', '--output-regions', default="renamed.bed", help='Path to the file containing the renamed regions (format: BED). [Default: %(default)s]')
     args = parser.parse_args()
 
-    # Get gene by transcript ID
-    gene_by_tr = dict()
-    with open(args.input_reference_tr) as FH_tr:
-        for line in FH_tr:
-            if not line.startswith("#"):
-                gene, tr_id = [field.strip() for field in line.split("\t")]
-                if tr_id != "":
-                    tr_id = tr_id.split(".")[0]
-                    gene_by_tr[tr_id] = gene
-
-    # Get transcript region by transcript ID (exons are in annot attribute)
-    tr_by_id = dict()
-    with GFF3IO(args.input_annotation) as FH_annot:
-        for record in FH_annot:
-            if record.type == "mRNA" and "transcript_id" in record.annot:
-                tr_id = record.annot["transcript_id"]
-                tr_id = tr_id.split(".")[0]
-                if tr_id in gene_by_tr:
-                    if tr_id not in tr_by_id:
-                        tr_by_id[tr_id] = Region(
-                            record.start,
-                            record.end,
-                            record.strand,
-                            record.seq_id,
-                            tr_id,
-                            {"exons": RegionList(), "gene": gene_by_tr[tr_id]}
-                        )
-            if record.type == "exon" and "transcript_id" in record.annot:
-                tr_id = record.annot["transcript_id"]
-                tr_id = tr_id.split(".")[0]
-                if tr_id in gene_by_tr:
-                    tr_by_id[tr_id].annot["exons"].append(
-                        Region(
-                            record.start,
-                            record.end,
-                            record.strand,
-                            record.seq_id,
-                            None,
-                            {"exon_idx": None, "type": "exon"}
-                        )
-                    )
-    if len(gene_by_tr) != len(tr_by_id):
-        raise Exception("The following transcripts are missing in {}: {}".format(
-            args.input_annotation,
-            set(gene_by_tr.keys()).difference(set(tr_by_id.keys()))
-        ))
-
-    # Region list for chr
-    tr_by_chr = dict()
-    for tr_id in tr_by_id:
-        curr_tr = tr_by_id[tr_id]
-        # Sort exons by transcript order
-        sorted_exons = list()
-        if curr_tr.strand == "-":
-            sorted_exons = sorted(curr_tr.annot["exons"], key=lambda exon: (exon.end, exon.start), reverse=True)
-        else:
-            sorted_exons = sorted(curr_tr.annot["exons"], key=lambda exon: (exon.start, exon.end))
-        for idx_exon, curr_exon in enumerate(sorted_exons):
-            curr_exon.annot["exon_idx"] = idx_exon
-        # Store regions on chromosome
-        chrom = curr_tr.reference.name
-        if chrom not in tr_by_chr:
-            tr_by_chr[chrom] = RegionList()
-        tr_by_chr[chrom].append(curr_tr)
-
+    # Get transcripts
+    gene_by_tr = getGeneByRefTr(args.input_reference_tr)
+    selected_transcripts = getTranscriptAnnot(args.input_annotation, gene_by_tr)
+    tr_by_chr = splittedByRef(selected_transcripts)
     # Write renamed regions
+    out_nb_col = BEDIO.getMaxNbCol(args.input_regions)
+    if out_nb_col == 3:
+        out_nb_col = 4
     with BEDIO(args.input_regions) as FH_regions:
-        with BEDIO(args.output_regions, "w", (6 if args.is_thick_based else 8)) as FH_out:
+        with BEDIO(args.output_regions, "w", out_nb_col) as FH_out:
             for record_idx, record in enumerate(FH_regions):
-                amplicon = Region(record.start, record.end, record.strand, record.chrom)
+                target = Region(record.start, record.end, record.strand, record.chrom)
+                if args.is_thick_based and record.thickStart is not None and record.thickEnd is not None:
+                    target.start = record.thickStart
+                    target.end = record.thickEnd
                 overlapped_tr = list()
                 if record.chrom in tr_by_chr:
-                    overlapped_tr = tr_by_chr[record.chrom].getOverlapped( amplicon )
+                    overlapped_tr = tr_by_chr[record.chrom].getOverlapped(target)
+                if len(overlapped_tr) > 1:
+                    warnings.warn("The region {} overlaps several transcripts ({}).".format(target, [str(tr) for tr in overlapped_tr]))
                 if len(overlapped_tr) >= 1:
-                    overlapped_exons = overlapped_tr[0].annot["exons"].getOverlapped( amplicon )
+                    overlapped_exons = overlapped_tr[0].children.getOverlapped(target)
                     features = list()
                     for curr_feature in overlapped_exons:
-                        features.append( "ex" + str(curr_feature.annot["exon_idx"] + 1) )
-                    record.name = "_".join([
-                        overlapped_tr[0].annot["gene"],
+                        features.append("ex{}".format(curr_feature.annot["siblings_idx"]))
+                    record.name = "{}_{}_{}_{}".format(
+                        overlapped_tr[0].parent.name,
                         "-".join(features),
-                        str(amplicon.start),
-                        amplicon.strand,
-                        "ampl" + str(record_idx)
-                    ])
+                        ("" if target.strand is None else target.strand),
+                        "trgt" + str(record_idx)
+                    )
                 else:
-                    record.name = "_".join([
+                    record.name = "{}__{}_{}".format(
                         "noFeature",
-                        str(amplicon.start),
-                        amplicon.strand,
-                        "ampl" + str(record_idx)
-                    ])
-                if args.is_thick_based and record.thickStart is not None and record.thickEnd is not None:
-                    record.start = record.thickStart
-                    record.end = record.thickEnd
-                FH_out.write( record )
+                        ("" if target.strand is None else target.strand),
+                        "trgt" + str(record_idx)
+                    )
+                FH_out.write(record)
