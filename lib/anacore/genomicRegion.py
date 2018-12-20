@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -210,7 +210,7 @@ class Transcript(RegionTree):
                 intron_start = exons[exon_idx - 1].end + 1
                 intron_end = exons[exon_idx].start - 1
                 sub_region_idx = exon_idx
-                sub_region = Intron(intron_start, intron_end, self.strand, self.reference, "intron_{}".format(sub_region_idx), parent=self)
+                sub_region = Intron(intron_start, intron_end, self.strand, self.reference, "intron_{}".format(sub_region_idx), {"siblings_idx": sub_region_idx}, parent=self)
             else:
                 sub_region_idx = exon_idx + 1
                 sub_region = exons[exon_idx]
@@ -221,7 +221,7 @@ class Transcript(RegionTree):
                 intron_end = exons[exon_idx - 1].start - 1
                 intron_start = exons[exon_idx].end + 1
                 sub_region_idx = exon_idx
-                sub_region = Intron(intron_start, intron_end, self.strand, self.reference, "intron_{}".format(sub_region_idx), parent=self)
+                sub_region = Intron(intron_start, intron_end, self.strand, self.reference, "intron_{}".format(sub_region_idx), {"siblings_idx": sub_region_idx}, parent=self)
             else:
                 sub_region_idx = exon_idx + 1
                 sub_region = exons[exon_idx]

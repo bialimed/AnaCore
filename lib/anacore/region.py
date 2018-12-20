@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.1'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -325,13 +325,17 @@ class RegionTree(Region):
             self.sortChildren()
 
     def sortChildren(self):
-        """Sort children in order of their apparition on self strand."""
+        """Sort children in order of their apparition on self strand. Add siblings_idx (1-based) in annotations of children."""
         if self.strand is None:
             raise Exception("Cannot sort sub-regions because the strand is None in {}.".format(self))
+        # Sort
         if self.strand == "-":
             self.children = RegionList(sorted(self.children, key=lambda x: (x.end, x.start), reverse=True))
         else:
             self.children = RegionList(sorted(self.children, key=lambda x: (x.start, x.end)))
+        # Add siblings_idx
+        for siblings_idx, child in enumerate(self.children):
+            child.annot["siblings_idx"] = siblings_idx + 1  # Siblings idx is 1-based
 
 
 class RegionList(list):

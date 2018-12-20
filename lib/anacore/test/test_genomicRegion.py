@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -171,6 +171,7 @@ class TestTranscript(unittest.TestCase):
             else:
                 self.assertEqual(observed[1], expected[1])
                 self.assertEqual(observed[0].getCoordinatesStr(), expected[0].getCoordinatesStr())
+            self.assertEqual(observed[0].annot["siblings_idx"], expected[1])  # Test siblings_idx
         # Reverse
         rvs_tests = [
             [10, (self.rvs["exon_1"], 3)],
@@ -196,6 +197,7 @@ class TestTranscript(unittest.TestCase):
             else:
                 self.assertEqual(observed[1], expected[1])
                 self.assertEqual(observed[0].getCoordinatesStr(), expected[0].getCoordinatesStr())
+            self.assertEqual(observed[0].annot["siblings_idx"], expected[1])  # Test siblings_idx
 
 
 class TestProtein(unittest.TestCase):
