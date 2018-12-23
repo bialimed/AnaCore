@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -57,7 +57,7 @@ def getBiggerCluster(freq_by_spl, max_freq_diff):
     for start_idx, start_spl in enumerate(asc_freq_spl):
         clstr_size = 0
         clstr_samples = list()  # The start sample itself will be added in comparison below
-        start_AF = AF_by_spl[start_spl]
+        start_AF = freq_by_spl[start_spl]
         if len(asc_freq_spl) - start_idx > bigger_cluster_size:
             curr_idx = start_idx
             out_of_range = False
@@ -69,6 +69,7 @@ def getBiggerCluster(freq_by_spl, max_freq_diff):
                     clstr_samples.append(curr_spl)
                 else:
                     out_of_range = True
+                curr_idx += 1
         if clstr_size > bigger_cluster_size:
             bigger_cluster_size = clstr_size
             bigger_clster_samples = clstr_samples
