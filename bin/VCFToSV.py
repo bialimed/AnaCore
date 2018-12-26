@@ -86,7 +86,7 @@ if __name__ == "__main__":
             "Filters",
             "Alt_alleles_frequencies",
             args.separator.join(FH_vcf.samples),
-            args.separator.join(FH_vcf.CSQ_titles),
+            args.separator.join(FH_vcf.ANN_titles),
             sep=args.separator
         )
         for record in FH_vcf:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             if len(record.info["CSQ"]) == 0:  # Record without consequence
                 print(
                     args.separator.join(record_fields),
-                    args.separator.join(["" for col in FH_vcf.CSQ_titles]),
+                    args.separator.join(["" for col in FH_vcf.ANN_titles]),
                     sep=args.separator
                 )
             else:  # Record with at least one consequence
@@ -116,7 +116,7 @@ if __name__ == "__main__":
                         start_fields = record_fields
                     # Pre-process consequence display
                     csq_values = list()
-                    for title in FH_vcf.CSQ_titles:
+                    for title in FH_vcf.ANN_titles:
                         if title not in csq or csq[title] is None:
                             csq_values.append("")
                         else:
