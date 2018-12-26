@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -57,7 +57,7 @@ def getBiggerCluster(freq_by_spl, max_freq_diff):
     for start_idx, start_spl in enumerate(asc_freq_spl):
         clstr_size = 0
         clstr_samples = list()  # The start sample itself will be added in comparison below
-        start_AF = AF_by_spl[start_spl]
+        start_AF = freq_by_spl[start_spl]
         if len(asc_freq_spl) - start_idx > bigger_cluster_size:
             curr_idx = start_idx
             out_of_range = False
@@ -69,6 +69,7 @@ def getBiggerCluster(freq_by_spl, max_freq_diff):
                     clstr_samples.append(curr_spl)
                 else:
                     out_of_range = True
+                curr_idx += 1
         if clstr_size > bigger_cluster_size:
             bigger_cluster_size = clstr_size
             bigger_clster_samples = clstr_samples
@@ -83,17 +84,17 @@ def getBiggerCluster(freq_by_spl, max_freq_diff):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Find constitutive variants in population of samples coming from one VCF. An constitutive variant is a variant coming from polymerase error rate at this position, or workflow artifact, ... . It is common in almost all samples with an allele frequency very similar in each samples. If this variant is present in a superiror frequency in a particular sample that can signify that this variant is not an artefact in this sample only.')
-    parser.add_argument('-n', '--noise-offset', type=float, default=0.01, help='The value added to the maximum constitutive frequency of the variant.')
+    parser.add_argument('-n', '--noise-offset', type=float, default=0.01, help='The value added to the maximum constitutive frequency of the variant. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_thresholds = parser.add_argument_group('Thresolds')  # Thresholds
-    group_thresholds.add_argument('-r', '--min-presence-ratio', type=float, default=0.75, help='Minimum ratio between samples with variant at the same AF and the samples with valid depth (see "--min-DP") for declare variant as constitutive.')
-    group_thresholds.add_argument('-c', '--min-presence-count', type=int, default=4, help='Minimum number of samples with variant at the same AF for declare variant as constitutive.')
-    group_thresholds.add_argument('-d', '--min-DP', type=int, default=150, help='Minimum number of reads at the variant position for use the sample in constitutive variant evaluation.')
-    group_thresholds.add_argument('-a', '--max-AF-var', type=float, default=0.015, help='Maximum variation between samples AF in constitutive variant. Constitutive variant have an AF similar between all samples, for determine if a variant is constitutive only the samples where the variant has an AF similar in comparison to this value are counted as support.')
+    group_thresholds.add_argument('-r', '--min-presence-ratio', type=float, default=0.75, help='Minimum ratio between samples with variant at the same AF and the samples with valid depth (see "--min-DP") for declare variant as constitutive. [Default: %(default)s]')
+    group_thresholds.add_argument('-c', '--min-presence-count', type=int, default=4, help='Minimum number of samples with variant at the same AF for declare variant as constitutive. [Default: %(default)s]')
+    group_thresholds.add_argument('-d', '--min-DP', type=int, default=150, help='Minimum number of reads at the variant position for use the sample in constitutive variant evaluation. [Default: %(default)s]')
+    group_thresholds.add_argument('-a', '--max-AF-var', type=float, default=0.015, help='Maximum variation between samples AF in constitutive variant. Constitutive variant have an AF similar between all samples, for determine if a variant is constitutive only the samples where the variant has an AF similar in comparison to this value are counted as support. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
-    group_output.add_argument('-o', '--output-TSV', required=True, help='The path to the outputted file containing the constitutive variants (format: TSV).')
+    group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted file containing the constitutive variants (format: TSV).')
     args = parser.parse_args()
 
     # Process
@@ -116,7 +117,7 @@ if __name__ == "__main__":
                 "Nb_constit_spl",
                 "Constit_spl",
                 "Constit_AF"
-            ]))
+            ]) + "\n")
             # Records
             for record in FH_in:
                 for idx in range(len(record.alt)):
@@ -136,21 +137,22 @@ if __name__ == "__main__":
                             if curr_AF is not None and curr_AF > 0:  # The sample contain the variant
                                 nb_support_spl += 1
                                 AF_by_spl[curr_spl] = curr_AF
-                    if nb_support_spl / nb_usable_spl >= args.min_presence_ratio and nb_support_spl >= args.min_presence_count:  # Prefilter by support number for reduce processing time
-                        clstr_samples = getBiggerCluster(AF_by_spl, args.max_AF_var)
-                        nb_support_constit_spl = len(clstr_samples)
-                        if nb_support_constit_spl / nb_usable_spl >= args.min_presence_ratio and nb_support_constit_spl >= args.min_presence_count:  # The variant is constitutive
-                            clstr_AF = [AF_by_spl[clstr_samples] for spl in sorted(clstr_samples)]
-                            FH_out.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
-                                curr_allele.chrom,
-                                curr_allele.pos,
-                                curr_allele.ref,
-                                curr_allele.alt[0],
-                                max(clstr_AF) + args.noise_offset,
-                                nb_spl,
-                                nb_usable_spl,
-                                nb_support_spl,
-                                nb_support_constit_spl,
-                                ";".join(sorted(clstr_samples)),
-                                ";".join(clstr_AF)
-                            ))
+                    if nb_usable_spl > 0:
+                        if nb_support_spl / nb_usable_spl >= args.min_presence_ratio and nb_support_spl >= args.min_presence_count:  # Prefilter by support number for reduce processing time
+                            clstr_samples = getBiggerCluster(AF_by_spl, args.max_AF_var)
+                            nb_support_constit_spl = len(clstr_samples)
+                            if nb_support_constit_spl / nb_usable_spl >= args.min_presence_ratio and nb_support_constit_spl >= args.min_presence_count:  # The variant is constitutive
+                                clstr_AF = [AF_by_spl[spl] for spl in sorted(clstr_samples)]
+                                FH_out.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(
+                                    curr_allele.chrom,
+                                    curr_allele.pos,
+                                    curr_allele.ref,
+                                    curr_allele.alt[0],
+                                    max(clstr_AF) + args.noise_offset,
+                                    nb_spl,
+                                    nb_usable_spl,
+                                    nb_support_spl,
+                                    nb_support_constit_spl,
+                                    ";".join(sorted(clstr_samples)),
+                                    ";".join(map(str, clstr_AF))
+                                ))
