@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -137,7 +137,7 @@ def _castedRegionTree(region, new_class):
     return casted_obj
 
 
-def loadModel(gtf_path, feature_handle="exons"):
+def loadModel(gtf_path, feature_handle="exons", restrict_to=None):
     """
     Return genomic model from a GTF. A genomic model is a tree where nodes are genes, transcripts, protein, exons and CDS.
 
@@ -145,6 +145,8 @@ def loadModel(gtf_path, feature_handle="exons"):
     :type gtf_path: str
     :param feature_handle: The type of objects directly accessible in returned list. Authorized values: genes, exons, transcripts, proteins, cds.
     :type feature_handle: str
+    :param restrict_to: If this parameter is used, the model is retricted to this seqname. Default: All the seqname of the GTF are used.
+    :type restrict_to: str
     :return: The list of regions corresponding to the selected feature.
     :rtype: region.RegionList
     """
@@ -158,60 +160,61 @@ def loadModel(gtf_path, feature_handle="exons"):
     # Build model from GTF
     with GTFIO(gtf_path) as FH_in:
         for record in FH_in:
-            if record.annot["feature"] == "exon":
-                record = _castedRegionTree(record, Exon)
-                # Transcript
-                transcript_id = record.annot["transcript_id"]
-                if transcript_id not in transcripts:
-                    transcript_name = record.annot["transcript_name"] if "transcript_name" in record.annot else None
-                    transcripts[transcript_id] = Transcript(
-                        None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
-                    )
+            if restrict_to is None or restrict_to == record.reference.name:
+                if record.annot["feature"] == "exon":
+                    record = _castedRegionTree(record, Exon)
+                    # Transcript
+                    transcript_id = record.annot["transcript_id"]
+                    if transcript_id not in transcripts:
+                        transcript_name = record.annot["transcript_name"] if "transcript_name" in record.annot else None
+                        transcripts[transcript_id] = Transcript(
+                            None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
+                        )
+                        gene_id = record.annot["gene_id"]
+                        if gene_id not in genes:
+                            gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
+                            gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
+                            genes[gene_id] = gene
+                        genes[gene_id].addChild(transcripts[transcript_id])
+                    transcript = transcripts[transcript_id]
+                    # Exon
+                    record.name = record.annot["transcript_id"] + "_e" + str(len(transcript.children))
+                    record.annot["id"] = record.annot["exon_id"] if "exon_id" in record.annot else record.name
+                    transcript.addChild(record)
+                    exons.append(record)
+                elif record.annot["feature"] == "CDS":
+                    record = _castedRegionTree(record, CDS)
+                    # Transcript
+                    transcript_id = record.annot["transcript_id"]
+                    if transcript_id not in transcripts:
+                        transcript_name = record.annot["transcript_name"] if "transcript_name" in record.annot else None
+                        transcripts[transcript_id] = Transcript(
+                            None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
+                        )
+                        gene_id = record.annot["gene_id"]
+                        if gene_id not in genes:
+                            gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
+                            gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
+                            genes[gene_id] = gene
+                        genes[gene_id].addChild(transcripts[transcript_id])
+                    transcript = transcripts[transcript_id]
+                    # Protein
+                    protein_id = record.annot["protein_id"] if "protein_id" in record.annot else "prot:None_tr:" + record.annot["transcript_id"]
+                    protein = None
+                    if protein_id not in proteins:
+                        protein = Protein(None, None, record.strand, record.reference, protein_id, {"feature": "protein", "id": protein_id}, None, None, transcript)
+                        proteins[protein_id] = protein
+                    else:
+                        protein = proteins[protein_id]
+                    # CDS
+                    protein.addChild(record)
+                    cds.append(record)
+                elif record.annot["feature"] == "gene":
                     gene_id = record.annot["gene_id"]
                     if gene_id not in genes:
                         gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
                         gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
                         genes[gene_id] = gene
-                    genes[gene_id].addChild(transcripts[transcript_id])
-                transcript = transcripts[transcript_id]
-                # Exon
-                record.name = record.annot["transcript_id"] + "_e" + str(len(transcript.children))
-                record.annot["id"] = record.annot["exon_id"] if "exon_id" in record.annot else record.name
-                transcript.addChild(record)
-                exons.append(record)
-            elif record.annot["feature"] == "CDS":
-                record = _castedRegionTree(record, CDS)
-                # Transcript
-                transcript_id = record.annot["transcript_id"]
-                if transcript_id not in transcripts:
-                    transcript_name = record.annot["transcript_name"] if "transcript_name" in record.annot else None
-                    transcripts[transcript_id] = Transcript(
-                        None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
-                    )
-                    gene_id = record.annot["gene_id"]
-                    if gene_id not in genes:
-                        gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
-                        gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
-                        genes[gene_id] = gene
-                    genes[gene_id].addChild(transcripts[transcript_id])
-                transcript = transcripts[transcript_id]
-                # Protein
-                protein_id = record.annot["protein_id"] if "protein_id" in record.annot else "prot:None_tr:" + record.annot["transcript_id"]
-                protein = None
-                if protein_id not in proteins:
-                    protein = Protein(None, None, record.strand, record.reference, protein_id, {"feature": "protein", "id": protein_id}, None, None, transcript)
-                    proteins[protein_id] = protein
-                else:
-                    protein = proteins[protein_id]
-                # CDS
-                protein.addChild(record)
-                cds.append(record)
-            elif record.annot["feature"] == "gene":
-                gene_id = record.annot["gene_id"]
-                if gene_id not in genes:
-                    gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
-                    gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
-                    genes[gene_id] = gene
     # Sort transcripts because reverse strand are added without exons information and coordinate are initially None
     for gene in genes.values():
         gene.sortChildren()
