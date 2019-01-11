@@ -69,7 +69,8 @@ def getGeneAnnot(record, genes_by_chr):
                     "EXON": None,
                     "INTRON": None,
                     "CDS_position": None,
-                    "Protein_position": None
+                    "Protein_position": None,
+                    "Codon_position": None
                 }
                 if curr_transcript.strand is not None:
                     curr_annot["STRAND"] = ("1" if curr_transcript.strand == "+" else "-1")
@@ -89,7 +90,7 @@ def getGeneAnnot(record, genes_by_chr):
                     if len(curr_transcript.proteins) > 0:
                         curr_annot["CDS_position"] = curr_transcript.proteins[0].getNtPosFromRefPos(variant_region.start)
                         if curr_annot["CDS_position"] is not None:
-                            curr_annot["Protein_position"] = curr_transcript.proteins[0].getPosOnRegion(variant_region.start)[0]
+                            curr_annot["Protein_position"], curr_annot["Codon_position"] = curr_transcript.proteins[0].getPosOnRegion(variant_region.start)
                 annotations.append(curr_annot)
     return annotations
 
