@@ -40,15 +40,24 @@ from anacore.region import Region, splittedByRef
 # FUNCTIONS
 #
 ########################################################################
-def getRegionGeneAnnot(region, genes_by_chr):
+def getGeneAnnot(record, genes_by_chr):
     """
+    Return genomic items overlapped by the BND record.
+
+    :param record: The BND record.
+    :type record: anacore.vcf.VCFRecord
+    :param genes_by_chr: By chromosomes a tree where nodes are genes, transcripts, protein, exons and CDS.
+    :type genes_by_chr: dict
+    :return: The list of annotations (one annotation by overlapped transcript).
+    :rtype: list
     """
+    variant_region = Region(record.pos, None, None, record.chrom, record.getName())
     annotations = []
     container_genes = genes_by_chr[record.chrom].getContainers(variant_region)
     for curr_gene in container_genes:
         container_transcripts = curr_gene.children.getContainers(variant_region)
         if len(container_transcripts) == 0:
-            warnings.warn("The breakpoint {} is contained by gene {} but by 0 of these transcripts.".format(region, curr_gene))
+            warnings.warn("The breakpoint {} is contained by gene {} but by 0 of these transcripts.".format(variant_region, curr_gene))
         else:
             for curr_transcript in container_transcripts:
                 curr_annot = {
@@ -64,7 +73,7 @@ def getRegionGeneAnnot(region, genes_by_chr):
                 }
                 if curr_transcript.strand is not None:
                     curr_annot["STRAND"] = ("1" if curr_transcript.strand == "+" else "-1")
-                subregion, subregion_idx = curr_transcript.getSubFromRefPos(region.start)
+                subregion, subregion_idx = curr_transcript.getSubFromRefPos(variant_region.start)
                 if issubclass(subregion.__class__, Intron):  # On intron
                     curr_annot["INTRON"] = "{}/{}".format(
                         subregion_idx,
@@ -78,14 +87,19 @@ def getRegionGeneAnnot(region, genes_by_chr):
                     if len(curr_transcript.proteins) > 1:
                         raise Exception("The management of several proteins for one transcript is not implemented. The transcript {} contains several proteins {}.".format(curr_transcript, curr_transcript.proteins))
                     if len(curr_transcript.proteins) > 0:
-                        curr_annot["CDS_position"] = curr_transcript.proteins[0].getNtPosFromRefPos(region.start)
+                        curr_annot["CDS_position"] = curr_transcript.proteins[0].getNtPosFromRefPos(variant_region.start)
                         if curr_annot["CDS_position"] is not None:
-                            curr_annot["Protein_position"] = curr_transcript.proteins[0].getPosOnRegion(region.start)[0]
+                            curr_annot["Protein_position"] = curr_transcript.proteins[0].getPosOnRegion(variant_region.start)[0]
                 annotations.append(curr_annot)
     return annotations
 
-def annotBNDStream(record):
+
+def annotGeneShard(record):
     """
+    Add which shard of genes are in fusion (up or down).
+
+    :param record: The annotated BND record. The BND is previously annotated by genomic regions (see getRegionGeneAnnot()).
+    :type record: anacore.vcf.VCFRecord
     """
     # Get position relative to the break
     is_before_break = []
@@ -96,19 +110,19 @@ def annotBNDStream(record):
             is_before_break.append(True)
     if len(set(is_before_break)) > 1:
         record_name = record.id if record.id is not None else record.getName()
-        raise Exception("The breakend {} has severeal fusion partners with different break's configuration.".format(record_name))
+        raise Exception("The breakend {} has several fusion partners with different break's configuration.".format(record_name))
     is_before_break = is_before_break[0]
     # Set BND_stream
-    genes = set([annot["Gene"] for annot in record.info["ANN"]])
     for annot in record.info["ANN"]:
+        annot["GENE_SHARD"] = None
         if annot["STRAND"] is not None:
-            annot["BND_stream"] = "down"
+            annot["GENE_SHARD"] = "down"
             if annot["STRAND"] == "1":
                 if is_before_break:
-                    annot["BND_stream"] = "up"
+                    annot["GENE_SHARD"] = "up"
             else:
                 if not is_before_break:
-                    annot["BND_stream"] = "up"
+                    annot["GENE_SHARD"] = "up"
 
 
 ########################################################################
@@ -144,7 +158,7 @@ if __name__ == "__main__":
         with VCFIO(args.input_variants) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.ANN_titles = ["SYMBOL", "Gene", "Feature", "Feature_type", "STRAND", "EXON", "INTRON", "CDS_position", "Protein_position"]
+            FH_out.ANN_titles = ["SYMBOL", "Gene", "Feature", "Feature_type", "STRAND", "EXON", "INTRON", "CDS_position", "Protein_position", "GENE_SHARD"]
             FH_out.info["ANN"] = {
                 "type": str,
                 "type_tag": "String",
@@ -155,15 +169,8 @@ if __name__ == "__main__":
             FH_out._writeHeader()
             # Records
             for record in FH_in:
-                variant_region = Region(record.pos, None, None, record.chrom, record.getName())
                 if record.info["SVTYPE"] == "BND":
-                    record.info["ANN"] = getRegionGeneAnnot(variant_region, genes_by_chr)
-                    annotBNDStream(record)
+                    record.info["ANN"] = getGeneAnnot(record, genes_by_chr)
+                    annotGeneShard(record)
                 FH_out.write(record)
     log.info("End process.")
-
-    #~ strand_by_id = {}
-    #~ with VCFIO(args.input_variants) as FH_in:
-        #~ for record in FH_in:
-            #~ for bnd_idx, bnd_id in enumerate(record.info["MATEID"]):
-                #~ strand_by_id[bnd_id] = "+" if record.alt[bnd_idx].startswith("[") or record.alt[bnd_idx].endswith("[") else "-"
