@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -28,7 +28,6 @@ import os
 import sys
 import logging
 import argparse
-import warnings
 from anacore.gtf import loadModel
 from anacore.genomicRegion import Intron
 from anacore.annotVcf import AnnotVCFIO, VCFIO
@@ -57,7 +56,7 @@ def getGeneAnnot(record, genes_by_chr):
     for curr_gene in container_genes:
         container_transcripts = curr_gene.children.getContainers(variant_region)
         if len(container_transcripts) == 0:
-            warnings.warn("The breakpoint {} is contained by gene {} but by 0 of these transcripts.".format(variant_region, curr_gene))
+            log.warn("The breakpoint {} is contained by gene {} but by 0 of these transcripts.".format(variant_region, curr_gene))
         else:
             for curr_transcript in container_transcripts:
                 curr_annot = {
@@ -86,7 +85,10 @@ def getGeneAnnot(record, genes_by_chr):
                         len(curr_transcript.children)
                     )
                     if len(curr_transcript.proteins) > 1:
-                        raise Exception("The management of several proteins for one transcript is not implemented. The transcript {} contains several proteins {}.".format(curr_transcript, curr_transcript.proteins))
+                        log.error(
+                            "The management of several proteins for one transcript is not implemented. The transcript {} contains several proteins {}.".format(curr_transcript, curr_transcript.proteins),
+                            exec_info=True
+                        )
                     if len(curr_transcript.proteins) > 0:
                         curr_annot["CDS_position"] = curr_transcript.proteins[0].getNtPosFromRefPos(variant_region.start)
                         if curr_annot["CDS_position"] is not None:
@@ -111,7 +113,10 @@ def annotGeneShard(record):
             is_before_break.append(True)
     if len(set(is_before_break)) > 1:
         record_name = record.id if record.id is not None else record.getName()
-        raise Exception("The breakend {} has several fusion partners with different break's configuration.".format(record_name))
+        log.error(
+            "The breakend {} has several fusion partners with different break's configuration.".format(record_name),
+            exec_info=True
+        )
     is_before_break = is_before_break[0]
     # Set BND_stream
     for annot in record.info["ANN"]:
