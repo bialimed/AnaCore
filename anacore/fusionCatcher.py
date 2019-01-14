@@ -176,7 +176,7 @@ class FusionCatcherIO(HashedSVIO):
             }
         }
         format_field = sorted(sample_field[self.sample_name].keys())
-        info_sources = None if fusion_record["Fusion_finding_method"] == "" else [elt.strip() for elt in fusion_record["Fusion_finding_method"].split(",")]
+        info_sources = None if fusion_record["Fusion_finding_method"] == "" else [elt.strip() for elt in fusion_record["Fusion_finding_method"].split(";")]
         first_id = str(uuid.uuid4())
         first_coord = getCoordDictFromCoordStr(fusion_record["Fusion_point_for_gene_1(5end_fusion_partner)"])
         second_id = str(uuid.uuid4())
