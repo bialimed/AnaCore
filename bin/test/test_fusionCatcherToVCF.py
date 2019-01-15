@@ -83,7 +83,7 @@ MN1	BEND2	oncogene,cancer,tumor,exon-exon	0	40	19	30	BOWTIE;BOWTIE+BLAT;BOWTIE+S
 
         # Validate results
         expected = """##fileformat=VCFv4.1
-##INFO=<ID=MATEID,Number=1,Type=String,Description="ID of mate breakend.">
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
 ##INFO=<ID=RNA_CONTIG,Number=1,Type=String,Description="The sequence of the breakend spanning contig.">
 ##INFO=<ID=RNA_FIRST,Number=0,Type=Flag,Description="For RNA fusions, this break-end is 5' in the fusion transcript.">
 ##INFO=<ID=SOURCES,Number=.,Type=String,Description="Aligning method used for mapping the reads and finding the fusion genes. Here are two methods used which are: (i) BOWTIE = only Bowtie aligner is used for mapping the reads on the genome and exon-exon fusion junctions, (ii) BOWTIE+BLAT = Bowtie aligner is used for mapping reads on the genome and BLAT is used for mapping reads for finding the fusion junction, (iii) BOWTIE+STAR = Bowtie aligner is used for mapping reads on the genome and STAR is used for mapping reads for finding the fusion junction, (iv) BOWTIE+BOWTIE2 = Bowtie aligner is used for mapping reads on the genome and Bowtie2 is used for mapping reads for finding the fusion junction.">

@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -88,7 +88,7 @@ def setFusionCatcherVCFHeader(vcf_io, annotation_field="FCANN"):
     """
     # INFO
     vcf_io.info = {
-        "MATEID": {"type": str, "type_tag": "String", "number": 1, "description": "ID of mate breakend."},
+        "MATEID": {"type": str, "type_tag": "String", "number_tag": "A", "number": None, "description": "ID of mate breakend."},
         "SVTYPE": {"type": str, "type_tag": "String", "number": 1, "description": "Type of structural variant."},
         "SOURCES": {"type": str, "type_tag": "String", "number": None, "description": "Aligning method used for mapping the reads and finding the fusion genes. Here are two methods used which are: (i) BOWTIE = only Bowtie aligner is used for mapping the reads on the genome and exon-exon fusion junctions, (ii) BOWTIE+BLAT = Bowtie aligner is used for mapping reads on the genome and BLAT is used for mapping reads for finding the fusion junction, (iii) BOWTIE+STAR = Bowtie aligner is used for mapping reads on the genome and STAR is used for mapping reads for finding the fusion junction, (iv) BOWTIE+BOWTIE2 = Bowtie aligner is used for mapping reads on the genome and Bowtie2 is used for mapping reads for finding the fusion junction."},
         "RNA_FIRST": {"type": None, "type_tag": "Flag", "number": 0, "description": "For RNA fusions, this break-end is 5' in the fusion transcript."},
@@ -184,7 +184,7 @@ class FusionCatcherIO(HashedSVIO):
         first_alt, second_alt = getAltFromCoord(first_coord, second_coord)
         # First breakend
         first_info = {
-            "MATEID": second_id,
+            "MATEID": [second_id],
             "SVTYPE": "BND",
             "SOURCES": info_sources,
             "RNA_FIRST": True,
@@ -208,7 +208,7 @@ class FusionCatcherIO(HashedSVIO):
         )
         # Second breakends
         second_info = {
-            "MATEID": first_id,
+            "MATEID": [first_id],
             "SVTYPE": "BND",
             "SOURCES": info_sources,
             "RNA_CONTIG": fusion_record["Fusion_sequence"],
