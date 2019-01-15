@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -52,48 +52,51 @@ def getGeneAnnot(record, genes_by_chr):
     """
     variant_region = Region(record.pos, None, None, record.chrom, record.getName())
     annotations = []
-    container_genes = genes_by_chr[record.chrom].getContainers(variant_region)
-    for curr_gene in container_genes:
-        container_transcripts = curr_gene.children.getContainers(variant_region)
-        if len(container_transcripts) == 0:
-            log.warn("The breakpoint {} is contained by gene {} but by 0 of these transcripts.".format(variant_region, curr_gene))
-        else:
-            for curr_transcript in container_transcripts:
-                curr_annot = {
-                    "SYMBOL": curr_gene.name,
-                    "Gene": curr_gene.annot["id"],
-                    "Feature": curr_transcript.annot["id"],
-                    "Feature_type": "Transcript",
-                    "STRAND": None,
-                    "EXON": None,
-                    "INTRON": None,
-                    "CDS_position": None,
-                    "Protein_position": None,
-                    "Codon_position": None
-                }
-                if curr_transcript.strand is not None:
-                    curr_annot["STRAND"] = ("1" if curr_transcript.strand == "+" else "-1")
-                subregion, subregion_idx = curr_transcript.getSubFromRefPos(variant_region.start)
-                if issubclass(subregion.__class__, Intron):  # On intron
-                    curr_annot["INTRON"] = "{}/{}".format(
-                        subregion_idx,
-                        len(curr_transcript.children) - 1
-                    )
-                else:  # On exon
-                    curr_annot["EXON"] = "{}/{}".format(
-                        subregion_idx,
-                        len(curr_transcript.children)
-                    )
-                    if len(curr_transcript.proteins) > 1:
-                        log.error(
-                            "The management of several proteins for one transcript is not implemented. The transcript {} contains several proteins {}.".format(curr_transcript, curr_transcript.proteins),
-                            exec_info=True
+    if record.chrom not in genes_by_chr:
+        log.warn("The region {} where the breakpoint {} has been detected does not contain any annotation.".format(record.chrom, record.id))
+    else:
+        container_genes = genes_by_chr[record.chrom].getContainers(variant_region)
+        for curr_gene in container_genes:
+            container_transcripts = curr_gene.children.getContainers(variant_region)
+            if len(container_transcripts) == 0:
+                log.warn("The breakpoint {} is contained by gene {} but by 0 of these transcripts.".format(variant_region, curr_gene))
+            else:
+                for curr_transcript in container_transcripts:
+                    curr_annot = {
+                        "SYMBOL": curr_gene.name,
+                        "Gene": curr_gene.annot["id"],
+                        "Feature": curr_transcript.annot["id"],
+                        "Feature_type": "Transcript",
+                        "STRAND": None,
+                        "EXON": None,
+                        "INTRON": None,
+                        "CDS_position": None,
+                        "Protein_position": None,
+                        "Codon_position": None
+                    }
+                    if curr_transcript.strand is not None:
+                        curr_annot["STRAND"] = ("1" if curr_transcript.strand == "+" else "-1")
+                    subregion, subregion_idx = curr_transcript.getSubFromRefPos(variant_region.start)
+                    if issubclass(subregion.__class__, Intron):  # On intron
+                        curr_annot["INTRON"] = "{}/{}".format(
+                            subregion_idx,
+                            len(curr_transcript.children) - 1
                         )
-                    if len(curr_transcript.proteins) > 0:
-                        curr_annot["CDS_position"] = curr_transcript.proteins[0].getNtPosFromRefPos(variant_region.start)
-                        if curr_annot["CDS_position"] is not None:
-                            curr_annot["Protein_position"], curr_annot["Codon_position"] = curr_transcript.proteins[0].getPosOnRegion(variant_region.start)
-                annotations.append(curr_annot)
+                    else:  # On exon
+                        curr_annot["EXON"] = "{}/{}".format(
+                            subregion_idx,
+                            len(curr_transcript.children)
+                        )
+                        if len(curr_transcript.proteins) > 1:
+                            log.error(
+                                "The management of several proteins for one transcript is not implemented. The transcript {} contains several proteins {}.".format(curr_transcript, curr_transcript.proteins),
+                                exec_info=True
+                            )
+                        if len(curr_transcript.proteins) > 0:
+                            curr_annot["CDS_position"] = curr_transcript.proteins[0].getNtPosFromRefPos(variant_region.start)
+                            if curr_annot["CDS_position"] is not None:
+                                curr_annot["Protein_position"], curr_annot["Codon_position"] = curr_transcript.proteins[0].getPosOnRegion(variant_region.start)
+                    annotations.append(curr_annot)
     return annotations
 
 
