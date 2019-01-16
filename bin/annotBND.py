@@ -28,6 +28,11 @@ import os
 import sys
 import logging
 import argparse
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
+sys.path.append(LIB_DIR)
+
 from anacore.gtf import loadModel
 from anacore.genomicRegion import Intron
 from anacore.annotVcf import AnnotVCFIO, VCFIO
@@ -142,6 +147,7 @@ def annotGeneShard(record):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Annotate BND in a VCF with content of a GTF.')
+    parser.add_argument('-a', '--annotation-field', default="ANN", help='Field used for store annotations. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-a', '--input-annotations', required=True, help='Path to the file containing the annotations of genes and transcript for the reference used in variant calling. (format: GTF).')
@@ -168,7 +174,7 @@ if __name__ == "__main__":
             # Header
             FH_out.copyHeader(FH_in)
             FH_out.ANN_titles = ["SYMBOL", "Gene", "Feature", "Feature_type", "STRAND", "EXON", "INTRON", "CDS_position", "Protein_position", "GENE_SHARD"]
-            FH_out.info["ANN"] = {
+            FH_out.info[args.annotation_field] = {
                 "type": str,
                 "type_tag": "String",
                 "number": None,
@@ -179,7 +185,7 @@ if __name__ == "__main__":
             # Records
             for record in FH_in:
                 if record.info["SVTYPE"] == "BND":
-                    record.info["ANN"] = getGeneAnnot(record, genes_by_chr)
+                    record.info[args.annotation_field] = getGeneAnnot(record, genes_by_chr)
                     annotGeneShard(record)
                 FH_out.write(record)
     log.info("End process.")
