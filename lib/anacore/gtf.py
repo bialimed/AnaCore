@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -165,18 +165,21 @@ def loadModel(gtf_path, feature_handle="exons", restrict_to=None):
                     record = _castedRegionTree(record, Exon)
                     # Transcript
                     transcript_id = record.annot["transcript_id"]
-                    if transcript_id not in transcripts:
+                    transcript_uid = "{}:{}".format(record.reference.name, transcript_id)  # Add chromosome to prevent collision on sex chromosomes
+                    if transcript_uid not in transcripts:
                         transcript_name = record.annot["transcript_name"] if "transcript_name" in record.annot else None
-                        transcripts[transcript_id] = Transcript(
+                        transcripts[transcript_uid] = Transcript(
                             None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
                         )
+                        # Parent gene
                         gene_id = record.annot["gene_id"]
-                        if gene_id not in genes:
+                        gene_uid = "{}:{}".format(record.reference.name, gene_id)  # Add chromosome to prevent collision on sex chromosomes
+                        if gene_uid not in genes:
                             gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
                             gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
-                            genes[gene_id] = gene
-                        genes[gene_id].addChild(transcripts[transcript_id])
-                    transcript = transcripts[transcript_id]
+                            genes[gene_uid] = gene
+                        genes[gene_uid].addChild(transcripts[transcript_uid])
+                    transcript = transcripts[transcript_uid]
                     # Exon
                     record.name = record.annot["transcript_id"] + "_e" + str(len(transcript.children))
                     record.annot["id"] = record.annot["exon_id"] if "exon_id" in record.annot else record.name
@@ -186,35 +189,40 @@ def loadModel(gtf_path, feature_handle="exons", restrict_to=None):
                     record = _castedRegionTree(record, CDS)
                     # Transcript
                     transcript_id = record.annot["transcript_id"]
-                    if transcript_id not in transcripts:
+                    transcript_uid = "{}:{}".format(record.reference.name, transcript_id)  # Add chromosome to prevent collision on sex chromosomes
+                    if transcript_uid not in transcripts:
                         transcript_name = record.annot["transcript_name"] if "transcript_name" in record.annot else None
-                        transcripts[transcript_id] = Transcript(
+                        transcripts[transcript_uid] = Transcript(
                             None, None, record.strand, record.reference, transcript_name, {"feature": "transcript", "id": transcript_id}
                         )
+                        # Parent gene
                         gene_id = record.annot["gene_id"]
-                        if gene_id not in genes:
+                        gene_uid = "{}:{}".format(record.reference.name, gene_id)  # Add chromosome to prevent collision on sex chromosomes
+                        if gene_uid not in genes:
                             gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
                             gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
-                            genes[gene_id] = gene
-                        genes[gene_id].addChild(transcripts[transcript_id])
-                    transcript = transcripts[transcript_id]
+                            genes[gene_uid] = gene
+                        genes[gene_uid].addChild(transcripts[transcript_uid])
+                    transcript = transcripts[transcript_uid]
                     # Protein
                     protein_id = record.annot["protein_id"] if "protein_id" in record.annot else "prot:None_tr:" + record.annot["transcript_id"]
+                    protein_uid = "{}:{}".format(record.reference.name, protein_id)  # Add chromosome to prevent collision on sex chromosomes
                     protein = None
-                    if protein_id not in proteins:
-                        protein = Protein(None, None, record.strand, record.reference, protein_id, {"feature": "protein", "id": protein_id}, None, None, transcript)
-                        proteins[protein_id] = protein
+                    if protein_uid in proteins:
+                        protein = proteins[protein_uid]
                     else:
-                        protein = proteins[protein_id]
+                        protein = Protein(None, None, record.strand, record.reference, protein_id, {"feature": "protein", "id": protein_id}, None, None, transcript)
+                        proteins[protein_uid] = protein
                     # CDS
                     protein.addChild(record)
                     cds.append(record)
                 elif record.annot["feature"] == "gene":
                     gene_id = record.annot["gene_id"]
-                    if gene_id not in genes:
+                    gene_uid = "{}:{}".format(record.reference.name, gene_id)  # Add chromosome to prevent collision on sex chromosomes
+                    if gene_uid not in genes:
                         gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
                         gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
-                        genes[gene_id] = gene
+                        genes[gene_uid] = gene
     # Sort transcripts because reverse strand are added without exons information and coordinate are initially None
     for gene in genes.values():
         gene.sortChildren()

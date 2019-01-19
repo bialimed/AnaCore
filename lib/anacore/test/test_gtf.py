@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -240,6 +240,18 @@ class TestGTFIO(unittest.TestCase):
                         )
                     ]
                 )
+            ]),
+            Gene(2527306, 2529079, "+", "X", "CD99P1", {"id": "401577"}, None, [
+                Transcript(2527306, 2529079, "+", "X", "rna58916", {"id": "rna58916"}, None, [
+                    Exon(2527306, 2527522, "+", "X", "rna58916_e1"),
+                    Exon(2529037, 2529079, "+", "X", "rna58916_e2")
+                ])
+            ]),
+            Gene(2477306, 2479079, "+", "Y", "CD99P1", {"id": "401577"}, None, [
+                Transcript(2477306, 2479079, "+", "Y", "rna61353", {"id": "rna61353"}, None, [
+                    Exon(2477306, 2477522, "+", "Y", "rna61353_e1"),
+                    Exon(2479037, 2479079, "+", "Y", "rna61353_e2")
+                ])
             ])
         ]
         with open(self.tmp_ncbi_in_gtf, "w") as FH_gtf:
@@ -262,7 +274,11 @@ class TestGTFIO(unittest.TestCase):
 12	BestRefSeq	CDS	25368375	25368494	.	-	0	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
 12	BestRefSeq	CDS	25378548	25378707	.	-	1	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
 12	BestRefSeq	CDS	25380168	25380346	.	-	0	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
-12	BestRefSeq	CDS	25398208	25398318	.	-	0	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";""")
+12	BestRefSeq	CDS	25398208	25398318	.	-	0	transcript_id \"rna36550\"; gene_id \"3845\"; gene_name \"KRAS\";
+X	BestRefSeq	exon	2527306	2527522	.	+	.	transcript_id \"rna58916\"; gene_id \"401577\"; gene_name \"CD99P1\";
+X	BestRefSeq	exon	2529037	2529079	.	+	.	transcript_id \"rna58916\"; gene_id \"401577\"; gene_name \"CD99P1\";
+Y	BestRefSeq	exon	2477306	2477522	.	+	.	transcript_id \"rna61353\"; gene_id \"401577\"; gene_name \"CD99P1\";
+Y	BestRefSeq	exon	2479037	2479079	.	+	.	transcript_id \"rna61353\"; gene_id \"401577\"; gene_name \"CD99P1\";""")
 
 
     def testLoadModelEnsembl(self):
