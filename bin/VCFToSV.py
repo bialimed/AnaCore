@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.annotVcf import VEPVCFIO, getAlleleRecord
+from anacore.annotVcf import AnnotVCFIO, getAlleleRecord
 
 
 ########################################################################
@@ -41,11 +41,16 @@ from anacore.annotVcf import VEPVCFIO, getAlleleRecord
 ########################################################################
 def getAlleleCounts(FH_vcf, record, allele_separator=","):
     """
-    @summary: Returns the AD/DP for each allele for each sample.
-    @param FH_vcf: [VCFIO] The VCF file object.
-    @param record: [VCFRecord] The variant record.
-    @param allele_separator: [str] The character used to separate the alleles information.
-    @return: [list] Each element in the list represents one sample. In each sample the information for each allele is separated by "," (example: ["10/280,5/8", "800/812,62/62"]).
+    Return the AD/DP for each allele for each sample.
+
+    :param FH_vcf: The VCF file object.
+    :type FH_vcf: anacore.vcf.VCFIO
+    :param record: The variant record.
+    :type record: anacore.vcf.VCFRecord
+    :param allele_separator: The character used to separate the alleles information.
+    :type allele_separator: str
+    :return: Each element in the list represents one sample. In each sample the information for each allele is separated by "," (example: ["10/280,5/8", "800/812,62/62"]).
+    :rtype: list
     """
     count_by_spl = list()
     for curr_spl in FH_vcf.samples:
@@ -69,6 +74,7 @@ def getAlleleCounts(FH_vcf, record, allele_separator=","):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Converts VCF annotated with VEP in separated value format (CSV, TSV, ...). One line in output file represents an annotation.')
+    parser.add_argument('-f', '--annotation-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     parser.add_argument('-s', '--separator', default='\t', help="Field separator in output file. [Default: tab]")
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
@@ -76,7 +82,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process
-    with VEPVCFIO(args.input_variants) as FH_vcf:
+    with AnnotVCFIO(args.input_variants, "r", args.annotation_field) as FH_vcf:
         print(
             "Chromosome",
             "Position",
@@ -102,14 +108,14 @@ if __name__ == "__main__":
             record_fields.extend(
                 getAlleleCounts(FH_vcf, record)  # Samples AF/DP
             )
-            if len(record.info["CSQ"]) == 0:  # Record without consequence
+            if len(record.info[FH_vcf.annot_field]) == 0:  # Record without consequence
                 print(
                     args.separator.join(record_fields),
                     args.separator.join(["" for col in FH_vcf.ANN_titles]),
                     sep=args.separator
                 )
             else:  # Record with at least one consequence
-                for idx_csq, csq in enumerate(record.info["CSQ"]):  # For each consequence
+                for idx_csq, csq in enumerate(record.info[FH_vcf.annot_field]):  # For each consequence
                     # Pre-process record display
                     start_fields = ["" for col in record_fields]
                     if idx_csq == 0:

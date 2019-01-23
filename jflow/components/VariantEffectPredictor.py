@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.1'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -29,9 +29,7 @@ from weaver.function import PythonFunction
 
 
 def VEPWrapper(exec_path, in_vcf, out_file, stderr, out_format, species, assembly, cache_directory):
-    """
-    @summary: Wraps VEP execution for prevent error when the in_vcf does not contain any records.
-    """
+    """Wrap VEP execution for prevent error when the in_vcf does not contain any records."""
     import subprocess
 
     # Check if VCF contains records
@@ -80,6 +78,7 @@ def VEPWrapper(exec_path, in_vcf, out_file, stderr, out_format, species, assembl
               " --pubmed" + \
               " --no_stats" + \
               " --merged" + \
+              " --vcf_info_field ANN " + \
               " --" + out_format + \
               " --input_file " + in_vcf + \
               " --output_file " + out_file + \

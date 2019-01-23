@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -33,7 +33,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.annotVcf import VEPVCFIO, getAlleleRecord
+from anacore.annotVcf import AnnotVCFIO, getAlleleRecord
 
 
 ########################################################################
@@ -41,19 +41,25 @@ from anacore.annotVcf import VEPVCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getAnnotSummary(allele_record, initial_alt):
+def getAnnotSummary(allele_record, initial_alt, annot_field="ANN"):
     """
-    @summary: Returns a summary of the diffrent annotations of the variant. This summary is about identical known variants (xref), AF in populations (pop_AF), annotations of the variant and annotations of the colocated variants.
-    @param allele_record: [VCFRecord] The variant.
-    @param initial_alt: [str] The alternative variant before any transformation (standardization, ...). It must be the alternative variant directly extract from the annotated VCF.
-    @return: [list] Identical known variants (e.g. {"cosmic": ["COSM14", "COSM15"], "dbSNP":[]}), AF in populations (e.g. [{"source":"1KG", "name":"Global", "AF":0.85}]), annotations of the variant and annotations of the colocated variants.
-    @warnings: The allele_record must only contains one variant.
+    Return a summary of the diffrent annotations of the variant. This summary is about identical known variants (xref), AF in populations (pop_AF), annotations of the variant and annotations of the colocated variants.
+
+    :param allele_record: The variant.
+    :type allele_record: anacore.vcf.VCFRecord
+    :param initial_alt: The alternative variant before any transformation (standardization, ...). It must be the alternative variant directly extract from the annotated VCF.
+    :type initial_alt: str
+    :param annot_field: Field used to store annotations.
+    :type annot_field: str
+    :return: First the dentical known variants (e.g. {"cosmic": ["COSM14", "COSM15"], "dbSNP":[]}), second AF in populations (e.g. [{"source":"1KG", "name":"Global", "AF":0.85}]), third annotations of the variant and fourth annotations of the colocated variants.
+    :rtype: list
+    :warnings: The allele_record must only contains one variant.
     """
     xref = {"cosmic": set(), "dbSNP": set(), "HGMD": set(), "Unknown": set()}
     pop_AF = dict()
     variant_annot = list()
     colocated_annot = list()
-    for annot in allele_record.info["CSQ"]:
+    for annot in allele_record.info[annot_field]:
         annot_allele = annot["Allele"].replace(".", "-")
         annot_allele = "-" if annot_allele == "" else annot_allele
         is_self_variant = (annot_allele == initial_alt)
@@ -108,9 +114,12 @@ def getAnnotSummary(allele_record, initial_alt):
 
 def getPopInfo(annot_key):
     """
-    @summary: Returns source and name of a sub-population studied in large genomic programs (1KG, ExAC, ...) from the annotation tag.
-    @param annot_key: [str] The tag used in annotation to store AF of the variant in sub-population.
-    @return: [list] The source (project name) and the name of the sub-population.
+    Return source and name of a sub-population studied in large genomic programs (1KG, ExAC, ...) from the annotation tag.
+
+    :param annot_key: The tag used in annotation to store AF of the variant in sub-population.
+    :type annot_key: str
+    :return: The source (project name) and the name of the sub-population.
+    :rtype: list
     """
     source = None
     name = None
@@ -136,6 +145,7 @@ def getPopInfo(annot_key):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Converts VCF annotated with VEP in JSON format.')
+    parser.add_argument('-f', '--annotation-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file file containing variants and annotated with VEP v88+ (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
@@ -144,7 +154,7 @@ if __name__ == "__main__":
 
     # Convert VCF in python dict
     json_data = list()
-    with VEPVCFIO(args.input_variants) as FH_vcf:
+    with AnnotVCFIO(args.input_variants, "r", args.annotation_field) as FH_vcf:
         for record in FH_vcf:
             for idx_alt in range(len(record.alt)):
                 allele_record = getAlleleRecord(FH_vcf, record, idx_alt)
@@ -163,7 +173,7 @@ if __name__ == "__main__":
                     "qual": allele_record.qual,
                     "libraries": [{"alt_depth": allele_record.getAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples]
                 }
-                if "CSQ" in allele_record.info:
+                if FH_vcf.annot_field in allele_record.info:
                     # Identical known variants, AF in populations and annotations
                     curr_json["xref"], curr_json["pop_AF"], curr_json["annot"], curr_json["colocated_annot"] = getAnnotSummary(allele_record, record.alt[idx_alt])
                 json_data.append(curr_json)
