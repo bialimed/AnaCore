@@ -63,9 +63,9 @@ if __name__ == "__main__":
         # Open output with convenient class
         FH_out = None
         if issubclass(FastqIO, FH_seq.__class__):
-            FH_out = FastqIO(args.output, "w")
+            FH_out = FastqIO(args.output_sequences, "w")
         else:
-            FH_out = FastaIO(args.output, "w")
+            FH_out = FastaIO(args.output_sequences, "w")
         # Filter and write
         try:
             for record in FH_seq:
