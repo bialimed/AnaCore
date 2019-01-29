@@ -79,5 +79,5 @@ if __name__ == "__main__":
             for record in FH_in:
                 for tag, value in record.info.items():
                     if tag in clean_info:
-                        record.info["tag"] = clean_info[tag]["process"](value)
+                        record.info[tag] = clean_info[tag]["process"](value)
                 FH_out.write(record)
