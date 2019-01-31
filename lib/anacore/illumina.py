@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.10.0'
+__version__ = '1.11.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -401,5 +401,5 @@ def getInfFromSeqDesc(seq_desc):
         "reads_phases": int(reads_phases),
         "is_kept": kept_status == "N",
         "control_bits": None if control_bits == "0" else int(control_bits),
-        "barcode": barcode
+        "barcode": None if barcode == "" else barcode
     }
