@@ -80,7 +80,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process
-    clean_info = getCleanningRules()
+    clean_info = getCleanningRules(args.variant_caller)
     with VCFIO(args.output_variants, "w") as FH_out:
         with VCFIO(args.input_variants) as FH_in:
             # Header
