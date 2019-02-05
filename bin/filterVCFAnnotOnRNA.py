@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     kept_ID = getGeneByNM(args.reference_RNA, args.without_version)
 
     # Filter annotations
-    with AnnotVCFIO(args.input_variants, "r", args.annotion_field) as FH_in:
+    with AnnotVCFIO(args.input_variants, "r", args.annotation_field) as FH_in:
         with AnnotVCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.copyHeader(FH_in)
