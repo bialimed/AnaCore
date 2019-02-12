@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -84,7 +84,7 @@ def getRGInfo(input_aln, force_spl=None, force_lib=None, barcode=None):
             uid = pu if "ID" not in old_rg else "{}.{}".format(old_rg["ID"], pu)
             if uid not in RG_by_uid:
                 RG_by_uid[uid] = {
-                    "ID": next_id,
+                    "ID": str(next_id),
                     "PL": "ILLUMINA",
                     "PU": pu
                 }
