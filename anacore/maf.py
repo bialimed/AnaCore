@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -26,7 +26,7 @@ from anacore.sv import HashedSVIO
 
 
 class MAFIO(HashedSVIO):
-    """Class to read and write a file in Mutation Annotation Format."""
+    """Class to read and write a file in Mutation Annotation Format (see https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format)."""
 
     def __init__(self, filepath, mode="r"):
         """
@@ -45,11 +45,13 @@ class MAFIO(HashedSVIO):
     def _parseHeader(self):
         """Parse MAF header to set the attribute titles."""
         if self.current_line_nb == 0:
-            self.version = self.file_handle.readline().split(" ")[1]
-            self.current_line = self.file_handle.readline().rstrip()
-            self.current_line_nb += 2
-        clean_line = self.current_line
-        self.titles = [elt.strip() for elt in clean_line.split(self.separator)]
+            self.current_line = self.file_handle.readline()
+            self.version = self.current_line.split(" ")[1]
+            self.current_line_nb += 1
+            while not self.current_line.startswith("Hugo_Symbol"):
+                self.current_line = self.file_handle.readline().rstrip()
+                self.current_line_nb += 1
+        self.titles = [elt.strip() for elt in self.current_line.split(self.separator)]
 
     def write(self, record):
         """
