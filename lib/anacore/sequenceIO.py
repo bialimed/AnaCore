@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'frogs@toulouse.inra.fr'
 __status__ = 'prod'
 
@@ -31,7 +31,7 @@ def is_gzip(file):
     @param file : [str] Path to processed file.
     """
     is_gzip = None
-    FH_input = gzip.open( file )
+    FH_input = gzip.open(file)
     try:
         FH_input.readline()
         is_gzip = True
@@ -64,7 +64,7 @@ class SequenceFileReader(object):
         elif FastaIO.is_valid(filepath):
             return FastaIO(filepath)
         else:
-            raise IOError( "The file " + filepath + " does not have a valid format for 'SequenceFileReader'." )
+            raise IOError("The file " + filepath + " does not have a valid format for 'SequenceFileReader'.")
 
 
 class FastqIO:
@@ -76,9 +76,9 @@ class FastqIO:
         self.filepath = filepath
         self.mode = mode
         if (mode in ["w", "a"] and filepath.endswith('.gz')) or (mode not in ["w", "a"] and is_gzip(filepath)):
-            self.file_handle = gzip.open( filepath, mode + "t" )
+            self.file_handle = gzip.open(filepath, mode + "t")
         else:
-            self.file_handle = open( filepath, mode )
+            self.file_handle = open(filepath, mode)
         self.current_line_nb = 1
         self.current_line = None
 
@@ -113,10 +113,10 @@ class FastqIO:
                     seq_str = line
                 elif (self.current_line_nb % 4) == 0:
                     seq_qual = line
-                    yield Sequence( seq_id, seq_str, seq_desc, seq_qual )
+                    yield Sequence(seq_id, seq_str, seq_desc, seq_qual)
                 self.current_line_nb += 1
         except:
-            raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + "." )
+            raise IOError("The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".")
 
     def next_seq(self):
         """
@@ -144,9 +144,9 @@ class FastqIO:
                 seq_qual = self.file_handle.readline().strip()
                 self.current_line_nb += 1
                 # Record
-                seq_record = Sequence( seq_id, seq_str, seq_desc, seq_qual )
+                seq_record = Sequence(seq_id, seq_str, seq_desc, seq_qual)
         except:
-            raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + "." )
+            raise IOError("The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".")
         return seq_record
 
     @staticmethod
@@ -158,7 +158,7 @@ class FastqIO:
         """
         offset = None
         nb_qual = 0
-        count_by_qual = {elt:0 for elt in range(-5,127)}
+        count_by_qual = {elt: 0 for elt in range(-5, 127)}
         with FastqIO(filepath) as FH_in:
             record = FH_in.next_seq()
             while record and offset is None:
@@ -171,13 +171,12 @@ class FastqIO:
                         break
                 record = FH_in.next_seq()
         if offset is None:
-            checked_idx = int((float(nb_qual)/100)*20) # Index of the 20 percentile in sorted qualities
-            nb_spl = 0
+            checked_idx = int((float(nb_qual)/100)*20)  # Index of the 20 percentile in sorted qualities
             curr_idx = 0
             for curr_ascii in count_by_qual:
                 curr_idx += count_by_qual[curr_ascii]
-                if curr_idx >= checked_idx: # 20% of qualities before this point
-                    if curr_ascii > 84: # 80% of qualities are superior than Q61 with offset 33 and Q20 with offset 64
+                if curr_idx >= checked_idx:  # 20% of qualities before this point
+                    if curr_ascii > 84:  # 80% of qualities are superior than Q61 with offset 33 and Q20 with offset 64
                         offset = 64
                         break
         return offset
@@ -191,18 +190,18 @@ class FastqIO:
             header = FH_in.file_handle.readline()
             while seq_idx < 10 and header:
                 if not header.startswith("@"):
-                    raise IOError( "The line '" + str(header) + "' in '" + filepath + "' is not a fastq header." )
+                    raise IOError("The line '" + str(header) + "' in '" + filepath + "' is not a fastq header.")
                 unstriped_sequence = FH_in.file_handle.readline()
-                if unstriped_sequence == "": # No line
-                    raise IOError( filepath + "' is not a fastq." )
+                if unstriped_sequence == "":  # No line
+                    raise IOError(filepath + "' is not a fastq.")
                 unstriped_separator = FH_in.file_handle.readline()
-                if unstriped_separator == "": # No line
-                    raise IOError( filepath + "' is not a fastq." )
+                if unstriped_separator == "":  # No line
+                    raise IOError(filepath + "' is not a fastq.")
                 unstriped_quality = FH_in.file_handle.readline()
-                if unstriped_quality == "": # No line
-                    raise IOError( filepath + "' is not a fastq." )
+                if unstriped_quality == "":  # No line
+                    raise IOError(filepath + "' is not a fastq.")
                 if len(unstriped_sequence.strip()) != len(unstriped_quality.strip()):
-                    raise IOError( filepath + "' is not a fastq." )
+                    raise IOError(filepath + "' is not a fastq.")
                 header = FH_in.file_handle.readline()
                 seq_idx += 1
             is_valid = True
@@ -212,8 +211,29 @@ class FastqIO:
             FH_in.close()
         return is_valid
 
+    @staticmethod
+    def nbSeq(filepath):
+        """
+        Return the number of sequences in file.
+
+        :param filepath: Path to the file.
+        :type filepath: str
+        :return: The number of sequences.
+        :rtype: int
+        """
+        nb_line = 0
+        if is_gzip(filepath):
+            with gzip.open(filepath, "rt") as FH_in:
+                for line in FH_in:
+                    nb_line += 1
+        else:
+            with open(filepath, "r") as FH_in:
+                for line in FH_in:
+                    nb_line += 1
+        return nb_line / 4
+
     def write(self, sequence_record):
-        self.file_handle.write( self.seqToFastqLine(sequence_record) + "\n" )
+        self.file_handle.write(self.seqToFastqLine(sequence_record) + "\n")
 
     def seqToFastqLine(self, sequence):
         """
@@ -237,9 +257,9 @@ class FastaIO:
         self.filepath = filepath
         self.mode = mode
         if (mode in ["w", "a"] and filepath.endswith('.gz')) or (mode not in ["w", "a"] and is_gzip(filepath)):
-            self.file_handle = gzip.open( filepath, mode + "t" )
+            self.file_handle = gzip.open(filepath, mode + "t")
         else:
-            self.file_handle = open( filepath, mode )
+            self.file_handle = open(filepath, mode)
         self.current_line_nb = 1
         self.current_line = None
 
@@ -268,7 +288,7 @@ class FastaIO:
                 self.current_line_nb += 1
                 if line.startswith('>'):
                     if seq_id is not None:
-                        seq_record = Sequence( seq_id, seq_str, seq_desc )
+                        seq_record = Sequence(seq_id, seq_str, seq_desc)
                         yield seq_record
                     # New seq
                     fields = line[1:].split(None, 1)
@@ -278,10 +298,10 @@ class FastaIO:
                 else:
                     seq_str += line
             if seq_id is not None:
-                seq_record = Sequence( seq_id, seq_str, seq_desc )
+                seq_record = Sequence(seq_id, seq_str, seq_desc)
                 yield seq_record
         except:
-            raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + "." )
+            raise IOError("The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".")
 
     def next_seq(self):
         """
@@ -306,11 +326,10 @@ class FastaIO:
             fields = self.next_id[1:].split(None, 1)
             seq_id = fields[0]
             seq_desc = fields[1] if len(fields) == 2 else None
-            seq_record = Sequence( seq_id, seq_str, seq_desc )
-            self.next_id = line # next seq_id
+            seq_record = Sequence(seq_id, seq_str, seq_desc)
+            self.next_id = line  # next seq_id
         except:
-            raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".\n"
-                            + "content : " + line )
+            raise IOError("The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".\ncontent : " + line)
         return seq_record
 
     @staticmethod
@@ -322,14 +341,14 @@ class FastaIO:
             header = FH_in.file_handle.readline()
             while seq_idx < 10 and header:
                 if not header.startswith(">"):
-                    raise IOError( "The line '" + str(header) + "' in '" + filepath + "' is not a fasta header." )
+                    raise IOError("The line '" + str(header) + "' in '" + filepath + "' is not a fasta header.")
                 previous_is_header = True
                 current_line = FH_in.file_handle.readline()
                 while not current_line.startswith(">") and current_line:
                     previous_is_header = False
                     current_line = FH_in.file_handle.readline()
                 if previous_is_header:
-                    raise IOError( filepath + "' is not a fasta." )
+                    raise IOError(filepath + "' is not a fasta.")
                 header = current_line
                 seq_idx += 1
             is_valid = True
@@ -339,8 +358,31 @@ class FastaIO:
             FH_in.close()
         return is_valid
 
+    @staticmethod
+    def nbSeq(filepath):
+        """
+        Return the number of sequences in file.
+
+        :param filepath: Path to the file.
+        :type filepath: str
+        :return: The number of sequences.
+        :rtype: int
+        """
+        nb_seq = 0
+        if is_gzip(filepath):
+            with gzip.open(filepath, "rt") as FH_in:
+                for line in FH_in:
+                    if line.startswith(">"):
+                        nb_seq += 1
+        else:
+            with open(filepath, "r") as FH_in:
+                for line in FH_in:
+                    if line.startswith(">"):
+                        nb_seq += 1
+        return nb_seq
+
     def write(self, sequence_record):
-        self.file_handle.write( self.seqToFastaLine(sequence_record) + "\n" )
+        self.file_handle.write(self.seqToFastaLine(sequence_record) + "\n")
 
     def seqToFastaLine(self, sequence):
         """
