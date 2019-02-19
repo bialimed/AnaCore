@@ -285,22 +285,43 @@ def getPartialFragment(region_seq, start_idx_in_reg, fragment_len):
         curr_len_fragment += len(nt_on_pos)
         idx_in_reg += 1
     end_idx_in_reg = idx_in_reg - 1
-    return "".join(region_seq[start_idx_in_reg:end_idx_in_reg + 1]), end_idx_in_reg, fragment_len - curr_len_fragment
+    missing = fragment_len - curr_len_fragment
+    fragment_seq = "".join(region_seq[start_idx_in_reg:end_idx_in_reg + 1])
+    if missing == 0:
+        fragment_seq = fragment_seq[:fragment_len]  # If the fragment end with an insertion
+    return fragment_seq, end_idx_in_reg, missing
 
 
 def getFragmentRegion(chrom_seq, target, target_seq, start_pos, fragment_len):
-    idx_on_target = start_pos - target.start
-    fragment_seq, end_idx, missing_len = getPartialFragment(target_seq, max(idx_on_target, 0), fragment_len)
-    end_pos = start_pos + end_idx
-    if idx_on_target < 0:  # Manage the fragment starting before target
-        add_start_pos = target.start - abs(idx_on_target)
-        add_end_pos = start_pos
-        fragment_seq += chrom_seq[add_start_pos - 1:add_end_pos]  # Position is 1-based indexes are 0-based
-    if missing_len > 0:  # Manage the fragment ending after target
-        add_start_pos = start_pos + end_idx
-        add_end_pos = add_start_pos + missing_len
-        fragment_seq += chrom_seq[add_start_pos - 1:add_end_pos]  # Position is 1-based indexes are 0-based
-        end_pos = add_end_pos
+    fragment_seq = ""
+    end_pos = None
+    if start_pos > target.end:  # Fragment starts after target
+        end_pos = start_pos + fragment_len - 1
+        fragment_seq = chrom_seq[start_pos - 1:end_pos]  # Position is 1-based indexes are 0-based
+    elif start_pos + fragment_len - 1 < target.start:  # Fragment ends before target
+        end_pos = start_pos + fragment_len - 1
+        fragment_seq = chrom_seq[start_pos - 1:end_pos]  # Position is 1-based indexes are 0-based
+    else:  # Fragment overlap target
+        start_idx_on_target = start_pos - target.start
+        # Before target
+        if start_pos < target.start:  # Fragment starts before target
+            start_idx_on_target = 0
+            add_start_pos = start_pos
+            add_end_pos = target.start - 1
+            fragment_seq = chrom_seq[add_start_pos - 1:add_end_pos]  # Position is 1-based indexes are 0-based
+        # On target
+        fragment_seq_on_target, end_idx, missing_len = getPartialFragment(
+            target_seq,
+            start_idx_on_target,
+            fragment_len - len(fragment_seq)
+        )
+        fragment_seq += fragment_seq_on_target
+        end_pos = target.start + end_idx + missing_len
+        # After target
+        if missing_len > 0:  # Fragment ends after target
+            add_start_pos = target.end + 1
+            add_end_pos = add_start_pos + missing_len - 1
+            fragment_seq += chrom_seq[add_start_pos - 1:add_end_pos]  # Position is 1-based indexes are 0-based
     return Region(
         start_pos,
         end_pos,
@@ -369,11 +390,24 @@ def getTargetReads(chrom_seq, target, alt_records, fragments_len, args):
         res_simulated = []
         target_reads = []
         res_simu_by_var = {}
+        start_dp = random.randrange(args.min_depth, args.max_depth, 1)
         # Simulate
         fragment_idx = 1
         reads_overlapping = {curr_pos: [] for curr_pos in range(target.start - args.targets_padding - args.reads_length, target.end + args.targets_padding + args.reads_length + 1)}  # by pos permet d'ajouter le mate quand on fait le premier et que autre apres un insert
         for curr_pos in range(target.start - args.targets_padding, target.end + args.targets_padding + 1):
-            adding_proba = random.randrange(args.min_depth, args.max_depth, 1)
+            # Proba to add reads
+            adding_proba = None
+            if curr_pos < target.start:  # On upstream padding
+                distance_to_target = target.start - curr_pos
+                depth_ratio = distance_to_target / args.targets_padding
+                adding_proba = random.randrange(0, int(start_dp * depth_ratio) + 1, 1)
+            elif curr_pos > target.end:  # On downstream padding
+                distance_to_target = curr_pos - target.end
+                depth_ratio = (args.targets_padding - distance_to_target) / args.targets_padding
+                adding_proba = random.randrange(0, int(args.min_depth * depth_ratio) + 1, 1)
+            else:  # On target
+                adding_proba = random.randrange(args.min_depth, args.max_depth + 1, 1)
+            # Add reads
             reads_overlapping_pos = reads_overlapping[curr_pos]
             if adding_proba >= len(reads_overlapping_pos):
                 nb_added = random.randrange(args.min_add_depth, args.max_add_depth, 1)
@@ -435,7 +469,7 @@ def getFragmentsLengths(covered_len, args):
     approx_nb_reads = sequenced_nt / (2 * args.reads_length)
     approx_nb_reads = int(approx_nb_reads * 1.2) ################################################
     log.debug('Simulation targeted_nt:{}, sequenced_nt_on_target:{}, approx_nb_reads: {}'.format(covered_len, sequenced_nt, approx_nb_reads))
-    fragments_len = np.random.normal(args.fragment_length, args.fragment_length_sd, approx_nb_reads)
+    fragments_len = np.random.normal(args.fragments_length, args.fragments_length_sd, approx_nb_reads)
     fragments_len = [int(round(elt, 0)) for elt in fragments_len]  # To int
     return fragments_len
 
@@ -476,8 +510,8 @@ if __name__ == "__main__":
     group_reads.add_argument('-1', '--R1-end-adapter', default="AGATCGGAAGAGCACACGTCTGAACTCCAGTCACAACCGCGGATCTCGTATGCCGTCTTCTGCTTG", help='The sequence of the Illumina p7 adapter. It is found at the end of the R1 when the read length is superior to the fragment length. [Default: %(default)s]')
     group_reads.add_argument('-2', '--R2-end-adapter', default="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTTGACAAGCGCTTGTCAGTGTAGATCTCGGTGGTCGCCGTATCATT", help='The reverse complemented sequence of the Illumina p5 adapter. It is found at the end of the R2 when the read length is superior to the fragment length. [Default: %(default)s]')
     group_reads.add_argument('-l', '--reads-length', type=int, default=150, help='The reads length. [Default: %(default)s]')
-    group_reads.add_argument('-f', '--fragment-length', type=int, default=180, help='The fragments lengths. [Default: %(default)s]')
-    group_reads.add_argument('-e', '--fragment-length-sd', type=int, default=50, help='The starndard deviation for fragments lengths. [Default: %(default)s]')
+    group_reads.add_argument('-f', '--fragments-length', type=int, default=180, help='The fragments lengths. [Default: %(default)s]')
+    group_reads.add_argument('-e', '--fragments-length-sd', type=int, default=30, help='The standard deviation for fragments lengths. [Default: %(default)s]')
     group_depths = parser.add_argument_group('Depths')  # Depths
     group_depths.add_argument('--min-depth', type=int, default=200, help='The minimum depth on targets. [Default: %(default)s]')
     group_depths.add_argument('--max-depth', type=int, default=15000, help='The maximum depth on targets. [Default: %(default)s]')
@@ -609,7 +643,9 @@ if __name__ == "__main__":
             target_ref_seq = chrom_seq[curr_target.start - 1:curr_target.end]  # Position is 1-based indexes are 0-based
             # Apply variants
             alt_records = [{"id": idx + 1, "mut": {}, "seq": list(target_ref_seq)} for idx in range(int(1 / min_allele_freq))]
-            variants_on_target = selectMatchedVariants(curr_target, variant_by_pos[chrom_id])
+            variants_on_target = []
+            if chrom_id in variant_by_pos:
+                variants_on_target = selectMatchedVariants(curr_target, variant_by_pos[chrom_id])
             applyVariants(curr_target, list(target_ref_seq), alt_records, {mut["start"]: mut for mut in variants_on_target})
             # Create reads
             simulated_reads_pairs, simu_AF_by_var = getTargetReads(chrom_seq, curr_target, alt_records, fragments_len, args)
