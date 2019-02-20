@@ -418,6 +418,8 @@ def getTargetReads(chrom_seq, target, alt_records, fragments_len, args):
                     fragment_record = getFragmentRegion(chrom_seq, target, curr_alt_record["seq"], curr_pos, curr_fragment_len)
                     fragment_record.name = fragment_idx
                     fragment_record.strand = random.choice(["+", "-"])
+                    if curr_fragment_len != (fragment_record.end - fragment_record.start + 1):
+                        log.error("{}\t{}\t{}\t{}".format(target.name, curr_pos, curr_fragment_len, (fragment_record.end - fragment_record.start + 1)))
                     # Create reads pair
                     setReadsPair(fragment_record, args.reads_length, args.R1_end_adapter, args.R2_end_adapter)
                     target_reads.append(fragment_record.annot["reads"])
@@ -650,7 +652,8 @@ if __name__ == "__main__":
             # Create reads
             simulated_reads_pairs, simu_AF_by_var = getTargetReads(chrom_seq, curr_target, alt_records, fragments_len, args)
             writeTargetReads(args.output_R1, args.output_R2, simulated_reads_pairs)
-            updateVariantsAF(variant_by_pos[chrom_id], simu_AF_by_var)
+            if len(simu_AF_by_var) > 0:
+                updateVariantsAF(variant_by_pos[chrom_id], simu_AF_by_var)
 
     # Write variants
     log.info("Write variants trace")
