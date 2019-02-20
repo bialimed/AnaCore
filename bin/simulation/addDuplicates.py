@@ -44,17 +44,6 @@ from anacore.sv import HashedSVIO
 # FUNCTIONS
 #
 ########################################################################
-# def fitDistribParamToDup(expected_dup=0.5, distribution_law=stats.exponen):
-#     better_param = 0
-#     better_observed_diff = math.inf
-#     for curr_param in range(0, 5, 0.001):
-#         curr_dup = distribution_law.sf(1, curr_param)
-#         curr_observed_diff = abs(expected_dup - curr_dup)
-#         if curr_observed_diff < better_observed_diff:
-#             better_param = curr_param
-#             better_observed_diff = curr_observed_diff
-#     return better_param
-
 def getNbOccur(in_profile, nb_distinct_reads):
     """
     Return the number of future occurrences for each distinct reads.
@@ -73,7 +62,7 @@ def getNbOccur(in_profile, nb_distinct_reads):
     # Get nb_occurences
     nb_occurences = []
     for category in profile:
-        category_nb_occur = int(round(category["%_distinct"] * nb_distinct_reads, 0))
+        category_nb_occur = int(round(float(category["%_distinct"]) * nb_distinct_reads, 0))
         for idx in range(category_nb_occur):
             nb_occurences.append(int(category["duplication_level"]))
     nb_missing = len(nb_occurences) - nb_reads
@@ -90,13 +79,13 @@ def getNbOccur(in_profile, nb_distinct_reads):
 #
 ########################################################################
 if __name__ == "__main__":
+    print("ok")
     # Manage parameters
-    parser = argparse.ArgumentParser(description='')
+    parser = argparse.ArgumentParser(description='Add duplicated sequences in reads files. The duplication model (number of duplication for each distinct sequence) follow the profile provided by user.')
     parser.add_argument('-s', '--random-seed', type=int, default=int(time.time()), help="The seed used for the random generator. If you want reproduce results of one execution: use the same parameters AND the same random-seed. [Default: auto]")
-    # parser.add_argument('-d', '--duplication-rate', type=float, default=0.50, help="**************************. [Default: %(default)s]")
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
-    group_input.add_argument('-d', '--duplication-profile', required=True, help='Path to the file containing the percentage of distinct sequences by number of duplications (format: TSV). Header line must start with "#" and must contain "duplication_level" and "%_distinct".')
+    group_input.add_argument('-d', '--duplication-profile', required=True, help='Path to the file containing the percentage of distinct sequences by number of duplications (format: TSV). Header line must start with "#" and must contain "duplication_level" and "%%_distinct".')
     group_input.add_argument('-1', '--input-R1', required=True, help='Path to the file containing R1 reads (format: fasta).')
     group_input.add_argument('-2', '--input-R2', required=True, help='Path to the file containing R2 reads (format: fasta).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
@@ -110,24 +99,13 @@ if __name__ == "__main__":
     logging.info(" ".join(sys.argv))
     logging.info("Random seed used: {}".format(args.random_seed))
 
-    # # Get distribution law parameter to fit % of duplication
-    # distribution_law = stats.exponen
-    # distrib_shape_param = fitDistribParamToDup(args.duplication_rate, distribution_law)
-    # logging.info("Value of shape parameter used to fit distribution law to the duplication rate: {}".format(distrib_shape_param))
-    #
-    # # Get number of duplications by reads
-    # logging.info("Get duplication count for each read")
-    # nb_reads = getNbSeq(args.input_R1)
-    # nb_occurences = [int(round(elt, 0)) for elt in distribution_law.rvs(distrib_shape_param, size=nb_reads, random_state=args.random_seed)]
-    # 0 will become 1
-
     # Get number of duplications by reads
     logging.info("Get duplication count for each read")
     random.seed(args.random_seed)
-    nb_reads = FastaIO.getNbSeq(args.input_R1)
+    nb_reads = FastaIO.nbSeq(args.input_R1)
     if nb_reads < 10000:
         logging.error("The number of reads in {} is unsufficient to simulate duplication (found: {} ; expected: {}).".format(args.input_R1, nb_reads, 10000))
-    nb_occurences = getNbOccur(args.duplication_profiles, nb_reads)
+    nb_occurences = getNbOccur(args.duplication_profile, nb_reads)
 
     # Witre reads
     logging.info("Write reads")
@@ -136,8 +114,14 @@ if __name__ == "__main__":
             with FastaIO(args.input_R1) as FH_in_R1:
                 with FastaIO(args.input_R1) as FH_in_R2:
                     for curr_nb_occur, R1, R2 in zip(nb_occurences, FH_in_R1, FH_in_R2):
-                        R1.description += "_dupCount:{}".format(curr_nb_occur)
-                        R2.description += "_dupCount:{}".format(curr_nb_occur)
+                        description = "dupCount:{}".format(curr_nb_occur)
+                        if R1.description is not None and R1.description != "":
+                            description = R1.description + "_" + description
+                        R1.description = description
+                        description = "dupCount:{}".format(curr_nb_occur)
+                        if R2.description is not None and R2.description != "":
+                            description = R2.description + "_" + description
+                        R2.description = description
                         old_R1_id = R1.id
                         for idx in range(curr_nb_occur):
                             R1.id = old_R1_id + "_dupId:{}".format(idx)
