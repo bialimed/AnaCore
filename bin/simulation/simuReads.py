@@ -187,7 +187,7 @@ def applyVariants(region, ref_sequence, alt_records, variant_by_pos):
                         curr_alt_seq[pos - region.start + idx] = alt_allele[idx]
 
 
-def mergeOverlapped(regions):
+def mergeOverlapped(regions, padding=0, trace=False):
     """
     """
     sorted_regions = sorted(regions, key=lambda x: (x.start, x.end))
@@ -195,7 +195,25 @@ def mergeOverlapped(regions):
     prev_region = Region(-1, -1)
     # Extend regions
     for idx, curr_region in enumerate(sorted_regions):
-        if curr_region.start <= prev_region.end:  # Overlap between regions
+        curr_start = max(1, curr_region.start - padding)
+        prev_end = curr_region.end + padding
+        if curr_start <= prev_end:  # Overlap between regions
+            if trace:
+                if "merge_traceback" not in prev_region.annot:
+                    prev_region.annot["merge_traceback"] = [Region(
+                        prev_region.start,
+                        prev_region.end,
+                        prev_region.strand,
+                        prev_region.reference,
+                        prev_region.name
+                    )]
+                prev_region.annot["merge_traceback"].append(Region(
+                    curr_region.start,
+                    curr_region.end,
+                    curr_region.strand,
+                    curr_region.reference,
+                    curr_region.name
+                ))
             prev_region.end = max(curr_region.end, prev_region.end)  # Max to manage included regions
             deleted_idx.append(idx)
         else:
@@ -205,17 +223,11 @@ def mergeOverlapped(regions):
         del(sorted_regions[idx])
 
 
-def addPaddingAndMerge(regions_by_chr, length_by_chr, padding=0):
+def mergeOverlappedWithPadding(regions_by_chr, padding=0):
     """
     """
     for chrom_id, regions in regions_by_chr.items():
-        # Add padding
-        if padding != 0:
-            for curr_region in regions:
-                curr_region.start = max(1, curr_region.start - padding)
-                curr_region.end = min(length_by_chr[chrom_id], curr_region.end + padding)
-        # Merge overlapping targets
-        mergeOverlapped(regions)
+        mergeOverlapped(regions, padding, True)
 
 
 def getChrSeq(in_ref, chrom_id):
@@ -227,16 +239,6 @@ def getChrSeq(in_ref, chrom_id):
             if record.id == chrom_id:
                 chrom_seq = record.string
     return chrom_seq
-
-
-def getLengthByChr(in_ref):
-    """
-    """
-    lg_by_chr = {}
-    with FastaIO(in_ref) as FH_seq:
-        for record in FH_seq:
-            lg_by_chr[record.id] = len(record.string)
-    return lg_by_chr
 
 
 def setReadsPair(fragment_record, reads_length, end_R1_adpter, end_R2_adapter):
@@ -373,7 +375,11 @@ def simulationPenaltyScore(res_simulated, res_expected):
     return penalty_score
 
 
-def getTargetReads(chrom_seq, target, alt_records, fragments_len, args):
+def getTargetReads(chrom_seq, chrom_len, target, alt_records, fragments_len, args):
+    padded_start = max(1, target.start - args.targets_padding)
+    padded_end = min(chrom_len, target.end + args.targets_padding)
+    large_padded_start = max(1, padded_start - args.reads_length)
+    large_padded_end = min(chrom_len, padded_end + args.reads_length)
     mut_by_pos = {}
     for alt in alt_records:
         for pos, variant in alt["mut"].items():
@@ -393,8 +399,8 @@ def getTargetReads(chrom_seq, target, alt_records, fragments_len, args):
         start_dp = random.randrange(args.min_depth, args.max_depth, 1)
         # Simulate
         fragment_idx = 1
-        reads_overlapping = {curr_pos: [] for curr_pos in range(target.start - args.targets_padding - args.reads_length, target.end + args.targets_padding + args.reads_length + 1)}  # by pos permet d'ajouter le mate quand on fait le premier et que autre apres un insert
-        for curr_pos in range(target.start - args.targets_padding, target.end + args.targets_padding + 1):
+        reads_overlapping = {curr_pos: [] for curr_pos in range(large_padded_start, large_padded_end + 1)}  # by pos permet d'ajouter le mate quand on fait le premier et que autre apres un insert
+        for curr_pos in range(padded_start, padded_end + 1):
             # Proba to add reads
             adding_proba = None
             if curr_pos < target.start:  # On upstream padding
@@ -418,8 +424,6 @@ def getTargetReads(chrom_seq, target, alt_records, fragments_len, args):
                     fragment_record = getFragmentRegion(chrom_seq, target, curr_alt_record["seq"], curr_pos, curr_fragment_len)
                     fragment_record.name = fragment_idx
                     fragment_record.strand = random.choice(["+", "-"])
-                    if curr_fragment_len != (fragment_record.end - fragment_record.start + 1):
-                        log.error("{}\t{}\t{}\t{}".format(target.name, curr_pos, curr_fragment_len, (fragment_record.end - fragment_record.start + 1)))
                     # Create reads pair
                     setReadsPair(fragment_record, args.reads_length, args.R1_end_adapter, args.R2_end_adapter)
                     target_reads.append(fragment_record.annot["reads"])
@@ -635,11 +639,11 @@ if __name__ == "__main__":
     log.info("Create reads")
     fragments_len = getFragmentsLengths(covered_len, args)
     targets_by_chr = getAreasByChr(args.input_targets)
-    length_by_chr = getLengthByChr(args.input_reference)
-    addPaddingAndMerge(targets_by_chr, length_by_chr, args.targets_padding)
+    mergeOverlappedWithPadding(targets_by_chr, args.targets_padding)
     for chrom_id, targets in sorted(targets_by_chr.items()):
         log.info("Get sequence from region {}.".format(chrom_id))
         chrom_seq = getChrSeq(args.input_reference, chrom_id)
+        chrom_len = len(chrom_seq)
         for curr_target in targets:
             log.info("Create reads from targeted region {}".format(curr_target))
             target_ref_seq = chrom_seq[curr_target.start - 1:curr_target.end]  # Position is 1-based indexes are 0-based
@@ -650,7 +654,7 @@ if __name__ == "__main__":
                 variants_on_target = selectMatchedVariants(curr_target, variant_by_pos[chrom_id])
             applyVariants(curr_target, list(target_ref_seq), alt_records, {mut["start"]: mut for mut in variants_on_target})
             # Create reads
-            simulated_reads_pairs, simu_AF_by_var = getTargetReads(chrom_seq, curr_target, alt_records, fragments_len, args)
+            simulated_reads_pairs, simu_AF_by_var = getTargetReads(chrom_seq, chrom_len, curr_target, alt_records, fragments_len, args)
             writeTargetReads(args.output_R1, args.output_R2, simulated_reads_pairs)
             if len(simu_AF_by_var) > 0:
                 updateVariantsAF(variant_by_pos[chrom_id], simu_AF_by_var)
