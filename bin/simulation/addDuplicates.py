@@ -62,8 +62,8 @@ def getNbOccur(in_profile, nb_distinct_reads):
     # Get nb_occurences
     nb_occurences = []
     for category in profile:
-        category_nb_occur = int(round(float(category["%_distinct"]) * nb_distinct_reads, 0))
-        for idx in range(category_nb_occur):
+        nb_reads_at_dup_lvl = int(round(float(category["%_distinct"]) * nb_distinct_reads, 0))
+        for idx in range(nb_reads_at_dup_lvl):
             nb_occurences.append(int(category["duplication_level"]))
     nb_missing = len(nb_occurences) - nb_reads
     for idx in range(nb_missing):
@@ -112,20 +112,20 @@ if __name__ == "__main__":
     with FastaIO(args.output_R1, "w") as FH_out_R1:
         with FastaIO(args.output_R2, "w") as FH_out_R2:
             with FastaIO(args.input_R1) as FH_in_R1:
-                with FastaIO(args.input_R1) as FH_in_R2:
+                with FastaIO(args.input_R2) as FH_in_R2:
                     for curr_nb_occur, R1, R2 in zip(nb_occurences, FH_in_R1, FH_in_R2):
-                        description = "dupCount:{}".format(curr_nb_occur)
+                        description = "dupCount={}".format(curr_nb_occur)
                         if R1.description is not None and R1.description != "":
                             description = R1.description + "_" + description
                         R1.description = description
-                        description = "dupCount:{}".format(curr_nb_occur)
+                        description = "dupCount={}".format(curr_nb_occur)
                         if R2.description is not None and R2.description != "":
                             description = R2.description + "_" + description
                         R2.description = description
                         old_R1_id = R1.id
                         for idx in range(curr_nb_occur):
-                            R1.id = old_R1_id + "_dupId:{}".format(idx)
-                            R2.id = old_R1_id + "_dupId:{}".format(idx)
+                            R1.id = old_R1_id + "_dupId={}".format(idx)
+                            R2.id = old_R1_id + "_dupId={}".format(idx)
                             FH_out_R1.write(R1)
                             FH_out_R2.write(R2)
 
