@@ -513,8 +513,8 @@ if __name__ == "__main__":
     parser.add_argument('-g', '--targets-padding', type=int, default=150, help="Padding introduced by panel around the primary targets. [Default: %(default)s]")
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_reads = parser.add_argument_group('Reads')  # Reads
-    group_reads.add_argument('-1', '--R1-end-adapter', default="AGATCGGAAGAGCACACGTCTGAACTCCAGTCACAACCGCGGATCTCGTATGCCGTCTTCTGCTTG", help='The sequence of the Illumina p7 adapter. It is found at the end of the R1 when the read length is superior to the fragment length. [Default: %(default)s]')
-    group_reads.add_argument('-2', '--R2-end-adapter', default="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTTGACAAGCGCTTGTCAGTGTAGATCTCGGTGGTCGCCGTATCATT", help='The reverse complemented sequence of the Illumina p5 adapter. It is found at the end of the R2 when the read length is superior to the fragment length. [Default: %(default)s]')
+    group_reads.add_argument('-1', '--R1-end-adapter', default="AGATCGGAAGAGCACACGTCTGAACTCCAGTCACAACCGCGGATCTCGTATGCCGTCTTCTGCTTGAAAAAAAAAA", help='The sequence of the Illumina p7 adapter + flowcell anchor (stretch of 10 A). It is found at the end of the R1 when the read length is superior to the fragment length. [Default: %(default)s]')
+    group_reads.add_argument('-2', '--R2-end-adapter', default="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTTGACAAGCGCTTGTCAGTGTAGATCTCGGTGGTCGCCGTATCATTAAAAAAAAAA", help='The reverse complemented sequence of the Illumina p5 adapter + flowcell anchor (stretch of 10 A). It is found at the end of the R2 when the read length is superior to the fragment length. [Default: %(default)s]')
     group_reads.add_argument('-l', '--reads-length', type=int, default=150, help='The reads length. [Default: %(default)s]')
     group_reads.add_argument('-f', '--fragments-length', type=int, default=180, help='The fragments lengths. [Default: %(default)s]')
     group_reads.add_argument('-e', '--fragments-length-sd', type=int, default=30, help='The standard deviation for fragments lengths. [Default: %(default)s]')
@@ -534,7 +534,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Logger initialisation
-    logging.basicConfig(level=args.logging_level, format='%(asctime)s -- [%(name)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    logging.basicConfig(level=args.logging_level, format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger(os.path.basename(__file__))
     log.info(" ".join(sys.argv))
 

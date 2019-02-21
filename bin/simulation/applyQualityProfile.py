@@ -74,6 +74,7 @@ if __name__ == "__main__":
     parser.add_argument('-a', '--sequences-alphabet', nargs='+', default=["A", "T", "G", "C"], help="The alphabet of the input sequences. [Default: %(default)s]")
     parser.add_argument('-q', '--qual-offset', type=int, default=33, help="The position of the first quality encoding character in ASCII table (example: 33 for Illumina 1.8+). [Default: %(default)s]")
     parser.add_argument('-p', '--qual-penalty', type=int, default=0, help="The penalty applied to reduce the quality of the sequences produced. With 2, the quality of each base is decrease of 2 compared to the model. [Default: %(default)s]")
+    parser.add_argument('-l', '--reads-length', type=int, help="If this option is used, the reads smaller than this are completed by random nucleotids with a minimal quality. This function simulate the noise coming from neighbors clusters on flowcell when sequenced the fragment is too small.")
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-m', '--input-models', required=True, nargs='+', help='The paths of the sequences files used to retrieve the error model from qualities (format: fastq). The sequences length must be at least the same as sequences provided by --input-sequences.')
@@ -86,7 +87,7 @@ if __name__ == "__main__":
     # Logger
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s -- [%(name)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+        format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     logger = logging.getLogger(os.path.basename(__file__))
 
     # Random seed
@@ -129,6 +130,12 @@ if __name__ == "__main__":
                     FH_out_trace.write("\t".join([record.id, str(idx_elt + 1), str(elt_qual), elt, new_elt]) + "\n")
                 new_seq += new_elt
             record.string = new_seq
+            # Complete sequence
+            if args.reads_length is not None and len(record.string) < args.reads_length:
+                missing_length = args.reads_length - len(record.string)
+                record.quality += "".join([chr(2 + args.qual_offset) for elt in range(missing_length)])
+                record.string += "".join([random.choice(args.sequences_alphabet) for elt in range(missing_length)])
+            # Write sequence
             FH_out_seq.write(record)
             # Next quality model
             idx_qual += 1

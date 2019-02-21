@@ -62,10 +62,10 @@ def getNbOccur(in_profile, nb_distinct_reads):
     # Get nb_occurences
     nb_occurences = []
     for category in profile:
-        nb_reads_at_dup_lvl = int(round(float(category["%_distinct"]) * nb_distinct_reads, 0))
+        nb_reads_at_dup_lvl = int(round(float(category["%_distinct"]) * nb_distinct_reads / 100, 0))
         for idx in range(nb_reads_at_dup_lvl):
             nb_occurences.append(int(category["duplication_level"]))
-    nb_missing = len(nb_occurences) - nb_reads
+    nb_missing = len(nb_occurences) - nb_distinct_reads
     for idx in range(nb_missing):
         nb_occurences.append(1)
     # Shuffle nb_occurences
@@ -79,7 +79,6 @@ def getNbOccur(in_profile, nb_distinct_reads):
 #
 ########################################################################
 if __name__ == "__main__":
-    print("ok")
     # Manage parameters
     parser = argparse.ArgumentParser(description='Add duplicated sequences in reads files. The duplication model (number of duplication for each distinct sequence) follow the profile provided by user.')
     parser.add_argument('-s', '--random-seed', type=int, default=int(time.time()), help="The seed used for the random generator. If you want reproduce results of one execution: use the same parameters AND the same random-seed. [Default: auto]")
@@ -94,21 +93,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Logger initialisation
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -- [%(name)s][pid:%(process)d][%(levelname)s] -- %(message)s')
-    logger = logging.getLogger(os.path.basename(__file__))
-    logging.info(" ".join(sys.argv))
-    logging.info("Random seed used: {}".format(args.random_seed))
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    log = logging.getLogger(os.path.basename(__file__))
+    log.info(" ".join(sys.argv))
+    log.info("Random seed used: {}".format(args.random_seed))
 
     # Get number of duplications by reads
-    logging.info("Get duplication count for each read")
+    log.info("Get duplication count for each read")
     random.seed(args.random_seed)
     nb_reads = FastaIO.nbSeq(args.input_R1)
     if nb_reads < 10000:
-        logging.error("The number of reads in {} is unsufficient to simulate duplication (found: {} ; expected: {}).".format(args.input_R1, nb_reads, 10000))
+        log.error("The number of reads in {} is unsufficient to simulate duplication (found: {} ; expected: {}).".format(args.input_R1, nb_reads, 10000))
     nb_occurences = getNbOccur(args.duplication_profile, nb_reads)
 
     # Witre reads
-    logging.info("Write reads")
+    log.info("Write reads")
     with FastaIO(args.output_R1, "w") as FH_out_R1:
         with FastaIO(args.output_R2, "w") as FH_out_R2:
             with FastaIO(args.input_R1) as FH_in_R1:
@@ -129,4 +128,4 @@ if __name__ == "__main__":
                             FH_out_R1.write(R1)
                             FH_out_R2.write(R2)
 
-    logging.info("End of process")
+    log.info("End of process")
