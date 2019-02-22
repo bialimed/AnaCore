@@ -33,12 +33,43 @@ import subprocess
 
 ########################################################################
 #
+# FUNCTIONS
+#
+########################################################################
+def getLogLevelParam(str_level):
+    """
+    Return the level parameter for logging.basicConfig from the string version of the level.
+
+    :param str_level: The logging level.
+    :type str_level: str
+    :return: The parameter for logging.basicConfig.
+    :rtype: int
+    """
+    log_level = None
+    if str_level == "DEBUG":
+        log_level = logging.DEBUG
+    elif str_level == "INFO":
+        log_level = logging.INFO
+    elif str_level == "WARNING":
+        log_level = logging.WARNING
+    elif str_level == "ERROR":
+        log_level = logging.ERROR
+    elif str_level == "CRITICAL":
+        log_level = logging.CRITICAL
+    else:
+        raise ValueError("The value {} is invalid for logging level.".format(str_level))
+    return log_level
+
+
+########################################################################
+#
 # MAIN
 #
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Simulate enrichment sample.')
+    parser.add_argument('--logging-level', default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help='The logger level. [Default: %(default)s]')
     parser.add_argument('--random-seed', type=int, default=int(time.time()), help="The seed used for the random generator. If you want reproduce results of one execution: use the same parameters AND the same random-seed. [Default: auto]")
     parser.add_argument('--nb-random-simulations', type=int, default=30, help='Number of simulations used to find the best reads set to optimize variants frequencies simulated compared to expected. [Default: %(default)s]')
     parser.add_argument('--min-distance', type=int, default=3, help="The minimum distance between two variants. [Default: %(default)s]")
@@ -74,7 +105,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Logger initialisation
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    logging.basicConfig(level=getLogLevelParam(args.logging_level), format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger(os.path.basename(__file__))
     log.info(" ".join(sys.argv))
     log.info("Random seed used: {}".format(args.random_seed))
@@ -88,6 +119,7 @@ if __name__ == "__main__":
     # Simulate reads
     cmd = [
         "simuReads.py",
+        "--logging-level", args.logging_level,
         "--random-seed", args.random_seed,
         "--nb-random-simulations", args.nb_random_simulations,
         "--min-distance", args.min_distance,
@@ -140,7 +172,8 @@ if __name__ == "__main__":
         "--output-sequences", args.output_R1,
         "--output-trace", args.output_errors_R1,
         "--input-models"
-    ].extend(args.input_R1_quality_models)
+    ]
+    cmd.extend(args.input_R1_quality_models)
     cmd = [str(elt) for elt in cmd]
     log.info("Apply quality profile for R1: {}".format(" ".join(cmd)))
     subprocess.check_call(cmd)
@@ -156,7 +189,8 @@ if __name__ == "__main__":
         "--output-sequences", args.output_R2,
         "--output-trace", args.output_errors_R2,
         "--input-models"
-    ].extend(args.input_R2_quality_models)
+    ]
+    cmd.extend(args.input_R2_quality_models)
     cmd = [str(elt) for elt in cmd]
     log.info("Apply quality profile for R2: {}".format(" ".join(cmd)))
     subprocess.check_call(cmd)
