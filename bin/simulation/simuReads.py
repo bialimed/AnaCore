@@ -468,7 +468,7 @@ def updateVariantsAF(variants_by_pos, simu_AF_by_id):
     return variants_by_pos
 
 
-def getFragmentsLengths(covered_len, args):
+def getFragmentsLengths(covered_len, args, min_len=10):
     """
     """
     sequenced_nt = int(covered_len * np.mean([args.min_depth, args.max_depth]))  # without padding
@@ -476,8 +476,17 @@ def getFragmentsLengths(covered_len, args):
     approx_nb_reads = int(approx_nb_reads * 1.2) ################################################
     log.debug('Simulation targeted_nt:{}, sequenced_nt_on_target:{}, approx_nb_reads: {}'.format(covered_len, sequenced_nt, approx_nb_reads))
     fragments_len = np.random.normal(args.fragments_length, args.fragments_length_sd, approx_nb_reads)
-    fragments_len = [int(round(elt, 0)) for elt in fragments_len]  # To int
-    return fragments_len
+    fixed_fragments_len = []
+    for elt in fragments_len:
+        elt = int(round(elt, 0))  # To int
+        if elt < min_len:  # Prevent aberrant small sizes
+            elt = int(random.randrange(
+                args.fragments_length + args.fragments_length_sd,
+                args.fragments_length + 3 * args.fragments_length_sd,
+                1
+            ))
+        fixed_fragments_len.append(elt)
+    return fixed_fragments_len
 
 
 class LoggerAction(argparse.Action):
