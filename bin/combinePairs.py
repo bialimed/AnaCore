@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -109,7 +109,7 @@ def process(args, log):
         with FastqIO(args.input_R1) as FH_r1:
             with FastqIO(args.input_R2) as FH_r2:
                 for R1 in FH_r1:
-                    R2 = seqRevCom(FH_r2.next_seq())
+                    R2 = seqRevCom(FH_r2.nextSeq())
                     nb_pairs += 1
                     best_overlap = None
                     max_nb_support = -1

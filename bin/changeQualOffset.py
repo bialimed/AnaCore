@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -54,11 +54,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process
-    old_offset = args.old_offset if args.old_offset is not None else FastqIO.qual_offset(args.input_file)
+    old_offset = args.old_offset if args.old_offset is not None else FastqIO.qualOffset(args.input_file)
     if old_offset is None:
         raise Exception("The quality offset in {} cannot be determined.".format(args.input_file))
     offset_modifier = args.new_offset - old_offset
-    old_offset = FastqIO.qual_offset(args.input_file)
     with FastqIO(args.output_file, "w") as FH_out:
         with FastqIO(args.input_file) as FH_in:
             for record in FH_in:
