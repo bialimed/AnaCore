@@ -287,10 +287,10 @@ def getPartialFragment(region_seq, start_idx_in_reg, fragment_len):
         curr_len_fragment += len(nt_on_pos)
         idx_in_reg += 1
     end_idx_in_reg = idx_in_reg - 1
-    missing = fragment_len - curr_len_fragment
     fragment_seq = "".join(region_seq[start_idx_in_reg:end_idx_in_reg + 1])
-    if missing == 0:
-        fragment_seq = fragment_seq[:fragment_len]  # If the fragment end with an insertion
+    if curr_len_fragment > fragment_len:  # If the fragment end with an insertion
+        fragment_seq = fragment_seq[:fragment_len]
+    missing = fragment_len - len(fragment_seq)
     return fragment_seq, end_idx_in_reg, missing
 
 
