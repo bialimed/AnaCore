@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.0'
+__version__ = '1.7.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -426,6 +426,79 @@ def splittedByRef(region_list):
             regions_by_ref[ref_name] = RegionList()
         regions_by_ref[ref_name].append(curr_region)
     return regions_by_ref
+
+
+def mergedRegion(regions, trace=False):
+    """
+    Return a region corresponding to the merge of all provided regions.
+
+    :param regions: One list of overlapped regions.
+    :param type: list
+    :param trace: if true the provided regions are store in merged_region.annot["merge_traceback"].
+    :type trace: bool
+    :return: The region corresponding to the merge of all provided regions.
+    :rtype: Region
+    """
+    # Check reference
+    ref = set()
+    for curr_region in regions:
+        if curr_region.reference is None:
+            ref.add(None)
+        else:
+            ref.add(curr_region.reference.name)
+    if len(ref) > 1:
+        raise Exception("All the regions in mergedRegion are not defined on the same reference.")
+    # Init merged region
+    merged_region = Region(
+        min([curr.start for curr in regions]),
+        max([curr.end for curr in regions]),
+        None,
+        regions[0].reference,
+        None
+    )
+    # Strand
+    strands = list(set([curr.strand for curr in regions]))
+    if len(strands) == 1 and strands[0] is not None:
+        merged_region.strand = strands[0]
+    # Traceback
+    if trace:
+        merged_region.annot["merge_traceback"] = RegionList()
+        for curr_region in regions:
+            if "merge_traceback" in curr_region.annot:
+                for curr_trace in curr_region.annot["merge_traceback"]:
+                    merged_region.annot["merge_traceback"].append(curr_trace)
+            else:
+                merged_region.annot["merge_traceback"].append(curr_region)
+    return merged_region
+
+
+def consolidated(regions, merge_contiguous=True, trace=False):
+    """
+    Return consolidated regions: the overlapping regions (and optionally the contiguous) are merged in one region.
+
+    :param regions: List of regions to consolidate.
+    :param type: list
+    :param merge_contiguous: If true the contiguous regions are also merged.
+    :type merge_contiguous: bool
+    :param trace: if true the provided regions are store in merged_region.annot["merge_traceback"].
+    :type trace: bool
+    :return: Consolidated regions.
+    :rtype: RegionList
+    """
+    padding = 1 if merge_contiguous else 0
+    merged_regions = RegionList()
+    regions_by_ref = splittedByRef(regions)
+    for ref_id, ref_regions in regions_by_ref.items():
+        sorted_regions = sorted(ref_regions, key=lambda x: (x.start, x.end))
+        prev_region = sorted_regions[0]
+        for curr_region in sorted_regions[1:]:
+            if curr_region.start <= prev_region.end + padding:
+                prev_region = mergedRegion([prev_region, curr_region], trace)
+            else:
+                merged_regions.append(prev_region)
+                prev_region = curr_region
+        merged_regions.append(prev_region)
+    return merged_regions
 
 
 def iterOverlapped(queries, subjects, check_ref=True):

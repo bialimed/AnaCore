@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 sys.path.append(LIB_DIR)
 
-from anacore.region import Region, RegionTree, RegionList, splittedByRef, iterOverlapped
+from anacore.region import Region, RegionTree, RegionList, splittedByRef, iterOverlapped, consolidated
 
 
 ########################################################################
@@ -575,6 +575,7 @@ class TestRegionTree(unittest.TestCase):
         with self.assertRaises(ValueError):
             tr1_region.addChild(exon5_region)
 
+
 class TestSplittedByRef(unittest.TestCase):
     def testSplittedByRef(self):
         reg_list = RegionList([
@@ -590,6 +591,31 @@ class TestSplittedByRef(unittest.TestCase):
             for curr_region in regions:
                 named_regions.append("{}:{}".format(chrom, curr_region.name))
             observed.extend(named_regions)
+        self.assertEqual(expected, observed)
+
+
+class TestConsolidate(unittest.TestCase):
+    def testConsolidate(self):
+        reg_list = RegionList([
+            Region(5, 9, "-", "chr1", "region1"),
+            Region(10, 30, "-", "chr1", "region2"),
+            Region(30, 40, "-", "chr1", "region3"),
+            Region(35, 39, "-", "chr1", "region4"),
+            Region(40, 70, "-", "chr1", "region5"),
+            Region(71, 90, "-", "chr1", "region6"),
+            Region(92, 100, "-", "chr1", "region7"),
+            Region(100, 100, "+", "chr1", "region8"),
+            Region(80, 100, "-", "chr2", "region9")
+        ])
+        # Merge overlapping
+        consolidated_reg = consolidated(reg_list, False)
+        expected = ["chr1:5-9[-]", "chr1:10-70[-]", "chr1:71-90[-]", "chr1:92-100[None]", "chr2:80-100[-]"]
+        observed = [curr.getCoordinatesStr() for curr in consolidated_reg]
+        self.assertEqual(expected, observed)
+        # Merge overlapping and contiguous
+        consolidated_reg = consolidated(reg_list, True)
+        expected = ["chr1:5-90[-]", "chr1:92-100[None]", "chr2:80-100[-]"]
+        observed = [curr.getCoordinatesStr() for curr in consolidated_reg]
         self.assertEqual(expected, observed)
 
 
