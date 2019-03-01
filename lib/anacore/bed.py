@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -82,6 +82,25 @@ class BEDRecord(Region):
             self.setReference(attr_value)
         else:
             object.__setattr__(self, attr_name, attr_value)
+
+    @staticmethod
+    def recFromRegion(region_record):
+        """
+        Return an instance of BEDRecord corresponding to the region_record. The following fields will be None: score, thickStart, thickEnd, itemRgb, blockCount, blockSizes and blockStarts.
+
+        :param region_record:
+        :type region_record: anacore.region.Region
+        :return: The BEDRecord corresponding to the region_record. The following fields will be None: score, thickStart, thickEnd, itemRgb, blockCount, blockSizes and blockStarts.
+        :rtype: BEDRecord
+        """
+        return BEDRecord(
+            region_record.reference,
+            region_record.start,
+            region_record.end,
+            region_record.name,
+            None,
+            region_record.strand
+        )
 
 
 class BEDIO(AbstractFile):
@@ -201,14 +220,16 @@ class BEDIO(AbstractFile):
                                 fields[11] = [int(block) for block in fields[11].split(",")]  # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
         return BEDRecord(*fields)
 
-    def write(self, bed_record):
+    def write(self, record):
         """
         Write record line in file.
 
-        :param bed_record: The record to write.
-        :type bed_record: BEDRecord
+        :param bed: The record to write.
+        :type record: anacore.region.Region
         """
-        self.file_handle.write(self.BEDRecordToBEDLine(bed_record) + "\n")
+        if not issubclass(record.__class__, BEDRecord):
+            record = BEDRecord.getSimpleFromRegion(record)
+        self.file_handle.write(self.BEDRecordToBEDLine(record) + "\n")
         self.current_line_nb += 1
 
     @staticmethod
