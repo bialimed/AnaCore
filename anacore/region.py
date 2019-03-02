@@ -488,7 +488,7 @@ def consolidated(regions, merge_contiguous=True, trace=False):
     padding = 1 if merge_contiguous else 0
     merged_regions = RegionList()
     regions_by_ref = splittedByRef(regions)
-    for ref_id, ref_regions in regions_by_ref.items():
+    for ref_id, ref_regions in sorted(regions_by_ref.items()):
         sorted_regions = sorted(ref_regions, key=lambda x: (x.start, x.end))
         prev_region = sorted_regions[0]
         for curr_region in sorted_regions[1:]:

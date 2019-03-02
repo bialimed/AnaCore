@@ -228,7 +228,7 @@ class BEDIO(AbstractFile):
         :type record: anacore.region.Region
         """
         if not issubclass(record.__class__, BEDRecord):
-            record = BEDRecord.getSimpleFromRegion(record)
+            record = BEDRecord.recFromRegion(record)
         self.file_handle.write(self.BEDRecordToBEDLine(record) + "\n")
         self.current_line_nb += 1
 
