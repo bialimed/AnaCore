@@ -1,0 +1,118 @@
+{
+    "class": "FiltersCombiner",
+    "operator": "and",
+    "filters": [
+        {
+            "class": "Filter",
+            "getter": "filter",
+            "action": "select",
+            "aggregator": "ratio:1",
+            "operator": "not in",
+            "values": ["popAF", "popConst"]
+        }, {
+            "class": "Filter",
+            "getter": "m:getPopAF",
+            "action": "select",
+            "aggregator": "ratio:1",
+            "operator": ">=",
+            "values": 0.02
+        }, {
+            "class": "FiltersCombiner",
+            "operator": "or",
+            "filters": [
+                {
+                    "class": "Filter",
+                    "getter": "filter",
+                    "action": "select",
+                    "aggregator": "ratio:1",
+                    "operator": "!=",
+                    "values": "CSQ"
+                }, {
+                    "class": "FiltersCombiner",
+                    "description": "Keep variants on TERT's promoter.",
+                    "operator": "and",
+                    "filters": [
+                        {
+                            "class": "Filter",
+                            "getter": "chrom",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": "==",
+                            "values": "5"
+                        }, {
+                            "class": "Filter",
+                            "getter": "m:refStart",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": ">",
+                            "values": 1295102
+                        }, {
+                            "class": "Filter",
+                            "getter": "m:refEnd",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": "<",
+                            "values": 1295147
+                        }
+                    ]
+                }, {
+                    "class": "FiltersCombiner",
+                    "description": "Keep variants on MET exon 14 upstream large splice site.",
+                    "operator": "and",
+                    "filters": [
+                        {
+                            "class": "Filter",
+                            "getter": "chrom",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": "==",
+                            "values": "7"
+                        }, {
+                            "class": "Filter",
+                            "getter": "m:refStart",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": ">",
+                            "values": 116771654
+                        }, {
+                            "class": "Filter",
+                            "getter": "m:refEnd",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": "<",
+                            "values": 116771849
+                        }
+                    ]
+                }, {
+                    "class": "FiltersCombiner",
+                    "description": "Keep variants on MET exon 14 downstream large splice site.",
+                    "operator": "and",
+                    "filters": [
+                        {
+                            "class": "Filter",
+                            "getter": "chrom",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": "==",
+                            "values": "7"
+                        }, {
+                            "class": "Filter",
+                            "getter": "m:refStart",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": ">",
+                            "values": 116771989
+                        }, {
+                            "class": "Filter",
+                            "getter": "m:refEnd",
+                            "action": "select",
+                            "aggregator": "nb:1",
+                            "operator": "<",
+                            "values": 116772190
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
