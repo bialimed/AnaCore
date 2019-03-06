@@ -68,5 +68,5 @@ if __name__ == "__main__":
                     FH_out.write(line)
     else:  # Annotate
         log.info("Process annotation")
-        subprocess.checkcall(vep_cmd)
+        subprocess.check_call(vep_cmd)
     log.info("End of process")
