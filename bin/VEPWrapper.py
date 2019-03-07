@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     if is_empty:  # Create empty output if VCF does not contain any records
         log.info("Skip annotation")
         log.warn('[WARN] The input file "{}" does not contain any records.'.format(input_file))
-        with open(input.vcf) as FH_in:
+        with open(input_file) as FH_in:
             with open(output_file, "w") as FH_out:
                 for line in FH_in:
                     FH_out.write(line)
