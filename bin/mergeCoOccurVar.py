@@ -28,6 +28,8 @@ import sys
 import pysam
 import logging
 import argparse
+from statistics import mean
+from anacore.sequenceIO import FastaIO
 from anacore.vcf import VCFIO, VCFRecord
 
 
@@ -94,17 +96,83 @@ def setSupportingReads(prev, curr, FH_aln):
                             var.supporting_reads.add(read.query_name)  # Fragment is overlapping if at least one of his read is ovelapping
 
 
-def mergeRecords(first, second, ref_seq):
-    # ref
-    # alt
-    # known
-    # pos
-    # AF
-    # AD
-    # DP
-    # Filter ?
-    # INFO add intersection rate and interstion nb
-    pass
+def mergedRecord(first, second, ref_seq):
+    merged = VCFRecord(
+        first.chrom,  # chrom
+        first.pos,  # pos
+        pFormat=first.format
+    )
+    # Ref and Alt
+    first_end = int(round(first.refEnd() - 0.49, 0))
+    second_start = int(round(second.refStart() + 0.49, 0))
+    ref_add = ""
+    if second_start - first_end > 0:
+        ref_add = ref_seq[first_end:second_start - 1]
+    merged.ref = first.ref + ref_add + second.ref
+    merged.ref = merged.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
+    merged.alt = [first.alt[0] + ref_add + second.alt[0]]
+    merged.alt[0] = merged.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
+    # Filter
+    merged.filter = list(set(first.filter + second.filter))
+    if len(merged.filter) > 1 and "PASS" in merged.filter:
+        merged.filter.remove("PASS")
+    # Samples
+    for spl in first.samples:
+        merged.samples[spl] = {}
+        if "DP" in first.format:
+            merged.samples[spl]["DP"] = min(
+                first.getDP(spl), second.getDP(spl)
+            )
+        if "AD" in first.format:
+            merged.samples[spl]["AD"] = [
+                min(
+                    first.getAD(spl)[0], second.getAD(spl)[0]
+                )
+            ]
+        if "AF" in first.format:
+            merged.samples[spl]["AF"] = [
+                min(
+                    first.getAF(spl)[0], second.getAF(spl)[0]
+                )
+            ]
+    # INFO metrics
+    if "AD" in first.info:
+        merged.info["AD"] = merged.getPopAD()
+    if "DP" in first.info:
+        merged.info["DP"] = merged.getPopDP()
+    if "AF" in first.info:
+        merged.info["AF"] = merged.getPopAF()
+    # INFO Parents
+    merged.info["MCO_VAR"] = []
+    if "MCO_VAR" in first.info:
+        for parent in first.info["MCO_VAR"]:
+            merged.info["MCO_VAR"].append(parent)
+    else:
+        merged.info["MCO_VAR"].append(first.getName())
+    if "MCO_VAR" in second.info:
+        for parent in second.info["MCO_VAR"]:
+            merged.info["MCO_VAR"].append(parent)
+    else:
+        merged.info["MCO_VAR"].append(second.getName())
+    ###################################################################### strand info from FreeBayes, VarDict, ...
+    # Quality
+    merged.info["MCO_QUAL"] = []
+    if "MCO_QUAL" in first.info:
+        for qual in first.info["MCO_QUAL"]:
+            merged.info["MCO_QUAL"].append(qual)
+    else:
+        if first.qual is not None:
+            merged.info["MCO_QUAL"].append(first.qual)
+    if "MCO_QUAL" in second.info:
+        for qual in second.info["MCO_QUAL"]:
+            merged.info["MCO_QUAL"].append(qual)
+    else:
+        if second.qual is not None:
+            merged.info["MCO_QUAL"].append(second.qual)
+    if len(merged.info["MCO_QUAL"]) > 0:
+        merged.qual = mean(merged.info["MCO_QUAL"])
+    # Return
+    return merged
 
 
 class LoggerAction(argparse.Action):
@@ -153,11 +221,18 @@ if __name__ == "__main__":
     log.info("Command: " + " ".join(sys.argv))
 
     # Process
+    seq_by_chrom = {}
+    with FastaIO(args.input_sequences) as FH_seq:
+        for record in FH_seq:
+            seq_by_chrom[record.id] = record.string
+
     with VCFIO(args.output_variants, "w") as FH_out:
         with pysam.AlignmentFile(args.input_aln, "rb") as FH_aln:
             with VCFIO(args.input_variants) as FH_vcf:
                 # Header
                 FH_out.copyHeader(FH_vcf)
+                FH_out.info["MCO_VAR"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Name of the variants merged because their occur on same reads."}
+                FH_out.info["MCO_QUAL"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Qualities of the variants merged because their occur on same reads."}
                 FH_out._writeHeader()
                 # Records
                 prev = None  #################################### pb quand plusieurs
@@ -185,10 +260,8 @@ if __name__ == "__main__":
                                     # Merge variants
                                     log.info("Merge {} and {}.".format(prev.getName(), curr.getName()))
                                     prev_is_merged = True
-                                    mergeRecords(prev, curr, chrom_seq)
-                                    ############################ merge records (complete with seq ref)
-                                    ## needs seq to complete
-                                    ## needs to take into account break in intron
+                                    curr = mergedRecord(prev, curr, seq_by_chrom[prev.chrom])
+                                    ############################### INFO add intersection rate and interstion nb parent_variants
                         if not prev_is_merged:
                             FH_out.write(prev)
                     prev = curr
