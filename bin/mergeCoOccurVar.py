@@ -64,7 +64,7 @@ def getAlnCmp(read):
     return ref_aln, read_aln
 
 
-def setSupportingReads(prev, curr, FH_aln):
+def setSupportingReads(prev, curr, FH_aln, log):
     """
     set supporting reads for each of two variants with fragment overlapping the two.
     """
@@ -248,7 +248,7 @@ if __name__ == "__main__":
                                 prev.isIns = prev.isInsertion()
                                 curr.isIns = curr.isInsertion()
                                 # Set supporting reads
-                                setSupportingReads(prev, curr, FH_aln)
+                                setSupportingReads(prev, curr, FH_aln, log)
                                 # Check co-occurence
                                 if len(prev.supporting_reads) == 0 and len(curr.supporting_reads) == 0:
                                     log.warnings("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
@@ -261,6 +261,9 @@ if __name__ == "__main__":
                                     log.info("Merge {} and {}.".format(prev.getName(), curr.getName()))
                                     prev_is_merged = True
                                     curr = mergedRecord(prev, curr, seq_by_chrom[prev.chrom])
+                                    # curr.info["MCO_IR"] = "():{}".format(intersection_rate)
+                                    # if "MCO_IR" in prev.info:
+                                    #         curr.info["MCO_IR"] = "(({}),):{}".format(prev.info["MCO_IR"], intersection_rate)
                                     ############################### INFO add intersection rate and interstion nb parent_variants
                         if not prev_is_merged:
                             FH_out.write(prev)

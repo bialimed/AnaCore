@@ -25,6 +25,9 @@ __status__ = 'prod'
 
 import os
 import sys
+import uuid
+import pysam
+import tempfile
 import unittest
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +38,7 @@ sys.path.append(BIN_DIR)
 sys.path.append(LIB_DIR)
 
 from anacore.vcf import VCFRecord
-from mergeCoOccurVar import mergedRecord
+from mergeCoOccurVar import mergedRecord, setSupportingReads
 
 BIN_DIR = os.path.dirname(CURRENT_DIR)
 os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
@@ -46,6 +49,230 @@ os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
 # FUNCTIONS
 #
 ########################################################################
+class LoggerSilencer:
+    def debug(self, args):
+        pass
+
+    def info(self, args):
+        pass
+
+class SetSupportingReads(unittest.TestCase):
+    def tearDown(self):
+        # Clean temporary files
+        for curr_file in [self.tmp_sam_path, self.tmp_bam_path, self.tmp_bam_path + ".bai"]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_sam_path = os.path.join(tmp_folder, unique_id + ".sam")
+        self.tmp_bam_path = os.path.join(tmp_folder, unique_id + ".bam")
+        self.ref_seq = "ggaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgcattggggtg"
+        #               | | | | | |  |  |  |  |
+        #               1 3 5 7 9 11 14 17 20 23
+        self.reads_content = """>subtit_AAA/CAC_1_alt
+ggaagccctgatcACGCCACTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtit_AAA/CAC_2_alt
+aagccctgatcACGCCACTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtit_AAA/CAC_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>subtit_AAA/CAC_4_mixUp
+ggaagccctgatcACGCCAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtit_AAA/CAC_5_mixDown
+ggaagccctgatcACGCAACTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtitClose_AA/CC_1_alt
+ggaagccctgatcACGCCCATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtitClose_AA/CC_2_alt
+aagccctgatcACGCCCATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtitClose_AA/CC_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>subtitClose_AA/CC_4_mixUp
+ggaagccctgatcACGCCAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtitClose_AA/CC_5_mixDown
+ggaagccctgatcACGCACATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtit_AAATCTC/CCTTCGG_1_alt
+ggaagccctgatcACGCCCTTCGGGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtit_AAATCTC/CCTTCGG_2_alt
+aagccctgatcACGCCCTTCGGGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtit_AAATCTC/CCTTCGG_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>subtit_AAATCTC/CCTTCGG_4_mixUp
+ggaagccctgatcACGCCCTTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>subtit_AAATCTC/CCTTCGG_5_mixDown
+ggaagccctgatcACGCAAATCGGGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insertion_A/TGGAGG_1_alt
+ggaagccctgatcACGCTGGAGGAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insertion_A/TGGAGG_2_alt
+aagccctgatcACGCTGGAGGAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insertion_A/TGGAGG_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>insertion_A/TGGAGG_4_mixUp
+ggaagccctgatcACGCTGGAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insertion_A/TGGAGG_5_mixDown
+ggaagccctgatcACGCAGGAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>deletion_AAATCTC/T_1_alt
+ggaagccctgatcACGCTGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>deletion_AAATCTC/T_2_alt
+aagccctgatcACGCTGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>deletion_AAATCTC/T_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>deletion_AAATCTC/T_4_mixUp
+ggaagccctgatcACGCTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>deletion_AAATCTC/T_5_mixDown
+ggaagccctgatcACGCAAATGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delIns_AAAT/TGA_1_alt
+ggaagccctgatcACGCTGACTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delIns_AAAT/TGA_2_alt
+aagccctgatcACGCTGACTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delIns_AAAT/TGA_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>delIns_AAAT/TGA_4_mixUp
+ggaagccctgatcACGCTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delIns_AAAT/TGA_5_mixDown
+ggaagccctgatcACGCAAATGACTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDel_AAA/GGGA_1_alt
+ggaagccctgatcACGCGGGATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDel_AAA/GGGA_2_alt
+aagccctgatcACGCGGGATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDel_AAA/GGGA_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>insDel_AAA/GGGA_4_mixUp
+ggaagccctgatcACGCGGGAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDel_AAA/GGGA_5_mixDown
+ggaagccctgatcACGCATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delInsNoStd_AAATCTC/CTGGG_1_alt
+ggaagccctgatcACGCCTGGGCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delInsNoStd_AAATCTC/CTGGG_2_alt
+aagccctgatcACGCCTGGGCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delInsNoStd_AAATCTC/CTGGG_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>delInsNoStd_AAATCTC/CTGGG_4_mixUp
+ggaagccctgatcACGCCTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>delInsNoStd_AAATCTC/CTGGG_5_mixDown
+ggaagccctgatcACGCAAATGGGCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca"""
+        self.test_cases = [
+            [
+                VCFRecord("chr1", 18, "subtit_AAA/CAC", "A", ["C"]),
+                VCFRecord("chr1", 20, "subtit_AAA/CAC", "A", ["C"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+subtit_AAA/CAC_1_alt	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCCACTCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:17A1A103	AS:i:113	XS:i:0
+subtit_AAA/CAC_4_mixUp	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCCAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:1	MD:Z:17A105	AS:i:118	XS:i:0
+subtit_AAA/CAC_5_mixDown	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCAACTCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:1	MD:Z:19A103	AS:i:118	XS:i:0
+subtit_AAA/CAC_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+subtit_AAA/CAC_2_alt	0	chr1	3	60	121M	*	0	0	AAGCCCTGATCACGCCACTCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:15A1A103	AS:i:111	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 18, "subtitClose_AA/CC", "A", ["C"]),
+                VCFRecord("chr1", 19, "subtitClose_AA/CC", "A", ["C"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+subtitClose_AA/CC_1_alt	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCCCATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:17A0A104	AS:i:113	XS:i:0
+subtitClose_AA/CC_4_mixUp	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCCAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:1	MD:Z:17A105	AS:i:118	XS:i:0
+subtitClose_AA/CC_5_mixDown	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCACATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:1	MD:Z:18A104	AS:i:118	XS:i:0
+subtitClose_AA/CC_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+subtitClose_AA/CC_2_alt	0	chr1	3	60	121M	*	0	0	AAGCCCTGATCACGCCCATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:15A0A104	AS:i:111	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 18, "subtit_AAATCTC/CCTTCGG", "AAA", ["CCT"]),
+                VCFRecord("chr1", 23, "subtit_AAATCTC/CCTTCGG", "TC", ["GG"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+subtit_AAATCTC/CCTTCGG_1_alt	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCCCTTCGGGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:17A0A0A2T0C99	AS:i:99	XS:i:0
+subtit_AAATCTC/CCTTCGG_4_mixUp	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCCCTTCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:17A0A0A103	AS:i:108	XS:i:0
+subtit_AAATCTC/CCTTCGG_5_mixDown	0	chr1	1	60	123M	*	0	0	GGAAGCCCTGATCACGCAAATCGGGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:22T0C99	AS:i:113	XS:i:0
+subtit_AAATCTC/CCTTCGG_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+subtit_AAATCTC/CCTTCGG_2_alt	0	chr1	3	60	121M	*	0	0	AAGCCCTGATCACGCCCTTCGGGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:15A0A0A2T0C99	AS:i:99	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 18, "insertion_A/TGGAGG", "-", ["TGG"]),
+                VCFRecord("chr1", 19, "insertion_A/TGGAGG", "-", ["GG"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+insertion_A/TGGAGG_1_alt	0	chr1	1	60	17M3I1M2I105M	*	0	0	GGAAGCCCTGATCACGCTGGAGGAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:123	AS:i:107	XS:i:0
+insertion_A/TGGAGG_4_mixUp	0	chr1	1	60	17M3I106M	*	0	0	GGAAGCCCTGATCACGCTGGAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:123	AS:i:114	XS:i:0
+insertion_A/TGGAGG_5_mixDown	0	chr1	1	60	18M2I105M	*	0	0	GGAAGCCCTGATCACGCAGGAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:123	AS:i:115	XS:i:0
+insertion_A/TGGAGG_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+insertion_A/TGGAGG_2_alt	0	chr1	3	60	15M3I1M2I105M	*	0	0	AAGCCCTGATCACGCTGGAGGAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:121	AS:i:105	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 18, "deletion_AAATCTC/T", "AAA", ["-"]),
+                VCFRecord("chr1", 22, "deletion_AAATCTC/T", "CTC", ["-"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+deletion_AAATCTC/T_1_alt	0	chr1	1	60	17M3D1M3D99M	*	0	0	GGAAGCCCTGATCACGCTGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:17^AAA1^CTC99	AS:i:100	XS:i:0
+deletion_AAATCTC/T_4_mixUp	0	chr1	1	60	17M3D103M	*	0	0	GGAAGCCCTGATCACGCTCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:17^AAA103	AS:i:111	XS:i:0
+deletion_AAATCTC/T_5_mixDown	0	chr1	1	60	21M3D99M	*	0	0	GGAAGCCCTGATCACGCAAATGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:21^CTC99	AS:i:111	XS:i:0
+deletion_AAATCTC/T_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+deletion_AAATCTC/T_2_alt	0	chr1	3	60	15M3D1M3D99M	*	0	0	AAGCCCTGATCACGCTGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:15^AAA1CTC99	AS:i:99	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 18, "delIns_AAAT/TGA", "AAA", ["-"]),
+                VCFRecord("chr1", 22, "delIns_AAAT/TGA", "-", ["GA"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+delIns_AAAT/TGA_1_alt	0	chr1	1	60	17M3D1M2I102M	*	0	0	GGAAGCCCTGATCACGCTGACTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:17^AAA103	AS:i:105	XS:i:0
+delIns_AAAT/TGA_4_mixUp	0	chr1	1	60	17M3D103M	*	0	0	GGAAGCCCTGATCACGCTCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:17^AAA103	AS:i:111	XS:i:0
+delIns_AAAT/TGA_5_mixDown	0	chr1	1	60	21M2I102M	*	0	0	GGAAGCCCTGATCACGCAAATGACTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:123	AS:i:115	XS:i:0
+delIns_AAAT/TGA_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+delIns_AAAT/TGA_2_alt	0	chr1	3	60	15M3D1M2I102M	*	0	0	AAGCCCTGATCACGCTGACTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:15^AAA103	AS:i:103	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 18, "insDel_AAA/GGGA", "-", ["GGG"]),
+                VCFRecord("chr1", 19, "insDel_AAA/GGGA", "AA", ["-"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+insDel_AAA/GGGA_1_alt	0	chr1	1	60	17M3I1M2D103M	*	0	0	GGAAGCCCTGATCACGCGGGATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:18^AA103	AS:i:106	XS:i:0
+insDel_AAA/GGGA_4_mixUp	0	chr1	1	60	17M3I106M	*	0	0	GGAAGCCCTGATCACGCGGGAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:123	AS:i:114	XS:i:0
+insDel_AAA/GGGA_5_mixDown	0	chr1	1	60	18M2D103M	*	0	0	GGAAGCCCTGATCACGCATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:18^AA103	AS:i:113	XS:i:0
+insDel_AAA/GGGA_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+insDel_AAA/GGGA_2_alt	0	chr1	3	60	15M3I1M2D103M	*	0	0	AAGCCCTGATCACGCGGGATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:16^AA103	AS:i:104	XS:i:0"""
+            ],
+            # [
+            #     VCFRecord("chr1", 18, "delInsNoStd_AAATCTC/CTGGG", "AAA", ["C"]),
+            #     VCFRecord("chr1", 22, "delInsNoStd_AAATCTC/CTGGG", "-", ["GGG"]),
+            #     """"""
+            # ]
+            # VCFRecord("chr1", 18, "insDelNoStd_AAATCTC/T", "AAA", "-")
+        ]
+
+    def testSetSupportingReads(self):
+        for first, second, aln_content in self.test_cases:
+            # Write BAM
+            with open(self.tmp_sam_path, "w") as FH_sam:
+                FH_sam.write(aln_content)
+            with pysam.AlignmentFile(self.tmp_sam_path) as FH_sam:
+                with pysam.AlignmentFile(self.tmp_bam_path, "wb", template=FH_sam) as FH_bam:
+                    for rec in FH_sam:
+                        FH_bam.write(rec)
+            pysam.index(self.tmp_bam_path)
+            # Eval
+            with pysam.AlignmentFile(self.tmp_bam_path) as FH_aln:
+                first.end = int(first.refEnd())
+                second.start = int(second.refStart())
+                first.isIns = first.isInsertion()
+                second.isIns = second.isInsertion()
+                print("{}/{}\t{}/{}".format(first.ref, first.alt[0], second.ref, second.alt[0]))
+                setSupportingReads(first, second, FH_aln, LoggerSilencer())
+                # Check supporting first
+                expected = sorted([
+                    "{}_{}".format(first.id, curr_suffix) for curr_suffix in ["1_alt", "2_alt", "4_mixUp"]
+                ])
+                self.assertEqual(
+                    sorted(first.supporting_reads),
+                    expected
+                )
+                # Check supporting first
+                expected = sorted([
+                    "{}_{}".format(second.id, curr_suffix) for curr_suffix in ["1_alt", "2_alt", "5_mixDown"]
+                ])
+                self.assertEqual(
+                    sorted(second.supporting_reads),
+                    expected
+                )
+
+
 class MergeCoOccurVar(unittest.TestCase):
     def setUp(self):
         self.ref_seq = "ACGCAAATCTCGGCATGCCGATT"
