@@ -38,7 +38,7 @@ sys.path.append(BIN_DIR)
 sys.path.append(LIB_DIR)
 
 from anacore.vcf import VCFRecord
-from mergeCoOccurVar import mergedRecord, setSupportingReads
+from mergeCoOccurVar import mergedRecord, setSupportingReads, setRefPos
 
 BIN_DIR = os.path.dirname(CURRENT_DIR)
 os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
@@ -150,7 +150,27 @@ gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccc
 >delInsNoStd_AAATCTC/CTGGG_4_mixUp
 ggaagccctgatcACGCCTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
 >delInsNoStd_AAATCTC/CTGGG_5_mixDown
-ggaagccctgatcACGCAAATGGGCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca"""
+ggaagccctgatcACGCAAATGGGCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_AAAT/GTGA_1_alt
+ggaagccctgatcACGCGTGACTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_AAAT/GTGA_2_alt
+aagccctgatcACGCGTGACTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_AAAT/GTGA_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>insDelNoStd_AAAT/GTGA_4_mixUp
+ggaagccctgatcACGCGTGAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_AAAT/GTGA_5_mixDown
+ggaagccctgatcACGCAACTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_CAAA/CGTGA_1_alt
+ggaagccctgatcACGCGTGATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_CAAA/CGTGA_2_alt
+aagccctgatcACGCGTGATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_CAAA/CGTGA_3_ref
+gaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgc
+>insDelNoStd_CAAA/CGTGA_4_mixUp
+ggaagccctgatcACGCGTGAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
+>insDelNoStd_CAAA/CGTGA_5_mixDown
+ggaagccctgatcACGCATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca"""
         self.test_cases = [
             [
                 VCFRecord("chr1", 18, "subtit_AAA/CAC", "A", ["C"]),
@@ -229,12 +249,39 @@ insDel_AAA/GGGA_5_mixDown	0	chr1	1	60	18M2D103M	*	0	0	GGAAGCCCTGATCACGCATCTCGGCA
 insDel_AAA/GGGA_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
 insDel_AAA/GGGA_2_alt	0	chr1	3	60	15M3I1M2D103M	*	0	0	AAGCCCTGATCACGCGGGATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:16^AA103	AS:i:104	XS:i:0"""
             ],
-            # [
-            #     VCFRecord("chr1", 18, "delInsNoStd_AAATCTC/CTGGG", "AAA", ["C"]),
-            #     VCFRecord("chr1", 22, "delInsNoStd_AAATCTC/CTGGG", "-", ["GGG"]),
-            #     """"""
-            # ]
-            # VCFRecord("chr1", 18, "insDelNoStd_AAATCTC/T", "AAA", "-")
+            [
+                VCFRecord("chr1", 18, "delInsNoStd_AAATCTC/CTGGG", "AAA", ["C"]),
+                VCFRecord("chr1", 22, "delInsNoStd_AAATCTC/CTGGG", "-", ["GGG"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+delInsNoStd_AAATCTC/CTGGG_1_alt	0	chr1	1	60	17M2D2M3I102M	*	0	0	GGAAGCCCTGATCACGCCTGGGCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:6	MD:Z:17^AA0C103	AS:i:102	XS:i:0
+delInsNoStd_AAATCTC/CTGGG_4_mixUp	0	chr1	1	60	17M2D104M	*	0	0	GGAAGCCCTGATCACGCCTCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:17^AA0C103	AS:i:108	XS:i:0
+delInsNoStd_AAATCTC/CTGGG_5_mixDown	0	chr1	1	60	21M3I102M	*	0	0	GGAAGCCCTGATCACGCAAATGGGCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:123	AS:i:114	XS:i:0
+delInsNoStd_AAATCTC/CTGGG_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+delInsNoStd_AAATCTC/CTGGG_2_alt	0	chr1	3	60	15M2D2M3I102M	*	0	0	AAGCCCTGATCACGCCTGGGCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:6	MD:Z:15^AA0C103	AS:i:102	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 18, "insDelNoStd_AAAT/GTGA", "A", ["GTG"]),
+                VCFRecord("chr1", 20, "insDelNoStd_AAAT/GTGA", "AT", ["-"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+insDelNoStd_AAAT/GTGA_1_alt	0	chr1	1	60	17M1D3I1M2D102M	*	0	0	GGAAGCCCTGATCACGCGTGACTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:6	MD:Z:17^A103	AS:i:103	XS:i:0
+insDelNoStd_AAAT/GTGA_4_mixUp	0	chr1	1	60	17M1D3I105M	*	0	0	GGAAGCCCTGATCACGCGTGAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:17^A105	AS:i:110	XS:i:0
+insDelNoStd_AAAT/GTGA_5_mixDown	0	chr1	1	60	19M2D102M	*	0	0	GGAAGCCCTGATCACGCAACTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:19^AT102	AS:i:113	XS:i:0
+insDelNoStd_AAAT/GTGA_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+insDelNoStd_AAAT/GTGA_2_alt	0	chr1	3	60	15M1D3I1M2D102M	*	0	0	AAGCCCTGATCACGCGTGACTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:6	MD:Z:15A0A0A0T102	AS:i:102	XS:i:0"""
+            ],
+            [
+                VCFRecord("chr1", 17, "insDelNoStd_CAAA/CGTGA", "C", ["CGTG"]),
+                VCFRecord("chr1", 18, "insDelNoStd_CAAA/CGTGA", "AAA", ["A"]),
+                """@SQ	SN:chr1	LN:131
+@PG	ID:bwa	PN:bwa	VN:0.7.17-r1188	CL:bwa mem ref.fa reads.fa
+insDelNoStd_CAAA/CGTGA_1_alt	0	chr1	1	60	17M3I1M2D103M	*	0	0	GGAAGCCCTGATCACGCGTGATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:18^AA103	AS:i:106	XS:i:0
+insDelNoStd_CAAA/CGTGA_4_mixUp	0	chr1	1	60	17M3I106M	*	0	0	GGAAGCCCTGATCACGCGTGAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:3	MD:Z:123	AS:i:114	XS:i:0
+insDelNoStd_CAAA/CGTGA_5_mixDown	0	chr1	1	60	18M2D103M	*	0	0	GGAAGCCCTGATCACGCATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:2	MD:Z:18^AA103	AS:i:113	XS:i:0
+insDelNoStd_CAAA/CGTGA_3_ref	0	chr1	2	60	118M	*	0	0	GAAGCCCTGATCACGCAAATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGC	*	NM:i:0	MD:Z:118	AS:i:118	XS:i:0
+insDelNoStd_CAAA/CGTGA_2_alt	0	chr1	3	60	15M3I1M2D103M	*	0	0	AAGCCCTGATCACGCGTGATCTCGGCATGCCGATTAAGTGTGCTCTGAACAGGACGAACTGGATTTCCTCATGGAAGCCCTGATCATCAGCAAATTCAACCACCAGAACATTGTTCGCTGCA	*	NM:i:5	MD:Z:16^AA103	AS:i:104	XS:i:0"""
+            ]
         ]
 
     def testSetSupportingReads(self):
@@ -248,13 +295,14 @@ insDel_AAA/GGGA_2_alt	0	chr1	3	60	15M3I1M2D103M	*	0	0	AAGCCCTGATCACGCGGGATCTCGGC
                         FH_bam.write(rec)
             pysam.index(self.tmp_bam_path)
             # Eval
+            first.standardizeSingleAllele()
+            second.standardizeSingleAllele()
             with pysam.AlignmentFile(self.tmp_bam_path) as FH_aln:
-                first.end = int(first.refEnd())
-                second.start = int(second.refStart())
+                setRefPos(first)
+                setRefPos(second)
                 first.isIns = first.isInsertion()
                 second.isIns = second.isInsertion()
-                print("{}/{}\t{}/{}".format(first.ref, first.alt[0], second.ref, second.alt[0]))
-                setSupportingReads(first, second, FH_aln, LoggerSilencer())
+                setSupportingReads(first, second, self.ref_seq, FH_aln, LoggerSilencer())
                 # Check supporting first
                 expected = sorted([
                     "{}_{}".format(first.id, curr_suffix) for curr_suffix in ["1_alt", "2_alt", "4_mixUp"]

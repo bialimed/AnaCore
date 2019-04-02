@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -38,10 +38,20 @@ from anacore.vcf import VCFIO, VCFRecord
 # FUNCTIONS
 #
 ########################################################################
-def getAlnCmp(read):
+def getAlnCmp(read, ref_seq):
+    """
+    Return the dense representation of the alignment between reference sequence and read.
+
+    param read: The alignment.
+    type read: pysam.AlignedSegment
+    param ref_seq: The reference sequence included in the alignement.
+    type ref_seq: str
+    return: Dense representation of the alignment. First is reference alignment and second is read alignment.
+    rtype: (list, list)
+    """
     ref_aln = []
     read_aln = []
-    ref_seq = [elt for elt in read.get_reference_sequence()]  # reference sequence on alignment
+    ref_seq = [elt for elt in ref_seq]  # reference sequence on alignment (read.get_reference_sequence() can be incorrect)
     read_seq = [elt for elt in read.query_alignment_sequence]  # query sequence without clipped
     for operation_id, operation_lg in read.cigartuples:
         for operation_pos in range(operation_lg):
@@ -64,12 +74,35 @@ def getAlnCmp(read):
     return ref_aln, read_aln
 
 
-def setSupportingReads(prev, curr, FH_aln, log):
+def setRefPos(variant):
     """
-    set supporting reads for each of two variants with fragment overlapping the two.
+    Add start and end attributes in VCFRecord. For insertions the start is defined on the first position before the insertion and the end on the last position affected by the insertion.
+
+    param variant: The variant to update.
+    type variant: anacore.vcf.VCFRecord
     """
-    prev.start = int(prev.refStart())
-    curr.end = int(curr.refEnd())
+    variant.start = int(variant.refStart())
+    if variant.isInsertion():
+        if variant.start == int(variant.refStart() + 0.5):
+            variant.start -= 1
+    variant.end = int(variant.refEnd())
+
+
+def setSupportingReads(prev, curr, chrom_seq, FH_aln, log):
+    """
+    Add supporting reads for each variant. Only the reads overlapping the positions of the two variants are take into account.
+
+    param prev: The upstream variant to update.
+    type prev: anacore.vcf.VCFRecord updated with setRefPos() and isIns
+    param curr: The donstream variant to update.
+    type curr: anacore.vcf.VCFRecord updated with setRefPos() and isIns
+    param chrom_seq: The sequence of the chromosome.
+    type chrom_seq: str
+    param FH_aln: The file handle to the alignments file. The variants must have been defined from this alignments file.
+    type FH_aln: pysam.AlignmentFile
+    param log: The logger object.
+    type log: logging.Logger
+    """
     prev.supporting_reads = set()
     curr.supporting_reads = set()
     for read in FH_aln.fetch(curr.chrom, prev.start, curr.end):
@@ -78,17 +111,16 @@ def setSupportingReads(prev, curr, FH_aln, log):
             if len(reads_pos) != 0:  # Skip alignment with problem
                 ref_start = reads_pos[0] + 1  # 0-based to 1-based
                 ref_end = reads_pos[-1] + 1  # 0-based to 1-based
-                overlap_the_two = (ref_start <= prev.end and ref_end >= prev.start) and (ref_start <= curr.end and ref_end >= curr.start)
+                overlap_the_two = (ref_start <= prev.start and ref_end >= prev.end) and (ref_start <= curr.start and ref_end >= curr.end)
                 if overlap_the_two:
-                    ref_aln, read_aln = getAlnCmp(read)
+                    ref_aln, read_aln = getAlnCmp(read, chrom_seq[ref_start - 1:ref_end])
                     for var in [prev, curr]:
                         alt = read_aln[var.start - ref_start:var.end - ref_start + 1]
                         ref = ref_aln[var.start - ref_start:var.end - ref_start + 1]
                         if var.isIns:
-                            if len(ref[0]) != len(alt[0]):  # Read contains an insertion
-                                while len(ref[0]) > 0 and len(alt[0]) > 0 and alt[0][0] == ref[0][0]:
-                                    alt[0] = alt[0][1:]
-                                    ref[0] = ref[0][1:]
+                            while len(ref[0]) > 0 and len(alt[0]) > 0 and alt[0][0] == ref[0][0]:
+                                alt[0] = alt[0][1:]
+                                ref[0] = ref[0][1:]
                         var_alt = var.alt[0].upper().replace(VCFRecord.getEmptyAlleleMarker(), "")
                         var_ref = var.ref.upper().replace(VCFRecord.getEmptyAlleleMarker(), "")
                         if "".join(alt).upper() == var_alt and "".join(ref).upper() == var_ref:  # Is present
@@ -97,6 +129,19 @@ def setSupportingReads(prev, curr, FH_aln, log):
 
 
 def mergedRecord(first, second, ref_seq):
+    """
+    Return the VCFRecord corresponding to the merge of first and second.
+
+    param first: The upstream variant to merge.
+    type first: anacore.vcf.VCFRecord
+    param second: The downstream variant to merge.
+    type second: anacore.vcf.VCFRecord
+    param ref_seq: The sequence of the chromosome.
+    type ref_seq: str
+    return: The variant corresponding to the merge of first and second.
+    rtype: anacore.vcf.VCFRecord
+    todo: Keep INFO and format on strand from FreeBayes, VarDict, ...
+    """
     merged = VCFRecord(
         first.chrom,  # chrom
         first.pos,  # pos
@@ -154,22 +199,19 @@ def mergedRecord(first, second, ref_seq):
             merged.info["MCO_VAR"].append(parent)
     else:
         merged.info["MCO_VAR"].append(second.getName())
-    ###################################################################### strand info from FreeBayes, VarDict, ...
     # Quality
     merged.info["MCO_QUAL"] = []
     if "MCO_QUAL" in first.info:
         for qual in first.info["MCO_QUAL"]:
             merged.info["MCO_QUAL"].append(qual)
     else:
-        if first.qual is not None:
-            merged.info["MCO_QUAL"].append(first.qual)
+        merged.info["MCO_QUAL"].append(first.qual)
     if "MCO_QUAL" in second.info:
         for qual in second.info["MCO_QUAL"]:
             merged.info["MCO_QUAL"].append(qual)
     else:
-        if second.qual is not None:
-            merged.info["MCO_QUAL"].append(second.qual)
-    if len(merged.info["MCO_QUAL"]) > 0:
+        merged.info["MCO_QUAL"].append(second.qual)
+    if None not in merged.info["MCO_QUAL"]:
         merged.qual = mean(merged.info["MCO_QUAL"])
     # Return
     return merged
@@ -198,17 +240,22 @@ class LoggerAction(argparse.Action):
 #
 ########################################################################
 if __name__ == "__main__":
+    """
+    todo:
+      - merge by group not upstream to downstream
+      - count fragment overlapping the two and not the reads (increase length)
+    """
     # Manage parameters
     parser = argparse.ArgumentParser(description='Groups variants occuring in same reads.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     parser.add_argument('-l', '--logging-level', default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], action=LoggerAction, help='The logger level. [Default: %(default)s]')
-    parser.add_argument('-r', '--intersection-rate', default=0.98, type=float, help='****************. [Default: %(default)s]')
-    parser.add_argument('-n', '--intersection-nb', default=3, type=int, help='****************. [Default: %(default)s]')
-    parser.add_argument('-f', '--af-diff-threshold', default=0.01, type=float, help='**********************. [Default: %(default)s]')
-    parser.add_argument('-d', '--max-distance', default=15, type=int, help='**********************. [Default: %(default)s]')
+    parser.add_argument('-r', '--intersection-rate', default=0.98, type=float, help='Minimum ratio of co-occurancy (nb_reads_containing_the_two_variants / nb_reads_overlapping_the_two_variants_but_containing_only_one). [Default: %(default)s]')
+    parser.add_argument('-n', '--intersection-count', default=3, type=int, help='Minimum number of reads containing co-occurancy. [Default: %(default)s]')
+    parser.add_argument('-f', '--AF-diff-rate', default=0.2, type=float, help='Maximum difference rate between AF of two merged variants. [Default: %(default)s]')
+    parser.add_argument('-d', '--max-distance', default=15, type=int, help='Maximum distance between two merged variants. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-a', '--input-aln', required=True, help='Path to the alignment file (format: BAM).')
-    group_input.add_argument('-i', '--input-variants', required=True, help='Path to the varuiants file (format: VCF).')
+    group_input.add_argument('-i', '--input-variants', required=True, help='Path to the varuiants file (format: VCF). Variants must be ordered by position. They should not be move to upstream.')
     group_input.add_argument('-s', '--input-sequences', required=True, help='Path to the reference sequences file (format: fasta).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-o', '--output-variants', required=True, help='Path to the variant file. (format: VCF).')
@@ -220,12 +267,15 @@ if __name__ == "__main__":
     log.setLevel(args.logging_level)
     log.info("Command: " + " ".join(sys.argv))
 
-    # Process
+    # Load reference sequences
+    log.info("Load reference sequences")
     seq_by_chrom = {}
     with FastaIO(args.input_sequences) as FH_seq:
         for record in FH_seq:
             seq_by_chrom[record.id] = record.string
 
+    # Merge variants
+    log.info("Process merge")
     with VCFIO(args.output_variants, "w") as FH_out:
         with pysam.AlignmentFile(args.input_aln, "rb") as FH_aln:
             with VCFIO(args.input_variants) as FH_vcf:
@@ -233,38 +283,53 @@ if __name__ == "__main__":
                 FH_out.copyHeader(FH_vcf)
                 FH_out.info["MCO_VAR"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Name of the variants merged because their occur on same reads."}
                 FH_out.info["MCO_QUAL"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Qualities of the variants merged because their occur on same reads."}
+                FH_out.info["MCO_IR"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Co-occurancy rate between pairs of variants."}
+                FH_out.info["MCO_IC"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Co-occurancy count between pairs of variants."}
                 FH_out._writeHeader()
                 # Records
-                prev = None  #################################### pb quand plusieurs
+                prev = None
                 for curr in FH_vcf:
+                    curr.standardizeSingleAllele()
                     prev_is_merged = False
                     if prev is not None:
-                        prev.end = int(prev.refEnd())
-                        curr.start = int(curr.refStart())
-                        if prev.chrom == curr.chrom and prev.end - curr.start < args.max_distance:  # The two records are close together
-                            prev_AF = prev.getPopAF()[0]
-                            curr_AF = curr.getPopAF()[0]
-                            if min(prev_AF, curr_AF) / max(prev_AF, curr_AF) >= args.af_diff_threshold:  # The two records have similar frequencies
-                                prev.isIns = prev.isInsertion()
-                                curr.isIns = curr.isInsertion()
-                                # Set supporting reads
-                                setSupportingReads(prev, curr, FH_aln, log)
-                                # Check co-occurence
-                                if len(prev.supporting_reads) == 0 and len(curr.supporting_reads) == 0:
-                                    log.warnings("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
-                                else:
-                                    intersection_nb = len(prev.supporting_reads & curr.supporting_reads)
-                                    intersection_rate = intersection_nb / len(prev.supporting_reads | curr.supporting_reads)
-                                    log.info("{} and {} intersection rate: {:.5} ; number: {}.".format(prev.getName(), curr.getName(), intersection_rate, intersection_nb))
-                                if intersection_rate >= args.intersection_rate and intersection_nb >= args.intersection_nb:
-                                    # Merge variants
-                                    log.info("Merge {} and {}.".format(prev.getName(), curr.getName()))
-                                    prev_is_merged = True
-                                    curr = mergedRecord(prev, curr, seq_by_chrom[prev.chrom])
-                                    # curr.info["MCO_IR"] = "():{}".format(intersection_rate)
-                                    # if "MCO_IR" in prev.info:
-                                    #         curr.info["MCO_IR"] = "(({}),):{}".format(prev.info["MCO_IR"], intersection_rate)
-                                    ############################### INFO add intersection rate and interstion nb parent_variants
+                        if prev.chrom == curr.chrom:
+                            setRefPos(prev)
+                            setRefPos(curr)
+                            if prev.start > curr.start:  # Fix order problem after standardization
+                                aux = prev
+                                prev = curr
+                                curr = aux
+                            if prev.end - curr.start < args.max_distance:  # The two records are close together
+                                prev_AF = prev.getPopAF()[0]
+                                curr_AF = curr.getPopAF()[0]
+                                if min(prev_AF, curr_AF) / max(prev_AF, curr_AF) >= args.AF_diff_rate:  # The two records have similar frequencies
+                                    prev.isIns = prev.isInsertion()
+                                    curr.isIns = curr.isInsertion()
+                                    # Set supporting reads
+                                    setSupportingReads(prev, curr, seq_by_chrom[prev.chrom], FH_aln, log)
+                                    # Check co-occurence
+                                    if len(prev.supporting_reads) == 0 and len(curr.supporting_reads) == 0:
+                                        log.warning("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
+                                    else:
+                                        intersection_count = len(prev.supporting_reads & curr.supporting_reads)
+                                        intersection_rate = intersection_count / len(prev.supporting_reads | curr.supporting_reads)
+                                        log.info("{} and {} intersection rate: {:.5} ; number: {}.".format(prev.getName(), curr.getName(), intersection_rate, intersection_count))
+                                        if intersection_rate >= args.intersection_rate and intersection_count >= args.intersection_count:
+                                            # Merge variants
+                                            prev_is_merged = True
+                                            merged = mergedRecord(prev, curr, seq_by_chrom[prev.chrom])
+                                            log.info("Merge {} and {} in {}.".format(prev.getName(), curr.getName(), merged.getName()))
+                                            merged.info["MCO_IR"] = []
+                                            if "MCO_IR" in prev.info:
+                                                for curr_IR in prev.info["MCO_IR"]:
+                                                    merged.info["MCO_IR"].append(curr_IR)
+                                            merged.info["MCO_IR"].append(round(intersection_rate, 4))
+                                            merged.info["MCO_IC"] = []
+                                            if "MCO_IC" in prev.info:
+                                                for curr_IC in prev.info["MCO_IC"]:
+                                                    merged.info["MCO_IC"].append(curr_IC)
+                                            merged.info["MCO_IC"].append(intersection_count)
+                                            curr = merged
                         if not prev_is_merged:
                             FH_out.write(prev)
                     prev = curr
