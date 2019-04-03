@@ -19,12 +19,13 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import json
 import pysam
 import logging
 import argparse
@@ -314,7 +315,51 @@ def getTranscriptsAnnot(region, transcripts):
     return annotations
 
 
-def writeOutput(out_path, shallow):
+def region2dict(region):
+    """
+    Return the conversion of region object to dict.
+
+    :param region: The region to convert.
+    :type region: anacore.region.Region
+    :return: The dict representation of the region.
+    :rtype: dict
+    """
+    return {
+        "start": region.start,
+        "end": region.end,
+        "strand": region.strand,
+        "reference": (None if region.reference is None else region.reference.name),
+        "name": region.name,
+        "annotations": region.annot["ANN"],
+        "known_variants": [curr_var.annot for curr_var in region.annot["VAR"]]
+    }
+
+
+def writeJSON(out_path, shallow, args):
+    """
+    Write shallow areas there annotations in a JSON file.
+
+    :param out_path: Path to the output file.
+    :type out_path: str
+    :param shallow: The list of shallow areas.
+    :type shallow: anacore.region.RegionList
+    :param args: Parameters used in analysis.
+    :type args: NameSpace
+    """
+    nb_shallows = len(shallow)
+    with open(out_path, "w") as FH_out:
+        FH_out.write("{\n")
+        FH_out.write('  "parameters": {{"depth_mode": {}, "min_depth": {}}},\n'.format(args.depth_mode, args.min_depth))
+        FH_out.write('  "results": [\n')
+        for idx_shallow, curr_shallow in enumerate(shallow):
+            curr_json = json.dumps(region2dict(curr_shallow), sort_keys=True)
+            suffix = "," if idx_shallow + 1 < nb_shallows else ""
+            FH_out.write("  {}{}\n".format(curr_json, suffix))
+        FH_out.write('  ]\n')
+        FH_out.write('}')
+
+
+def writeGFF(out_path, shallow):
     """
     Write shallow areas there annotations in a GFF3 file.
 
@@ -327,7 +372,7 @@ def writeOutput(out_path, shallow):
         for curr_shallow in sorted(shallow, key=lambda x: (x.reference.name, x.start, x.end)):
             record = GFF3Record(
                 curr_shallow.reference.name,
-                "depthAnalysis",
+                "shallowsAnalysis",
                 "experimental_feature",
                 curr_shallow.start,
                 curr_shallow.end
@@ -359,12 +404,12 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--depth-mode', choices=["read", "fragment"], default="fragment", help='How count the depth: by reads (each reads is added independently) or by fragment (the R1 and R2 coming from the same pair are counted only once). [Default: %(default)s]')
     parser.add_argument('-d', '--min-depth', type=int, default=30, help='All the locations with a depth under this value are reported in shallows areas. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
-    group_input.add_argument('-b', '--input-aln', required=True, help='Path to the variants files (format: BAM).')
+    group_input.add_argument('-b', '--input-aln', required=True, help='Path to the alignments file (format: BAM).')
     group_input.add_argument('-t', '--input-targets', help='Path to the targeted regions (format: BED). They must not contains any overlap. [Default: all positions defined in the alignment file header]')
     group_input.add_argument('-a', '--input-annotations', help='Path to the file defining transcripts, genes and proteins locations (format: GTF). This file allow to annotate locations on genes and proteins located on shallows areas. [Default: The shallows areas are not annotated]')
     group_input.add_argument('-s', '--inputs-variants', nargs="+", help='Path(es) to the file(s) defining known variants (format: VCF). This file allow to annotate variant potentially masked because they are on shallows areas. [Default: The variants on shallows areas are not reported]')
     group_output = parser.add_argument_group('Outputs')  # Outputs
-    group_output.add_argument('-o', '--output-shallow', default="shallow_areas.gff3", help='Path to the file containing shallow areas and there annotations. (format: GFF3). [Default: %(default)s]')
+    group_output.add_argument('-o', '--output-shallow', default="shallow_areas.gff3", help='Path to the file containing shallow areas and there annotations. (format: GFF3 or JSON if file name ends with ".json"). [Default: %(default)s]')
     args = parser.parse_args()
 
     # Logger
@@ -397,4 +442,7 @@ if __name__ == "__main__":
 
     # Write output
     log.info("Write output.")
-    writeOutput(args.output_shallow, shallow)
+    if args.output_shallow.endswith(".json"):
+        writeJSON(args.output_shallow, shallow, args)
+    else:
+        writeGFF(args.output_shallow, shallow, args)

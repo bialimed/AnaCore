@@ -36,7 +36,7 @@ sys.path.append(BIN_DIR)
 
 from anacore.region import Region
 from anacore.genomicRegion import CDS, Exon, Gene, Protein, Transcript
-from depthsAnalysis import getTranscriptsAnnot
+from shallowsAnalysis import getTranscriptsAnnot
 
 BIN_DIR = os.path.dirname(CURRENT_DIR)
 os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
