@@ -42,12 +42,12 @@ def getAlnCmp(read, ref_seq):
     """
     Return the dense representation of the alignment between reference sequence and read.
 
-    param read: The alignment.
-    type read: pysam.AlignedSegment
-    param ref_seq: The reference sequence included in the alignement.
-    type ref_seq: str
-    return: Dense representation of the alignment. First is reference alignment and second is read alignment.
-    rtype: (list, list)
+    :param read: The alignment.
+    :type read: pysam.AlignedSegment
+    :param ref_seq: The reference sequence included in the alignement.
+    :type ref_seq: str
+    :return: Dense representation of the alignment. First is reference alignment and second is read alignment.
+    :rtype: (list, list)
     """
     ref_aln = []
     read_aln = []
@@ -78,8 +78,8 @@ def setRefPos(variant):
     """
     Add start and end attributes in VCFRecord. For insertions the start is defined on the first position before the insertion and the end on the last position affected by the insertion.
 
-    param variant: The variant to update.
-    type variant: anacore.vcf.VCFRecord
+    :param variant: The variant to update.
+    :type variant: anacore.vcf.VCFRecord
     """
     variant.start = int(variant.refStart())
     if variant.isInsertion():
@@ -92,16 +92,16 @@ def setSupportingReads(prev, curr, chrom_seq, FH_aln, log):
     """
     Add supporting reads for each variant. Only the reads overlapping the positions of the two variants are take into account.
 
-    param prev: The upstream variant to update.
-    type prev: anacore.vcf.VCFRecord updated with setRefPos() and isIns
-    param curr: The donstream variant to update.
-    type curr: anacore.vcf.VCFRecord updated with setRefPos() and isIns
-    param chrom_seq: The sequence of the chromosome.
-    type chrom_seq: str
-    param FH_aln: The file handle to the alignments file. The variants must have been defined from this alignments file.
-    type FH_aln: pysam.AlignmentFile
-    param log: The logger object.
-    type log: logging.Logger
+    :param prev: The upstream variant to update.
+    :type prev: anacore.vcf.VCFRecord updated with setRefPos() and isIns
+    :param curr: The donstream variant to update.
+    :type curr: anacore.vcf.VCFRecord updated with setRefPos() and isIns
+    :param chrom_seq: The sequence of the chromosome.
+    :type chrom_seq: str
+    :param FH_aln: The file handle to the alignments file. The variants must have been defined from this alignments file.
+    :type FH_aln: pysam.AlignmentFile
+    :param log: The logger object.
+    :type log: logging.Logger
     """
     prev.supporting_reads = set()
     curr.supporting_reads = set()
@@ -132,15 +132,15 @@ def mergedRecord(first, second, ref_seq):
     """
     Return the VCFRecord corresponding to the merge of first and second.
 
-    param first: The upstream variant to merge.
-    type first: anacore.vcf.VCFRecord
-    param second: The downstream variant to merge.
-    type second: anacore.vcf.VCFRecord
-    param ref_seq: The sequence of the chromosome.
-    type ref_seq: str
-    return: The variant corresponding to the merge of first and second.
-    rtype: anacore.vcf.VCFRecord
-    todo: Keep INFO and format on strand from FreeBayes, VarDict, ...
+    :param first: The upstream variant to merge.
+    :type first: anacore.vcf.VCFRecord
+    :param second: The downstream variant to merge.
+    :type second: anacore.vcf.VCFRecord
+    :param ref_seq: The sequence of the chromosome.
+    :type ref_seq: str
+    :return: The variant corresponding to the merge of first and second.
+    :rtype: anacore.vcf.VCFRecord
+    :todo: Keep INFO and format on strand from FreeBayes, VarDict, ...
     """
     merged = VCFRecord(
         first.chrom,  # chrom
@@ -241,7 +241,7 @@ class LoggerAction(argparse.Action):
 ########################################################################
 if __name__ == "__main__":
     """
-    todo:
+    :todo:
       - merge by group not upstream to downstream
       - count fragment overlapping the two and not the reads (increase length)
     """
