@@ -349,7 +349,7 @@ def writeJSON(out_path, shallow, args):
     nb_shallows = len(shallow)
     with open(out_path, "w") as FH_out:
         FH_out.write("{\n")
-        FH_out.write('  "parameters": {{"depth_mode": {}, "min_depth": {}}},\n'.format(args.depth_mode, args.min_depth))
+        FH_out.write('  "parameters": {{"depth_mode": "{}", "min_depth": {}}},\n'.format(args.depth_mode, args.min_depth))
         FH_out.write('  "results": [\n')
         for idx_shallow, curr_shallow in enumerate(shallow):
             curr_json = json.dumps(region2dict(curr_shallow), sort_keys=True)
