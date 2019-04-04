@@ -1,4 +1,11 @@
+/*!
+  * shallowsAnalysisTable component v1.0.0
+  * Copyright 2019 IUCT-O
+  * Author Frederic Escudie
+  * Licensed under GNU General Public License
+  */
 
+ 
 function displayKnownVariants(variant){
     let display = getVariantLink(variant.id)
     if(variant.HGVSp != ""){
@@ -10,6 +17,7 @@ function displayKnownVariants(variant){
     }
     return display
 }
+
 
 function displayAnnotations(annot){
     let display = ""
@@ -42,6 +50,7 @@ function displayAnnotations(annot){
     }
     return display
 }
+
 
 Vue.component('shallows-analysis-table', {
     props: {

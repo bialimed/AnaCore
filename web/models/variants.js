@@ -1,3 +1,11 @@
+/*!
+  * shallowsAnalysisTable component v1.0.0
+  * Copyright 2019 IUCT-O
+  * Author Frederic Escudie
+  * Licensed under GNU General Public License
+  */
+
+
 function getURLFromVariantId(variant_id){
     let url = null
     if(variant_id.startsWith("COSM")){
