@@ -1,3 +1,11 @@
+/*!
+  * tinyHighchart component v1.1.0
+  * Copyright 2018 IUCT-O
+  * Author Frederic Escudie
+  * Licensed under GNU General Public License
+  */
+
+
 function getGraph( pChart_type, pSeries, pX_title, pY_title, pTitle=null, pTickInterval=1 ){
 	let chart_param = {
         chart: {
@@ -41,6 +49,7 @@ function getGraph( pChart_type, pSeries, pX_title, pY_title, pTitle=null, pTickI
 	}
     return chart_param
 }
+
 
 Vue.component('tiny-highchart', {
     props: {

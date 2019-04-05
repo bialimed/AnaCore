@@ -1,3 +1,11 @@
+/*!
+  * thresholdAlert component v1.1.0
+  * Copyright 2018 IUCT-O
+  * Author Frederic Escudie
+  * Licensed under GNU General Public License
+  */
+
+
 class ThresholdAlert {
     constructor(rules, text_pre, text_post="", value_suffix="") {
         this.text_pre = text_pre
@@ -6,6 +14,7 @@ class ThresholdAlert {
         this.value_suffix = value_suffix
 	}
 }
+
 
 Vue.component('threshold-alert', {
 	props: {
