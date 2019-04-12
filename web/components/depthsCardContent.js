@@ -54,7 +54,7 @@ Vue.component('depths-card-content', {
             let prct_shallows_nt = null
             if(this.depthsMetrics !== null){
                 const spl_name = Object.keys(this.depthsMetrics.under_threshold.count_by_spl)[0]
-                const prct_shallows_nt = this.depthsMetrics.under_threshold.count_by_spl[spl_name].rate * 100
+                prct_shallows_nt = this.depthsMetrics.under_threshold.count_by_spl[spl_name].rate * 100
                 this.threshold_shallows_prct.text_post = " (" + this.depthsMetrics.under_threshold.count_by_spl[spl_name].count + " nt) of targeted nucleotids have a depth <= " +  this.depthsMetrics.under_threshold.threshold
             }
             return prct_shallows_nt
@@ -69,7 +69,7 @@ Vue.component('depths-card-content', {
                     nb_missing_nt = this.depthsMetrics.depths_classes.count_by_spl[spl_name][idx_missing]
                 }
                 const nb_targeted_nt = this.depthsMetrics.sequencing_by_spl[spl_name].nt_targeted
-                const prct_missing_nt = (nb_missing_nt * 100 / nb_targeted_nt).toFixed(2)
+                prct_missing_nt = (nb_missing_nt * 100 / nb_targeted_nt).toFixed(2)
                 this.threshold_missing_prct.text_post = " (" + nb_missing_nt + " nt) of targeted nucleotids are not covered"
             }
             return prct_missing_nt
@@ -84,11 +84,11 @@ Vue.component('depths-card-content', {
                     </depths-chart>
                 </div>
                 <div class="col-md-2">
-                    <threshold-alert v-if="values_shallows_prct !== null"
+                    <threshold-alert v-if="values_missing_prct !== null"
                         :threshold=threshold_missing_prct
                         :value=values_missing_prct>
                     </threshold-alert>
-                    <threshold-alert v-if="values_missing_prct !== null"
+                    <threshold-alert v-if="values_shallows_prct !== null"
                         :threshold=threshold_shallows_prct
                         :value=values_shallows_prct>
                     </threshold-alert>
@@ -101,10 +101,10 @@ Vue.component('depths-card-content', {
                     </shallows-analysis-table>
                 </div>
                 <div class="col-md-2">
-                      <threshold-alert v-if="values_shallows_with_variants !== null"
-                          :threshold=threshold_shallows_with_variants
-                          :value=values_shallows_with_variants>
-                      </threshold-alert>
+                    <threshold-alert v-if="values_shallows_with_variants !== null"
+                        :threshold=threshold_shallows_with_variants
+                        :value=values_shallows_with_variants>
+                    </threshold-alert>
                 </div>
             </div>
         </div>`
