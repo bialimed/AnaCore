@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '2.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -33,7 +33,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.annotVcf import AnnotVCFIO, getAlleleRecord
+from anacore.annotVcf import AnnotVCFIO, getAlleleRecord, VCFRecord
 
 
 ########################################################################
@@ -41,9 +41,36 @@ from anacore.annotVcf import AnnotVCFIO, getAlleleRecord
 # FUNCTIONS
 #
 ########################################################################
-def getAnnotSummary(allele_record, initial_alt, annot_field="ANN"):
+def isSameAlt(var_record, var_annot):
     """
-    Return a summary of the diffrent annotations of the variant. This summary is about identical known variants (xref), AF in populations (pop_AF), annotations of the variant and annotations of the colocated variants.
+    Evaluate an annotation of a variant and return False if it concerns an collocated variant and not the same variant.
+
+    :param var_record: The variant. It must contain only one alternative allele.
+    :type var_record: anacore.vcf.VCFRecord
+    :param var_annot: One annotation of the variant (for example coming from ANN INFO field produced by VEP).
+    :type var_annot: dict
+    :return: True if the var_record and var_annot concern the same alternative allele.
+    :rtype: boolean
+    """
+    record_alt_str = var_record.alt[0].replace(".", "").replace("-", "").upper()
+    annot_alt_str = var_annot["Allele"].replace(".", "").replace("-", "").upper()
+    is_self_variant = (record_alt_str == annot_alt_str)
+    if not is_self_variant:
+        std_record = VCFRecord(
+            var_record.chrom,
+            var_record.pos,
+            var_record.ref,
+            [record_alt_str]
+        )
+        std_record.standardizeSingleAllele()
+        record_alt_str = std_record.alt[0].replace(".", "").replace("-", "").upper()
+        is_self_variant = (record_alt_str == annot_alt_str)
+    return is_self_variant
+
+
+def getAnnotSummary(allele_record, initial_alt, annot_field="ANN", pop_prefixes=None, pathogenicity_fields=None):
+    """
+    Return a summary of the diffrent annotations of the variant. This summary is about identical known variants (xref), AF in populations (pop_AF), annotations of the variant and annotations of the collocated variants.
 
     :param allele_record: The variant.
     :type allele_record: anacore.vcf.VCFRecord
@@ -51,18 +78,20 @@ def getAnnotSummary(allele_record, initial_alt, annot_field="ANN"):
     :type initial_alt: str
     :param annot_field: Field used to store annotations.
     :type annot_field: str
-    :return: First the dentical known variants (e.g. {"cosmic": ["COSM14", "COSM15"], "dbSNP":[]}), second AF in populations (e.g. [{"source":"1KG", "name":"Global", "AF":0.85}]), third annotations of the variant and fourth annotations of the colocated variants.
+    :param pop_prefixes: The prefixes used to determine database name in population allele frequency fields. Example: the prefix "gnomAD" is used in gnomAD_AF, gnomAD_EUR_AF.
+    :type pop_prefixes: list
+    :param pathogenicity_fields: The titles of fields used to store pathogenicity predictor results. Example: SIFT, PolyPhen, CADD_PHRED.
+    :type pathogenicity_fields: str
+    :return: First the dentical known variants (e.g. {"cosmic": ["COSM14", "COSM15"], "dbSNP":[]}), second AF in populations (e.g. [{"source":"1KG", "name":"Global", "AF":0.85}]), third annotations of the variant and fourth annotations of the collocated variants.
     :rtype: list
     :warnings: The allele_record must only contains one variant.
     """
     xref = {"cosmic": set(), "dbSNP": set(), "HGMD": set(), "Unknown": set()}
     pop_AF = dict()
     variant_annot = list()
-    colocated_annot = list()
+    collocated_annot = list()
     for annot in allele_record.info[annot_field]:
-        annot_allele = annot["Allele"].replace(".", "-")
-        annot_allele = "-" if annot_allele == "" else annot_allele
-        is_self_variant = (annot_allele == initial_alt)
+        is_self_variant = isSameAlt(allele_record, annot)
         # Similar knowns variants
         if is_self_variant and annot["Existing_variation"] is not None:
             for db_id in annot["Existing_variation"].split("&"):
@@ -79,7 +108,7 @@ def getAnnotSummary(allele_record, initial_alt, annot_field="ANN"):
         if is_self_variant:
             for key in annot:
                 if key.endswith("_AF") and annot[key] is not None:
-                    source, name = getPopInfo(key)
+                    source, name = getPopInfo(key, pop_prefixes)
                     pop_id = source + "_" + name
                     for curr_AF in annot[key].split("&"):
                         if pop_id not in pop_AF:
@@ -96,37 +125,64 @@ def getAnnotSummary(allele_record, initial_alt, annot_field="ANN"):
                                     )
                                 )
         # Annotations
-        annot_container = variant_annot if is_self_variant else colocated_annot
+        annot_container = variant_annot if is_self_variant else collocated_annot
         annot_container.append({
             "subject": {"symbol": annot["SYMBOL"], "feature": annot["Feature"], "feature_type": annot["Feature_type"]},
-            "change": {"HGVSc": annot["HGVSc"], "HGVSp": annot["HGVSp"]},
-            "conseq": {
-                "tag": annot["Consequence"],
-                "polyphen": annot["PolyPhen"],
-                "sift": annot["SIFT"],
-                "clinvar": annot["CLIN_SIG"]
-            }
+            "changes": {"HGVSc": annot["HGVSc"], "HGVSp": annot["HGVSp"]},
+            "conseq": annot["Consequence"],
+            "pathogenicity": getPathogenicityPredictors(annot, pathogenicity_fields)
         })
     xref = {db: list(xref[db]) for db in xref}
     pop_AF = list(pop_AF.values())
-    return xref, pop_AF, variant_annot, colocated_annot
+    return xref, pop_AF, variant_annot, collocated_annot
 
 
-def getPopInfo(annot_key):
+def getPathogenicityPredictors(annot, pathogenicity_fields=None):
+    """
+    Return by predictor the predicted pathogenicity.
+
+    :param annot: The information from an annotation feature.
+    :type annot: dict
+    :param pathogenicity_fields: The titles of fields used to store pathogenicity predictor results. Example: SIFT, PolyPhen, CADD_PHRED.
+    :type pathogenicity_fields: str
+    :return: by predictor the predicted pathogenicity.
+    :rtype: dict
+    """
+    pathogenicity_fields = ["CLIN_SIG", "CADD_PHRED", "MetaLR_rankscore", "VEST3_rankscore"] if pathogenicity_fields is None else pathogenicity_fields
+    rename = {
+        "CLIN_SIG": "ClinVar",
+        "CADD_PHRED": "CADD_phred",
+        "MetaLR_rankscore": "MetaLR",
+        "VEST3_rankscore": "VEST3"
+    }
+    score_by_predictor = {}
+    for key in pathogenicity_fields:
+        if key in annot and annot[key] != "":
+            source = key
+            if key in rename:
+                source = rename[key]
+            score_by_predictor[source] = annot[key]
+    return score_by_predictor
+
+
+def getPopInfo(annot_key, pop_prefixes=None):
     """
     Return source and name of a sub-population studied in large genomic programs (1KG, ExAC, ...) from the annotation tag.
 
     :param annot_key: The tag used in annotation to store AF of the variant in sub-population.
     :type annot_key: str
+    :param pop_prefixes: The prefixes used to determine database name in population allele frequency fields (example: "gnomAD" is used in gnomAD_AF, gnomAD_EUR_AF).
+    :type pop_prefixes: list
     :return: The source (project name) and the name of the sub-population.
     :rtype: list
     """
+    pop_lower_prefixes = ["exac", "gnomad", "1kg", "esp"] if pop_prefixes is None else [elt.lower() for elt in pop_prefixes]
     source = None
     name = None
     if annot_key == "AF":
         source = "1KG"
         name = "Global"
-    elif annot_key.lower().startswith("exac_") or annot_key.lower().startswith("gnomAD_") or annot_key.lower().startswith("1kg_") or annot_key.lower().startswith("esp_"):  # ExAC_AF, ExAC_Adj_AF, ExAC_AFR_AF, ExAC_AMR_AF, ...
+    elif "_" in annot_key and annot_key.lower().split("_")[0] in pop_lower_prefixes:  # ExAC_AF, ExAC_Adj_AF, ExAC_AFR_AF, ExAC_AMR_AF, ...
         source = annot_key.split("_")[0]
         name = "Global" if annot_key.count('_') == 1 else annot_key.split("_")[1]
     elif annot_key.count('_') == 1:  # AFR_AF, AMR_AF, EAS_AF, EUR_AF, SAS_AF, AA_AF, EA_AF, ...
@@ -145,7 +201,10 @@ def getPopInfo(annot_key):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Converts VCF annotated with VEP in JSON format.')
-    parser.add_argument('-f', '--annotation-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
+    parser.add_argument('-r', '--assembly-id', help='ID of the reference used for the variant calling (example: GRCh38.p12).')
+    parser.add_argument('-t', '--pathogenicity-fields', default=["CLIN_SIG", "CADD_PHRED", "MetaLR_rankscore", "VEST3_rankscore"], nargs='+', help='The titles of fields used to store pathogenicity predictor results (example: SIFT, PolyPhen, CADD_PHRED). [Default: %(default)s]')
+    parser.add_argument('-p', '--populations-prefixes', default=["exac", "gnomad", "1kg", "esp"], nargs='+', help='The prefixes used to determine database name in population allele frequency fields (example: "gnomAD" is used in gnomAD_AF, gnomAD_EUR_AF). [Default: %(default)s]')
+    parser.add_argument('-a', '--annotation-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file file containing variants and annotated with VEP v88+ (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
@@ -160,22 +219,30 @@ if __name__ == "__main__":
                 allele_record = getAlleleRecord(FH_vcf, record, idx_alt)
                 allele_record.standardizeSingleAllele()
                 curr_json = dict()
-                # Core information
-                curr_json["core"] = {
+                # Coord information
+                curr_json["coord"] = {
                     "region": allele_record.chrom,
                     "pos": allele_record.pos,
                     "ref": allele_record.ref,
-                    "alt": allele_record.alt[0]
+                    "alt": allele_record.alt[0],
+                    "assembly": (None if args.assembly_id is None else args.assembly_id)
                 }
                 # Support information
-                curr_json["support"] = {
+                curr_json["supports"] = [{
                     "filters": allele_record.filter,
-                    "qual": allele_record.qual,
-                    "libraries": [{"alt_depth": allele_record.getAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples]
-                }
+                    "quality": allele_record.qual,
+                    "libraries": [{"alt_depth": allele_record.getAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples],
+                    "source": None
+                }]
                 if FH_vcf.annot_field in allele_record.info:
                     # Identical known variants, AF in populations and annotations
-                    curr_json["xref"], curr_json["pop_AF"], curr_json["annot"], curr_json["colocated_annot"] = getAnnotSummary(allele_record, record.alt[idx_alt])
+                    curr_json["xref"], curr_json["pop_AF"], curr_json["annot"], curr_json["collocated_annot"] = getAnnotSummary(
+                        allele_record,
+                        record.alt[idx_alt],
+                        args.annotation_field,
+                        args.populations_prefixes,
+                        args.pathogenicity_fields
+                    )
                 json_data.append(curr_json)
 
     # Write output file
