@@ -1,12 +1,12 @@
 /*!
-  * dynamicTable component v1.0.0
+  * dynamicTable component v1.1.0
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
   */
 
 
-Vue.component('dynamic-table', {
+DynamicTable = Vue.component('dynamic-table', {
 	props: {
 		data: Array,
 		filters: Object,  // An instance of FiltersCombiner
@@ -34,6 +34,10 @@ Vue.component('dynamic-table', {
 			default: function(){ return {"export": true, "filter": true, "pagination": true} },
 			type: Object
 		},
+		export_title:  {
+			default: null,
+			type: String
+		},
 		scroll_x: {
 			default: false,  // This option is incompatible with header containing rowspan or colspan
 			type: Boolean
@@ -41,7 +45,7 @@ Vue.component('dynamic-table', {
 		title: String,
 	},
 	mounted: function() {
-		$(this.$el).DataTable(this._datatableParams)
+		$(this.$el).DataTable(this.datatableParams)
 	},
 	computed: {
 		is_multi_rows_header: function(){
@@ -107,7 +111,7 @@ Vue.component('dynamic-table', {
 			}
 			return filtered_data
 		},
-		_datatableParams: function(){
+		datatableParams: function(){
 			order_rule = [[ 0, "asc" ]]
 			this.columns.forEach(function( curr_col, col_idx ){
 				if( curr_col.hasOwnProperty("sort") ){
@@ -128,7 +132,14 @@ Vue.component('dynamic-table', {
 				datatable_params["dom"] = 'l' + datatable_params["dom"] + 'rtip'
 			}
 			if( this.menu.export ){
-				datatable_params["buttons"] = ['csv', 'excel']
+				if(this.export_title === null){
+					datatable_params["buttons"] = ['csv', 'excel']
+				} else {
+					datatable_params["buttons"] = [
+						{extend: 'csv', title: this.export_title},
+						{extend: 'excel', title: this.export_title}
+					]
+				}
 				datatable_params["dom"] = 'B' + datatable_params["dom"]
 			}
 			return datatable_params
@@ -148,7 +159,7 @@ Vue.component('dynamic-table', {
 		$(this.$el).DataTable().destroy()
 	},
 	updated: function() {
-		$(this.$el).DataTable(this._datatableParams)
+		$(this.$el).DataTable(this.datatableParams)
 	},
 	methods: {
 		getValue: function( entry, col ){
