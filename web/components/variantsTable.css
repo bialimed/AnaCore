@@ -1,0 +1,46 @@
+/*!
+  * variantsTable component v2.0.0
+  * Copyright 2018 IUCT-O
+  * Author Frederic Escudie
+  * Licensed under GNU General Public License
+  */
+.vtable-label {
+  display: inline;
+  padding: .01em .6em .02em;
+  color: #fff;
+  font-size: 75%;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  padding-right: .6em;
+  padding-left: .6em;
+  border-radius: 10rem;
+  border-style: solid;
+  border-width: 2px;
+  box-sizing: border-box;
+}
+.vtable-label-danger {
+  border-color: #d9534f;
+  background-color: #d9534f;
+}
+.vtable-label-warning {
+  border-color: #f0ad4e;
+  background-color: #f0ad4e;
+}
+.vtable-label-success {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+.vtable-label-good {
+  border-color: #5cb85c;
+  background-color: #5cb85c;
+}
+.vtable-label-na {
+  border-color: #6c757d;
+  background-color: #6c757d;
+}
+.vtable-noStdCaller {
+  color: #FF9800;
+}

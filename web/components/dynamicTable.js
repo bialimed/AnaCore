@@ -144,7 +144,7 @@ DynamicTable = Vue.component('dynamic-table', {
 			}
 			return datatable_params
 		},
-		_datatableStyle: function(){
+		datatableStyle: function(){
 			let style = {}
 			if( this.scroll_x ){
 				style = {
@@ -202,7 +202,7 @@ DynamicTable = Vue.component('dynamic-table', {
 		}
 	},
 	template:
-		`<table class="table table-striped" :style="_datatableStyle">
+		`<table class="table table-striped" :style="datatableStyle">
 			<caption>
 				{{title}}
 			</caption>
