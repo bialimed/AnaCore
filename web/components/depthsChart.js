@@ -41,6 +41,6 @@ Vue.component('depths-chart', {
             x_title="Depth"
             y_title="Number of nucleotids with this depth"
             title="Depths distribution"
-            :tick_interval=1>
+            :x_tick_interval=1>
         </tiny-highchart>`
 })
