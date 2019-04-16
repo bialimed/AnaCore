@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -359,7 +359,7 @@ def writeJSON(out_path, shallow, args):
         FH_out.write('}')
 
 
-def writeGFF(out_path, shallow):
+def writeGFF(out_path, shallow, args):
     """
     Write shallow areas there annotations in a GFF3 file.
 
@@ -367,6 +367,8 @@ def writeGFF(out_path, shallow):
     :type out_path: str
     :param shallow: The list of shallow areas.
     :type shallow: anacore.region.RegionList
+    :param args: Parameters used in analysis.
+    :type args: NameSpace
     """
     with GFF3IO(out_path, "w") as FH_out:
         for curr_shallow in sorted(shallow, key=lambda x: (x.reference.name, x.start, x.end)):
