@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -158,7 +158,9 @@ def mergedRecord(first, second, ref_seq):
     merged.alt = [first.alt[0] + ref_add + second.alt[0]]
     merged.alt[0] = merged.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
     # Filter
-    merged.filter = list(set(first.filter + second.filter))
+    first_filters = [] if first.filter is None else first.filter
+    second_filters = [] if second.filter is None else second.filter
+    merged.filter = list(set(first_filters + second_filters))
     if len(merged.filter) > 1 and "PASS" in merged.filter:
         merged.filter.remove("PASS")
     # Samples
@@ -255,7 +257,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--max-distance', default=15, type=int, help='Maximum distance between two merged variants. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-a', '--input-aln', required=True, help='Path to the alignment file (format: BAM).')
-    group_input.add_argument('-i', '--input-variants', required=True, help='Path to the varuiants file (format: VCF). Variants must be ordered by position. They should not be move to upstream.')
+    group_input.add_argument('-i', '--input-variants', required=True, help='Path to the variants file (format: VCF). Variants must be ordered by position. They should not be move to upstream.')
     group_input.add_argument('-s', '--input-sequences', required=True, help='Path to the reference sequences file (format: fasta).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-o', '--output-variants', required=True, help='Path to the variant file. (format: VCF).')
@@ -299,7 +301,7 @@ if __name__ == "__main__":
                                 aux = prev
                                 prev = curr
                                 curr = aux
-                            if prev.end - curr.start < args.max_distance:  # The two records are close together
+                            if curr.start - prev.end < args.max_distance:  # The two records are close together
                                 prev_AF = prev.getPopAF()[0]
                                 curr_AF = curr.getPopAF()[0]
                                 if min(prev_AF, curr_AF) / max(prev_AF, curr_AF) >= args.AF_diff_rate:  # The two records have similar frequencies
