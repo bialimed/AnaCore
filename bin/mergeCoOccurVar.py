@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -171,24 +171,64 @@ def mergedRecord(first, second, ref_seq):
                 first.getDP(spl), second.getDP(spl)
             )
         if "AD" in first.format:
-            merged.samples[spl]["AD"] = [
-                min(
-                    first.getAD(spl)[0], second.getAD(spl)[0]
-                )
-            ]
+            fisrt_AD = first.getAD(spl)[0]
+            second_AD = second.getAD(spl)[0]
+            alt_AD = min(fisrt_AD, second_AD)
+            if isinstance(first.samples[spl]["AD"], (int, float)) or len(first.samples[spl]["AD"]) == 1:  # Contains only alt allele
+                merged.samples[spl]["AD"] = [alt_AD]
+            else:  # Contains ref allele
+                # Manage ref_AD also when several variants exist on position
+                ref_AD = None
+                if fisrt_AD < second_AD:
+                    ref_AD = first.samples[spl]["AD"][0]
+                elif fisrt_AD > second_AD:
+                    ref_AD = second.samples[spl]["AD"][0]
+                else:
+                    ref_AD = max(first.samples[spl]["AD"][0], second.samples[spl]["AD"][0])
+                merged.samples[spl]["AD"] = [ref_AD, alt_AD]
         if "AF" in first.format:
-            merged.samples[spl]["AF"] = [
-                min(
-                    first.getAF(spl)[0], second.getAF(spl)[0]
-                )
-            ]
+            first_AF = first.getAF(spl)[0]
+            second_AF = second.getAF(spl)[0]
+            alt_AF = min(first_AF, second_AF)
+            if isinstance(first.samples[spl]["AF"], (float, int)) or len(first.samples[spl]["AF"]) == 1:  # Contains only alt allele
+                merged.samples[spl]["AF"] = [alt_AF]
+            else:  # Contains ref allele
+                # Manage ref_AF also when several variants exist on position
+                ref_AF = None
+                if first_AF < second_AF:
+                    ref_AF = first.samples[spl]["AF"][0]
+                elif first_AF > second_AD:
+                    ref_AF = second.samples[spl]["AF"][0]
+                else:
+                    ref_AF = max(first.samples[spl]["AF"][0], second.samples[spl]["AF"][0])
+                merged.samples[spl]["AF"] = [ref_AF, alt_AF]
     # INFO metrics
     if "AD" in first.info:
-        merged.info["AD"] = merged.getPopAD()
+        if isinstance(first.info["AD"], (int, float)) or len(first.info["AD"]) == 1:  # Contains only alt allele
+            merged.info["AD"] = merged.getPopAD()
+        else:
+            pop_AD = merged.getPopAD()[0]
+            ref_pop_AD = 1 - pop_AD  # Erroneous when several variants exist on position
+            if "AD" in merged.format and len(merged.samples.values[0]["AD"]) == 2:
+                ref_pop_AD = 0
+                for spl_name, spl_info in merged.samples.items():
+                    ref_pop_AD += spl_info["AD"][0]
+            elif "AF" in merged.format and "DP" in merged.format and len(merged.samples.values[0]["AF"]) == 2:
+                ref_pop_AD = 0
+                for spl_name, spl_info in merged.samples.items():
+                    ref_pop_AD += spl_info["AF"][0] * spl_info["DP"]
+            merged.info["AD"] = [int(ref_pop_AD), pop_AD]
     if "DP" in first.info:
         merged.info["DP"] = merged.getPopDP()
     if "AF" in first.info:
-        merged.info["AF"] = merged.getPopAF()
+        if isinstance(first.info["AF"], (float, int)) or len(first.info["AF"]) == 1:  # Contains only alt allele
+            merged.info["AF"] = merged.getPopAF()
+        else:
+            pop_AF = merged.getPopAF()[0]
+            ref_pop_AF = 1 - pop_AF  # Erroneous when several variants exist on position
+            if ("AD" in merged.info or "AD" in merged.format) and ("DP" in merged.info or "DP" in merged.format) and len(merged.getPopAD()) == 2:
+                ref_pop_AF = round(merged.getPopAD()[0] / merged.getPopDP(), 6)
+            merged.info["AF"] = [ref_pop_AF, pop_AF]
     # INFO Parents
     merged.info["MCO_VAR"] = []
     if "MCO_VAR" in first.info:
@@ -251,10 +291,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Groups variants occuring in same reads.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     parser.add_argument('-l', '--logging-level', default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], action=LoggerAction, help='The logger level. [Default: %(default)s]')
-    parser.add_argument('-r', '--intersection-rate', default=0.98, type=float, help='Minimum ratio of co-occurancy (nb_reads_containing_the_two_variants / nb_reads_overlapping_the_two_variants_but_containing_only_one). [Default: %(default)s]')
+    parser.add_argument('-r', '--intersection-rate', default=0.9, type=float, help='Minimum ratio of co-occurancy (nb_reads_containing_the_two_variants / nb_reads_overlapping_the_two_variants_but_containing_only_one). [Default: %(default)s]')
     parser.add_argument('-n', '--intersection-count', default=3, type=int, help='Minimum number of reads containing co-occurancy. [Default: %(default)s]')
     parser.add_argument('-f', '--AF-diff-rate', default=0.2, type=float, help='Maximum difference rate between AF of two merged variants. [Default: %(default)s]')
-    parser.add_argument('-d', '--max-distance', default=15, type=int, help='Maximum distance between two merged variants. [Default: %(default)s]')
+    parser.add_argument('-d', '--max-distance', default=10, type=int, help='Maximum distance between two merged variants. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-a', '--input-aln', required=True, help='Path to the alignment file (format: BAM).')
     group_input.add_argument('-i', '--input-variants', required=True, help='Path to the variants file (format: VCF). Variants must be ordered by position. They should not be move to upstream.')
@@ -304,7 +344,8 @@ if __name__ == "__main__":
                             if curr.start - prev.end < args.max_distance:  # The two records are close together
                                 prev_AF = prev.getPopAF()[0]
                                 curr_AF = curr.getPopAF()[0]
-                                if min(prev_AF, curr_AF) / max(prev_AF, curr_AF) >= args.AF_diff_rate:  # The two records have similar frequencies
+                                AF_diff = 1 - (min(prev_AF, curr_AF) / max(prev_AF, curr_AF))
+                                if AF_diff <= args.AF_diff_rate:  # The two records have similar frequencies
                                     prev.isIns = prev.isInsertion()
                                     curr.isIns = curr.isInsertion()
                                     # Set supporting reads
