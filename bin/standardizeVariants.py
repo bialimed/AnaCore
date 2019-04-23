@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -70,7 +70,7 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard)
             # Header
             FH_out.copyHeader(FH_in)
             if trace_unstandard:
-                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": None, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
+                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": 1, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
             FH_out._writeHeader()
             # Records
             for record in FH_in:
@@ -95,7 +95,7 @@ def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
             # Header
             FH_out.copyHeader(FH_in)
             if trace_unstandard:
-                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": None, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
+                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": 1, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
             FH_out._writeHeader()
             # Records
             for record in FH_in:
