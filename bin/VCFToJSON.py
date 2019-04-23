@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -205,6 +205,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--pathogenicity-fields', default=["CLIN_SIG", "CADD_PHRED", "MetaLR_rankscore", "VEST3_rankscore"], nargs='+', help='The titles of fields used to store pathogenicity predictor results (example: SIFT, PolyPhen, CADD_PHRED). [Default: %(default)s]')
     parser.add_argument('-p', '--populations-prefixes', default=["exac", "gnomad", "1kg", "esp"], nargs='+', help='The prefixes used to determine database name in population allele frequency fields (example: "gnomAD" is used in gnomAD_AF, gnomAD_EUR_AF). [Default: %(default)s]')
     parser.add_argument('-a', '--annotation-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
+    parser.add_argument('-c', '--calling-source', default=None, help='Add source of the calling in support information.')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file file containing variants and annotated with VEP v88+ (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
@@ -232,7 +233,7 @@ if __name__ == "__main__":
                     "filters": allele_record.filter,
                     "quality": allele_record.qual,
                     "libraries": [{"alt_depth": allele_record.getAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples],
-                    "source": None
+                    "source": args.calling_source
                 }]
                 if FH_vcf.annot_field in allele_record.info:
                     # Identical known variants, AF in populations and annotations
