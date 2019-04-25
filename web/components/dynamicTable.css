@@ -1,0 +1,10 @@
+/*!
+  * dynamicTable component v1.2.0
+  * Copyright 2018 IUCT-O
+  * Author Frederic Escudie
+  * Licensed under GNU General Public License
+  */
+.dtable-head-btn {
+    margin-left: 10px;
+    margin-right: 10px;
+}

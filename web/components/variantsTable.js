@@ -1,5 +1,5 @@
 /*!
-  * variantsTable component v2.0.0
+  * variantsTable component v2.1.0
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
@@ -234,11 +234,20 @@ VariantsTable = Vue.component('variants-table', {
                     "leftColumns": 2
                 }
             }
-            if( this.menu.filter ){
-                datatable_params["dom"] = 'f'
-            }
             if( this.menu.pagination ){
-                datatable_params["dom"] = 'l' + datatable_params["dom"] + 'rtip'
+                if( this.menu.filter ){
+                    datatable_params["dom"] = 'f'
+                }
+                if(this.menu.export){
+                    datatable_params["dom"] = "<'d-md-none'<'row'<'col-sm-12'B><'col-sm-12'l><'col-sm-12'" + datatable_params["dom"] + "r>>>" +
+						"<'d-none d-md-block'<'row'<'col-md-6'<'row'<'dtable-head-btn'B>l>><'col-md-6'" + datatable_params["dom"] + "r>>>" +
+                        "<'row'<'col-sm-12't>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+                } else {
+                    datatable_params["dom"] = "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'" + datatable_params["dom"] + "r>>" +
+                        "<'row'<'col-sm-12't>>" +
+                        "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+                }
             }
             if( this.menu.export ){
                 if(this.export_title === null){
@@ -252,7 +261,6 @@ VariantsTable = Vue.component('variants-table', {
                         title: this.export_title
                     }]
                 }
-                datatable_params["dom"] = 'B' + datatable_params["dom"]
             }
             return datatable_params
         },
