@@ -1,5 +1,5 @@
 /*!
-  * depthsCardContent component v1.2.0
+  * depthsCardContent component v1.2.1
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
@@ -54,7 +54,7 @@ Vue.component('depths-card-content', {
             let prct_shallows_nt = null
             if(this.depthsMetrics !== null){
                 const spl_name = Object.keys(this.depthsMetrics.under_threshold.count_by_spl)[0]
-                prct_shallows_nt = this.depthsMetrics.under_threshold.count_by_spl[spl_name].rate * 100
+                prct_shallows_nt = (this.depthsMetrics.under_threshold.count_by_spl[spl_name].rate * 100).toFixed(2)
                 this.threshold_shallows_prct.text_post = " (" + this.depthsMetrics.under_threshold.count_by_spl[spl_name].count + " nt) of targeted nucleotids have a depth <= " +  this.depthsMetrics.under_threshold.threshold
             }
             return prct_shallows_nt
