@@ -19,14 +19,14 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
 import json
-import warnings
+import logging
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -59,8 +59,9 @@ def isSameAlt(var_record, var_annot):
         std_record = VCFRecord(
             var_record.chrom,
             var_record.pos,
+            None,
             var_record.ref,
-            [record_alt_str]
+            var_record.alt
         )
         std_record.standardizeSingleAllele()
         record_alt_str = std_record.alt[0].replace(".", "").replace("-", "").upper()
@@ -68,7 +69,7 @@ def isSameAlt(var_record, var_annot):
     return is_self_variant
 
 
-def getAnnotSummary(allele_record, initial_alt, annot_field="ANN", pop_prefixes=None, pathogenicity_fields=None):
+def getAnnotSummary(allele_record, initial_alt, annot_field="ANN", pop_prefixes=None, pathogenicity_fields=None, logger=None):
     """
     Return a summary of the diffrent annotations of the variant. This summary is about identical known variants (xref), AF in populations (pop_AF), annotations of the variant and annotations of the collocated variants.
 
@@ -82,6 +83,8 @@ def getAnnotSummary(allele_record, initial_alt, annot_field="ANN", pop_prefixes=
     :type pop_prefixes: list
     :param pathogenicity_fields: The titles of fields used to store pathogenicity predictor results. Example: SIFT, PolyPhen, CADD_PHRED.
     :type pathogenicity_fields: str
+    :param logger: The logger object.
+    :type loggger: logging.Logger
     :return: First the dentical known variants (e.g. {"cosmic": ["COSM14", "COSM15"], "dbSNP":[]}), second AF in populations (e.g. [{"source":"1KG", "name":"Global", "AF":0.85}]), third annotations of the variant and fourth annotations of the collocated variants.
     :rtype: list
     :warnings: The allele_record must only contains one variant.
@@ -103,12 +106,13 @@ def getAnnotSummary(allele_record, initial_alt, annot_field="ANN", pop_prefixes=
                     xref["HGMD"].add(db_id)
                 else:
                     xref["Unknown"].add(db_id)
-                    warnings.warn('The database using the variant ID "{}" is not managed by "{}".'.format(db_id, sys.argv[0]))
+                    if logger is not None:
+                        logger.warning('The database using the variant ID "{}" is not managed by "{}".'.format(db_id, sys.argv[0]))
         # Allele frequency in populations
         if is_self_variant:
             for key in annot:
                 if key.endswith("_AF") and annot[key] is not None:
-                    source, name = getPopInfo(key, pop_prefixes)
+                    source, name = getPopInfo(key, pop_prefixes, logger)
                     pop_id = source + "_" + name
                     for curr_AF in annot[key].split("&"):
                         if pop_id not in pop_AF:
@@ -165,7 +169,7 @@ def getPathogenicityPredictors(annot, pathogenicity_fields=None):
     return score_by_predictor
 
 
-def getPopInfo(annot_key, pop_prefixes=None):
+def getPopInfo(annot_key, pop_prefixes=None, logger=None):
     """
     Return source and name of a sub-population studied in large genomic programs (1KG, ExAC, ...) from the annotation tag.
 
@@ -173,6 +177,8 @@ def getPopInfo(annot_key, pop_prefixes=None):
     :type annot_key: str
     :param pop_prefixes: The prefixes used to determine database name in population allele frequency fields (example: "gnomAD" is used in gnomAD_AF, gnomAD_EUR_AF).
     :type pop_prefixes: list
+    :param logger: The logger object.
+    :type loggger: logging.Logger
     :return: The source (project name) and the name of the sub-population.
     :rtype: list
     """
@@ -189,7 +195,8 @@ def getPopInfo(annot_key, pop_prefixes=None):
         source = "1KG"
         name = annot_key.split("_")[0]
     else:
-        warnings.warn('The population information stored with tag "{}" cannot be used by "{}".'.format(annot_key, sys.argv[0]))
+        if logger is not None:
+            logger.warning('The population information stored with tag "{}" cannot be used by "{}".'.format(annot_key, sys.argv[0]))
     return source, name
 
 
@@ -211,6 +218,12 @@ if __name__ == "__main__":
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_input.add_argument('-o', '--output-variants', required=True, help='The path to the file outputted file (format: JSON).')
     args = parser.parse_args()
+
+    # Logger
+    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    log = logging.getLogger(os.path.basename(__file__))
+    log.setLevel(logging.INFO)
+    log.info("Command: " + " ".join(sys.argv))
 
     # Convert VCF in python dict
     json_data = list()
@@ -242,7 +255,8 @@ if __name__ == "__main__":
                         record.alt[idx_alt],
                         args.annotation_field,
                         args.populations_prefixes,
-                        args.pathogenicity_fields
+                        args.pathogenicity_fields,
+                        log
                     )
                 json_data.append(curr_json)
 
@@ -251,3 +265,4 @@ if __name__ == "__main__":
         FH_out.write(
             json.dumps(json_data, default=lambda o: o.__dict__, sort_keys=True)
         )
+    log.info("END of process.")
