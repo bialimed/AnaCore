@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -67,7 +67,8 @@ if __name__ == "__main__":
                 if curr_var_id not in variants_by_id:
                     variants_by_id[curr_var_id] = curr_var
                 else:
-                    variants_by_id[curr_var_id]["supports"].append(curr_var["supports"])
+                    for curr_support in curr_var["supports"]:
+                        variants_by_id[curr_var_id]["supports"].append(curr_support)
 
     # Write output
     log.info("Write output.")
