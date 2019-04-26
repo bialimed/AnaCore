@@ -1,11 +1,11 @@
 /*!
-  * shallowsAnalysisTable component v1.0.0
+  * shallowsAnalysisTable component v1.1.0
   * Copyright 2019 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
   */
 
- 
+
 function displayKnownVariants(variant){
     let display = getVariantLink(variant.id)
     if(variant.HGVSp != ""){
@@ -92,6 +92,7 @@ Vue.component('shallows-analysis-table', {
 	template:
 		`<dynamic-table
             :data="analysis.results"
+            :scroll_x=true
             :header="columns"
             :title="title">
         </dynamic-table>`
