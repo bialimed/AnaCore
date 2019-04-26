@@ -1,5 +1,5 @@
 /*!
-  * variantsTable component v2.0.0
+  * variantsTable component v2.2.0
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
@@ -42,5 +42,6 @@
   background-color: #6c757d;
 }
 .vtable-noStdCaller {
-  color: #FF9800;
+  color: #BDBDBD;
+  font-style: italic;
 }

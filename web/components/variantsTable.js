@@ -1,5 +1,5 @@
 /*!
-  * variantsTable component v2.1.0
+  * variantsTable component v2.2.0
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
@@ -349,9 +349,9 @@ VariantsTable = Vue.component('variants-table', {
                             {{curr_source}}
                         </template>
                     </td>
-                    <td :class="{'vtable-noStdCaller': !entry._variant.supports.hasOwnProperty(default_source)}">{{entry.AF | vtablePrct}}</td>
-                    <td :class="{'vtable-noStdCaller': !entry._variant.supports.hasOwnProperty(default_source)}">{{entry.Depth}}</td>
-                    <td :class="{'vtable-noStdCaller': !entry._variant.supports.hasOwnProperty(default_source)}">{{entry.Ratio_lib}}</td>
+                    <td><span :class="{'vtable-noStdCaller': !entry._variant.supports.hasOwnProperty(default_source)}">{{entry.AF | vtablePrct}}</span></td>
+                    <td><span :class="{'vtable-noStdCaller': !entry._variant.supports.hasOwnProperty(default_source)}">{{entry.Depth}}</span></td>
+                    <td><span :class="{'vtable-noStdCaller': !entry._variant.supports.hasOwnProperty(default_source)}">{{entry.Ratio_lib}}</span></td>
                     <td>
                         <span v-for="curr_filter in entry.Filters" class="block-list">
                             <span v-if='curr_filter == "PASS"' class="vtable-label vtable-label-good">{{curr_filter}}</span>
