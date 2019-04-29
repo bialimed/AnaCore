@@ -208,7 +208,7 @@ class RunInfo(object):
         self.filepath = path
         self.flowcell = None  # {'id': 'HN33VBGX5', 'layout': {'LaneCount': '4', 'SurfaceCount': '2', 'SwathCount': '3', 'TileCount': '12', 'SectionPerLane': '3', 'LanePerSection': '2'}}
         self.instrument = None  # {'id': 'NS500523', 'platform': 'NextSeq'}
-        self.reads = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
+        self.reads_mask = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
         self.run = None  # {'number': '133', 'id': '180406_NS500523_0133_AHN33VBGX5', 'start_date': datetime.datetime(2018, 4, 6, 0, 0)}
         self._parse()
 
@@ -218,7 +218,7 @@ class RunInfo(object):
         run = tree.getroot().find("Run")
         # Process information
         self.instrument = self._getInstrumentFromRun(run)
-        self.reads = self._getReadsFromRun(run.find("Reads"))
+        self.reads_mask = self._getReadsFromRun(run.find("Reads"))
         self.run = self._getRunFromRun(run)
         self.flowcell = self._getFlowcellFromRun(run)
 
@@ -261,7 +261,7 @@ class RunParameters(object):
         self.filepath = path
         self.kit = None
         self.instrument = None
-        self.reads = None
+        self.reads_mask = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
         self.run = None
         self._parse()
 
@@ -273,9 +273,9 @@ class RunParameters(object):
         self.instrument = self._getInstrumentFromRoot(root)
         reads_subtree = root.find("Reads")
         if reads_subtree is not None:
-            self.reads = self._getReadsFromSection(reads_subtree)
+            self.reads_mask = self._getReadsFromSection(reads_subtree)
         else:
-            self.reads = self._getReadsFromSetup(root.find("Setup"))
+            self.reads_mask = self._getReadsFromSetup(root.find("Setup"))
         self.run = self._getRunFromRoot(root)
         self.kit = self._getKitFromRoot(root)
 
