@@ -1,5 +1,5 @@
 /*!
-  * tinyHighchart component v1.1.0
+  * tinyHighchart component v1.2.0
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
@@ -81,7 +81,15 @@ Vue.component('tiny-highchart', {
 		x_tick_categories: {
             type: Array,
             default: null
-        }
+        },
+		y_min: {
+			type: Number,
+			default: null
+		},
+		x_min: {
+			type: Number,
+			default: null
+		}
 	},
     mounted: function() {
 		this.drawGraph()
@@ -99,6 +107,12 @@ Vue.component('tiny-highchart', {
 				params["xAxis"]["tickInterval"] = this.x_tick_interval
 			} else if (this.x_tick_categories) {
 				params["xAxis"]["categories"] = this.x_tick_categories
+			}
+			if(this.x_min !== null){
+				params["xAxis"]["min"] = this.x_min
+			}
+			if(this.y_min !== null){
+				params["yAxis"]["min"] = this.y_min
 			}
 			return params
         }
