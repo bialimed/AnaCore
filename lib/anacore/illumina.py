@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.11.0'
+__version__ = '1.12.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -101,9 +101,7 @@ class SampleSheetIO(object):
 
 
 class ADSSampleSheetIO(SampleSheetIO):
-    """
-    @summary: Manage SampleSheet designed for AmpliconDS analysis.
-    """
+    """Manage SampleSheet designed for AmpliconDS analysis."""
 
     def _getSamplesFromData(self, data_section):
         samples = super()._getSamplesFromData(data_section)
@@ -113,11 +111,12 @@ class ADSSampleSheetIO(SampleSheetIO):
             spl["Library_Name"] = spl["Library_Basename"]
         return samples
 
-
     def filterPanels(self, selected_manifests):
         """
-        @summary: Filters samples and manifests on their panel.
-        @param selected_manifests: [list] The manifests corresponding to the selected panel.
+        Filter samples and manifests on their panel.
+
+        :param selected_manifests: The manifests corresponding to the selected panel.
+        :type selected_manifests: list
         """
         # Get kept
         new_manifests = {}
@@ -143,14 +142,18 @@ class ADSSampleSheetIO(SampleSheetIO):
                 new_spl.append(spl)
         self.samples = new_spl
 
-
     def findSplFiles(self, directory, end_pattern, subject="library"):
         """
-        @summary: Returns by sample name or library name all the files in directory corresponding to the subject.
-        @param directory: [str] The path to the directory where the files names are evaluated.
-        @param end_pattern: [str] File pattern added at the end of each sample basename or library basename to select files.
-        @param subject: [str] "library" or "sample" to select files corresponding to libraries or corresponding to samples.
-        @return: [dict] By subject the pathes of the corresponding files.
+        Return by sample name or library name all the files in directory corresponding to the subject.
+
+        :param directory: The path to the directory where the files names are evaluated.
+        :type directory: str
+        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.
+        :type end_pattern: str
+        :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
+        :type subject: str
+        :return: By subject the pathes of the corresponding files.
+        :rtype: dict
         """
         subject_start_tag = subject.capitalize()
         files_by_elt = {}
@@ -164,11 +167,16 @@ class ADSSampleSheetIO(SampleSheetIO):
 
     def setSplFiles(self, tag, directory, end_pattern, subject="library"):
         """
-        @summary: Adds the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.
-        @param tag: [str] The attribute used in self.sample to store the files pathes.
-        @param directory: [str] The path to the directory where the files names are evaluated.
-        @param end_pattern: [str] File pattern added at the end of each sample basename or library basename to select files.
-        @param subject: [str] "library" or "sample" to select files corresponding to libraries or corresponding to samples.
+        Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.
+
+        :param tag: The attribute used in self.sample to store the files pathes.
+        :type tag: str
+        :param directory: The path to the directory where the files names are evaluated.
+        :type directory: str
+        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.
+        :type end_pattern: str
+        :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
+        :type subject: str
         """
         subject_tag = subject.capitalize() + "_Name"
         files_by_spl = self.findSplFiles(directory, end_pattern, subject)
@@ -193,7 +201,60 @@ class RTAComplete(object):
             self.RTA_version = fields[1].rsplit(" ", 1)[0]
 
 
+class RunInfo(object):
+    """Parser for RunInfo.xml"""
+
+    def __init__(self, path):
+        self.filepath = path
+        self.flowcell = None  # {'id': 'HN33VBGX5', 'layout': {'LaneCount': '4', 'SurfaceCount': '2', 'SwathCount': '3', 'TileCount': '12', 'SectionPerLane': '3', 'LanePerSection': '2'}}
+        self.instrument = None  # {'id': 'NS500523', 'platform': 'NextSeq'}
+        self.reads = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
+        self.run = None  # {'number': '133', 'id': '180406_NS500523_0133_AHN33VBGX5', 'start_date': datetime.datetime(2018, 4, 6, 0, 0)}
+        self._parse()
+
+    def _parse(self):
+        # Retrieve information by section
+        tree = ET.parse(self.filepath)
+        run = tree.getroot().find("Run")
+        # Process information
+        self.instrument = self._getInstrumentFromRun(run)
+        self.reads = self._getReadsFromRun(run.find("Reads"))
+        self.run = self._getRunFromRun(run)
+        self.flowcell = self._getFlowcellFromRun(run)
+
+    def _getReadsFromRun(self, reads_tree):
+        reads = list()
+        for child in reads_tree:
+            reads.append({
+                "is_index": (child.get("IsIndexedRead") == "Y"),
+                "nb_cycles": int(child.get("NumCycles"))
+            })
+        return reads
+
+    def _getInstrumentFromRun(self, run_tree):
+        serial_number = run_tree.find("Instrument").text
+        return {
+            "id": serial_number,
+            "platform": platformFromInstrumentSerialNumber(serial_number)
+        }
+
+    def _getRunFromRun(self, run_tree):
+        return {
+            "number": run_tree.attrib["Number"],
+            "id": run_tree.attrib["Id"],
+            "start_date": datetime.datetime.strptime(run_tree.find("Date").text, '%y%m%d')
+        }
+
+    def _getFlowcellFromRun(self, run_tree):
+        return {
+            "id": run_tree.find("Flowcell").text,
+            "layout": run_tree.find("FlowcellLayout").attrib
+        }
+
+
 class RunParameters(object):
+    """Parser for runParameters.xml"""
+
     PLATFORMS = ["MiniSeq", "MiSeq", "NextSeq", "HiSeq", "NovaSeq"]
 
     def __init__(self, path):
@@ -342,18 +403,24 @@ def etreeToDict(node):
 
 def getIlluminaName(name):
     """
-    @sumary: Returns sample name used by Illumina in filename.
-    @param name: [str] The name provided to Illumina process (for example in samplesheet).
-    @return: [str] The sample name used by Illumina as part of filename.
+    Return sample name used by Illumina in filename.
+
+    :param name: The name provided to Illumina process (for example in samplesheet).
+    :type name: str
+    :return: The sample name used by Illumina as part of filename.
+    :rtype: str
     """
     return name.replace("_", "-").replace(" ", "-").replace(".", "-").replace("+", "")
 
 
 def getLibNameFromReadsPath(seq_path):
     """
-    @sumary: Returns library name from the path of the sequences file.
-    @param seq_path: [str] The path of the sequences file.
-    @return: [str] The library name.
+    Return library name from the path of the sequences file.
+
+    :param seq_path: The path of the sequences file.
+    :type seq_path: str
+    :return: The library name.
+    :rtype: str
     """
     library_name, extensions = os.path.basename(seq_path).split(".", 1)
     for curr_ext in extensions.split("."):
@@ -368,11 +435,12 @@ def getLibNameFromReadsPath(seq_path):
 
 def getInfFromSeqID(seq_id):
     """
-    @summary: Returns sequencer id, run id, flowcell id and position of the
-    sequence on the sequencer flowcell.
-    @param sequence: [str] The ID of the sequence provided by the sequencer.
-    @return: [dict] The sequencer id, run id, flowcell id and position of the
-    sequence on the sequencer flowcell.
+    Return sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.
+
+    :param sequence: The ID of the sequence provided by the sequencer.
+    :type sequence: str
+    :return: The sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.
+    :rtype: dict
     """
     # Illumina's ID: EAS139:136:FC706VJ:2:2104:15343:197393
     sequencer_id, run_id, flowcell_id, lane_id, tile_id, x_pos, y_pos = seq_id.split(":")
@@ -389,11 +457,12 @@ def getInfFromSeqID(seq_id):
 
 def getInfFromSeqDesc(seq_desc):
     """
-    @summary: Returns sequencer id, run id, flowcell id and position of the
-    sequence on the sequencer flowcell.
-    @param sequence: [str] The ID of the sequence provided by the sequencer.
-    @return: [dict] The sequencer id, run id, flowcell id and position of the
-    sequence on the sequencer flowcell.
+    Return sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.
+
+    :param sequence: The ID of the sequence provided by the sequencer.
+    :type sequence: str
+    :return: The sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.
+    :rtype: dict
     """
     # Illumina's description: 1:Y:18:ATCACG
     reads_phases, kept_status, control_bits, barcode = seq_desc.split(":")
@@ -403,3 +472,30 @@ def getInfFromSeqDesc(seq_desc):
         "control_bits": None if control_bits == "0" else int(control_bits),
         "barcode": None if barcode == "" else barcode
     }
+
+
+def platformFromInstrumentSerialNumber(instrument_id):
+    """
+    Return platform name from instrument ID.
+
+    :param instrument_id: The instrument serial number.
+    :type instrument_id: str
+    :return: The platform name (Hiseq or NextSeq or ...).
+    :rtype: str
+    """
+    platform_by_re = {
+        # "?": "iSeq",
+        "^MN[0-9]{5}$": "MiniSeq",
+        "^M[0-9]{5}$": "MiSeq",
+        "^N[SB][0-9]{6}$": "NextSeq",
+        "^[CDJKE][0-9]{5}$": "HiSeq",
+        "^A[0-9]{5}$": "NovaSeq"
+    }
+    if instrument_id.startswith("HWI"):
+        instrument_id = instrument_id[3:]
+    platform = None
+    for curr_re, curr_instru in platform_by_re.items():
+        if platform is None:
+            if re.search(curr_re, instrument_id):
+                platform = curr_instru
+    return platform
