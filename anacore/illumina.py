@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.12.0'
+__version__ = '1.13.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -208,7 +208,7 @@ class RunInfo(object):
         self.filepath = path
         self.flowcell = None  # {'id': 'HN33VBGX5', 'layout': {'LaneCount': '4', 'SurfaceCount': '2', 'SwathCount': '3', 'TileCount': '12', 'SectionPerLane': '3', 'LanePerSection': '2'}}
         self.instrument = None  # {'id': 'NS500523', 'platform': 'NextSeq'}
-        self.reads_mask = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
+        self.reads_phases = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
         self.run = None  # {'number': '133', 'id': '180406_NS500523_0133_AHN33VBGX5', 'start_date': datetime.datetime(2018, 4, 6, 0, 0)}
         self._parse()
 
@@ -218,7 +218,7 @@ class RunInfo(object):
         run = tree.getroot().find("Run")
         # Process information
         self.instrument = self._getInstrumentFromRun(run)
-        self.reads_mask = self._getReadsFromRun(run.find("Reads"))
+        self.reads_phases = self._getReadsFromRun(run.find("Reads"))
         self.run = self._getRunFromRun(run)
         self.flowcell = self._getFlowcellFromRun(run)
 
@@ -261,7 +261,7 @@ class RunParameters(object):
         self.filepath = path
         self.kit = None
         self.instrument = None
-        self.reads_mask = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
+        self.reads_phases = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
         self.run = None
         self._parse()
 
@@ -273,9 +273,9 @@ class RunParameters(object):
         self.instrument = self._getInstrumentFromRoot(root)
         reads_subtree = root.find("Reads")
         if reads_subtree is not None:
-            self.reads_mask = self._getReadsFromSection(reads_subtree)
+            self.reads_phases = self._getReadsFromSection(reads_subtree)
         else:
-            self.reads_mask = self._getReadsFromSetup(root.find("Setup"))
+            self.reads_phases = self._getReadsFromSetup(root.find("Setup"))
         self.run = self._getRunFromRoot(root)
         self.kit = self._getKitFromRoot(root)
 
@@ -499,3 +499,35 @@ def platformFromInstrumentSerialNumber(instrument_id):
             if re.search(curr_re, instrument_id):
                 platform = curr_instru
     return platform
+
+
+def getRunFolderInfo(run_folder):
+    """
+    Return run information (instrument, run configuration, samples, ...) coming from several file in run folder.
+
+    :param run_folder: Path to the run folder.
+    :type run_folder: str
+    :return: Run information.
+    :rtype: dict
+    """
+    # RunInfo
+    run_info_path = os.path.join(run_folder, "RunInfo.xml")
+    run_info = RunInfo(run_info_path)
+    run = {
+        "reads_phases": run_info.reads_phases,
+        "flowcell": run_info.flowcell,
+        "instrument": run_info.instrument,
+        "info": run_info.run,
+        "samples": None
+    }
+    run["info"]["end_date"] = None
+    # RTAComplete
+    rta_complete_path = os.path.join(run_folder, "RTAComplete.txt")
+    if os.path.exists(rta_complete_path):
+        rta_complete = RTAComplete(rta_complete_path)
+        run["info"]["end_date"] = rta_complete.end_date
+    # SampleSheet
+    samplesheet_path = os.path.join(run_folder, "SampleSheet.csv")
+    if os.path.exists(samplesheet_path):
+        run["samples"] = SampleSheetIO(samplesheet_path).samples
+    return run
