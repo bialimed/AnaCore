@@ -33,18 +33,20 @@ Vue.component('run-error-graph', {
         chart_series: function(){
             const self = this
             let series = []
+            idx_read = 0
             this.run_phases.forEach(function(curr_phase){
-                if(curr_phase.title.startsWith("R")){
+                if(!curr_phase.is_index){
                     series.push({
-                        "name": curr_phase.title,
+                        "name": "R" + (idx_read + 1),
                         "data": []
                     })
+                    idx_read++
                 }
             })
             let idx_cycle = 0
             let idx_category = 0
             this.run_phases.forEach(function(curr_phase, idx_phase){
-                if(curr_phase.title.startsWith("R")){
+                if(!curr_phase.is_index){
                     const nb_cycles_in_phase = self.run_phases[idx_phase].nb_cycles
                     for(let idx=0 ; idx < nb_cycles_in_phase - 1 ; idx++){
                         series[idx_category].data.push([

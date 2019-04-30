@@ -28,7 +28,7 @@ Vue.component('run-density-card-content', {
             default: null,
             type: Object
         },
-        'run_params': {
+        'run_info': {
             default: null,
             type: Object
         },
@@ -50,17 +50,17 @@ Vue.component('run-density-card-content', {
     computed: {
         threshold_density: function(){
             let threshold_density = null
-            if( this.run_params !== null ){
-                let spec_id = this.run_params.instrument
+            if( this.run_info !== null ){
+                let spec_id = this.run_info.instrument.platform
                 if( spec_id == "MiSeq" || spec_id == "HiSeq" ){
-                    spec_id += "_" +  this.run_params.kit.version
+                    spec_id += "_" +  this.run_info.kit.version
                 }
                 if( this.density_spec.hasOwnProperty(spec_id) ){
                     threshold_density = new ThresholdAlert(
                         this.density_spec[spec_id],
                         "Run density",
                         "",
-                        " KClusters/mm2"
+                        " KC/mm2"
                     )
                 }
             }

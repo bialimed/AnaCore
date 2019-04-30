@@ -89,7 +89,7 @@ Vue.component('run-quality-card-content', {
             const lot_percentile = (100 - this.few_reads) + "_percentile"
             let idx_cycle = 0
             this.run_phases.forEach(function(curr_phase, idx_phase){
-                if(curr_phase.title.startsWith("R")){
+                if(!curr_phase.is_index){
                     const nb_cycles_in_phase = curr_phase.nb_cycles
                     let sum_error_upper_quartile = 0
                     let nb_error_upper_quartile = 0
