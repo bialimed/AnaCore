@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -63,28 +63,29 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
         for pileupcolumn in FH_sam.pileup(chrom, inspect_start, inspect_end, max_depth=100000):
             for pileupread in pileupcolumn.pileups:
                 if selected_RG is None or (pileupread.alignment.get_tag("RG") in selected_RG):
-                    if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
-                        # Get unique id
-                        read_id = pileupread.alignment.query_name
-                        if not pileupread.alignment.is_read2:
-                            read_id += "_R1"
-                        else:
-                            read_id += "_R2"
-                        # Store new reads
-                        if read_id not in reads:
-                            reads[read_id] = [None for pos in range(inspect_start, pileupcolumn.pos)]
-                        # Store comparison with ref for current position
-                        if pileupread.is_del:  # Deletion
-                            reads[read_id].append("")
-                        elif pileupread.indel > 0:  # Insertion
-                            insert = ""
-                            for insert_idx in range(pileupread.indel + 1):
-                                insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
-                            reads[read_id].append(insert)
-                        elif not pileupread.is_refskip:  # Substitution
-                            reads[read_id].append(
-                                pileupread.alignment.query_sequence[pileupread.query_position].upper()
-                            )
+                    if not pileupread.alignment.is_duplicate and not pileupread.alignment.is_secondary:
+                        if pileupcolumn.pos >= inspect_start and pileupcolumn.pos < inspect_end:
+                            # Get unique id
+                            read_id = pileupread.alignment.query_name
+                            if not pileupread.alignment.is_read2:
+                                read_id += "_R1"
+                            else:
+                                read_id += "_R2"
+                            # Store new reads
+                            if read_id not in reads:
+                                reads[read_id] = [None for pos in range(inspect_start, pileupcolumn.pos)]
+                            # Store comparison with ref for current position
+                            if pileupread.is_del:  # Deletion
+                                reads[read_id].append("")
+                            elif pileupread.indel > 0:  # Insertion
+                                insert = ""
+                                for insert_idx in range(pileupread.indel + 1):
+                                    insert += pileupread.alignment.query_sequence[pileupread.query_position + insert_idx].upper()
+                                reads[read_id].append(insert)
+                            elif not pileupread.is_refskip:  # Substitution
+                                reads[read_id].append(
+                                    pileupread.alignment.query_sequence[pileupread.query_position].upper()
+                                )
     # Completes downstream positions
     inspected_len = inspect_end - inspect_start
     for read_id in reads:
