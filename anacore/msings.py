@@ -18,89 +18,117 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.2'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import gzip
 from anacore.abstractFile import isGzip
+from anacore.sv import HashedSVIO
+from anacore.msi import MSILocus, LocusRes, MSISample, MSISplRes, Status
 
 
-class MsingsSample:
-    def __init__(self, name, score, is_stable, loci=None):
+class MSINGSAnalysis(HashedSVIO):
+    """Manage output file produced by the command "msi analyzer" of mSINGS (https://bitbucket.org/uwlabmed/msings)."""
+
+    def __init__(self, filepath, mode="r"):
         """
-        @param name: [str] Name of the sample.
-        @param score: [float] Score of the MSI.
-        @param is_stable: [bool] True if the sample is stable.
-        @param loci: [dict] The stability status by locus (with True the locus is stable).
+        Return the new instance of MSINGSAnalysis.
+
+        :param filepath: The filepath.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
         """
-        self.name = name
-        self.score = score
-        self.is_stable = is_stable
-        self.loci = dict() if loci is None else loci
+        super().__init__(filepath, mode, "\t", "")
+        if mode == "w":
+            self.titles = ["Position", "Name", "Average_Depth", "Number_of_Peaks", "Standard_Deviation", "IndelLength:AlleleFraction:SupportingCalls"]
 
-
-    def getNbUnstable(self):
+    def _parseLine(self):
         """
-        @summary: Returns the number of instable loci for the sample.
-        @return: [int] The number of instable loci.
+        Return a structured record from the current line.
+
+        :return: The record described by the current line.
+        :rtype: MSILocus
         """
-        nb_unstable = 0
-        for locus, is_stable in self.loci.items():
-            if is_stable is not None and not is_stable:
-                nb_unstable += 1
-        return nb_unstable
+        record = super()._parseLine()
+        peaks = record["IndelLength:AlleleFraction:SupportingCalls"].split(" ")
+        nb_by_length = {}
+        if len(peaks) == 1 and peaks[0] == "0:0.0:0":
+            peaks = []
+        else:
+            for idx, curr_peak in enumerate(peaks):
+                indel_length, AF, DP = curr_peak.split(":")
+                peaks[idx] = {
+                    "indel_length": int(indel_length),
+                    "AF": float(AF),
+                    "DP": int(DP)
+                }
+                nb_by_length[int(indel_length)] = int(DP)
 
+        return MSILocus.fromDict({
+            "position": record["Position"],
+            "name": record["Name"],
+            "results": {
+                "MSINGS": {
+                    "_class": "LocusResDistrib",
+                    "status": Status.undetermined,
+                    "data": {
+                        "avg_depth": record["Average_Depth"],
+                        "nb_peaks": record["Number_of_Peaks"],
+                        "peaks": peaks,
+                        "std_dev": record["Standard_Deviation"],
+                        "nb_by_length": nb_by_length
+                    }
+                }
+            }
+        })
 
-    def getNbStable(self):
+    def recordToLine(self, record):
         """
-        @summary: Returns the number of stable loci for the sample.
-        @return: [int] The number of stable loci.
+        Return the record in SV format.
+
+        :param record: The record containing a result coming from mSINGS.
+        :type record: MSILocus
+        :return: The SV line corresponding to the record.
+        :rtype: str
         """
-        nb_stable = 0
-        for locus, is_stable in self.loci.items():
-            if is_stable is not None and is_stable:
-                nb_stable += 1
-        return nb_stable
+        formatted_record = {
+            "Position": record.position,
+            "Name": record.name,
+            "Average_Depth": record.results["MSINGS"].data["avg_depth"],
+            "Number_of_Peaks": record.results["MSINGS"].data["nb_peaks"],
+            "Standard_Deviation": record.results["MSINGS"].data["std_dev"]
+        }
+        formatted_record["IndelLength:AlleleFraction:SupportingCalls"] = " ".join(
+            ["{}:{}:{}".format(curr_peak["indel_length"], curr_peak["AF"], curr_peak["DP"]) for curr_peak in record.results["MSINGS"].data["peaks"]]
+        )
+        return super().recordToLine(formatted_record)
 
 
-    def getNbUsable(self):
-        """
-        @summary: Returns the number of loci usable in MSI evaluation for the sample.
-        @return: [int] The number of instable loci.
-        """
-        nb_usable = 0
-        for locus, is_stable in self.loci.items():
-            if is_stable is not None:
-                nb_usable += 1
-        return nb_usable
-
-
-    def getNbLoci(self):
-        """
-        @summary: Returns the number of loci in the sample.
-        @return: [int] The number of loci.
-        """
-        return len(self.loci)
-
-
-class CountMSI(object):
-    """
-    @summary: Manage output file produced by the command "msi count_msi_samples"
-    of mSINGS (https://bitbucket.org/uwlabmed/msings).
-    """
+class MSINGSReport(object):
+    """Manage output file produced by the command "msi count_msi_samples" of mSINGS (https://bitbucket.org/uwlabmed/msings)."""
 
     def __init__(self, filepath):
         """
-        @param filepath: [str] The filepath.
+        Return the new instance of MSINGSReport.
+
+        :param filepath: The filepath.
+        :type filepath: str
         """
         self.filepath = filepath
         self.samples = dict()
         self.loci = list()
+        self.method_name = "MSINGS"
         self.parse()
 
-
     def _parseFileHandle(self, FH):
+        """
+        Parse file referenced by the file handle FH and store information in self.
+
+        :param FH: The file handle for the filepath.
+        :type FH: TextIOWrapper
+        """
         # Parse general information
         samples = [elt.strip() for elt in FH.readline().split("\t")[1:]]
         nb_unstable = [int(elt.strip()) for elt in FH.readline().split("\t")[1:]]
@@ -118,15 +146,25 @@ class CountMSI(object):
             line = FH.readline()  # To next line
         status = [elt.strip() for elt in line.split("\t")][1:]
         for idx, elt in enumerate(status):
-            is_stable = None
+            curr_status = Status.undetermined
             if nb_evaluated[idx] > 0:
                 if elt == "NEG":
-                    is_stable = True
+                    curr_status = Status.stable
                 elif elt == "POS":
-                    is_stable = False
-            status[idx] = is_stable
+                    curr_status = Status.unstable
+            status[idx] = curr_status
         for spl_idx, curr_spl in enumerate(samples):
-            self.samples[curr_spl] = MsingsSample(curr_spl, scores[spl_idx], status[spl_idx])
+            if status[spl_idx] == Status.stable:
+                """
+                Convert mSINGS score (ratio unstable / determined) to a confidence score.
+                Nb loci unstables:    0    1    2    3    4
+                mSINGS score:         0 0.25 0.50 0.75    1
+                confi unstable:       0 0.25 0.50 0.75    1
+                confi stable:         1 0.75 0.50 0.25    0
+                """
+                scores[spl_idx] = 1 - scores[spl_idx]
+            spl_res = MSISplRes(status[spl_idx], scores[spl_idx], self.method_name)
+            self.samples[curr_spl] = MSISample(curr_spl, None, {self.method_name: spl_res})
         # Parse loci information
         for curr_line in FH:
             fields = [elt.strip() for elt in curr_line.split("\t")]
@@ -134,15 +172,19 @@ class CountMSI(object):
             self.loci.append(curr_locus)
             for idx, curr_val in enumerate(fields[1:]):
                 curr_spl = samples[idx]
+                loci_res = None
                 if curr_val == "":
-                    self.samples[curr_spl].loci[curr_locus] = None
+                    loci_res = LocusRes(Status.undetermined)
                 elif curr_val == "1":
-                    self.samples[curr_spl].loci[curr_locus] = False
+                    loci_res = LocusRes(Status.unstable)
                 else:
-                    self.samples[curr_spl].loci[curr_locus] = True
-
+                    loci_res = LocusRes(Status.stable)
+                self.samples[curr_spl].addLocus(
+                    MSILocus(curr_locus, None, {self.method_name: loci_res})
+                )
 
     def parse(self):
+        """Parse file and store information in self."""
         if isGzip(self.filepath):
             with gzip.open(self.filepath, "rt") as FH:
                 self._parseFileHandle(FH)
