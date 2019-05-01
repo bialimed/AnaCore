@@ -50,10 +50,12 @@ Vue.component('run-density-card-content', {
     computed: {
         threshold_density: function(){
             let threshold_density = null
-            if( this.run_info !== null ){
+            if( this.run_info !== null){
                 let spec_id = this.run_info.instrument.platform
                 if( spec_id == "MiSeq" || spec_id == "HiSeq" ){
-                    spec_id += "_" +  this.run_info.kit.version
+                    if( this.run_info.hasOwnProperty("kit") ){
+                        spec_id += "_" +  this.run_info.kit.version
+                    }
                 }
                 if( this.density_spec.hasOwnProperty(spec_id) ){
                     threshold_density = new ThresholdAlert(
