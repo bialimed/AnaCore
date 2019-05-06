@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -52,6 +52,20 @@ class MAFIO(HashedSVIO):
                 self.current_line = self.file_handle.readline().rstrip()
                 self.current_line_nb += 1
         self.titles = [elt.strip() for elt in self.current_line.split(self.separator)]
+
+    def isRecordLine(self, line):
+        """
+        Return True if the line corresponds to a record (it is not a comment or an header line).
+
+        :param line: The evaluated line.
+        :type line: str.
+        :return: True if the line corresponds to a record.
+        :rtype: bool
+        """
+        is_record = True
+        if line.startswith("#") or line.startswith("Hugo_Symbol"):
+            is_record = False
+        return is_record
 
     def write(self, record):
         """
