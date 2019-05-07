@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -279,4 +279,21 @@ def getAreasByChr(in_bed):
         if chrom not in areas_by_chr:
             areas_by_chr[chrom] = RegionList()
         areas_by_chr[chrom].append(curr_area)
+    return areas_by_chr
+
+
+def getSortedAreasByChr(in_bed):
+    """
+    Return by chromosome the list of sorted areas from a BED file.
+
+    :param in_bed: The path to the areas description (format: BED).
+    :type in_bed: str
+    :return: The list of sorted areas by chromosome (each list is an instance of region.Regionlist).
+    :rtype: dict
+    """
+    areas_by_chr = {}
+    for chrom, areas in getAreasByChr(in_bed).items():
+        areas_by_chr[chrom] = RegionList(
+            sorted(areas, key=lambda x: (x.start, x.end))
+        )
     return areas_by_chr
