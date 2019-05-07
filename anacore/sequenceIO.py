@@ -18,33 +18,14 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import re
 import gzip
-
-
-def isGzip(filepath):
-    """
-    Return true if the file is gzipped.
-
-    :param filepath: Path to the file.
-    :type filepath: str.
-    :return: True if the file is gziped.
-    :rtype: bool
-    """
-    is_gzip = None
-    FH_input = gzip.open(filepath)
-    try:
-        FH_input.readline()
-        is_gzip = True
-    except Exception:
-        is_gzip = False
-    finally:
-        FH_input.close()
-    return is_gzip
+from anacore.sv import SVIO
+from anacore.abstractFile import isGzip
 
 
 class Sequence:
@@ -109,6 +90,77 @@ class Sequence:
             self.description,
             (None if self.quality is None else self.quality[::-1])
         )
+
+
+class FaidxRecord:
+    """Record for faidx (see http://www.htslib.org/doc/faidx.html)."""
+
+    def __init__(self, name, length, offset, line_bases, line_width, qual_offset=None):
+        """
+        Build and return an instance of FaidxRecord.
+
+        :param name: Name of this reference sequence.
+        :type name: str
+        :param length: Total length of this reference sequence, in bases.
+        :type length: int
+        :param offset: Offset in the FASTA/FASTQ file of this sequence's first base.
+        :type offset: int
+        :param line_bases: The number of bases on each line.
+        :type line_bases: int
+        :param line_width: The number of bytes in each line, including the newline.
+        :type line_width: int
+        :param qual_offset: Offset of sequence's first quality within the FASTQ file.
+        :type qual_offset: int
+        :return: The new instance.
+        :rtype: FaidxRecord
+        """
+        self.name = name
+        self.length = length
+        self.offset = offset
+        self.line_bases = line_bases
+        self.line_width = line_width
+        self.qual_offset = qual_offset
+
+
+class Faidx(SVIO):
+    """Class to read and write a faidx file (see http://www.htslib.org/doc/faidx.html)."""
+
+    def __init__(self, filepath, mode="r"):
+        """
+        Build and return an instance of Faidx.
+
+        :param filepath: Path to the file.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
+        :return: The new instance.
+        :rtype: Faidx
+        """
+        super().__init__(filepath, mode=mode, separator="\t", title_starter=None, has_title=False)
+
+    def _parseLine(self):
+        """
+        Return a structured record from the current line.
+
+        :return: The record defined by the current line.
+        :rtype: FaidxItem
+        """
+        fields = []
+        for idx, elt in enumerate(self.current_line.split('\t')):
+            elt = elt.strip()
+            if idx != 0:
+                elt = int(elt)
+            fields.append(elt)
+        return FaidxRecord(*fields)
+
+    def readById(self):
+        """
+        Return all the record from the file.
+
+        :return: By sequence ID his FaiItem.
+        :rtype: dict
+        """
+        return {record.name: record for record in self}
 
 
 class SequenceFileReader(object):
@@ -510,3 +562,67 @@ class FastaIO:
         """
         header = ">" + sequence.id + (" " + sequence.description if sequence.description is not None else "")
         return header + "\n" + sequence.string
+
+
+class IdxFastaIO(FastaIO):
+    """Class to read and write a fasta file with an faidx index file."""
+
+    def __init__(self, filepath, mode="r", use_cache=False, fai_path=None):
+        """
+        Build and return an instance of IdxFastaIO.
+
+        :param filepath: Path to the file.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
+        :param use_cache: If True the last sequence retrieved with get is kept in memory to speed-up successive call to get() for the same sequence.
+        :type use_cache: bool
+        :param fai_path: Path to the fai file.
+        :type fai_path: str
+        :return: The new instance.
+        :rtype: IdxFastaIO
+        """
+        super().__init__(filepath, mode=mode)
+        if mode != "r":
+            raise NotImplementedError("Write and Append mode are not currently implemented for IdxFastaIO.")
+        self.fai_path = self.filepath + ".fai" if fai_path is None else fai_path
+        self.use_cache = use_cache
+        self.cached = None  # cached sequence
+        self._setIndex()
+
+    def _setIndex(self):
+        """Set self.index with content of self.fai_path."""
+        self.index = Faidx(self.fai_path).readById()
+
+    def get(self, id):
+        """
+        Return the sequence from file.
+
+        :param id: The sequence ID.
+        :type id: str
+        :return: The sequence selected from the file.
+        :rtype: Sequence
+        """
+        if self.cached is not None:
+            if self.cached.id == "id":
+                return self.cached
+        # The sequence is not already cached
+        start = self.index[id].offset
+        read_length = self.index[id].length + int(self.index[id].length / self.index[id].line_bases)
+        self.file_handle.seek(start)
+        seq = self.file_handle.read(read_length).replace("\n", "").replace("\r", "")
+        selected = Sequence(id, seq)
+        if self.use_cache:
+            self.cached = selected
+        return selected
+
+    # def write(self, sequence_record):
+    #     """
+    #     Write record lines in file.
+    #
+    #     :param sequence_record: The record to write.
+    #     :type sequence_record: Sequence
+    #     """
+    #     self.file_handle.write(self.seqToFastaLine(sequence_record) + "\n")
+    #     self.faidx.write(sequence_record)
+    #     self.current_line_nb += 1

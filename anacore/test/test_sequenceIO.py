@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -34,7 +34,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
 sys.path.append(LIB_DIR)
 
-from anacore.sequenceIO import FastaIO, FastqIO, Sequence
+from anacore.sequenceIO import IdxFastaIO, FastaIO, FastqIO, Sequence
 
 
 ########################################################################
@@ -339,6 +339,83 @@ def cmpSequences(rec_1, rec_2):
                 if rec_1.quality == rec_2.quality:
                     are_equal = True
     return are_equal
+
+
+class TestIdxFastaIO(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+
+        # Temporary files
+        self.tmp_fasta_idx = os.path.join(tmp_folder, unique_id + ".fasta.fai")
+        self.tmp_fasta = os.path.join(tmp_folder, unique_id + ".fasta")
+
+        # Expected
+        self.expected_rec = {
+            "one": Sequence("one", "ATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCAT"),
+            "two": Sequence("two", "ATGCATGCATGCATGCATGCATGCATGC", "another chromosome")
+        }
+
+        # Create sequence file
+        content_fasta = """>one
+ATGCATGCATGCATGCATGCATGCATGCAT
+GCATGCATGCATGCATGCATGCATGCATGC
+ATGCAT
+>two another chromosome
+ATGCATGCATGCAT
+GCATGCATGCATGC"""
+        with open(self.tmp_fasta, "w") as FH_out:
+            FH_out.write(content_fasta)
+
+        # Create index
+        content_fasta_idx = """one	66	5	30	31
+two	28	98	14	15"""
+        with open(self.tmp_fasta_idx, "w") as FH_out:
+            FH_out.write(content_fasta_idx)
+
+    def tearDown(self):
+        # Clean temporary files
+        for curr_file in [self.tmp_fasta, self.tmp_fasta_idx]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testGet(self):
+        # Without cache
+        with IdxFastaIO(self.tmp_fasta) as FH:
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.get("one").string
+            )
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.get("one").string
+            )
+            self.assertEqual(
+                self.expected_rec["two"].string,
+                FH.get("two").string
+            )
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.get("one").string
+            )
+        # With cache
+        with IdxFastaIO(self.tmp_fasta, "r", True) as FH:
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.get("one").string
+            )
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.get("one").string
+            )
+            self.assertEqual(
+                self.expected_rec["two"].string,
+                FH.get("two").string
+            )
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.get("one").string
+            )
 
 
 ########################################################################
