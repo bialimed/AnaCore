@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -196,7 +196,7 @@ if __name__ == "__main__":
             if "AF" not in curr_var.format: curr_var.format.append("AF")
             if "AD" not in curr_var.format: curr_var.format.append("AD")
             if "DP" not in curr_var.format: curr_var.format.append("DP")
-            # Process population AF, Ad and DP
+            # Process population AF, AD and DP
             curr_var.info["AF"] = [0]
             curr_var.info["AD"] = [0]
             curr_var.info["DP"] = 0
@@ -211,13 +211,13 @@ if __name__ == "__main__":
                         ref, alt = ref_alt.split("/")
                         AD, DP = getADPReads(chrom, int(pos), ref, alt, aln_by_samples[spl])
                         curr_var.samples[spl] = {
-                            "AF": [0 if DP == 0 else round(float(AD)/DP, args.AF_precision)],
+                            "AF": [0 if DP == 0 else round(AD / DP, args.AF_precision)],
                             "AD": [AD],
                             "DP": DP
                         }
                 if curr_var.samples[spl]["DP"] is not None:
                     curr_var.info["AD"][0] += curr_var.samples[spl]["AD"][0]
                     curr_var.info["DP"] += curr_var.samples[spl]["DP"]
-            curr_var.info["AF"][0] = curr_var.info["AD"][0] / curr_var.info["DP"]
+            curr_var.info["AF"][0] = round(curr_var.info["AD"][0] / curr_var.info["DP"], args.AF_precision)
             # Write variant
             FH_out.write(curr_var)
