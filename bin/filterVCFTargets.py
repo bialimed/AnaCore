@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -93,6 +93,7 @@ def isOverlapping(regions_by_chr, variant, seq_handler):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Filters variants by location. Each variant not located on one of the selected regions is removed.')
+    parser.add_argument('-m', '--mode', default="tag", choices=["tag", "remove"], help='Select the filter mode. In mode "tag" the filter tag OOT is added to the variants out of target. In mode "remove" the variant out of target are removed. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='Path to the variants file (format: VCF).')
@@ -117,15 +118,27 @@ if __name__ == "__main__":
             with VCFIO(args.output_variants, "w") as FH_out:
                 # Writes header
                 FH_out.copyHeader(FH_in)
-                FH_out.filter["REG"] = 'The variant is out off targeted regions (' + args.input_targets + ').'
+                FH_out.filter["OOT"] = 'The variant is out of targeted regions (' + args.input_targets + ').'
                 FH_out._writeHeader()
                 # Writes variants
                 for variant in FH_in:
                     nb_variants += 1
+                    overlap_targets = False
                     if isOverlapping(kept_by_chr, variant, FH_seq):
                         nb_kept += 1
+                        overlap_targets = True
+                    if args.mode == "remove":
+                        if overlap_targets:
+                            FH_out.write(variant)
+                    else:
+                        if variant.filter is None or len(variant.filter) == 0:  # Init filter tags
+                            variant.filter = ["PASS"]
+                        if not overlap_targets:  # Add OOT filter tag
+                            if len(variant.filter) == 1 and variant.filter[0] == "PASS":
+                                variant.filter = ["OOT"]
+                            else:
+                                variant.filter.append("OOT")
                         FH_out.write(variant)
-
     # Log process
     log.info(
         "{:.2%} of variants have been removed ({}/{})".format(
