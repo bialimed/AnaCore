@@ -245,7 +245,7 @@ if __name__ == "__main__":
                 curr_json["supports"] = [{
                     "filters": allele_record.filter,
                     "quality": allele_record.qual,
-                    "libraries": [{"alt_depth": allele_record.getAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples],
+                    "libraries": [{"alt_depth": allele_record.getAltAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples],
                     "source": args.calling_source
                 }]
                 if FH_vcf.annot_field in allele_record.info:

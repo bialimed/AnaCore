@@ -83,6 +83,6 @@ if __name__ == "__main__":
                     if curr_field in record.info:
                         del(record.info[curr_field])
                 record.info["DP"] = record.getPopDP()
-                record.info["AD"] = record.getPopAD()
-                record.info["AF"] = [round(elt, 5) for elt in record.getPopAF()]
+                record.info["AD"] = record.getPopAltAD()
+                record.info["AF"] = [round(elt, 5) for elt in record.getPopAltAF()]
                 FH_out.write(record)

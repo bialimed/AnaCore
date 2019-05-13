@@ -135,27 +135,27 @@ if __name__ == "__main__":
                                 SAR = [int(elt) for elt in curr_allele.samples[curr_spl]["SAR"]]
                                 strand_ratio = 0
                                 if max(SAF[idx], SAR[idx]) != 0:
-                                    strand_ratio = min(SAF[idx], SAR[idx])/max(SAF[idx], SAR[idx])
+                                    strand_ratio = min(SAF[idx], SAR[idx]) / max(SAF[idx], SAR[idx])
                             if curr_spl in group:
-                                curr_AD = curr_allele.getAD(curr_spl)[0]
+                                curr_AD = curr_allele.getAltAD(curr_spl)[0]
                                 curr_DP = curr_allele.getDP(curr_spl)
                                 group_AD += curr_AD
                                 group_DP += curr_DP
                                 if strand_ratio >= args.strand_ratio_threshold:
-                                    if curr_allele.getAD(curr_spl)[0] >= args.AD_threshold and curr_allele.getAF(curr_spl)[0] >= args.AF_threshold and curr_allele.getDP(curr_spl) >= args.DP_threshold:
+                                    if curr_allele.getAltAD(curr_spl)[0] >= args.AD_threshold and curr_allele.getAltAF(curr_spl)[0] >= args.AF_threshold and curr_allele.getDP(curr_spl) >= args.DP_threshold:
                                         test1.append(strand_ratio)
-                                        test0.append(curr_allele.getAD(curr_spl)[0])
+                                        test0.append(curr_allele.getAltAD(curr_spl)[0])
                                         curr_allele.info["SUP"] += 1
                             else:
                                 #~ if strand_ratio >= args.strand_ratio_threshold:
                                 if curr_allele.getDP(curr_spl) >= args.others_DP_threshold:
                                     nb_others_valid_DP += 1
-                                    if curr_allele.getAD(curr_spl)[0] >= args.others_AD_threshold and curr_allele.getAF(curr_spl)[0] >= args.others_AF_threshold:
+                                    if curr_allele.getAltAD(curr_spl)[0] >= args.others_AD_threshold and curr_allele.getAltAF(curr_spl)[0] >= args.others_AF_threshold:
                                         test2.append(strand_ratio)
                                         nb_others_support += 1
                         # Evaluates specificity of variant
-                        if curr_allele.info["SUP"]/float(len(group)) >= args.support_ratio_threshold: # The number of supporting samples in group is sufficient
-                            if group_AD/float(group_DP) >= args.popAF_threshold: # The number of supporting samples in group is sufficient
+                        if curr_allele.info["SUP"]/float(len(group)) >= args.support_ratio_threshold:  # The number of supporting samples in group is sufficient
+                            if group_AD/float(group_DP) >= args.popAF_threshold:  # The number of supporting samples in group is sufficient
                                     if args.group:
                                         curr_allele.info["gpAF"] = group_AD/float(group_DP)
                                         curr_allele.info["CONT"] = nb_others_support

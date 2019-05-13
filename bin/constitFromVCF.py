@@ -133,7 +133,7 @@ if __name__ == "__main__":
                             raise Exception('The DP for the variant "{}" in sample "{}" must be set when you merge samples.'.format(curr_allele.getName(), curr_spl))
                         elif curr_DP > args.min_DP:  # Skip samples with limited DP at the variant position
                             nb_usable_spl += 1
-                            curr_AF = curr_allele.getAF(curr_spl)[0]
+                            curr_AF = curr_allele.getAltAF(curr_spl)[0]
                             if curr_AF is not None and curr_AF > 0:  # The sample contain the variant
                                 nb_support_spl += 1
                                 AF_by_spl[curr_spl] = curr_AF

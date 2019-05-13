@@ -83,7 +83,7 @@ if __name__ == "__main__":
                 if has_DP:
                     record.info["DP"] = record.getPopDP()
                 if has_AF:
-                    record.info["AF"] = record.getPopAF()
+                    record.info["AF"] = record.getPopAltAF()
                 if has_AD:
-                    record.info["AD"] = record.getPopAD()
+                    record.info["AD"] = record.getPopAltAD()
                 FH_out.write(record)

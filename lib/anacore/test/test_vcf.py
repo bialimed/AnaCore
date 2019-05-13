@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -256,7 +256,7 @@ class TestVCFRecord(unittest.TestCase):
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 
-    def testGetAF(self):
+    def testGetAltAF(self):
         for curr_dataset in sorted(self.freq_data):
             if not curr_dataset.startswith("wout_spl"):
                 # Write test data
@@ -273,13 +273,13 @@ class TestVCFRecord(unittest.TestCase):
                                 for idx_spl, curr_spl in enumerate(FH_vcf.samples):
                                     expected_AF = self.freq_expected[variant.info["expModel"]]["AF"][curr_spl]
                                     expected_records.append("{} {}".format(variant.id, expected_AF))
-                                    observed_records.append("{} {}".format(variant.id, variant.getAF(curr_spl)))
+                                    observed_records.append("{} {}".format(variant.id, variant.getAltAF(curr_spl)))
                             except Exception:
-                                raise Exception('Error in TestVCFRecord.testGetAF() for variant "' + variant.id + '".')
+                                raise Exception('Error in TestVCFRecord.testGetAltAF() for variant "' + variant.id + '".')
                 # Assert
                 self.assertEqual(expected_records, observed_records)
 
-    def testGetAD(self):
+    def testGetAltAD(self):
         for curr_dataset in sorted(self.freq_data):
             if not curr_dataset.startswith("wout_spl"):
                 # Write test data
@@ -296,9 +296,9 @@ class TestVCFRecord(unittest.TestCase):
                                 for idx_spl, curr_spl in enumerate(FH_vcf.samples):
                                     expected_AD = self.freq_expected[variant.info["expModel"]]["AD"][curr_spl]
                                     expected_records.append("{} {}".format(variant.id, expected_AD))
-                                    observed_records.append("{} {}".format(variant.id, variant.getAD(curr_spl)))
+                                    observed_records.append("{} {}".format(variant.id, variant.getAltAD(curr_spl)))
                             except Exception:
-                                raise Exception('Error in TestVCFRecord.testGetAD() for variant "' + variant.id + '".')
+                                raise Exception('Error in TestVCFRecord.testGetAltAD() for variant "' + variant.id + '".')
                 # Assert
                 self.assertEqual(expected_records, observed_records)
 
@@ -325,7 +325,7 @@ class TestVCFRecord(unittest.TestCase):
                 # Assert
                 self.assertEqual(expected_records, observed_records)
 
-    def testGetPopAD(self):
+    def testGetPopAltAD(self):
         for curr_dataset in sorted(self.freq_data):
             # Write test data
             content = self.freq_data[curr_dataset]
@@ -339,13 +339,13 @@ class TestVCFRecord(unittest.TestCase):
                     try:
                         expected_AD = self.freq_expected[variant.info["expModel"]]["AD"]["pop"]
                         expected_records.append("{} {}".format(variant.id, expected_AD))
-                        observed_records.append("{} {}".format(variant.id, variant.getPopAD()))
+                        observed_records.append("{} {}".format(variant.id, variant.getPopAltAD()))
                     except Exception:
-                        raise Exception('Error in TestVCFRecord.testGetPopAD() for variant "' + variant.id + '".')
+                        raise Exception('Error in TestVCFRecord.testGetPopAltAD() for variant "' + variant.id + '".')
             # Assert
             self.assertEqual(expected_records, observed_records)
 
-    def testGetPopAF(self):
+    def testGetPopAltAF(self):
         for curr_dataset in sorted(self.freq_data):
             # Write test data
             content = self.freq_data[curr_dataset]
@@ -359,9 +359,9 @@ class TestVCFRecord(unittest.TestCase):
                     try:
                         expected_AF = self.freq_expected[variant.info["expModel"]]["AF"]["pop"]
                         expected_records.append("{} {}".format(variant.id, expected_AF))
-                        observed_records.append("{} {}".format(variant.id, variant.getPopAF()))
+                        observed_records.append("{} {}".format(variant.id, variant.getPopAltAF()))
                     except Exception:
-                        raise Exception('Error in TestVCFRecord.testGetPopAF() for variant "' + variant.id + '".')
+                        raise Exception('Error in TestVCFRecord.testGetPopAltAF() for variant "' + variant.id + '".')
             # Assert
             self.assertEqual(expected_records, observed_records)
 
@@ -426,7 +426,10 @@ class TestVCFRecord(unittest.TestCase):
         self.assertTrue(insertion.ref == "AGGCTTATGC" and insertion.alt[0] == "CTGATTA" and insertion.pos == 19)
 
     def testGetMostUpstream(self):
-        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT" # length: 33
+        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #      | | | | | | | | | | | | | | | | |
+        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                  13  17  21  25  29  32
         # Test fix deletion
         deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
         upstream = deletion.getMostUpstream(ref)
@@ -469,7 +472,10 @@ class TestVCFRecord(unittest.TestCase):
         self.assertTrue(upstream.pos == 34 and upstream.ref == "-" and upstream.alt[0] == "G")
 
     def testGetMostDownstream(self):
-        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT" # length: 33
+        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #      | | | | | | | | | | | | | | | | |
+        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                  13  17  21  25  29  32
         # Test fix deletion
         deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
         downstream = deletion.getMostDownstream(ref)

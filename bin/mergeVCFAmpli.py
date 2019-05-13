@@ -430,7 +430,7 @@ if __name__ == "__main__":
             # Manage records
             for record in FH_vcf:  # For each variant
                 for curr_spl in FH_vcf.samples:  # For each sample in VCF
-                    vcaller_AF = record.getAF(curr_spl)
+                    vcaller_AF = record.getAltAF(curr_spl)
                     vcaller_DP = record.getDP(curr_spl)
                     for alt_idx, curr_alt in enumerate(record.alt):  # For each alternative allele in variant
                         record_allele = getAlleleRecord(FH_vcf, record, alt_idx)
@@ -439,7 +439,7 @@ if __name__ == "__main__":
                         if len(vcaller_AF) == len(record.alt) + 1:  # The AF contains reference AF
                             vcaller_curr_AF = vcaller_AF[alt_idx + 1]
                         record_allele.samples[curr_spl]["AF"] = [round(vcaller_curr_AF, args.AF_precision)]
-                        record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF*vcaller_DP)]
+                        record_allele.samples[curr_spl]["AD"] = [int(vcaller_curr_AF * vcaller_DP)]
                         record_allele.samples[curr_spl]["DP"] = vcaller_DP
                         # Store allele
                         allele_id = record_allele.getName()

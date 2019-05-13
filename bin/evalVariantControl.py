@@ -76,7 +76,7 @@ def addVCFVariants(variants, vcf_path, vcf_idx, spl_name=None):
         if spl_name is None:
             spl_name = FH_vcf.samples[0]
         for record in FH_vcf:
-            allele_freq = record.getAF(spl_name)
+            allele_freq = record.getAltAF(spl_name)
             # For each alternative allele
             for idx_alt, alt in enumerate(record.alt):
                 allele_record = getAlleleRecord(FH_vcf, record, idx_alt)

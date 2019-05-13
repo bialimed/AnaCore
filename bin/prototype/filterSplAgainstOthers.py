@@ -78,10 +78,10 @@ if __name__ == "__main__":
                     for curr_spl in FH_in.samples:
                         if curr_spl not in spl_in_gp and curr_allele.getDP(curr_spl) > args.others_DP_threshold:
                             nb_valid_DP_in_others += 1
-                        if curr_allele.getAD(curr_spl)[0] >= args.AD_threshold and curr_allele.getAF(curr_spl)[0] >= args.AF_threshold:
+                        if curr_allele.getAltAD(curr_spl)[0] >= args.AD_threshold and curr_allele.getAltAF(curr_spl)[0] >= args.AF_threshold:
                             if curr_spl in spl_in_gp:
                                 curr_allele.info["SUP"] += 1
-                        if curr_allele.getAD(curr_spl)[0] >= args.AD_threshold or curr_allele.getAF(curr_spl)[0] >= args.AF_threshold:
+                        if curr_allele.getAltAD(curr_spl)[0] >= args.AD_threshold or curr_allele.getAltAF(curr_spl)[0] >= args.AF_threshold:
                             if curr_spl not in spl_in_gp:
                                 curr_allele.info["CONT"] += 1
                     # Evaluates specificity of variant

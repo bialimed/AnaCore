@@ -85,7 +85,7 @@ if __name__ == "__main__":
                 pop = {
                     "AD": None,
                     "DP": record.getPopDP(),
-                    "AF": [round(curr_AF, args.AF_precision) for curr_AF in record.getPopAF()]
+                    "AF": [round(curr_AF, args.AF_precision) for curr_AF in record.getPopAltAF()]
                 }
                 pop["AD"] = [int(curr_AF * pop["DP"]) for curr_AF in pop["AF"]]
                 # Replace samples by the new sample

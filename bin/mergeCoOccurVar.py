@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.2'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -205,30 +205,16 @@ def mergedRecord(first, second, ref_seq):
     # INFO metrics
     if "AD" in first.info:
         if isinstance(first.info["AD"], (int, float)) or len(first.info["AD"]) == 1:  # Contains only alt allele
-            merged.info["AD"] = merged.getPopAD()
+            merged.info["AD"] = merged.getPopAltAD()
         else:
-            pop_AD = merged.getPopAD()[0]
-            ref_pop_AD = 1 - pop_AD  # Erroneous when several variants exist on position
-            if "AD" in merged.format and len(merged.samples.values[0]["AD"]) == 2:
-                ref_pop_AD = 0
-                for spl_name, spl_info in merged.samples.items():
-                    ref_pop_AD += spl_info["AD"][0]
-            elif "AF" in merged.format and "DP" in merged.format and len(merged.samples.values[0]["AF"]) == 2:
-                ref_pop_AD = 0
-                for spl_name, spl_info in merged.samples.items():
-                    ref_pop_AD += spl_info["AF"][0] * spl_info["DP"]
-            merged.info["AD"] = [int(ref_pop_AD), pop_AD]
+            merged.info["AD"] = [merged.getPopRefAD()] + merged.getPopAltAD()
     if "DP" in first.info:
         merged.info["DP"] = merged.getPopDP()
     if "AF" in first.info:
         if isinstance(first.info["AF"], (float, int)) or len(first.info["AF"]) == 1:  # Contains only alt allele
-            merged.info["AF"] = merged.getPopAF()
+            merged.info["AF"] = merged.getPopAltAF()
         else:
-            pop_AF = merged.getPopAF()[0]
-            ref_pop_AF = 1 - pop_AF  # Erroneous when several variants exist on position
-            if ("AD" in merged.info or "AD" in merged.format) and ("DP" in merged.info or "DP" in merged.format) and len(merged.getPopAD()) == 2:
-                ref_pop_AF = round(merged.getPopAD()[0] / merged.getPopDP(), 6)
-            merged.info["AF"] = [ref_pop_AF, pop_AF]
+            merged.info["AF"] = [merged.getPopRefAF()] + merged.getPopAltAF()
     # INFO Parents
     merged.info["MCO_VAR"] = []
     if "MCO_VAR" in first.info:

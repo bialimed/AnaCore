@@ -100,7 +100,7 @@ if __name__ == "__main__":
                     if curr_allele.getName() in noise_by_variant:
                         nb_spl_over_noise = 0
                         for curr_spl in curr_allele.samples:
-                            if curr_allele.getAF(curr_spl)[0] > noise_by_variant[curr_allele.getName()]:
+                            if curr_allele.getAltAF(curr_spl)[0] > noise_by_variant[curr_allele.getName()]:
                                 nb_spl_over_noise += 1
                         if nb_spl_over_noise == 0:
                             if curr_allele.filter is None or len(curr_allele.filter) == 0:

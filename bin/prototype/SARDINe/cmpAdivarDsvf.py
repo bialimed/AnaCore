@@ -105,8 +105,8 @@ if __name__ == "__main__":
                     processed = dict()
                     for variant_id in adivar_spl_var:
                         processed[variant_id] = 1
-                        adivar_AF = round(adivar_spl_var[variant_id].getPopAF()[0], 2)
-                        dsvf_AF = round((dsvf_spl_var[variant_id].getPopAF()[0] if variant_id in dsvf_spl_var else 0), 2)
+                        adivar_AF = round(adivar_spl_var[variant_id].getPopAltAF()[0], 2)
+                        dsvf_AF = round((dsvf_spl_var[variant_id].getPopAltAF()[0] if variant_id in dsvf_spl_var else 0), 2)
                         print(
                             curr_run,
                             curr_spl,
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                     for variant_id in dsvf_spl_var:
                         if variant_id not in processed:
                             adivar_AF = 0.00
-                            dsvf_AF = round(dsvf_spl_var[variant_id].getPopAF()[0], 2)
+                            dsvf_AF = round(dsvf_spl_var[variant_id].getPopAltAF()[0], 2)
                             print(
                                 curr_run,
                                 curr_spl,
