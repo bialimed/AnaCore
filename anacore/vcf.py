@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.19.0'
+__version__ = '1.20.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -61,9 +61,11 @@ class VCFRecord:
 
     def containsIndel(self):
         """
-        @summary: Returns True if the variant contains an allele corresponding to an insertion or a deletion.
-        @return: [bool] True if the variant contains an allele corresponding to an insertion or a deletion.
-        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        Return True if the variant contains an allele corresponding to an insertion or a deletion.
+
+        :return: True if the variant contains an allele corresponding to an insertion or a deletion.
+        :rtype: bool
+        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         contains_indel = False
         ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
@@ -75,10 +77,12 @@ class VCFRecord:
 
     def refStart(self):
         """
-        @summary: Returns the first position on reference affected by the alternative allele.
-        @return: [float] the first position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
-        @warnings: This method can only be used on record with only one alternative allele.
-        @examples:
+        Return the first position on reference affected by the alternative allele.
+
+        :return: The first position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
+        :rtype: float
+        :warnings: This method can only be used on record with only one alternative allele.
+        :examples:
                 # Insertion:
                 chr1  12  A    TG    => returns 12
                 chr1  12  A    AGT   => chr1  13  .   GT  (std) => returns 12.5
@@ -110,10 +114,12 @@ class VCFRecord:
 
     def refEnd(self):
         """
-        @summary: Returns the last position on reference affected by the alternative allele.
-        @return: [float] The last position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
-        @warnings: This method can only be used on record with only one alternative allele.
-        @examples:
+        Return the last position on reference affected by the alternative allele.
+
+        :return: The last position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
+        :rtype: float
+        :warnings: This method can only be used on record with only one alternative allele.
+        :examples:
                 # Insertion:
                 chr1  12  A    TG    => returns 12
                 chr1  12  A    AGT   => chr1  13  -   GT  (std) => returns 12.5
@@ -147,8 +153,10 @@ class VCFRecord:
 
     def getName(self):
         """
-        @summary: Returns an unique name to identified the variant.
-        @return: [str] The variant name.
+        Return an unique name to identified the variant.
+
+        :return: The variant name.
+        :rtype: str
         """
         return "{}:{}={}/{}".format(
             self.chrom,
@@ -159,10 +167,12 @@ class VCFRecord:
 
     def isDeletion(self):
         """
-        @summary: Returns True if the variant is a deletion.
-        @return: [bool] True if the variant is a deletion.
-        @warnings: This method can only be used on record with only one alternative allele.
-        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        Return True if the variant is a deletion.
+
+        :return: True if the variant is a deletion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
@@ -175,10 +185,12 @@ class VCFRecord:
 
     def isIndel(self):
         """
-        @summary: Returns True if the variant is an insertion or a deletion.
-        @return: [bool] True if the variant is an insertion or a deletion.
-        @warnings: This method can only be used on record with only one alternative allele.
-        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        Return True if the variant is an insertion or a deletion.
+
+        :return: True if the variant is an insertion or a deletion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isIndel' cannot be used on multi-allelic variant.")
@@ -191,10 +203,12 @@ class VCFRecord:
 
     def isInsertion(self):
         """
-        @summary: Returns True if the variant is an insertion.
-        @return: [bool] True if the variant is an insertion.
-        @warnings: This method can only be used on record with only one alternative allele.
-        @note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        Return True if the variant is an insertion.
+
+        :return: True if the variant is an insertion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant.")
@@ -207,9 +221,11 @@ class VCFRecord:
 
     def type(self):
         """
-        @summary: Returns the vrariant type.
-        @return: [str] 'snp' or 'indel' or 'variation'.
-        @warnings: This method can only be used on record with only one alternative allele.
+        Return the variant type.
+
+        :return: 'snp' or 'indel' or 'variation'.
+        :rtype: str
+        :warnings: This method can only be used on record with only one alternative allele.
         """
         record_type = "snp"
         if self.isIndel():
@@ -220,13 +236,16 @@ class VCFRecord:
 
     def standardizeSingleAllele(self):
         """
-        @summary: The empty allele marker is replaced by the empty_marker and the alternative and reference allele are reduced to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.
-        @warnings: This method can only be used on record with only one alternative allele.
+        The empty allele marker is replaced by the empty_marker and the alternative and reference allele are reduced to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.
+
+        :warnings: This method can only be used on record with only one alternative allele.
         """
         def twoSideTrimming(record):
             """
-            @summary: Removes identical end and start between reference allele and alternative allele (example: ATGACT/ATCT becomes G/). The end is removed first to manage repeat cases.
-            @param record: [VCFRecord] The mono-alternative variant.
+            Remove identical end and start between reference allele and alternative allele (example: ATGACT/ATCT becomes G/). The end is removed first to manage repeat cases.
+
+            :param record: The mono-alternative variant.
+            :type record: VCFRecord
             """
             ref = record.ref
             alt = record.alt[0]
@@ -281,10 +300,13 @@ class VCFRecord:
 
     def getMostUpstream(self, ref_seq):
         """
-        @summary: Returns the most upstream variant that can have the same alternative sequence of the instance.
-        @param ref_seq: [str] The reference sequence where the variant has been identified (example: the sequence of the chromosome).
-        @return: [VCFRecord] The standardized most upstream variant (see standardizeSingleAllele).
-        @warnings: This method can only be used on record with only one alternative allele.
+        Return the most upstream variant that can have the same alternative sequence of the instance.
+
+        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).
+        :type ref_seq: str
+        :return: The standardized most upstream variant (see standardizeSingleAllele).
+        :rtype: VCFRecord
+        :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
@@ -320,10 +342,13 @@ class VCFRecord:
 
     def getMostDownstream(self, ref_seq):
         """
-        @summary: Returns the most downstream variant that can have the same alternative sequence of the instance.
-        @param ref_seq: [str] The reference sequence where the variant has been identified (example: the sequence of the chromosome).
-        @return: [VCFRecord] The standardized most downstream variant (see standardizeSingleAllele).
-        @warnings: This method can only be used on record with only one alternative allele.
+        Return the most downstream variant that can have the same alternative sequence of the instance.
+
+        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).
+        :type ref_seq: str
+        :return: The standardized most downstream variant (see standardizeSingleAllele).
+        :rtype: VCFRecord
+        :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
@@ -361,10 +386,50 @@ class VCFRecord:
                 new_record.alt = [alt]
         return new_record
 
-    def getPopAD(self):
+    def getPopRefAD(self):
         """
-        @summary: Returns the list of alleles depths for the population (it is composed by all samples). The reference depth is removed from the result if it exists.
-        @return: [list] The list of alleles depths.
+        Return the reference allele depth for the population (it is composed by all samples).
+
+        :return: The reference allele population depth.
+        :rtype: int
+        """
+        ref_pop_AD = None
+        if "AD" in self.info and len(self.info["AD"]) == len(self.alt) + 1:  # INFO.AD contains ref allele
+            ref_pop_AD = self.info["AD"]
+        elif "AF" in self.info and "DP" in self.info and len(self.info["AF"]) == len(self.alt) + 1:  # INFO.AF contains ref allele and INFO.DP exists
+            ref_pop_AD = int(self.info["AF"][0] * self.info["DP"])
+        elif len(self.samples) != 0:  # Must be processed by samples data
+            first_spl = self.samples.keys()[0]
+            if "AD" in self.format and len(first_spl["AD"]) == len(self.alt) + 1:  # AD contains ref allele
+                try:
+                    ref_pop_AD = 0
+                    for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
+                        ref_pop_AD += spl_data["AD"][0]
+                except Exception:
+                    ref_pop_AD = None
+            if ref_pop_AD is None and "AF" in self.format and "DP" in self.format and len(first_spl["AF"]) == len(self.alt) + 1:  # AF contains ref allele
+                try:
+                    ref_pop_AD = 0
+                    for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
+                        ref_pop_AD += spl_data["AF"][0] * spl_data["DP"]
+                except Exception:
+                    ref_pop_AD = None
+        if ref_pop_AD is None:  # Erroneous when several variants exist on position and are line splitted
+            if "AD" in self.info:  # INFO.AD does not contain ref
+                ref_pop_AD = self.getPopDP() - sum(self.info["AD"])
+            elif "AF" in self.info and "DP" in self.info:  # INFO.AF does not contain ref and INFO.DP exists
+                ref_pop_AD = int((1 - sum(self.info["AF"])) * self.info["DP"])
+            else:  # Must be processed by samples data
+                alt_pop_AD = sum(self.getPopAltAD())
+                ref_pop_AD = self.getPopDP() - alt_pop_AD
+        return ref_pop_AD
+
+    def getPopAltAD(self):
+        """
+        Return the list of alternative alleles depths for the population (it is composed by all samples). The reference depth is removed from the result if it exists.
+
+        :return: The list of alternative alleles depths.
+        :rtype: list
         """
         # Retrieve AD from self
         AD = None
@@ -375,7 +440,8 @@ class VCFRecord:
             DP = None
             try:
                 DP = self.getPopDP()
-            except Exception: pass
+            except Exception:
+                pass
             if "AF" in self.info and DP is not None:  # The AD can be processed directly from the population information
                 AF = self.info["AF"] if isinstance(self.info["AF"], (list, tuple)) else [self.info["AF"]]
                 AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
@@ -387,9 +453,9 @@ class VCFRecord:
                     try:
                         for idx_spl, spl_name in enumerate(self.samples):
                             if idx_spl == 0:
-                                AD = [curr_AD for curr_AD in self.getAD(spl_name)]
+                                AD = [curr_AD for curr_AD in self.getAltAD(spl_name)]
                             else:
-                                for idx_allele, curr_AD in enumerate(self.getAD(spl_name)):
+                                for idx_allele, curr_AD in enumerate(self.getAltAD(spl_name)):
                                     AD[idx_allele] += curr_AD
                     except Exception:
                         raise Exception('The allele depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
@@ -402,10 +468,56 @@ class VCFRecord:
         # Return
         return(AD)
 
-    def getPopAF(self):
+    def getPopRefAF(self):
         """
-        @summary: Returns the list of alleles frequencies for the population (it is composed by all samples). The reference frequency is removed from the result if it exists.
-        @return: [list] The list of alleles frequencies.
+        Return the reference allele frequency for the population (it is composed by all samples).
+
+        :return: The reference allele population frequency.
+        :rtype: int
+        """
+        ref_pop_AF = None
+        if "AF" in self.info and len(self.info["AF"]) == len(self.alt) + 1:  # INFO.AF contains ref allele
+            ref_pop_AF = self.info["AF"]
+        elif "AD" in self.info and "DP" in self.info and len(self.info["AD"]) == len(self.alt) + 1:  # INFO.AD contains ref allele and INFO.DP exists
+            ref_pop_AF = self.info["AD"][0] / self.info["DP"]
+        elif len(self.samples) != 0:  # Must be processed by samples data
+            first_spl = self.samples.keys()[0]
+            if "AD" in self.format and "DP" in self.format and len(first_spl["AD"]) == len(self.alt) + 1:  # AD contains ref allele
+                try:
+                    ref_pop_AD = 0
+                    pop_DP = 0
+                    for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
+                        pop_DP += spl_data["DP"]
+                        ref_pop_AD += spl_data["AD"][0]
+                    ref_pop_AF = ref_pop_AD / pop_DP
+                except Exception:
+                    ref_pop_AF = None
+            if ref_pop_AF is None and "AF" in self.format and "DP" in self.format and len(first_spl["AF"]) == len(self.alt) + 1:  # AF contains ref allele
+                try:
+                    ref_pop_AD = 0
+                    pop_DP = 0
+                    for spl_name, spl_data in self.samples.items():  # Sum ref AF for all samples
+                        pop_DP += spl_data["DP"]
+                        ref_pop_AD += spl_data["AF"][0] * spl_data["DP"]
+                    ref_pop_AF = ref_pop_AD / pop_DP
+                except Exception:
+                    ref_pop_AF = None
+        if ref_pop_AF is None:  # Erroneous when several variants exist on position and are line splitted
+            if "AF" in self.info:  # INFO.AF does not contain ref
+                ref_pop_AF = 1 - sum(self.info["AF"])
+            elif "AD" in self.info and "DP" in self.info:  # INFO.AD does not contain ref and INFO.DP exists
+                ref_pop_AF = (self.info["DP"] - sum(self.info["AD"])) / self.info["DP"]
+            else:  # Must be processed by samples data
+                alt_pop_AF = sum(self.getPopAltAF())
+                ref_pop_AF = 1 - alt_pop_AF
+        return ref_pop_AF
+
+    def getPopAltAF(self):
+        """
+        Return the list of alleles frequencies for the population (it is composed by all samples). The reference frequency is removed from the result if it exists.
+
+        :return: The list of alleles frequencies.
+        :rtype: list
         """
         # Retrieve AF from self
         AF = None
@@ -416,10 +528,11 @@ class VCFRecord:
             DP = None
             try:
                 DP = self.getPopDP()
-            except Exception: pass
+            except Exception:
+                pass
             if "AD" in self.info and DP is not None:  # The AF can be processed directly from the population information
                 AD = self.info["AD"] if isinstance(self.info["AD"], (list, tuple)) else [self.info["AD"]]
-                AF = [curr_AD/float(DP) for curr_AD in AD]
+                AF = [curr_AD / DP for curr_AD in AD]
             else:  # The AF must be calculated from samples information
                 spl_names = list(self.samples.keys())
                 if len(self.samples) == 1 and "AF" in self.samples[spl_names[0]]:  # Only one sample and it contains AF
@@ -429,18 +542,18 @@ class VCFRecord:
                         pop_AD = None
                         for idx_spl, spl_name in enumerate(self.samples):
                             if idx_spl == 0:
-                                pop_AD = [curr_AD for curr_AD in self.getAD(spl_name)]
+                                pop_AD = [curr_AD for curr_AD in self.getAltAD(spl_name)]
                             else:
-                                for idx_allele, curr_AD in enumerate(self.getAD(spl_name)):
+                                for idx_allele, curr_AD in enumerate(self.getAltAD(spl_name)):
                                     pop_AD[idx_allele] += curr_AD
                         if DP == 0:
                             AF = [0 for curr_AD in pop_AD]
                             if sum(pop_AD) != 0:
-                                raise Exception('popAD and popDP are not compatible for variant "' + self.chrom + ":" + str(self.pos) + '".')
+                                raise Exception('popAD and popDP are not compatible for variant "{}".'.format(self.getName()))
                         else:
-                            AF = [curr_AD/float(DP) for curr_AD in pop_AD]
+                            AF = [curr_AD / DP for curr_AD in pop_AD]
                     except Exception:
-                        raise Exception('The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
+                        raise Exception('The allele frequency cannot be retrieved in variant "{}".'.format(self.getName()))
         # Transform AF to list
         if not isinstance(AF, (list, tuple)):
             AF = [AF]
@@ -452,8 +565,10 @@ class VCFRecord:
 
     def getPopDP(self):
         """
-        @summary: Returns the depth for the population (it is composed by all samples).
-        @return: [int] The depth.
+        Return the depth for the population (it is composed by all samples).
+
+        :return: The depth in population.
+        :rtype: int
         """
         DP = None
         if "DP" in self.info:  # The DP is already processed for the population
@@ -470,18 +585,21 @@ class VCFRecord:
                 AF = self.info["AF"] if isinstance(self.info["AF"], (list, tuple)) else [self.info["AF"]]
                 if len(AF) == len(self.alt) + 1:
                     AF = AF[1:]
-                DP = int(round(AD[0]/AF[0], 0))
+                DP = int(round(AD[0] / AF[0], 0))
             elif len(self.samples) != 0:  # The DP must be calculated from samples information
                 DP = sum([self.getDP(spl_name) for spl_name in self.samples])
             else:
-                raise Exception('The population depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
+                raise Exception('The population depth cannot be retrieved in variant "{}".'.format(self.getName()))
         return DP
 
     def getAD(self, spl_name):
         """
-        @summary: Returns the list of alleles depths for the specified sample. The reference depth is removed from the result if it exists.
-        @param spl_name: [str] The sample name.
-        @return: [list] The list of alleles depths.
+        Return the list of alleles depths for the specified sample.
+
+        :param spl_name: The sample name.
+        :type spl_name: str
+        :return: The list of alleles depths.
+        :rtype: list
         """
         AD = None
         # Retrieve AD from self
@@ -495,10 +613,23 @@ class VCFRecord:
                 DP = self.getDP(spl_name)
                 AD = [int(round(curr_AF * DP, 0)) for curr_AF in AF]
             except Exception:
-                raise Exception('The alternative alleles depths cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
+                raise Exception('The alternative alleles depths cannot be retrieved in variant "{}".'.format(self.getName()))
         # Transform AD to list
         if not isinstance(AD, (list, tuple)):
             AD = [AD]
+        # Return
+        return AD
+
+    def getAltAD(self, spl_name):
+        """
+        Return the list of alternative alleles depths for the specified sample. The reference depth is removed from the result if it exists.
+
+        :param spl_name: The sample name.
+        :type spl_name: str
+        :return: The list of alternative alleles depths.
+        :rtype: list
+        """
+        AD = self.getAD(spl_name)
         # Remove the reference allele depth
         if len(AD) == len(self.alt) + 1:
             AD = AD[1:]
@@ -507,9 +638,12 @@ class VCFRecord:
 
     def getAFBySample(self, missing_replacement=None):
         """
-        @summary: Returns the list of alleles frequencies by sample name. The reference frequency is removed from the result if it exists.
-        @param missing_replacement: [float] Value used to replace missing AF.
-        @return: [dict] The list of alleles frequencies by sample name.
+        Return the list of alleles frequencies by sample name. The reference frequency is removed from the result if it exists.
+
+        :param missing_replacement: Value used to replace missing AF.
+        :type missing_replacement: float
+        :return: The list of alleles frequencies by sample name.
+        :rtype: dict
         """
         AF = dict()
         for curr_spl in self.samples:
@@ -522,9 +656,12 @@ class VCFRecord:
 
     def getAF(self, spl_name):
         """
-        @summary: Returns the list of alleles frequencies for the specified sample. The reference frequency is removed from the result if it exists.
-        @param spl_name: [str] The sample name.
-        @return: [list] The list of alleles frequencies.
+        Return the list of alleles frequencies for the specified sample.
+
+        :param spl_name: The sample name.
+        :type spl_name: str
+        :return: The list of alleles frequencies.
+        :rtype: list
         """
         # Retrieve AF from self
         AF = None
@@ -540,28 +677,42 @@ class VCFRecord:
                 if DP == 0:
                     AF = [0 for curr_AD in AD]
                 else:
-                    AF = [curr_AD/float(DP) for curr_AD in AD]
+                    AF = [curr_AD / DP for curr_AD in AD]
             else:
                 # Get sample DP
                 DP = None
                 try:
                     DP = self.getDP(spl_name)
-                except Exception: pass
+                except Exception:
+                    pass
                 if AD is not None and DP is not None:  # The AF can be processed from sample's AD and DP
                     if DP == 0:
                         AF = [0 for curr_AD in AD]
                     else:
-                        AF = [curr_AD/float(DP) for curr_AD in AD]
+                        AF = [curr_AD / DP for curr_AD in AD]
                 elif len(self.samples) == 1 and spl_name in self.samples and "AF" in self.info:  # Only one sample and AF is already processed for population
                     AF = self.info["AF"]
                 # elif len(self.samples) == 1 and spl_name in self.samples and "AD" in self.info and DP is not None: # Only one sample and AF must be processed for population
                 #     AD = self.info["AD"]
                 #     AF = [curr_AD/float(DP) for curr_AD in AD]
                 else:
-                    raise Exception('The allele frequency cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
+                    raise Exception('The allele frequency cannot be retrieved in variant "{}".'.format(self.getName()))
         # Transform AF to list
         if not isinstance(AF, (list, tuple)):
             AF = [AF]
+        # Return
+        return AF
+
+    def getAltAF(self, spl_name):
+        """
+        Return the list of alternative alleles frequencies for the specified sample. The reference frequency is removed from the result if it exists.
+
+        :param spl_name: The sample name.
+        :type spl_name: str
+        :return: The list of alternative alleles frequencies.
+        :rtype: list
+        """
+        AF = self.getAF(spl_name)
         # Remove the reference allele frequency
         if len(AF) == len(self.alt) + 1:
             AF = AF[1:]
@@ -570,9 +721,12 @@ class VCFRecord:
 
     def getDP(self, spl_name):
         """
-        @summary: Returns the depth for the specified sample.
-        @param spl_name: [str] The sample name.
-        @return: [int] The depth.
+        Return the depth for the specified sample.
+
+        :param spl_name: The sample name.
+        :type spl_name: str
+        :return: The depth.
+        :rtype: int
         """
         DP = None
         if "DP" in self.samples[spl_name]:  # The DP is already processed for the sample
@@ -587,7 +741,7 @@ class VCFRecord:
                 AF = self.samples[spl_name]["AF"] if isinstance(self.samples[spl_name]["AF"], (list, tuple)) else [self.samples[spl_name]["AF"]]
                 if len(AF) == len(self.alt) + 1:
                     AF = AF[1:]
-                DP = int(round(AD[0]/AF[0], 0))
+                DP = int(round(AD[0] / AF[0], 0))
             else:  # AD does not contain reference AD and AF is missing to calculate DP
                 raise Exception('The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         else:  # AD is missing to calculate DP
