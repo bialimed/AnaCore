@@ -11,7 +11,7 @@
             "values": ["popAF", "popConst"]
         }, {
             "class": "Filter",
-            "getter": "m:getPopAF",
+            "getter": "m:getPopAltAF",
             "action": "select",
             "aggregator": "ratio:1",
             "operator": ">=",

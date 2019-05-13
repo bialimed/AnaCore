@@ -23,7 +23,7 @@
                     "values": ["incomplete"]
                 }, {
                     "class": "Filter",
-                    "getter": "m:getPopAF.0",
+                    "getter": "m:getPopAltAF.0",
                     "action": "select",
                     "aggregator": "nb:1",
                     "operator": ">=",
