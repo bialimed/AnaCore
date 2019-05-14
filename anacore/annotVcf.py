@@ -91,7 +91,7 @@ class AnnotVCFIO(VCFIO):
                 raise Exception("The {} description cannot be parsed in file {}.".format(self.annot_field, self.filepath))
             titles_str = match.group(1)
             if titles_str.endswith("."):
-                titles_str[:-1]
+                titles_str = titles_str[:-1]
             self.ANN_titles = titles_str.split("|")
 
     def _parseLine(self):
