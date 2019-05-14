@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -89,7 +89,10 @@ class AnnotVCFIO(VCFIO):
             match = re.search("Format: ([^ ]+)", self.info[self.annot_field]["description"])
             if match is None:
                 raise Exception("The {} description cannot be parsed in file {}.".format(self.annot_field, self.filepath))
-            self.ANN_titles = match.group(1).split("|")
+            titles_str = match.group(1)
+            if titles_str.endswith("."):
+                titles_str[:-1]
+            self.ANN_titles = titles_str.split("|")
 
     def _parseLine(self):
         """
@@ -127,6 +130,20 @@ class AnnotVCFIO(VCFIO):
                     csq_fields.append("|".join(annot_fields))
                 std_record.info[self.annot_field] = csq_fields
         return super().recToVCFLine(std_record)
+
+    def _writeHeader(self):
+        """Write VCF header"""
+        # Manage declaration of ANN in header
+        match = re.search("(Format: [^ ]+)", self.info[self.annot_field]["description"])
+        old_titles = match.group(1)
+        if old_titles.endswith("."):
+            old_titles = old_titles[:-1]
+        self.info[self.annot_field]["description"] = self.info[self.annot_field]["description"].replace(
+            old_titles,
+            "Format: " + "|".join(self.ANN_titles)
+        )
+        # Write header
+        super()._writeHeader()
 
 
 class VEPVCFIO(AnnotVCFIO):

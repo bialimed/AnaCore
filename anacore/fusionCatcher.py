@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -96,7 +96,7 @@ def setFusionCatcherVCFHeader(vcf_io, annotation_field="FCANN"):
         annotation_field: {"type": str, "type_tag": "String", "number": None, "description": "Consequence annotations. Format: SYMBOL|Gene|EXON|Effect."}
     }
     # ANN_titles
-    vcf_io.ANN_titles = ["SYMBOL", "Gene", "Exon", "Effect"]
+    vcf_io.ANN_titles = ["SYMBOL", "Gene", "EXON", "Effect"]
     # FORMAT
     vcf_io.format = {
         "PR": {"type": int, "type_tag": "Integer", "number": 1, "description": "Count of pairs of reads supporting the fusion (including also the multimapping reads)."},
@@ -191,7 +191,7 @@ class FusionCatcherIO(HashedSVIO):
             self.annot_field: [{
                 "SYMBOL": fusion_record["Gene_1_symbol(5end_fusion_partner)"],
                 "Gene": fusion_record["Gene_1_id(5end_fusion_partner)"],
-                "Exon": fusion_record["Exon_1_id(5end_fusion_partner)"],
+                "EXON": fusion_record["Exon_1_id(5end_fusion_partner)"],
                 "Effect": fusion_record["Predicted_effect"]
             }]
         }
@@ -215,7 +215,7 @@ class FusionCatcherIO(HashedSVIO):
             self.annot_field: [{
                 "SYMBOL": fusion_record["Gene_2_symbol(3end_fusion_partner)"],
                 "Gene": fusion_record["Gene_2_id(3end_fusion_partner)"],
-                "Exon": fusion_record["Exon_2_id(3end_fusion_partner)"],
+                "EXON": fusion_record["Exon_2_id(3end_fusion_partner)"],
                 "Effect": fusion_record["Predicted_effect"]
             }]
         }
