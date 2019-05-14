@@ -152,7 +152,7 @@ artificial_chr2	11	80	11	12""")
 
     def testResults(self):
         # Execute command
-        subprocess.check_call(self.cmd)
+        subprocess.check_call(self.cmd, stderr=subprocess.DEVNULL)
 
         # Validate results
         expected = [curr_var.id for curr_var in self.variants if curr_var.info["target"] == "target_2"]

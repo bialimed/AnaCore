@@ -83,37 +83,37 @@ class FilterVCFPrimers(unittest.TestCase):
             FH_var.info = {"ZOI": {"type": str, "type_tag": "String", "number": 1, "number_tag": 1, "description": "If the variant can be in interest area."} }
             FH_var._writeHeader()
             self.variants = [
-                VCFRecord( "artificial_chr1", 6, "alt_0", "A", ["AA"], None, None, {"ZOI": "no"} ),
-                VCFRecord( "artificial_chr1", 8, "alt_1", "TT", ["T"], None, None, {"ZOI": "no"} ),
-                VCFRecord( "artificial_chr1", 8, "alt_2", "T", ["TT"], None, None, {"ZOI": "yes"} ),
-                VCFRecord( "artificial_chr1", 9, "alt_3", "TTGG", ["TT"], None, None, {"ZOI": "yes"} ),
-                VCFRecord( "artificial_chr1", 14, "alt_4", "G", ["GG"], None, None, {"ZOI": "yes"} ),
-                VCFRecord( "artificial_chr1", 18, "alt_5", "GGG", ["G"], None, None, {"ZOI": "yes"} ), # ZOI downstream limit deletion
-                VCFRecord( "artificial_chr1", 22, "alt_6", "T", ["TT"], None, None, {"ZOI": "yes"} ),
+                VCFRecord("artificial_chr1", 6, "alt_0", "A", ["AA"], None, None, {"ZOI": "no"}),
+                VCFRecord("artificial_chr1", 8, "alt_1", "TT", ["T"], None, None, {"ZOI": "no"}),
+                VCFRecord("artificial_chr1", 8, "alt_2", "T", ["TT"], None, None, {"ZOI": "yes"}),
+                VCFRecord("artificial_chr1", 9, "alt_3", "TTGG", ["TT"], None, None, {"ZOI": "yes"}),
+                VCFRecord("artificial_chr1", 14, "alt_4", "G", ["GG"], None, None, {"ZOI": "yes"}),
+                VCFRecord("artificial_chr1", 18, "alt_5", "GGG", ["G"], None, None, {"ZOI": "yes"}),  # ZOI downstream limit deletion
+                VCFRecord("artificial_chr1", 22, "alt_6", "T", ["TT"], None, None, {"ZOI": "yes"}),
 
-                VCFRecord( "artificial_chr1", 9, "alt_7", "TT", ["TC"], None, None, {"ZOI": "no"} ), # Substitution before end of upstream primer
-                VCFRecord( "artificial_chr1", 10, "alt_8", "TG", ["TC"], None, None, {"ZOI": "yes"} ), # Substitution in upstream limit of ZOI
-                VCFRecord( "artificial_chr1", 15, "alt_9", "GG", ["GC"], None, None, {"ZOI": "yes"} ), # Substitution in dosnstream limit of ZOI
-                VCFRecord( "artificial_chr1", 20, "alt_10", "GT", ["GC"], None, None, {"ZOI": "no"} ), # Substitution after start of downstream primer
-                VCFRecord( "artificial_chr1", 21, "alt_11", "TT", ["TC"], None, None, {"ZOI": "no"} ), # Substitution in downstream primer
+                VCFRecord("artificial_chr1", 9, "alt_7", "TT", ["TC"], None, None, {"ZOI": "no"}),  # Substitution before end of upstream primer
+                VCFRecord("artificial_chr1", 10, "alt_8", "TG", ["TC"], None, None, {"ZOI": "yes"}),  # Substitution in upstream limit of ZOI
+                VCFRecord("artificial_chr1", 15, "alt_9", "GG", ["GC"], None, None, {"ZOI": "yes"}),  # Substitution in dosnstream limit of ZOI
+                VCFRecord("artificial_chr1", 20, "alt_10", "GT", ["GC"], None, None, {"ZOI": "no"}),  # Substitution after start of downstream primer
+                VCFRecord("artificial_chr1", 21, "alt_11", "TT", ["TC"], None, None, {"ZOI": "no"}),  # Substitution in downstream primer
 
-                VCFRecord( "artificial_chr2", 1, "alt_12", "C", ["CTT"], None, None, {"ZOI": "no"} ), # Insertion before end of upstream primer
-                VCFRecord( "artificial_chr2", 2, "alt_13", "G", ["GCC"], None, None, {"ZOI": "yes"} ), # Insertion in upstream limit of ZOI
-                VCFRecord( "artificial_chr2", 3, "alt_14", "AT", ["CCGC"], None, None, {"ZOI": "yes"} ), # Insertion in upstream limit of ZOI and without standardization
-                VCFRecord( "artificial_chr2", 9, "alt_15", "G", ["GCC"], None, None, {"ZOI": "yes"} ), # Insertion in downstream limit of ZOI
-                VCFRecord( "artificial_chr2", 9, "alt_16", "G", ["NNN"], None, None, {"ZOI": "yes"} ), # Insertion in downstream limit of ZOI and without standardization
-                VCFRecord( "artificial_chr2", 10, "alt_17", "-", ["CC"], None, None, {"ZOI": "yes"} ), # Insertion in downstream limit of ZOI
-                VCFRecord( "artificial_chr2", 10, "alt_18", "A", ["ATT"], None, None, {"ZOI": "no"} ), # Insertion after start of downstream primer
+                VCFRecord("artificial_chr2", 1, "alt_12", "C", ["CTT"], None, None, {"ZOI": "no"}),  # Insertion before end of upstream primer
+                VCFRecord("artificial_chr2", 2, "alt_13", "G", ["GCC"], None, None, {"ZOI": "yes"}),  # Insertion in upstream limit of ZOI
+                VCFRecord("artificial_chr2", 3, "alt_14", "AT", ["CCGC"], None, None, {"ZOI": "yes"}),  # Insertion in upstream limit of ZOI and without standardization
+                VCFRecord("artificial_chr2", 9, "alt_15", "G", ["GCC"], None, None, {"ZOI": "yes"}),  # Insertion in downstream limit of ZOI
+                VCFRecord("artificial_chr2", 9, "alt_16", "G", ["NNN"], None, None, {"ZOI": "yes"}),  # Insertion in downstream limit of ZOI and without standardization
+                VCFRecord("artificial_chr2", 10, "alt_17", "-", ["CC"], None, None, {"ZOI": "yes"}),  # Insertion in downstream limit of ZOI
+                VCFRecord("artificial_chr2", 10, "alt_18", "A", ["ATT"], None, None, {"ZOI": "no"}),  # Insertion after start of downstream primer
 
-                VCFRecord( "artificial_chr2", 1, "alt_19", "CG", ["C"], None, None, {"ZOI": "no"} ), # Deletion before end of upstream primer
-                VCFRecord( "artificial_chr2", 2, "alt_20", "GA", ["G"], None, None, {"ZOI": "yes"} ), # Deletion in upstream limit of ZOI
-                VCFRecord( "artificial_chr2", 3, "alt_21", "AT", ["C"], None, None, {"ZOI": "yes"} ), # Deletion in upstream limit of ZOI and without standardization
-                VCFRecord( "artificial_chr2", 6, "alt_22", "NNCG", ["N"], None, None, {"ZOI": "yes"} ), # Deletion in downstream limit of ZOI
-                VCFRecord( "artificial_chr2", 8, "alt_23", "CG", ["C"], None, None, {"ZOI": "yes"} ), # Deletion in downstream limit of ZOI
-                VCFRecord( "artificial_chr2", 8, "alt_24", "CG", ["T"], None, None, {"ZOI": "yes"} ), # Deletion in downstream limit of ZOI and without standardization
-                VCFRecord( "artificial_chr2", 9, "alt_25", "GA", ["G"], None, None, {"ZOI": "no"} ), # Insertion after start of downstream primer
-                VCFRecord( "artificial_chr2", 10, "alt_26", "A", ["-"], None, None, {"ZOI": "no"} ), # Insertion after start of downstream primer
-                VCFRecord( "artificial_chr2", 10, "alt_27", "AT", ["A"], None, None, {"ZOI": "no"} ), # Insertion after start of downstream primer
+                VCFRecord("artificial_chr2", 1, "alt_19", "CG", ["C"], None, None, {"ZOI": "no"}),  # Deletion before end of upstream primer
+                VCFRecord("artificial_chr2", 2, "alt_20", "GA", ["G"], None, None, {"ZOI": "yes"}),  # Deletion in upstream limit of ZOI
+                VCFRecord("artificial_chr2", 3, "alt_21", "AT", ["C"], None, None, {"ZOI": "yes"}),  # Deletion in upstream limit of ZOI and without standardization
+                VCFRecord("artificial_chr2", 6, "alt_22", "NNCG", ["N"], None, None, {"ZOI": "yes"}),  # Deletion in downstream limit of ZOI
+                VCFRecord("artificial_chr2", 8, "alt_23", "CG", ["C"], None, None, {"ZOI": "yes"}),  # Deletion in downstream limit of ZOI
+                VCFRecord("artificial_chr2", 8, "alt_24", "CG", ["T"], None, None, {"ZOI": "yes"}),  # Deletion in downstream limit of ZOI and without standardization
+                VCFRecord("artificial_chr2", 9, "alt_25", "GA", ["G"], None, None, {"ZOI": "no"}),  # Insertion after start of downstream primer
+                VCFRecord("artificial_chr2", 10, "alt_26", "A", ["-"], None, None, {"ZOI": "no"}),  # Insertion after start of downstream primer
+                VCFRecord("artificial_chr2", 10, "alt_27", "AT", ["A"], None, None, {"ZOI": "no"}),  # Insertion after start of downstream primer
             ]
             for idx, curr_var in enumerate(self.variants):
                 FH_var.write(curr_var)
@@ -147,7 +147,7 @@ class FilterVCFPrimers(unittest.TestCase):
             FH_reg.write(ampl2)
 
         # Execute command
-        subprocess.check_call(self.cmd)
+        subprocess.check_call(self.cmd, stderr=subprocess.DEVNULL)
 
         # Validate results
         expected = [curr_var.id for curr_var in self.variants if curr_var.info["ZOI"] == "yes"]
