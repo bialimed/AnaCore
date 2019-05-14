@@ -187,7 +187,7 @@ def applyVariants(region, ref_sequence, alt_records, variant_by_pos):
                         curr_alt_seq[pos - region.start + idx] = alt_allele[idx]
 
 
-def mergeOverlapped(regions, padding=0, trace=False):
+def mergedOverlapped(regions, padding=0, trace=False):  ###################################### pb
     """
     """
     sorted_regions = sorted(regions, key=lambda x: (x.start, x.end))
@@ -382,8 +382,13 @@ def getTargetReads(chrom_seq, chrom_len, target, alt_records, fragments_len, arg
     large_padded_end = min(chrom_len, padded_end + args.reads_length)
     mut_by_pos = {}
     for alt in alt_records:
-        for pos, variant in alt["mut"].items():
-            mut_by_pos[pos] = variant
+        for variant in alt["mut"].values():
+            variant_start = variant["start"]
+            variant_end = variant_start + len(variant["ref"]) - 1
+            if variant["ref"] == "":  # Deletion
+                variant_end = variant_start  ######################## system not check that all the deletion is present
+            for curr_pos in range(variant_start, variant_end + 1, 1):
+                mut_by_pos[curr_pos] = variant
     nb_random_simulations = 1 if len(mut_by_pos) == 0 else args.nb_random_simulations
     log.debug('Start {} random simulations on target {} cointaining {} variants'.format(nb_random_simulations, target, len(mut_by_pos)))
     best_simu_reads = []
@@ -392,11 +397,9 @@ def getTargetReads(chrom_seq, chrom_len, target, alt_records, fragments_len, arg
     for heuristic_idx in range(nb_random_simulations):
         log.debug('Simulation {}/{}'.format(heuristic_idx + 1, nb_random_simulations))
         cp_fragments_length = [elt for elt in fragments_len]
-        res_expected = []
-        res_simulated = []
         target_reads = []
-        res_simu_by_var = {}
-        start_dp = random.randrange(args.min_depth, args.max_depth, 1)
+        res_by_var = {}
+        start_dp = random.randrange(args.min_depth, args.max_depth + 1, 1)
         # Simulate
         fragment_idx = 1
         reads_overlapping = {curr_pos: [] for curr_pos in range(large_padded_start, large_padded_end + 1)}  # by pos permet d'ajouter le mate quand on fait le premier et que autre apres un insert
@@ -439,13 +442,25 @@ def getTargetReads(chrom_seq, chrom_len, target, alt_records, fragments_len, arg
                     AD = 0
                     for read, var_in_read in reads_overlapping_pos:
                         if var_in_read is not None:
-                            AD += 1
+                            if variant["id"] == var_in_read:
+                                AD += 1
                     AF = round(AD / len(reads_overlapping_pos), 6)
-                    res_expected.append(variant["AF"])
-                    res_simulated.append(AF)
-                    res_simu_by_var[variant["id"]] = AF
+                    if variant["id"] not in res_by_var:
+                        res_by_var[variant["id"]] = {
+                            "expected": variant["AF"],
+                            "simulated": []
+                        }
+                    res_by_var[variant["id"]]["simulated"].append(AF)
             # Next pos
             reads_overlapping[curr_pos] = None
+        # Summarize AF on multinucleotids variants
+        res_expected = []
+        res_simulated = []
+        res_simu_by_var = {}
+        for var_id, res in res_by_var.items():
+            res_simu_by_var[var_id] = res["simulated"]
+            res_expected.append(res["expected"])
+            res_simulated.append(res["simulated"]) ############## on parcours les erreurs dans l'ordre d'éloignement et on prend le 80eme percentile le signe depend du plus grna nombre d'erreur (au de ssus ou au dessous)
         # Compare simulation
         curr_simu_error = simulationPenaltyScore(res_simulated, res_expected)
         if curr_simu_error <= lowest_simu_error:
