@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Removes annotations that does not come from a list of RNA. The RNA source of one annotation is retrieved from the field "Feature".')
     parser.add_argument('-f', '--annotation-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
-    parser.add_argument('-w', '--without-version', action='store_true', help=' With this option the version number of the NM is not used in filter.')
+    parser.add_argument('-w', '--without-version', action='store_true', help='With this option the version number of the NM is not used in filter.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-r', '--reference-RNA', required=True, help='The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.')
