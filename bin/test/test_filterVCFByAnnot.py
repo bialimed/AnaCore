@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -208,7 +208,7 @@ class FilterVCFByAnnot(unittest.TestCase):
         cmd = [
             "filterVCFByAnnot.py",
             "--mode", "remove",
-            "--input-reference-RNA", self.tmp_selected_rna,
+            "--input-selected-RNA", self.tmp_selected_rna,
             "--input-variants", self.tmp_variants,
             "--output-variants", self.tmp_output
         ]
@@ -232,7 +232,7 @@ class FilterVCFByAnnot(unittest.TestCase):
         cmd = [
             "filterVCFByAnnot.py",
             "--mode", "tag",
-            "--input-reference-RNA", self.tmp_selected_rna,
+            "--input-selected-RNA", self.tmp_selected_rna,
             "--input-variants", self.tmp_variants,
             "--output-variants", self.tmp_output
         ]
@@ -256,7 +256,7 @@ class FilterVCFByAnnot(unittest.TestCase):
         cmd = [
             "filterVCFByAnnot.py",
             "--mode", "tag",
-            "--input-reference-RNA", self.tmp_selected_rna,
+            "--input-selected-RNA", self.tmp_selected_rna,
             "--input-variants", self.tmp_variants,
             "--output-variants", self.tmp_output
         ]
@@ -288,7 +288,7 @@ class FilterVCFByAnnot(unittest.TestCase):
         cmd = [
             "filterVCFByAnnot.py",
             "--mode", "remove",
-            "--input-reference-RNA", self.tmp_selected_rna,
+            "--input-selected-RNA", self.tmp_selected_rna,
             "--input-variants", self.tmp_variants,
             "--output-variants", self.tmp_output
         ]

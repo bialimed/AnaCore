@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -112,8 +112,8 @@ def writeHeader(FH_in, FH_out, args):
         FH_out.ANN_titles.append("FILTER")
     FH_out.filter["popAF"] = "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'."
     FH_out.filter["ANN.popAF"] = "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'."  # Is distinct of popAF because annotations can contain collocated variants
-    if args.input_reference_RNA is not None:
-        FH_out.filter["ANN.RNA"] = "The annotation RNA is not one of the selected ({}).".format(args.input_reference_RNA)
+    if args.input_selected_RNA is not None:
+        FH_out.filter["ANN.RNA"] = "The annotation RNA is not one of the selected ({}).".format(args.input_selected_RNA)
     FH_out.filter["CSQ"] = "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
     FH_out.filter["ANN.CSQ"] = "The annotation consequence does not correspond at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
     FH_out.filter["ANN.COOC"] = "The annotation corresponds to a co-occuring variant."
@@ -166,8 +166,8 @@ if __name__ == "__main__":
     group_filter.add_argument('-p', '--polym-populations', default=["AF", "AFR_AF", "AMR_AF", "EAS_AF", "EUR_AF", "SAS_AF", "AA_AF", "EA_AF", "ExAC_AF", "ExAC_Adj_AF", "ExAC_AFR_AF", "ExAC_AMR_AF", "ExAC_EAS_AF", "ExAC_FIN_AF", "ExAC_NFE_AF", "ExAC_OTH_AF", "ExAC_SAS_AF", "gnomAD_AF", "gnomAD_AFR_AF", "gnomAD_AMR_AF", "gnomAD_ASJ_AF", "gnomAD_EAS_AF", "gnomAD_FIN_AF", "gnomAD_NFE_AF", "gnomAD_OTH_AF", "gnomAD_SAS_AF"], help='Populations frequencies used as reference for polymorphism detection. [Default: %(default)s]')
     group_filter.add_argument('-l', '--polym-threshold', type=float, default=0.01, help='Minimum frequency in population to tag allele as polymorphism. [Default: %(default)s]')
     group_filter.add_argument('-k', '--kept-consequences', default=["TFBS_ablation", "TFBS_amplification", "TF_binding_site_variant", "regulatory_region_ablation", "regulatory_region_amplification", "transcript_ablation", "splice_acceptor_variant", "splice_donor_variant", "stop_gained", "frameshift_variant", "stop_lost", "start_lost", "transcript_amplification", "inframe_insertion", "inframe_deletion", "missense_variant", "protein_altering_variant"], nargs='+', help='The variants without one of these consequences are tagged as CSQ (see http://www.ensembl.org/info/genome/variation/predicted_data.html). [Default: %(default)s]')
-    group_filter.add_argument('-r', '--input-reference-RNA', help='The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.')
-    group_filter.add_argument('-w', '--ref-without-version', action='store_true', help='With this option the version number of the reference RNA is not used in filter.')
+    group_filter.add_argument('-r', '--input-selected-RNA', help='The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.')
+    group_filter.add_argument('-w', '--rna-without-version', action='store_true', help='With this option the version number of the reference RNA is not used in filter.')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file containing variants annotated with VEP v88+ (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
@@ -182,8 +182,8 @@ if __name__ == "__main__":
 
     # Process
     kept_ID = {}
-    if args.input_reference_RNA is not None:
-        kept_ID = getGeneByNM(args.input_reference_RNA, args.ref_without_version)
+    if args.input_selected_RNA is not None:
+        kept_ID = getGeneByNM(args.input_selected_RNA, args.rna_without_version)
     with AnnotVCFIO(args.input_variants, "r", args.annotation_field) as FH_in:
         with AnnotVCFIO(args.output_variants, "w") as FH_out:
             # Header
@@ -211,8 +211,8 @@ if __name__ == "__main__":
                         if "ANN.COOC" not in annot["FILTER"] and "ANN.popAF" in annot["FILTER"]:  # The variant is not a collocated and is polymorphism
                             record_is_filtered_on_polym = True
                         # Reference RNA
-                        if args.input_reference_RNA is not None:
-                            tagAnnotRNA(annot, kept_ID, args.ref_without_version)
+                        if args.input_selected_RNA is not None:
+                            tagAnnotRNA(annot, kept_ID, args.rna_without_version)
                         # Consequences on RNA
                         tagAnnotCSQ(annot, args.kept_consequences)
                         if "ANN.COOC" not in annot["FILTER"] and "ANN.RNA" not in annot["FILTER"] and "ANN.CSQ" not in annot["FILTER"]:
