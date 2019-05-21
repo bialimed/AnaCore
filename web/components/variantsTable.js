@@ -1,5 +1,5 @@
 /*!
-  * variantsTable component v2.2.0
+  * variantsTable component v2.2.1
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
@@ -117,7 +117,12 @@ const vtable_header = [
         'title': 'Ratio lib',
         '_val': function(variant, annot, default_source=null){
             let value = []
-            support = variant.supports[variant.sources[0]]
+            support = null
+            if(default_source !== null && variant.supports.hasOwnProperty(default_source)){
+                support = variant.supports[default_source]
+            } else {
+                support = variant.supports[variant.sources[0]]
+            }
             support.libraries.forEach(function(curr_lib) {
                 value.push(
                     curr_lib.alt_depth + "/" + curr_lib.depth
