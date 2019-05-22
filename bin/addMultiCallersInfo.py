@@ -45,11 +45,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Add sources and lowAF filter on each VCF coming from different variant caller.')
     parser.add_argument('-l', '--lowAF-tag', default="lowAF", help='FILTER tag used for variants with population AF <= than --min-AF.')
     parser.add_argument('-m', '--min-AF', type=float, help='Variants with population AF <= than this values in all calllers are tagged. [Default: No tag]')
-    parser.add_argument('-c', '--calling-sources', nargs='+', help='.')
+    parser.add_argument('-c', '--calling-sources', nargs='+', help='Name of callers corresponding to the inputs-variants.')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--inputs-variants', nargs='+', help='Pathes to the variants files coming from different callers (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
-    group_input.add_argument('-o', '--outputs-variants', nargs='+', help='The path to the file outputted file (format: JSON).')
+    group_input.add_argument('-o', '--outputs-variants', nargs='+', help='Pathes to the file outputted files (format: JSON).')
     args = parser.parse_args()
     if len(args.calling_sources) != len(args.input_variants) or len(args.input_variants) != len(args.output_variants):
         parser.error("Each input VCF must correspond to one calling source and one output.")
