@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -72,11 +72,11 @@ if __name__ == "__main__":
         with open(args.input_filters_annotations) as data_file:
             annot_filters = filtersFromDict(json.load(data_file))
     if record_filters is None and annot_filters is None:
-        parser.error('"--input-filters-annotations" and/or "--input-filters-annotations" must be specified.')
+        parser.error('"--input-filters-annotations" and/or "--input-filters-variants" must be specified.')
 
     # Process
-    with AnnotVCFIO(args.output_variants, mode="w", annot_field=args.annotation_field) as FH_out:
-        with AnnotVCFIO(args.input_variants) as FH_in:
+    with AnnotVCFIO(args.output_variants, mode="w") as FH_out:
+        with AnnotVCFIO(args.input_variants, annot_field=args.annotation_field) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
             FH_out._writeHeader()
