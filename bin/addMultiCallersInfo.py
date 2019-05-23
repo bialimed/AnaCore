@@ -51,7 +51,7 @@ if __name__ == "__main__":
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_input.add_argument('-o', '--outputs-variants', nargs='+', help='Pathes to the file outputted files (format: JSON).')
     args = parser.parse_args()
-    if len(args.calling_sources) != len(args.input_variants) or len(args.input_variants) != len(args.output_variants):
+    if len(args.calling_sources) != len(args.inputs_variants) or len(args.inputs_variants) != len(args.outputs_variants):
         parser.error("Each input VCF must correspond to one calling source and one output.")
 
     # Logger
@@ -76,13 +76,14 @@ if __name__ == "__main__":
                     }
                 else:
                     info_by_var[variant_name]["src"].append(args.calling_sources[idx_in])
-                    info_by_var[variant_name] = max(info_by_var[variant_name]["max_AF"], record.getPopAltAF()[0])
+                    info_by_var[variant_name]["max_AF"] = max(info_by_var[variant_name]["max_AF"], record.getPopAltAF()[0])
 
     # Write
     for idx_in, curr_in in enumerate(args.inputs_variants):
-        with VCFIO(args.output_variants[idx_in], "w") as FH_out:
+        with VCFIO(args.outputs_variants[idx_in], "w") as FH_out:
             with VCFIO(curr_in) as FH_in:
                 # Header
+                FH_out.copyHeader(FH_in)
                 FH_out.info["SRC"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Variant callers where the variant is identified"}
                 if args.min_AF is not None:
                     FH_out.filter[args.lowAF_tag] = "Variants with population AF <= {} in all variant callers".format(args.min_AF)
