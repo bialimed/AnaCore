@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -28,6 +28,7 @@ import os
 import sys
 import csv
 import json
+import logging
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -44,8 +45,9 @@ from anacore.vcf import VCFIO, getAlleleRecord
 ########################################################################
 def addVCFVariants(variants, vcf_path, vcf_idx, spl_name=None):
     """
-    @summary: Add variant from VCF in dict.
-    @param variants: [dict] By uniq ID the variants. The content of this variable is set by the call of this function.
+    Add variant from VCF in dict.
+
+    :param variants: By uniq ID the variants. The content of this variable is set by the call of this function.
                      Content example:
                      {
                        "chr1:10=T":{
@@ -68,9 +70,13 @@ def addVCFVariants(variants, vcf_path, vcf_idx, spl_name=None):
                          "freq":[0, 0.4] }
                      }
                      The list of frequencies is appended by each call of the function with a vcf_idx different.
-    @param vcf_path: [str] Path to the VCF file to add.
-    @param vcf_idx: [int] Index used to store the frequency of each vrariants of the VCF in frequencies list (start from 0).
-    @param spl_name: [str] The frequency of the variants came from this sample. This parameters is optional when the VCF file contain 0 to 1 sample.
+    :type variants: dict
+    :param vcf_path: Path to the VCF file to add.
+    :type vcf_path: str
+    :param vcf_idx: Index used to store the frequency of each vrariants of the VCF in frequencies list (start from 0).
+    :type vcf_idx: int
+    :param spl_name: The frequency of the variants came from this sample. This parameters is optional when the VCF file contain 0 to 1 sample.
+    :type spl_name: str
     """
     with VCFIO(vcf_path) as FH_vcf:
         if spl_name is None:
@@ -100,11 +106,15 @@ def addVCFVariants(variants, vcf_path, vcf_idx, spl_name=None):
         while len(variants[variant_id]["freq"]) <= vcf_idx:
             variants[variant_id]["freq"].append(0)
 
+
 def filterVarNotIn(variants, vcf_idx):
     """
-    @summary: Removes all variants not present in the specified VCF.
-    @param variants: [dict] By uniq ID the variants (see addVCFVariants).
-    @param vcf_idx: [int] Index used to store the frequency of each vrariants of the VCF in frequencies list (start from 0).
+    Remove all variants not present in the specified VCF.
+
+    :param variants: [dict] By uniq ID the variants (see addVCFVariants).
+    :type variants: dict
+    :param vcf_idx: Index used to store the frequency of each vrariants of the VCF in frequencies list (start from 0).
+    :type vcf_idx: int
     """
     removed = list()
     for variant_id in variants:
@@ -113,13 +123,19 @@ def filterVarNotIn(variants, vcf_idx):
     for variant_id in removed:
         del(variants[variant_id])
 
+
 def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
     """
-    @summary: Writes expected and detected fequency for each expected variant in TSV file.
-    @param variants: [dict] By uniq ID the variants (see addVCFVariants).
-    @param out_path: [str] Path to the output file.
-    @param error_threshold: [float] The maximum percentage difference between expected and detected.
-    @param separator: [str] The  column separator in output file.
+    Write expected and detected fequency for each expected variant in TSV file.
+
+    :param variants: By uniq ID the variants (see addVCFVariants).
+    :type variants: dict
+    :param out_path: Path to the output file.
+    :type out_path: str
+    :param error_threshold: The maximum percentage difference between expected and detected.
+    :type error_threshold: float
+    :param separator: The  column separator in output file.
+    :type separator: str
     """
     idx_expec = 0
     idx_detec = 1
@@ -132,7 +148,7 @@ def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
     for variant_id in variants:
         current_variant = variants[variant_id]
         error = current_variant["freq"][idx_expec] - current_variant["freq"][idx_detec]
-        error_ratio = abs(1 - (current_variant["freq"][idx_detec]/current_variant["freq"][idx_expec]))
+        error_ratio = abs(1 - (current_variant["freq"][idx_detec] / current_variant["freq"][idx_expec]))
         # Dissimilarity
         error_values_sum += abs(error)
         error_ratio_sum += error_ratio
@@ -150,7 +166,8 @@ def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
             nb_checked,
             error_values_sum,
             error_ratio_sum,
-            str(nb_out_threshold) + "/" + str(nb_checked) ])
+            str(nb_out_threshold) + "/" + str(nb_checked)
+        ])
         # Section separator
         FH_csv.writerow([])
         # Details section
@@ -159,7 +176,7 @@ def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
         for variant_id in sorted(variants):
             current_variant = variants[variant_id]
             error = current_variant["freq"][idx_expec] - current_variant["freq"][idx_detec]
-            error_ratio = abs(1 - (current_variant["freq"][idx_detec]/current_variant["freq"][idx_expec]))
+            error_ratio = abs(1 - (current_variant["freq"][idx_detec] / current_variant["freq"][idx_expec]))
             FH_csv.writerow([
                 current_variant["chrom"] + ":" + str(current_variant["pos"]),
                 current_variant["ref"] + "/" + current_variant["alt"],
@@ -167,13 +184,18 @@ def writeTSVResults(variants, out_path, error_threshold=0.2, separator="\t"):
                 current_variant["freq"][idx_detec],
                 error,
                 error_ratio,
-                (error_ratio > error_threshold) ])
+                (error_ratio > error_threshold)
+            ])
+
 
 def writeJSONResults(variants, out_path):
     """
-    @summary: Writes expected and detected fequency for each expected variant in JSON file.
-    @param variants: [dict] By uniq ID the variants (see addVCFVariants).
-    @param out_path: [str] Path to the output file.
+    Write expected and detected fequency for each expected variant in JSON file.
+
+    :param variants: By uniq ID the variants (see addVCFVariants).
+    :type variants: dict
+    :param out_path: Path to the output file.
+    :type out_path: str
     """
     data = list()
     for variant_id in variants:
@@ -207,6 +229,12 @@ if __name__ == "__main__":
     group_output.add_argument('-o', '--output-file', default="results.tsv", help='The path to the file containing the results of the comparison (format: TSV or JSON depends on extension). [Default: %(default)s]')
     args = parser.parse_args()
 
+    # Logger
+    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    log = logging.getLogger(os.path.basename(__file__))
+    log.setLevel(logging.INFO)
+    log.info("Command: " + " ".join(sys.argv))
+
     # Process
     all_variants = dict()
     addVCFVariants(all_variants, args.expected_file, 0)
@@ -216,3 +244,4 @@ if __name__ == "__main__":
         writeJSONResults(all_variants, args.output_file)
     else:
         writeTSVResults(all_variants, args.output_file, args.error_threshold)
+    log.info("End of job")
