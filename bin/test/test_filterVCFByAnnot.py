@@ -109,7 +109,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                 VCFRecord(
                     "artificial_chr1", 14, "alt_05", "G", ["T"], None, None,
                     {
-                        "ANN": [{"Allele": "G", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}],
+                        "ANN": [{"Allele": "G", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}],
                         "expected_filter": ["CSQ"]
                     }
                 ),
@@ -118,7 +118,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "PASS"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}
                         ],
                         "expected_filter": ["PASS"],
                     }
@@ -128,7 +128,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.01, "expected_filter": "ANN.popAF"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}
                         ],
                         "expected_filter": ["popAF"],
                     }
@@ -138,7 +138,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "Consequence": "synonymous_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.CSQ"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}
                         ],
                         "expected_filter": ["CSQ"],
                     }
@@ -148,7 +148,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "Consequence": "missense_variant", "Feature": "other", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.RNA"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}
                         ],
                         "expected_filter": ["CSQ"],
                     }
@@ -158,7 +158,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "Consequence": "synonymous_variant", "Feature": "other", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.01, "expected_filter": "ANN.CSQ&ANN.RNA&ANN.popAF"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}
                         ],
                         "expected_filter": ["CSQ", "popAF"],
                     }
@@ -168,7 +168,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "Consequence": "synonymous_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.01, "expected_filter": "ANN.CSQ&ANN.popAF"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}
                         ],
                         "expected_filter": ["CSQ", "popAF"],
                     }
@@ -179,7 +179,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                         "ANN": [
                             {"Allele": "T", "Consequence": "synonymous_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.01, "expected_filter": "ANN.CSQ&ANN.popAF"},
                             {"Allele": "T", "Consequence": "missense_variant", "Feature": "other", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.01, "expected_filter": "ANN.RNA&ANN.popAF"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.001&0.001", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC"}
                         ],
                         "expected_filter": ["CSQ", "popAF"],
                     }
@@ -189,7 +189,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "Consequence": "synonymous_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.CSQ&ANN.popAF"},
-                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COOC&ANN.popAF"}
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"}
                         ],
                         "expected_filter": ["CSQ", "popAF"],
                     }

@@ -15,7 +15,7 @@
             "action": "exclude",
             "aggregator": "nb:1",
             "operator": "contains",
-            "values": "ANN.COOC"
+            "values": "ANN.COLLOC"
         }
     ]
 }

@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -48,8 +48,6 @@ def getGeneByNM(gene_to_id_file, trim_version=False):
     :type gene_to_id_file: str
     :param trim_version: With True the version number is removed from the id.
     :type trim_version: bool
-    :return: The genes by RNA_id.
-    :rtype: dict
     """
     gene_by_NM = dict()
     with open(gene_to_id_file) as FH_ref:
@@ -64,6 +62,14 @@ def getGeneByNM(gene_to_id_file, trim_version=False):
 
 def tagAnnotRNA(annot, kept_id, trim_version=False):
     """
+    Add tag ANN.RBA in annot["FILTER"] if RNA used for annotation is not in selected RNA.
+
+    :param annot: One variant annotation (extracted from list variant.info["ANN"]).
+    :type annot: dict
+    :param kept_id: The IDs of the selected RNA.
+    :type kept_id: dict
+    :param trim_version: If True the version number of the RNA is not tacking into account. Otherwise only the selected RNA with the specific version provided in ID are not tagged.
+    :type trim_version: bool
     """
     RNA_id = annot["Feature"]
     if RNA_id is not None and trim_version:
@@ -74,6 +80,12 @@ def tagAnnotRNA(annot, kept_id, trim_version=False):
 
 def tagAnnotCSQ(annot, valid_consequences):
     """
+    Add tag ANN.CSQ in annot["FILTER"] if no consequences are in valid_consequences.
+
+    :param annot: One variant annotation (extracted from list variant.info["ANN"]).
+    :type annot: dict
+    :param valid_consequences: An annotation with one of these consequences is not tagged.
+    :type valid_consequences: list
     """
     is_filtered = True
     if annot["Consequence"] is not None:
@@ -85,15 +97,29 @@ def tagAnnotCSQ(annot, valid_consequences):
         annot["FILTER"].add("ANN.CSQ")
 
 
-def tagCoOccuring(annot, alt_in_annot_format):
+def tagCollocated(annot, alt_in_annot_format):
     """
+    Add tag ANN.COLLOC in annot["FILTER"] if annotation come from collocated variant and not the same variant.
+
+    :param annot: One variant annotation (extracted from list variant.info["ANN"]).
+    :type annot: dict
+    :param alt_in_annot_format: The alternative allele of the variant in same format as annotation allele.
+    :type alt_in_annot_format: str
     """
     if annot["Allele"] != alt_in_annot_format:
-        annot["FILTER"].add("ANN.COOC")
+        annot["FILTER"].add("ANN.COLLOC")
 
 
 def tagAnnotPolymophism(annot, checked_pop_tags, min_AF=0.01):
     """
+    Add tag ANN.popAF in annot["FILTER"] if the annotation come from a polymorphism.
+
+    :param annot: One variant annotation (extracted from list variant.info["ANN"]).
+    :type annot: dict
+    :param checked_pop_tags: The evaluated populations.
+    :type checked_pop_tags: list
+    :param min_AF: If the AF in a evaluated population is superior than this value the variant is take as polymorphism in this population.
+    :type min_AF: float
     """
     is_polymorphism = False
     for pop_freq in checked_pop_tags:
@@ -107,6 +133,16 @@ def tagAnnotPolymophism(annot, checked_pop_tags, min_AF=0.01):
 
 
 def writeHeader(FH_in, FH_out, args):
+    """
+    Write VCF header.
+
+    :param FH_in: File handle to model file.
+    :type FH_in: file object
+    :param FH_out: File handle to output file.
+    :type FH_out: file object
+    :param args: Scripts arguments.
+    :type args: NameSpace
+    """
     FH_out.copyHeader(FH_in)
     if "FILTER" not in FH_out.ANN_titles:
         FH_out.ANN_titles.append("FILTER")
@@ -116,11 +152,21 @@ def writeHeader(FH_in, FH_out, args):
         FH_out.filter["ANN.RNA"] = "The annotation RNA is not one of the selected ({}).".format(args.input_selected_RNA)
     FH_out.filter["CSQ"] = "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
     FH_out.filter["ANN.CSQ"] = "The annotation consequence does not correspond at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
-    FH_out.filter["ANN.COOC"] = "The annotation corresponds to a co-occuring variant."
+    FH_out.filter["ANN.COLLOC"] = "The annotation corresponds to a collocated variant."
     FH_out._writeHeader()
 
 
 def getVEPAlt(ref, alt):
+    """
+    Return the alternative allele in same format as annotation allele in VEP.
+
+    :param ref: The reference allele.
+    :type ref: str
+    :param alt: The alternative allele.
+    :type alt: str
+    :return: The alternative allele in same format as annotation allele in VEP.
+    :rtype: str
+    """
     alleles = [ref] + alt
     # Replace empty marker by empty string
     for idx, cur_allele in enumerate(alleles):
@@ -200,22 +246,22 @@ if __name__ == "__main__":
                     record_is_filtered_on_csq = True
                     for annot_idx, annot in enumerate(alt_record.info[FH_in.annot_field]):
                         old_filters = set()
-                        if "FILTER" in annot:
+                        if "FILTER" in annot and annot["FILTER"] is not None:
                             if annot["FILTER"] != "PASS":
                                 old_filters = set(annot["FILTER"].split(","))
                         annot["FILTER"] = set()
                         # Not same variant
-                        tagCoOccuring(annot, VEP_alt[alt_idx])
+                        tagCollocated(annot, VEP_alt[alt_idx])
                         # Polymorphism
                         tagAnnotPolymophism(annot, args.polym_populations, args.polym_threshold)
-                        if "ANN.COOC" not in annot["FILTER"] and "ANN.popAF" in annot["FILTER"]:  # The variant is not a collocated and is polymorphism
+                        if "ANN.COLLOC" not in annot["FILTER"] and "ANN.popAF" in annot["FILTER"]:  # The variant is not a collocated and is polymorphism
                             record_is_filtered_on_polym = True
                         # Reference RNA
                         if args.input_selected_RNA is not None:
                             tagAnnotRNA(annot, kept_ID, args.rna_without_version)
                         # Consequences on RNA
                         tagAnnotCSQ(annot, args.kept_consequences)
-                        if "ANN.COOC" not in annot["FILTER"] and "ANN.RNA" not in annot["FILTER"] and "ANN.CSQ" not in annot["FILTER"]:
+                        if "ANN.COLLOC" not in annot["FILTER"] and "ANN.RNA" not in annot["FILTER"] and "ANN.CSQ" not in annot["FILTER"]:
                             record_is_filtered_on_csq = False
                         # Manage FILTER tag
                         if len(annot["FILTER"]) == 0:

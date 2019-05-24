@@ -135,14 +135,14 @@ class TestFilterAnnotVCF(unittest.TestCase):
                 VCFRecord(
                     "artificial_chr1", 10, "alt_04", "G", ["T"], None, ["PASS"],
                     {
-                        "ANN": [{"Allele": "C", "id": "ann_01", "FILTER": "ANN.COOC", "is_filtered": 1}],
+                        "ANN": [{"Allele": "C", "id": "ann_01", "FILTER": "ANN.COLLOC", "is_filtered": 1}],
                         "is_filtered": 0
                     }
                 ),
                 VCFRecord(
                     "artificial_chr1", 10, "alt_05", "G", ["T"], None, ["CSQ"],
                     {
-                        "ANN": [{"Allele": "C", "id": "ann_02", "FILTER": "ANN.COOC", "is_filtered": 1}],
+                        "ANN": [{"Allele": "C", "id": "ann_02", "FILTER": "ANN.COLLOC", "is_filtered": 1}],
                         "is_filtered": 1
                     }
                 ),
@@ -158,7 +158,7 @@ class TestFilterAnnotVCF(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "id": "ann_04", "FILTER": "PASS", "is_filtered": 0},
-                            {"Allele": "C", "id": "ann_05", "FILTER": "ANN.COOC", "is_filtered": 1},
+                            {"Allele": "C", "id": "ann_05", "FILTER": "ANN.COLLOC", "is_filtered": 1},
                         ],
                         "is_filtered": 0
                     }
@@ -168,7 +168,7 @@ class TestFilterAnnotVCF(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "id": "ann_06", "FILTER": "ANN.popAF", "is_filtered": 1},
-                            {"Allele": "C", "id": "ann_07", "FILTER": "ANN.COOC&ANN.popAF", "is_filtered": 1},
+                            {"Allele": "C", "id": "ann_07", "FILTER": "ANN.COLLOC&ANN.popAF", "is_filtered": 1},
                         ],
                         "is_filtered": 0
                     }
@@ -178,7 +178,7 @@ class TestFilterAnnotVCF(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "id": "ann_08", "FILTER": "ANN.popAF", "is_filtered": 1},
-                            {"Allele": "C", "id": "ann_09", "FILTER": "ANN.COOC&ANN.popAF", "is_filtered": 1},
+                            {"Allele": "C", "id": "ann_09", "FILTER": "ANN.COLLOC&ANN.popAF", "is_filtered": 1},
                         ],
                         "is_filtered": 0  # Protected
                     }
@@ -188,7 +188,7 @@ class TestFilterAnnotVCF(unittest.TestCase):
                     {
                         "ANN": [
                             {"Allele": "T", "id": "ann_10", "FILTER": "PASS", "is_filtered": 0},
-                            {"Allele": "C", "id": "ann_11", "FILTER": "ANN.COOC&ANN.popAF", "is_filtered": 1},
+                            {"Allele": "C", "id": "ann_11", "FILTER": "ANN.COLLOC&ANN.popAF", "is_filtered": 1},
                         ],
                         "is_filtered": 0  # Protected
                     }
