@@ -1,5 +1,5 @@
 /*!
-  * variants v2.0.0
+  * variants v2.1.0
   * Copyright 2018 IUCT-O
   * Author Frederic Escudie
   * Licensed under GNU General Public License
@@ -227,7 +227,11 @@ class Variant {
                 filter_tags.push(curr_filter_tag)
             })
         })
-        return Array.from(new Set(filter_tags))
+        filter_tags = Array.from(new Set(filter_tags))
+        if(filter_tags.length > 1){  // Remove PASS coming from a support if others support tag as not pass
+            filter_tags = filter_tags.filter(function(elt){ return elt != "PASS" })
+        }
+        return filter_tags
     }
 
     get sources(){
