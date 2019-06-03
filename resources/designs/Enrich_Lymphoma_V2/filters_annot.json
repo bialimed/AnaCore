@@ -1,0 +1,21 @@
+{
+    "class": "FiltersCombiner",
+    "operator": "and",
+    "filters": [
+        {
+            "class": "Filter",
+            "getter": "FILTER",
+            "action": "exclude",
+            "aggregator": "nb:1",
+            "operator": "contains",
+            "values": "ANN.RNA"
+        }, {
+            "class": "Filter",
+            "getter": "FILTER",
+            "action": "exclude",
+            "aggregator": "nb:1",
+            "operator": "contains",
+            "values": "ANN.COLLOC"
+        }
+    ]
+}

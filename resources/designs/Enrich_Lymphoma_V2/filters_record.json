@@ -1,0 +1,31 @@
+{
+    "class": "FiltersCombiner",
+    "operator": "and",
+    "filters": [
+        {
+            "class": "Filter",
+            "description": "It is not only detected by FreeBayes.",
+            "getter": "info.SRC",
+            "action": "select",
+            "aggregator": "nb:1",
+            "operator": "in",
+            "values": ["vardict", "mutect2"]
+        }, {
+            "class": "Filter",
+            "description": "It is not a polymorphism or a known artifact or the AF is under the noise.",
+            "getter": "filter",
+            "action": "select",
+            "aggregator": "ratio:1",
+            "operator": "not in",
+            "values": ["popAF", "popConst", "lowAF"]
+        }, {
+			"class": "Filter",
+			"description": "Has consequence on protein.",
+			"getter": "filter",
+			"action": "select",
+			"aggregator": "ratio:1",
+			"operator": "!=",
+			"values": "CSQ"
+        }
+    ]
+}
