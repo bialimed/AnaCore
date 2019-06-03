@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -72,7 +72,7 @@ class AnnotVCFIO(VCFIO):
                 record.info[self.annot_field] = list()
             else:  # The variant has consequence(s)
                 for annot_idx, annot in enumerate(record.info[self.annot_field]):
-                    annot_val = dict()
+                    annot_val = {key: None for key in self.ANN_titles}
                     for field_idx, field_value in enumerate(annot.split("|")):
                         csq_key = self.ANN_titles[field_idx]
                         if field_value.strip() != "":
