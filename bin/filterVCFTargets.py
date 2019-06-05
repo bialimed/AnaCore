@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     # Log process
     log.info(
         "{:.2%} of variants have been removed ({}/{})".format(
-            (nb_variants - nb_kept) / nb_variants,
+            0 if nb_variants == 0 else (nb_variants - nb_kept) / nb_variants,
             nb_variants - nb_kept,
             nb_variants
         )
