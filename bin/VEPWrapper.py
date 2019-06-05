@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -65,6 +65,8 @@ if __name__ == "__main__":
         with open(input_file) as FH_in:
             with open(output_file, "w") as FH_out:
                 for line in FH_in:
+                    if line.startswith("#CHROM	POS	ID	REF	ALT	QUAL"):
+                        FH_out.write('##INFO=<ID=ANN,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature">\n')
                     FH_out.write(line)
     else:  # Annotate
         log.info("Process annotation")
