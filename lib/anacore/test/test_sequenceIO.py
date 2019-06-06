@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -415,6 +415,67 @@ two	28	98	14	15"""
             self.assertEqual(
                 self.expected_rec["one"].string,
                 FH.get("one").string
+            )
+
+
+    def testGetSub(self):
+        # From one
+        one_len = len(self.expected_rec["one"].string)
+        with IdxFastaIO(self.tmp_fasta) as FH:
+            # Full length
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.getSub("one", 1, one_len)
+            )
+            # Full length without end parameter
+            self.assertEqual(
+                self.expected_rec["one"].string,
+                FH.getSub("one", 1)
+            )
+            # First nt
+            self.assertEqual(
+                self.expected_rec["one"].string[0],
+                FH.getSub("one", 1, 1)
+            )
+            # 2 firsts nt
+            self.assertEqual(
+                self.expected_rec["one"].string[0:2],
+                FH.getSub("one", 1, 2)
+            )
+            # 3 firsts nt
+            self.assertEqual(
+                self.expected_rec["one"].string[0:3],
+                FH.getSub("one", 1, 3)
+            )
+            # Last nt
+            self.assertEqual(
+                self.expected_rec["one"].string[-1],
+                FH.getSub("one", one_len, one_len)
+            )
+            # 2 lasts nt
+            self.assertEqual(
+                self.expected_rec["one"].string[-2:],
+                FH.getSub("one", one_len - 1)
+            )
+            # 3 lasts nt
+            self.assertEqual(
+                self.expected_rec["one"].string[-3:],
+                FH.getSub("one", one_len - 2)
+            )
+            # 1 nt on start of second line
+            self.assertEqual(
+                self.expected_rec["one"].string[30],
+                FH.getSub("one", 31, 31)
+            )
+            # 1 nt in second line
+            self.assertEqual(
+                self.expected_rec["one"].string[31],
+                FH.getSub("one", 32, 32)
+            )
+            # 11 nt in second line
+            self.assertEqual(
+                self.expected_rec["one"].string[31:42],
+                FH.getSub("one", 32, 42)
             )
 
 

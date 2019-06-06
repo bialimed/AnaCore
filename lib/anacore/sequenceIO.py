@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -594,6 +594,26 @@ class IdxFastaIO(FastaIO):
         """Set self.index with content of self.fai_path."""
         self.index = Faidx(self.fai_path).readById()
 
+    def getSub(self, id, start, end=None):
+        """
+        Return the selected sub of the sequence from file.
+
+        :param id: The sequence ID.
+        :type id: str
+        :param start: The start position of the selected sub-sequence (1-based).
+        :type start: int
+        :param end: The end position of the selected sub-sequence (1-based). Default: The end of the sequence.
+        :type end: int
+        :return: The sequence selected.
+        :rtype: str
+        """
+        end = self.index[id].length if end is None else end
+        read_start = self.index[id].offset + start - 1 + int(start / self.index[id].line_bases)
+        read_end = self.index[id].offset + end - 1 + int(end / self.index[id].line_bases)
+        self.file_handle.seek(read_start)
+        seq = self.file_handle.read(read_end - read_start + 1).replace("\n", "").replace("\r", "")
+        return seq
+
     def get(self, id):
         """
         Return the sequence from file.
@@ -604,7 +624,7 @@ class IdxFastaIO(FastaIO):
         :rtype: Sequence
         """
         if self.cached is not None:
-            if self.cached.id == "id":
+            if self.cached.id == id:
                 return self.cached
         # The sequence is not already cached
         start = self.index[id].offset
