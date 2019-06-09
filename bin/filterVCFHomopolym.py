@@ -86,7 +86,7 @@ if __name__ == "__main__":
     group_filter.add_argument('-t', '--tag-name', default="homoP", help='The name of the tag added on variant. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the variants file (format: VCF).')
-    group_input.add_argument('-r', '--input-reference', required=True, help='The path to the reference file (format: fasta).')
+    group_input.add_argument('-r', '--input-reference', required=True, help='The path to the reference file (format: fasta). It must be indexed with faidx.')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-o', '--output-variants', required=True, help='The path to the filtered file (format: VCF).')
     args = parser.parse_args()
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     # Process
     nb_variants = 0
     nb_filtered = 0
-    with IdxFastaIO(args.input_reference, use_cache=True) as FH_ref:
+    with IdxFastaIO(args.input_reference) as FH_ref:
         with VCFIO(args.input_variants, "r") as FH_in:
             with VCFIO(args.output_variants, "w") as FH_out:
                 # Header
@@ -126,7 +126,6 @@ if __name__ == "__main__":
                         FH_out.write(alt_record)
                     elif not is_on_hpolym:  # Filter mode and is not on homopolymer
                         FH_out.write(alt_record)
-                    FH_out.write(alt_record)
 
     # Log process
     log.info(
