@@ -19,7 +19,10 @@ The application folder has the following structure:
     │   └── components/    # Wrappers used in workflow manager (jflow)
     ├── lib/               # Librairies used in binaries
     ├── README.md
-    └── resources/         # Resources (panels descriptions, ...)
+    ├── resources/         # Resources (panels descriptions, ...)
+    └── web/
+        ├── components/    # Re-usable Vue.js components for bioinformatic's results
+        └── models/        # JS objects for manipulate biological/analysis entities (variants, MSI, ...)
 
 ## License
 GNU GPL v3
