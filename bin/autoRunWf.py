@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.14.1'
+__version__ = '2.15.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -78,85 +78,6 @@ class ThreadWrapper(Thread):
         return self.errcode
 
 
-class Design:
-    """Class to describe design and his resources."""
-
-    def __init__(self, name, pos_ctrl_re=None, neg_ctrl_re=None, resources_folder=None):
-        """
-        Build and return an instance of Design.
-
-        :param name: Name/ID of pannel.
-        :type name: str
-        :param pos_ctrl_re: Regexp used to indetify positive control samples from a list of files pathes.
-        :type pos_ctrl_re: str
-        :param neg_ctrl_re: Regexp used to indetify negative control samples from a list of files pathes.
-        :type neg_ctrl_re: str
-        :param resources_folder: Path to the folder containing one folder by design. The name of the subfolders is the name of designs.
-        :type resources_folder: str
-        :return: The new instance.
-        :rtype: Design
-        """
-        self.name = name
-        self.pos_ctrl_re = pos_ctrl_re
-        self.neg_ctrl_re = neg_ctrl_re
-        self.resources_folder = resources_folder
-
-    def getAssemblyFolder(self, assembly):
-        """
-        Return the resource folder for the design in the selected assembly.
-
-        :param assembly: The selected assembly.
-        :type assembly: str
-        :return: Path to the resource folder.
-        :rtype: str
-        """
-        return os.path.join(self.resources_folder, self.name, assembly)
-
-    def getPosCtrlRef(self, assembly):
-        """
-        Return the file containing the reference values for the positive control (for example the VCF containing the expected variants).
-
-        :param assembly: The selected assembly.
-        :type assembly: str
-        :return: Path to the reference values file.
-        :rtype: str
-        """
-        return os.path.join(self.getAssemblyFolder(assembly), "pos_ctrl_expected.vcf")
-
-    def getVarNoise(self, assembly):
-        """
-        Return the file containing the list of constitutive variants with their maximum AF.
-
-        :param assembly: The selected assembly.
-        :type assembly: str
-        :return: Path to the reference values file.
-        :rtype: str
-        """
-        return os.path.join(self.getAssemblyFolder(assembly), "variants_noise.tsv")
-
-    def getSelectedRef(self, ref_type):
-        """
-        Return the file containing the reference selected (for example the list of RNA where the variants are kept).
-
-        :param ref_type: The type of reference.
-        :type ref_type: str
-        :return: Path to the file.
-        :rtype: str
-        """
-        return os.path.join(self.resources_folder, self.name, "reference_" + ref_type + ".tsv")
-
-    def getFilters(self, wf_name):
-        """
-        Return the file containing the filters to apply on the workflow results.
-
-        :param wf_name: The workflow name.
-        :type wf_name: str
-        :return: Path to the filters description file.
-        :rtype: str
-        """
-        return os.path.join(self.resources_folder, self.name, wf_name + "_filters.json")
-
-
 class Cmd:
     """Class to manage command line(s)."""
 
@@ -194,39 +115,161 @@ class Cmd:
         log.info("End sub-command {}".format(cmd_id))
 
 
-def getProtocol(in_spl_folder):
+def getIlluminaWorkflow(samplesheet_path):
     """
-    Return the analysis protocol (design and Illumina workflow) declarated in samplesheet.
+    Return the workflow declarated in the samplesheet.
+
+    :param samplesheet_path: Path to the run samplesheet.
+    :type samplesheet_path: str
+    :return: The workflow declarated in the samplesheet.
+    :rtype: str
+    """
+    workflow = None
+    samplesheet = SampleSheetIO(samplesheet_path)
+    if "Workflow" in samplesheet.header and samplesheet.header["Workflow"].strip() != "":
+        workflow = samplesheet.header["Workflow"].strip()
+    return workflow
+
+
+def getDesigns(samplesheet_path):
+    """
+    Return the designs declarated in samplesheet.
 
     :param in_spl_folder: Path to the sample folder (containing fastq and the samplesheet).
     :type in_spl_folder: str
-    :return: The analysis protocol. This dictionary contains 2 keys: workflow and design.
+    :return: By design ID (<protocol>_<panel>_<version>) the design and the samples coming from this.
     :rtype: dict
     :warning: For Amplicon - DS the manifests names must be <DESIGN>_A.txt and <DESIGN>_B.txt.
     """
-    protocol = {"workflow": None, "design": None}
-    samplesheet = SampleSheetIO(os.path.join(in_spl_folder, "SampleSheet.csv"))
-    protocol["workflow"] = samplesheet.header["Workflow"]
-    if samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
+    info_by_design = {}
+    samplesheet = SampleSheetIO(samplesheet_path)
+    # Get design tag from samplesheet
+    samples_are_tagged = False
+    for curr_spl in samplesheet.samples:
+        for curr_annot in curr_spl["Description"].split(","):
+            if curr_annot.startswith("DESIGN#"):
+                samples_are_tagged = True
+    # By samples
+    if samples_are_tagged:
+        for curr_spl in samplesheet.samples:
+            for curr_annot in curr_spl["Description"].split(","):
+                if curr_annot.startswith("DESIGN#"):
+                    design_id = curr_annot[7:]
+                    if design_id in info_by_design:
+                        info_by_design[design_id]["samples"].append(curr_spl)
+                    else:
+                        info_by_design[design_id] = {
+                            "design": {
+                                "id": design_id,
+                                "protocol": design_id.split("_")[0],
+                                "name": design_id.split("_")[1],
+                                "version": design_id.split("_")[2]
+                            },
+                            "samples": [curr_spl]
+                        }
+    # By header
+    if "DESIGN#" in samplesheet.header["Description"]:
+        for curr_annot in samplesheet.header["Description"].split(","):
+            if curr_annot.startswith("DESIGN#"):
+                design_id = curr_annot[7:]
+                info_by_design[design_id] = {
+                    "design": {
+                        "id": design_id,
+                        "protocol": design_id.split("_")[0],
+                        "name": design_id.split("_")[1],
+                        "version": design_id.split("_")[2]
+                    },
+                    "samples": []
+                }
+                for curr_spl in samplesheet.samples:
+                    if design_id in info_by_design:
+                        info_by_design[design_id]["samples"].append(curr_spl)
+    elif samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
         manifest_A = os.path.basename(samplesheet.manifests["A"])
-        design_name = manifest_A.split("_A.txt")[0]
-        pos_ctrl_re = "[Tt][Ee][Mm].*"
-        protocol["design"] = Design(design_name, pos_ctrl_re, "[Nn][Tt][Cc].*")
-    elif samplesheet.header["Workflow"] == "Enrichment":
-        manifest_A = os.path.basename(samplesheet.manifests["A"])
-        protocol["design"] = Design(
-            manifest_A.split(".txt")[0], None, "[Nn][Tt][Cc].*"
-        )
-    return protocol
+        design_id = manifest_A.split("_A.txt")[0]
+        info_by_design[design_id] = {
+            "design": {
+                "id": design_id,
+                "protocol": design_id.split("_")[0],
+                "name": design_id.split("_")[1],
+                "version": design_id.split("_")[2]
+            },
+            "samples": []
+        }
+        for curr_spl in samplesheet.samples:
+            if design_id in info_by_design:
+                info_by_design[design_id]["samples"].append(curr_spl)
+    return info_by_design.values()
+
+
+def getRenderedDefault(instance, default, replace_none=True):
+    """
+    Return configuration with missing values replaced by default values.
+
+    :param instance: The configuration node to take as subject.
+    :type instance: *
+    :param default: The default configuration node. It must be at the same level as instance.
+    :type default: *
+    :param replace_none: If False the parameters declarated in config (key in config file) but without defined values does not take default values.
+    :type replace_none: bool
+    :return: The copy of instance with missing values replaced by default values.
+    :rtype: *
+    """
+    new_val = None
+    if not isinstance(default, dict):
+        new_val = instance
+    else:  # Value is dict
+        new_val = {}
+        for default_param, default_value in default.items():
+            if default_param not in instance or (replace_none and instance[default_param] is None):
+                new_val[default_param] = default_value
+            elif isinstance(instance[default_param], dict):  # Value is dict
+                new_val[default_param] = getRenderedDefault(default_value, instance[default_param])
+        for param, value in instance.items():
+            if param not in new_val:
+                new_val[param] = value
+    return new_val
+
+
+def getRenderedPlaceholders(instance, placeholders):
+    """
+    Return configuration with placeholders replaced by values.
+
+    :param instance: The configuration node to take as subject.
+    :type instance: *
+    :param placeholders: The values to use by placeholder.
+    :type placeholders: dict
+    :return: The copy of field_value with placeholders replaced by values.
+    :rtype: *
+    """
+    new_val = None
+    if isinstance(instance, dict):  # Value is dict
+        new_val = {}
+        for key, val in instance.items():
+            new_val[key] = getRenderedPlaceholders(val, placeholders)
+    elif isinstance(instance, (list, tuple)):  # Value is iterable
+        new_val = []
+        for val in instance:
+            new_val.append(getRenderedPlaceholders(val, placeholders))
+    elif isinstance(instance, set):  # Value is set
+        new_val = set()
+        for val in instance:
+            new_val.add(getRenderedPlaceholders(val, placeholders))
+    else:  # Value is number or string
+        new_val = instance
+        if isinstance(instance, str):  # Value is str
+            for placeholder_name, placeholder_value in placeholders.items():
+                new_val = instance.replace("$" + placeholder_name, placeholder_value)
+    return new_val
 
 
 def getWfConfig(cfg_path):
     """
-    Return the workflows configuration file (format: YAML).
+    Return the workflows configuration.
 
     :param cfg_path: Path to the configuration file (format: YAML).
     :type cfg_path: str
-    :return: The analysis protocol. This dictionary contains 2 keys: workflow and design.
+    :return: workflows configuration by workflow name.
     :rtype: dict
 
     Example of configuration file:
@@ -252,83 +295,85 @@ def getWfConfig(cfg_path):
                     with_chr: False  # Mandatory for mSINGS
     """
     cfg = None
-    # Get parameters
+    # load parameters from file
     with open(cfg_path, 'r') as FH_cfg:
         cfg = yaml.load(FH_cfg)
-    # Replace empty by default values
+    # Render value
+    new_cfg = {}
     for wf_name, wf_param in cfg["workflows"].items():
-        # Application
-        if wf_param["app_dir"] is None:
-            wf_param["app_dir"] = cfg["default"]["app_dir"].replace("WF_NAME", wf_name)
-        if "adapters_folder" in wf_param and wf_param["adapters_folder"] is None:
-            wf_param["adapters_folder"] = cfg["default"]["adapters_folder"].replace("WF_NAME", wf_name)
-        if "designs_folder" in wf_param and wf_param["designs_folder"] is None:
-            wf_param["designs_folder"] = cfg["default"]["designs_folder"].replace("WF_NAME", wf_name)
-        # Reference
-        if "reference" in wf_param:
-            if "sequences" in wf_param["reference"] and wf_param["reference"]["sequences"] is None:
-                wf_param["reference"]["sequences"] = cfg["default"]["reference"]["sequences"]
-            if "assembly" in wf_param["reference"] and wf_param["reference"]["assembly"] is None:
-                wf_param["reference"]["assembly"] = cfg["default"]["reference"]["assembly"]
-            if "with_chr" in wf_param["reference"] and wf_param["reference"]["with_chr"] is None:
-                wf_param["reference"]["with_chr"] = cfg["default"]["reference"]["with_chr"]
-    return cfg
+        # Replace empty by default values
+        new_cfg[wf_name] = getRenderedDefault(wf_param, cfg["default"])
+        # Replace placeholders
+        new_cfg[wf_name] = getRenderedPlaceholders(new_cfg[wf_name], {"WF_NAME": wf_name})
+    return new_cfg
 
 
-def getWorkflows(protocol, cfg):
+def getWorkflows(designs, cfg):
     """
-    Return the list of workflows to execute on data.
+    Return the workflows to execute on data.
 
-    :param protocol: The analysis protocol (design and Illumina workflow).
-    :type protocol: str
+    :param designs: The designs declarated for the run.
+    :type designs: list
     :param cfg: Configuration for workflows.
     :type cfg: dict
-    :return: The names of the workflows to execute.
-    :rtype: list
+    :return: By ID the workflows information.
+    :rtype: dict
     """
-    expected_wf = list()
-    for wf_name, wf_param in cfg["workflows"].items():
-        if wf_param["apply_on"]["protocol"] == "." or protocol["workflow"] == wf_param["apply_on"]["protocol"]:
-            if protocol["design"] is None and wf_param["apply_on"]["designs"] is None:
-                expected_wf.append(wf_name)
-            elif len(wf_param["apply_on"]["designs"]) == 0 or protocol["design"].name in wf_param["apply_on"]["designs"]:
-                expected_wf.append(wf_name)
-    return expected_wf
+    workflows = {}
+    for curr_design in designs:
+        for wf_name, wf_param in cfg.items():
+            if wf_param["apply_on"]["protocol"] == "." or wf_param["apply_on"]["protocol"] == curr_design["design"]["protocol"]:
+                if curr_design["design"] is None and wf_param["apply_on"]["designs"] is None:
+                    wf_id = wf_name + "_" + curr_design["design"]["id"]
+                    workflows[wf_id] = {
+                        "id": wf_id,
+                        "name": wf_name,
+                        "design": curr_design["design"],
+                        "samples": curr_design["samples"],
+                        "resources": getRenderedPlaceholders(wf_param, {"DESIGN_ID": curr_design["design"]["id"]}),
+                        "out_folder": None
+                    }
+                elif len(wf_param["apply_on"]["designs"]) == 0 or curr_design["design"]["id"] in wf_param["apply_on"]["designs"]:
+                    wf_id = wf_name + "_" + curr_design["design"]["id"]
+                    workflows[wf_id] = {
+                        "id": wf_id,
+                        "name": wf_name,
+                        "design": curr_design["design"],
+                        "samples": curr_design["samples"],
+                        "resources": getRenderedPlaceholders(wf_param, {"DESIGN_ID": curr_design["design"]["id"]}),
+                        "out_folder": None
+                    }
+    return workflows
 
 
-def getRunCmd(wf_name, in_spl_folder, out_run_folder, cfg):
+def getRunCmd(wf_info, in_spl_folder, out_run_folder):
     """
     Return the command to launch the workflow.
 
-    :param wf_name: The name of the workflow.
-    :type wf_name: str
+    :param wf_info: The workflow information.
+    :type wf_info: dict
     :param in_spl_folder: Path to the sample folder (containing fastq and the samplesheet).
     :type in_spl_folder: str
     :param out_run_folder: Path to the workflow output folder.
-    :type out_run_folder: str
-    :param cfg: Configuration for workflows.
-    :type cfg: dict
+    :type param out_run_folder: str
     :return: The command if the corresponding workflow exists and None otherwise.
-    :rtype: None/Cmd
+    :rtype: Cmd
     """
-    wf_cfg = cfg["workflows"][wf_name]
-    fct_name = "get{}Cmd".format(wf_name)
+    fct_name = "get{}Cmd".format(wf_info["name"])
     if fct_name not in globals():
-        raise Exception("No {} has been implemented for the workflow {}.".format(fct_name, wf_name))
-    cmd = globals()[fct_name](in_spl_folder, out_run_folder, protocol["design"], wf_cfg)
+        raise Exception("No {} has been implemented for the workflow {}.".format(fct_name, wf_info["name"]))
+    cmd = globals()[fct_name](in_spl_folder, out_run_folder, wf_info)
     return cmd
 
 
-def getLoadCmd(design, raw_folder, out_by_wf):
+def getLoadCmd(raw_folder, wf_by_id):
     """
     Return the command to load run and workflows data in laboratory database.
 
-    :param design: The object describing the design.
-    :type design: Design
     :param raw_folder: Path to the run folder.
     :type raw_folder: str
-    :param out_by_wf: The workflow output path by workflow name.
-    :type out_by_wf: dict
+    :param wf_by_id: The workflow information by design ID.
+    :type wf_by_id: dict
     :return: The command to load data.
     :rtype: Cmd
     """
@@ -338,20 +383,31 @@ def getLoadCmd(design, raw_folder, out_by_wf):
         "--input-raw", raw_folder
     ]
     # Control samples
-    if design is not None:
-        if design.neg_ctrl_re is not None:
-            cmd.extend(["--negative-ctrl-regexp", design.neg_ctrl_re])
-        if design.pos_ctrl_re is not None:
-            cmd.extend(["--positive-ctrl-regexp", design.pos_ctrl_re])
+    pos_ctrl = set()
+    neg_ctrl = set()
+    for wf_id, wf_info in wf_by_id.items():
+        if "control" in wf_info["resources"]:
+            if "neg_ctrl_regexp" in wf_info["resources"]["control"] and wf_info["resources"]["control"]["neg_ctrl_regexp"] is not None:
+                neg_ctrl.add(wf_info["resources"]["control"]["neg_ctrl_regexp"])
+            if "pos_ctrl_regexp" in wf_info["resources"]["control"] and wf_info["resources"]["control"]["pos_ctrl_regexp"] is not None:
+                pos_ctrl.add(wf_info["resources"]["control"]["pos_ctrl_regexp"])
+    if len(pos_ctrl) != 0:
+        if len(pos_ctrl) > 1:
+            raise Exception("The run cannot be load with different positive-ctrl-regexp: {}".format(pos_ctrl))
+        cmd.extend(["--positive-ctrl-regexp", list(pos_ctrl)[0]])
+    if len(neg_ctrl) != 0:
+        if len(neg_ctrl) > 1:
+            raise Exception("The run cannot be load with different negative-ctrl-regexp: {}".format(neg_ctrl))
+        cmd.extend(["--negative-ctrl-regexp", list(neg_ctrl)[0]])
     # Workflows data
-    if len(out_by_wf) != 0:
+    if len(wf_by_id) != 0:
         cmd.append("--input-workflows")
-        for wf, wf_folder in out_by_wf.items():
-            cmd.append("{}:{}".format(wf, wf_folder))
+        for wf_id, wf_info in wf_by_id.items():
+            cmd.append("{}:{}".format(wf_info["name"], wf_info["out_folder"]))
     return Cmd(cmd)
 
 
-def getADSACmd(in_spl_folder, out_run_folder, design, wf_cfg):
+def getADSACmd(in_spl_folder, out_run_folder, wf_param):
     """
     Return the command to launch the variant annotation on MiSeq reporter outputs.
 
@@ -359,35 +415,34 @@ def getADSACmd(in_spl_folder, out_run_folder, design, wf_cfg):
     :type in_spl_folder: str
     :param out_run_folder: Path to the workflow output folder.
     :type out_run_folder: str
-    :param design: The object describing the design.
-    :type design: Design
-    :param wf_cfg: Configuration for the workflow (subset of autoRunWf workflows's configutration).
-    :type wf_cfg: dict
+    :param wf_param: Workflow's configuration.
+    :type wf_param: dict
     :return: The command to run ADSA.
     :rtype: Cmd
     """
-    design.resources_folder = wf_cfg["designs_folder"]
-    assembly_design = wf_cfg["reference"]["assembly"] + "_chr" if wf_cfg["reference"]["with_chr"] else wf_cfg["reference"]["assembly"]
-    app_exec = os.path.join(wf_cfg["app_dir"], "app", "bin", "jflow_cli.py")
+    wf_rsc = getRenderedPlaceholders(
+        wf_param["resources"],
+        {"ASSEMBLY": wf_param["resources"]["reference"]["assembly"]}
+    )
+    app_exec = os.path.join(wf_rsc["app_dir"], "app", "bin", "jflow_cli.py")
     cmd = [
         app_exec, "amplicondsannot",
-        "--RNA-selection", design.getSelectedRef("RNA"),
-        "--assembly-version", wf_cfg["reference"]["assembly"],
-        "--filters", design.getFilters("ADSA"),
+        "--RNA-selection", wf_rsc["design"]["selected_RNA"],
+        "--assembly-version", wf_rsc["reference"]["assembly"],
+        "--filters", wf_rsc["design"]["filters"],
         "--samplesheet", os.path.join(in_spl_folder, "SampleSheet.csv"),
         "--output-dir", out_run_folder
     ]
-    positive_ctrl_ref = design.getPosCtrlRef(assembly_design)
-    if os.path.exists(positive_ctrl_ref):
+    ctrl = wf_rsc["control"]
+    if os.path.exists(ctrl["pos_ctrl_path"]):
         cmd.extend([
-            "--pos-ctrl-names", design.pos_ctrl_re,
-            "--pos-ctrl-expected", positive_ctrl_ref
+            "--pos-ctrl-names", ctrl["pos_ctrl_regexp"],
+            "--pos-ctrl-expected", ctrl["pos_ctrl_path"]
         ])
-    design.resources_folder = None
     return Cmd(cmd)
 
 
-def getADIVaRCmd(in_spl_folder, out_run_folder, design, wf_cfg):
+def getADIVaRCmd(in_spl_folder, out_run_folder, wf_param):
     """
     Return the command to launch the amplicon double strand workflow.
 
@@ -395,46 +450,44 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, design, wf_cfg):
     :type in_spl_folder: str
     :param out_run_folder: Path to the workflow output folder.
     :type out_run_folder: str
-    :param design: The object describing the design.
-    :type design: Design
-    :param wf_cfg: Configuration for the workflow (subset of autoRunWf workflows's configutration).
-    :type wf_cfg: dict
+    :param wf_param: Workflow's configuration.
+    :type wf_param: dict
     :return: The command to run ADIVaR.
     :rtype: Cmd
     """
-    design.resources_folder = wf_cfg["designs_folder"]
-    assembly_design = wf_cfg["reference"]["assembly"] + "_chr" if wf_cfg["reference"]["with_chr"] else wf_cfg["reference"]["assembly"]
-    app_exec = os.path.join(wf_cfg["app_dir"], "app", "bin", "jflow_cli.py")
-    assembly_folder = design.getAssemblyFolder(assembly_design)
+    wf_rsc = getRenderedPlaceholders(
+        wf_param["resources"],
+        {"ASSEMBLY": wf_param["resources"]["reference"]["assembly"]}
+    )
+    app_exec = os.path.join(wf_rsc["app_dir"], "app", "bin", "jflow_cli.py")
     cmd = [
         app_exec, "adivar",
-        "--R1-end-adapter", os.path.join(wf_cfg["adapters_folder"], "Illumina_3prim_adapter.fasta"),
-        "--R2-end-adapter", os.path.join(wf_cfg["adapters_folder"], "Illumina_5prim_adapter_rvc.fasta"),
-        "--libA", "folderA=" + os.path.join(assembly_folder, "libA"),
-        "--libB", "folderB=" + os.path.join(assembly_folder, "libB"),
-        "--RNA-selection", design.getSelectedRef("RNA"),
-        "--assembly-version", wf_cfg["reference"]["assembly"],
-        "--genome-seq", wf_cfg["reference"]["sequences"],
-        "--filters", design.getFilters("ADIVaR"),
+        "--R1-end-adapter", wf_rsc["design"]["3prim_adapter"],
+        "--R2-end-adapter", wf_rsc["design"]["5prim_adapter"],
+        "--libA", "folderA=" + wf_rsc["design"]["libA_folder"],
+        "--libB", "folderB=" + wf_rsc["design"]["libB_folder"],
+        "--RNA-selection", wf_rsc["design"]["selected_RNA"],
+        "--assembly-version", wf_rsc["reference"]["assembly"],
+        "--genome-seq", wf_rsc["reference"]["sequences"],
+        "--filters", wf_rsc["design"]["filters"],
         "--samplesheet", os.path.join(in_spl_folder, "SampleSheet.csv"),
         "--output-dir", out_run_folder
     ]
-    positive_ctrl_ref = design.getPosCtrlRef(assembly_design)
-    if os.path.exists(positive_ctrl_ref):
+    ctrl = wf_rsc["control"]
+    if os.path.exists(ctrl["pos_ctrl_path"]):
         cmd.extend([
-            "--pos-ctrl-names", design.pos_ctrl_re,
-            "--pos-ctrl-expected", positive_ctrl_ref
+            "--pos-ctrl-names", ctrl["pos_ctrl_regexp"],
+            "--pos-ctrl-expected", ctrl["pos_ctrl_path"]
         ])
-    constit_variants = design.getVarNoise(assembly_design)
+    constit_variants = wf_rsc["design"]["variants_noise"]
     if os.path.exists(constit_variants):
         cmd.extend([
             "--constit-variants", constit_variants
         ])
-    design.resources_folder = None
     return Cmd(cmd)
 
 
-def getMIAmSCmd(in_spl_folder, out_run_folder, design, wf_cfg):
+def getMIAmSCmd(in_spl_folder, out_run_folder, wf_param):
     """
     Return the command to launch microsatellite instability detection by next-generation sequencing on amplicons.
 
@@ -442,17 +495,17 @@ def getMIAmSCmd(in_spl_folder, out_run_folder, design, wf_cfg):
     :type in_spl_folder: str
     :param out_run_folder: Path to the workflow output folder.
     :type out_run_folder: str
-    :param design: The object describing the design.
-    :type design: Design
-    :param wf_cfg: Configuration for the workflow (subset of autoRunWf workflows's configutration).
-    :type wf_cfg: dict
+    :param wf_param: Workflow's configuration.
+    :type wf_param: dict
     :return: The command to run MIAmS.
     :rtype: Cmd
     """
-    app_env_bin = os.path.join(wf_cfg["app_dir"], "envs", "miniconda3", "bin")
-    app_exec = os.path.join(wf_cfg["app_dir"], "jflow", "bin", "jflow_cli.py")
-    design.resources_folder = wf_cfg["designs_folder"]
-    assembly_folder = design.getAssemblyFolder(wf_cfg["reference"]["assembly"])
+    wf_rsc = getRenderedPlaceholders(
+        wf_param["resources"],
+        {"ASSEMBLY": wf_param["resources"]["reference"]["assembly"]}
+    )
+    app_env_bin = os.path.join(wf_rsc["app_dir"], "envs", "miniconda3", "bin")
+    app_exec = os.path.join(wf_rsc["app_dir"], "jflow", "bin", "jflow_cli.py")
     cmd = [
         "unset", "PYTHONPATH", ";",
         "source", os.path.join(app_env_bin, "activate"), "MIAmS", "&&",
@@ -461,50 +514,58 @@ def getMIAmSCmd(in_spl_folder, out_run_folder, design, wf_cfg):
         "--min-pair-overlap", 40,
         "--min-support-reads", 300,
         "--random-seed", 42,
-        "--R1-end-adapter", os.path.join(wf_cfg["adapters_folder"], "Illumina_3prim_adapter.fasta"),
-        "--R2-end-adapter", os.path.join(wf_cfg["adapters_folder"], "Illumina_5prim_adapter_rvc.fasta"),
-        "--models", os.path.join(assembly_folder, "MSI", "models.json"),
-        "--targets", os.path.join(assembly_folder, "MSI", "targets.bed"),
-        "--intervals", os.path.join(assembly_folder, "MSI", "intervals.tsv"),
-        "--baseline", os.path.join(assembly_folder, "MSI", "baseline.tsv"),
-        "--genome-seq", wf_cfg["reference"]["sequences"],
+        "--R1-end-adapter", wf_rsc["design"]["3prim_adapter"],
+        "--R2-end-adapter", wf_rsc["design"]["5prim_adapter"],
+        "--models", os.path.join(wf_rsc["design"]["MSI_folder"], "models.json"),
+        "--targets", os.path.join(wf_rsc["design"]["MSI_folder"], "targets.bed"),
+        "--intervals", os.path.join(wf_rsc["design"]["MSI_folder"], "intervals.tsv"),
+        "--baseline", os.path.join(wf_rsc["design"]["MSI_folder"], "baseline.tsv"),
+        "--genome-seq", wf_rsc["reference"]["sequences"],
         "--R1-pattern", "'" + os.path.join(in_spl_folder, "*R1_???.fastq.gz") + "'",
         "--R2-pattern", "'" + os.path.join(in_spl_folder, "*R2_???.fastq.gz") + "'",
         "--exclusion-pattern", "'" + "*Undetermined_S0_L???_R?_???.fastq.gz" + "'",
         "--output-dir", out_run_folder, "&&",
         "source", os.path.join(app_env_bin, "deactivate")
     ]
-    design.resources_folder = None
     return Cmd(cmd, True)
 
 
-def getArchiveCmd(profiles_folder, run, workflows):
+def archivate(profiles_folder, run, workflows, log):
     """
-    Return the command to archivate run and workflows data.
+    Archivate run and workflows data.
 
     :param profiles_folder: Path to the folder containing profiles describing the data to archivate.
     :type profiles_folder: str
     :param run: Name of the run folder.
     :type run: str
-    :param workflows: The names of the workflows to archivate.
+    :param workflows: The workflows to archivate.
     :type workflows: list
-    :return: The command to archivate data.
-    :rtype: Cmd
+    :param log: The logger instance.
+    :type log: logging.Logger
     """
-    cmd = [
-        "archive.py",
-        "--placeholders", "'@YEAR={}' '@RUN={}'".format("20" + run[0:2], run),
-        "--resources-profiles", os.path.join(profiles_folder, "Illumina", "*.yml")
-    ]
+    # Raw data
+    Cmd(
+        [
+            "archive.py",
+            "--placeholders", "'@YEAR={}'".format("20" + run[0:2]), "'@RUN={}'".format(run),
+            "--resources-profiles", os.path.join(profiles_folder, "Illumina", "*.yml")
+        ],
+        True
+    ).run(log)
     # Workflows data
-    if len(workflows) != 0:
-        for curr_wf in workflows:
-            wf_profiles_folder = os.path.join(profiles_folder, "workflows", curr_wf)
-            if os.path.exists(wf_profiles_folder):
-                cmd.append(os.path.join(wf_profiles_folder, "*.yml"))
-            else:
-                print("The data for the workflow {} of the run {} cannot be archivated.".format(curr_wf, run))
-    return Cmd(cmd, True)
+    for curr_wf in workflows:
+        wf_profiles_folder = os.path.join(profiles_folder, "workflows", curr_wf["name"])
+        if os.path.exists(wf_profiles_folder):
+            Cmd(
+                [
+                    "archive.py",
+                    "--placeholders", "'@YEAR={}'".format("20" + run[0:2]), "'@RUN={}'".format(run), "'@WF={}'".format(curr_wf["id"]),
+                    "--resources-profiles", os.path.join(wf_profiles_folder, "*.yml")
+                ],
+                True
+            ).run(log)
+        else:
+            log.warning("The data for the workflow {} of the run {} cannot be archivated.".format(curr_wf, run))
 
 
 def sendMail(smtp_adress, sender, recipients, subject, content):
@@ -564,8 +625,8 @@ def sendStatusMail(smtp_adress, sender, recipients, status, run_folder):
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description="This script uses an infinite loop to listen the Illumina's sequencer output folder and launch the appropriate workflow when a run is ended.")
-    parser.add_argument('-r', '--roll-time', type=int, default=(60*20), help="The time between each sequencer output folder evaluation (in seconds). [Default: %(default)s]")
-    parser.add_argument('-p', '--archivage-profiles-folder', help='Path to the folder containing profiles describing the data to archivate.')
+    parser.add_argument('-r', '--roll-time', type=int, default=(60 * 20), help="The time between each sequencer output folder evaluation (in seconds). [Default: %(default)s]")
+    parser.add_argument('-p', '--archive-profiles-folder', help='Path to the folder containing profiles describing the data to archivate.')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-l', '--listened-folder', required=True, help="The sequencer output folder.")
@@ -587,7 +648,7 @@ if __name__ == "__main__":
             raise Exception("To send mail all the mail parameters must be set.")
 
     # Logger
-    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger("autoRunWf")
     log.setLevel(logging.INFO)
     log.info("Command: " + " ".join(sys.argv))
@@ -611,20 +672,21 @@ if __name__ == "__main__":
                         if not os.path.exists(out_run_folder):
                             os.mkdir(out_run_folder)
                         in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
-                        protocol = getProtocol(in_basecalls_folder)
+                        samplesheet_path = os.path.join(in_basecalls_folder, "SampleSheet.csv")
                         out_folder_by_wf = dict()
                         # Launch workflows
                         step = "Launch analysis workflows"
                         parallel_processes = []
-                        for curr_wf in getWorkflows(protocol, analyses_cfg):
-                            out_wf_folder = os.path.join(out_run_folder, curr_wf)
-                            out_folder_by_wf[curr_wf] = out_wf_folder
+                        wf_by_id = getWorkflows(getDesigns(samplesheet_path), analyses_cfg)
+                        for wf_id, wf_info in wf_by_id.items():
+                            out_wf_folder = os.path.join(out_run_folder, wf_id)
+                            wf_info["out_folder"] = out_wf_folder
                             if os.path.exists(out_wf_folder):
-                                log.warning('The workflow "{}" has already be processed for run "{}".'.format(curr_wf, in_run_folder))
+                                log.warning('The workflow "{}" has already be processed for run "{}".'.format(wf_id, in_run_folder))
                             else:
                                 os.mkdir(out_wf_folder)
-                                cmd_analysis = getRunCmd(curr_wf, in_basecalls_folder, out_wf_folder, analyses_cfg)
-                                wf_process = ThreadWrapper(name=curr_wf, target=cmd_analysis.run, args=[log, curr_wf])
+                                cmd_analysis = getRunCmd(wf_info, in_basecalls_folder, out_wf_folder)
+                                wf_process = ThreadWrapper(name=wf_id, target=cmd_analysis.run, args=[log, wf_id])
                                 parallel_processes.append(wf_process)
                                 wf_process.start()
                         for wf_process in parallel_processes:  # Wait end of all workflows
@@ -649,20 +711,27 @@ if __name__ == "__main__":
                                         Cmd(cmd_rm_analysis).run(log)
                         # Copy Illumina's workflows
                         step = "Copy Illumina's workflows"
-                        if protocol["workflow"] != "GenerateFASTQ":  # Illumina reporter has processed an analysis
+                        illumina_workflow = getIlluminaWorkflow(samplesheet_path)
+                        if illumina_workflow is not None and illumina_workflow != "GenerateFASTQ":  # Illumina reporter has processed an analysis
                             # Get workflow name
-                            analysis_basename = protocol["workflow"].replace(" ", "_")
+                            analysis_basename = illumina_workflow.replace(" ", "_")
                             if analysis_basename == "Amplicon_-_DS":
                                 analysis_basename = "ADSA"
+                            else:
+                                analysis_basename = "Illumina_" + analysis_basename
                             # Process workflow results
-                            in_basecalls_folder = os.path.join(in_run_folder, "Data", "Intensities", "BaseCalls")
                             in_wf_folder_prefix = os.path.join(in_basecalls_folder, "Alignment")
                             alignments_files = glob.glob(in_wf_folder_prefix + "*")
                             for in_wf_folder in alignments_files:
                                 if os.path.isdir(in_wf_folder):
                                     out_wf_folder = os.path.join(out_run_folder, analysis_basename)
                                     out_wf_folder += in_wf_folder.replace(in_wf_folder_prefix, "")  # Add workflow suffix (the index of the algnment folder)
-                                    if analysis_basename not in ["ADSA"]: out_folder_by_wf[analysis_basename] = out_wf_folder
+                                    if analysis_basename not in ["ADSA"]:
+                                        wf_by_id[analysis_basename] = {
+                                            "id": analysis_basename,
+                                            "name": analysis_basename,
+                                            "out_folder": out_wf_folder,
+                                        }
                                     log_file = os.path.join(out_wf_folder, "CompletedJobInfo.xml")
                                     if not os.path.exists(log_file):  # The results have not been copied in workflow folder
                                         cmd_copy_analysis = ["rsync", "--recursive", "--perms", "--times", in_wf_folder + os.sep, out_wf_folder]
@@ -672,7 +741,7 @@ if __name__ == "__main__":
                         out_run_storage = in_run_folder
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, run_id)
-                        cmd_load = getLoadCmd(protocol["design"], out_run_storage, out_folder_by_wf)
+                        cmd_load = getLoadCmd(out_run_storage, wf_by_id, log)
                         cmd_load.run(log)
                         # Log end process
                         with open(completed_analyses_file, "w") as FH:
@@ -681,11 +750,10 @@ if __name__ == "__main__":
                             sendStatusMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "end", in_run_folder)
                         # Send to archive
                         step = "Send to archive"
-                        if args.archivage_profiles_folder is not None:
-                            cmd_archivage = getArchiveCmd(args.archivage_profiles_folder, run_id, list(out_folder_by_wf.keys()))
-                            cmd_archivage.run(log)
+                        if args.archive_profiles_folder is not None:
+                            archivate(args.archive_profiles_folder, run_id, list(wf_by_id.values()), log)
                             if send_mail:
-                                sendMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "[NGS] Sequencer data archivage", "The run {} has been archived.".format(in_run_folder))
+                                sendMail(args.mail_smtp, args.mail_sender, args.mail_recipients, "[NGS] Sequencer data archiving", "The run {} has been archived.".format(in_run_folder))
                     except Exception:
                         log.error("The post-process on run {} has failed.".format(run_id))
                         if send_mail:
