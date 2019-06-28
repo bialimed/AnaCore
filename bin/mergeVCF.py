@@ -19,13 +19,14 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.1'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
 import pysam
+import logging
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +55,7 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     """
     ref_start = pos
     ref_end = pos + len(ref.replace("-", "")) - 1
-    if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
+    if selected_RG is not None: selected_RG = {RG: 1 for RG in selected_RG}
     # Retrieve reads
     inspect_start = ref_start - 1
     inspect_end = ref_end
@@ -143,6 +144,13 @@ if __name__ == "__main__":
                 "this option and -i/--input-variants must contain the same number of files."
             )
 
+    # Logger
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    log = logging.getLogger()
+    log.setLevel(logging.INFO)
+    log.info("Command: " + " ".join(sys.argv))
+    log.info("Version: " + str(__version__))
+
     # Get identified variants from VCF
     variants = dict()
     aln_by_samples = dict()
@@ -221,3 +229,4 @@ if __name__ == "__main__":
             curr_var.info["AF"][0] = round(curr_var.info["AD"][0] / curr_var.info["DP"], args.AF_precision)
             # Write variant
             FH_out.write(curr_var)
+    logging.info("End of process")
