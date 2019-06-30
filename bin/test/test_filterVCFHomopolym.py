@@ -183,12 +183,10 @@ artificial_chr6	102	557	102	103""")
 
         # Validate results
         expected = [curr_var.id for curr_var in self.variants if curr_var.info["is_filtered"] == 0]
-        print(expected)
         observed = list()
         with VCFIO(self.tmp_output) as FH_results:
             for record in FH_results:
                 observed.append(record.id)
-        print(observed)
         self.assertEqual(
             sorted(expected),
             sorted(observed)
