@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.13.0'
+__version__ = '1.14.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -66,10 +66,11 @@ class SampleSheetIO(object):
     def _getSamplesFromData(self, data_section):
         samples = list()
         data_titles = [field.strip() for field in data_section[0].split(",")]
-        for line in data_section[1:]:
-            samples.append(
-                {data_titles[idx]: field.strip() for idx, field in enumerate(line.split(","))}
-            )
+        for spl_idx, line in enumerate(data_section[1:]):
+            spl = {data_titles[idx]: field.strip() for idx, field in enumerate(line.split(","))}
+            spl["Sample_Basename"] = getIlluminaName(spl["Sample_Name"])
+            spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
+            samples.append(spl)
         return samples
 
     def _getInfoFromSection(self, section):
@@ -102,14 +103,6 @@ class SampleSheetIO(object):
 
 class ADSSampleSheetIO(SampleSheetIO):
     """Manage SampleSheet designed for AmpliconDS analysis."""
-
-    def _getSamplesFromData(self, data_section):
-        samples = super()._getSamplesFromData(data_section)
-        for spl_idx, spl in enumerate(samples):
-            spl["Sample_Basename"] = getIlluminaName(spl["Sample_Name"])
-            spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
-            spl["Library_Name"] = spl["Library_Basename"]
-        return samples
 
     def filterPanels(self, selected_manifests):
         """
@@ -163,7 +156,6 @@ class ADSSampleSheetIO(SampleSheetIO):
                     os.path.join(directory, spl[subject_start_tag + "_Basename"] + end_pattern)
                 ))
         return files_by_elt
-
 
     def setSplFiles(self, tag, directory, end_pattern, subject="library"):
         """
