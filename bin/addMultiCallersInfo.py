@@ -55,7 +55,7 @@ if __name__ == "__main__":
         parser.error("Each input VCF must correspond to one calling source and one output.")
 
     # Logger
-    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger(os.path.basename(__file__))
     log.setLevel(logging.INFO)
     log.info("Command: " + " ".join(sys.argv))
@@ -96,4 +96,4 @@ if __name__ == "__main__":
                         record.filter.append(args.lowAF_tag)
                     FH_out.write(record)
 
-    log.info("END of process.")
+    log.info("End of job")

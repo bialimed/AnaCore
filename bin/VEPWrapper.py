@@ -71,4 +71,4 @@ if __name__ == "__main__":
     else:  # Annotate
         log.info("Process annotation")
         subprocess.check_call(vep_cmd)
-    log.info("End of process")
+    log.info("End of job")

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Logger
-    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger(os.path.basename(__file__))
     log.setLevel(logging.INFO)
     log.info("Command: " + " ".join(sys.argv))
@@ -75,4 +75,4 @@ if __name__ == "__main__":
     variants = [curr_var for curr_id, curr_var in variants_by_id.items()]
     with open(args.output_variants, "w") as FH_out:
         json.dump(variants, FH_out)
-    log.info("END of process.")
+    log.info("End of job")

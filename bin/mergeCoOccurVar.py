@@ -364,4 +364,4 @@ if __name__ == "__main__":
                     prev = curr
                 if prev is not None:
                     FH_out.write(prev)
-    log.info("End of process.")
+    log.info("End of job")

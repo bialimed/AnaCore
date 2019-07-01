@@ -148,7 +148,7 @@ def process(args, log):
                                         consensus_qual += qual_R2
                             # Filter consensus and select the best
                             if nb_support >= max_nb_support:
-                                if float(nb_contradict)/curr_overlap_len <= args.max_contradict_ratio:
+                                if float(nb_contradict) / curr_overlap_len <= args.max_contradict_ratio:
                                     max_nb_support = nb_support
                                     best_overlap = {
                                         "nb_support": nb_support,
@@ -234,10 +234,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Process
-    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger("combinePairs")
     log.setLevel(logging.INFO)
-    log.info("Start")
     log.info("Command: " + " ".join(sys.argv))
+    log.info("Start")
     process(args, log)
-    log.info("End")
+    log.info("End of job")

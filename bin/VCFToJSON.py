@@ -220,7 +220,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Logger
-    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger(os.path.basename(__file__))
     log.setLevel(logging.INFO)
     log.info("Command: " + " ".join(sys.argv))
@@ -265,4 +265,4 @@ if __name__ == "__main__":
         FH_out.write(
             json.dumps(json_data, default=lambda o: o.__dict__, sort_keys=True)
         )
-    log.info("END of process.")
+    log.info("End of job")

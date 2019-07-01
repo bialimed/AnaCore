@@ -97,4 +97,4 @@ if __name__ == "__main__":
         else:
             log.warning(msg)
 
-    log.info("End of process")
+    log.info("End of job")

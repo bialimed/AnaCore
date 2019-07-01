@@ -196,4 +196,4 @@ if __name__ == "__main__":
     subprocess.check_call(cmd)
     os.remove(tmp_dup_R2)
 
-    log.info("End of process")
+    log.info("End of job")

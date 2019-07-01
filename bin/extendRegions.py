@@ -81,4 +81,4 @@ if __name__ == "__main__":
                 curr_region.name = ";".join([str(elt) for elt in curr_region.annot["merge_traceback"]])
             FH_out.write(curr_region)
 
-    log.info("End of process")
+    log.info("End of job")

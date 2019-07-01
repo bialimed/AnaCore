@@ -128,4 +128,4 @@ if __name__ == "__main__":
                             FH_out_R1.write(R1)
                             FH_out_R2.write(R2)
 
-    log.info("End of process")
+    log.info("End of job")

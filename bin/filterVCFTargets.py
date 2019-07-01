@@ -104,7 +104,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Logger
-    logging.basicConfig(format='%(asctime)s - %(name)s [%(levelname)s] %(message)s')
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
     log = logging.getLogger(os.path.basename(__file__))
     log.setLevel(logging.INFO)
     log.info("Command: " + " ".join(sys.argv))
