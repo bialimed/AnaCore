@@ -68,7 +68,7 @@ class SampleSheetIO(object):
         data_titles = [field.strip() for field in data_section[0].split(",")]
         for spl_idx, line in enumerate(data_section[1:]):
             spl = {data_titles[idx]: field.strip() for idx, field in enumerate(line.split(","))}
-            spl["Sample_Basename"] = getIlluminaName(spl["Sample_Name"])
+            spl["Sample_Basename"] = getIlluminaName(spl["Sample_ID"])
             spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
             samples.append(spl)
         return samples
@@ -103,6 +103,13 @@ class SampleSheetIO(object):
 
 class ADSSampleSheetIO(SampleSheetIO):
     """Manage SampleSheet designed for AmpliconDS analysis."""
+
+    def _getSamplesFromData(self, data_section):
+        samples = super()._getSamplesFromData(data_section)
+        for spl_idx, spl in enumerate(samples):
+            spl["Sample_Basename"] = getIlluminaName(spl["Sample_Name"])
+            spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
+        return samples
 
     def filterPanels(self, selected_manifests):
         """
