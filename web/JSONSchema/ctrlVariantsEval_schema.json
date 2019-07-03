@@ -1,0 +1,87 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "anacore/ctrl_variants_eval/1",
+  "type": "array",
+  "title": "Results of control variants evaluation",
+  "description": "This array contains for each evaluated variants the expected and detected allele frequency.",
+  "default": null,
+  "items": {
+    "$id": "#/items",
+    "type": "object",
+    "title": "Variant",
+    "default": null,
+    "required": [
+      "alt",
+      "chrom",
+      "detected",
+      "expected",
+      "pos",
+      "ref"
+    ],
+    "properties": {
+      "alt": {
+        "$id": "#/items/properties/alt",
+        "type": "string",
+        "title": "Alternative allele",
+        "default": "",
+        "examples": [
+          "T"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "chrom": {
+        "$id": "#/items/properties/chrom",
+        "type": "string",
+        "title": "Chromosome",
+        "default": "",
+        "examples": [
+          "2"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "detected": {
+        "$id": "#/items/properties/detected",
+        "type": "number",
+        "title": "Detected AF",
+        "default": 0.0,
+        "examples": [
+          0.0441
+        ],
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "expected": {
+        "$id": "#/items/properties/expected",
+        "type": "number",
+        "title": "Expected AF",
+        "default": 0.0,
+        "examples": [
+          0.05
+        ],
+        "minimum": 0.0,
+        "maximum": 1.0
+      },
+      "pos": {
+        "$id": "#/items/properties/pos",
+        "type": "integer",
+        "title": "Start position",
+        "default": 0,
+        "examples": [
+          208248388
+        ],
+        "minimum": 1.0
+      },
+      "ref": {
+        "$id": "#/items/properties/ref",
+        "type": "string",
+        "title": "Reference allele",
+        "default": "",
+        "examples": [
+          "C"
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }
+}
