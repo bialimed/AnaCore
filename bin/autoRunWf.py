@@ -19,15 +19,18 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.15.0'
+__version__ = '2.16.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+import re
 import os
 import sys
 import yaml
 import time
 import glob
+import copy
+import uuid
 import hashlib
 import smtplib
 import logging
@@ -81,7 +84,7 @@ class ThreadWrapper(Thread):
 class Cmd:
     """Class to manage command line(s)."""
 
-    def __init__(self, cmd, is_shell=False):
+    def __init__(self, cmd, is_shell=False, stderr=None, stdout=None):
         """
         Build and return an instance of Cmd.
 
@@ -89,11 +92,17 @@ class Cmd:
         :type cmd: list
         :param is_shell: If shell is True, the specified command will be executed through the shell.
         :type is_shell: boolean
+        :param stderr: Path to the stderr file. [Default: STDERR]
+        :type stderr: str
+        :param stdout: Path to the stdout file. [Default: DEVNULL]
+        :type stdout: str
         :return: The new instance.
         :rtype: Cmd
         """
         self.cmd = cmd
         self.is_shell = is_shell
+        self.stderr = stderr
+        self.stdout = stdout
 
     def run(self, log, cmd_id=None):
         """
@@ -108,10 +117,20 @@ class Cmd:
         if cmd_id is None:
             cmd_id = hashlib.md5(cmd_str.encode()).hexdigest()
         log.info("Start sub-command {}: {}".format(cmd_id, cmd_str))
-        if self.is_shell:
-            subprocess.check_call(" ".join([str(elt) for elt in self.cmd]), stdout=subprocess.DEVNULL, shell=True)
+        # Manage stderr and stdout
+        FH_stderr = None
+        FH_stdout = None
+        if self.stderr is not None:
+            FH_stderr = open(self.stderr, "w")
+        if self.stdout is not None:
+            FH_stdout = open(self.stdout, "w")
         else:
-            subprocess.check_call(self.cmd, stdout=subprocess.DEVNULL)
+            FH_stdout = subprocess.DEVNULL
+        # Exec
+        if self.is_shell:
+            subprocess.check_call(" ".join([str(elt) for elt in self.cmd]), stdout=FH_stdout, stderr=FH_stderr, shell=True)
+        else:
+            subprocess.check_call(self.cmd, stdout=FH_stdout, stderr=FH_stderr)
         log.info("End sub-command {}".format(cmd_id))
 
 
@@ -156,7 +175,7 @@ def getDesigns(samplesheet_path):
                 if curr_annot.startswith("DESIGN#"):
                     design_id = curr_annot[7:]
                     if design_id in info_by_design:
-                        info_by_design[design_id]["samples"].append(curr_spl)
+                        info_by_design[design_id]["samples"][curr_spl["Library_Basename"]] = curr_spl
                     else:
                         info_by_design[design_id] = {
                             "design": {
@@ -165,7 +184,7 @@ def getDesigns(samplesheet_path):
                                 "name": design_id.split("_")[1],
                                 "version": design_id.split("_")[2]
                             },
-                            "samples": [curr_spl]
+                            "samples": {curr_spl["Library_Basename"]: curr_spl}
                         }
     # By header
     if "DESIGN#" in samplesheet.header["Description"]:
@@ -179,11 +198,10 @@ def getDesigns(samplesheet_path):
                         "name": design_id.split("_")[1],
                         "version": design_id.split("_")[2]
                     },
-                    "samples": []
+                    "samples": {spl["Library_Basename"]: spl for spl in samplesheet.samples}
                 }
                 for curr_spl in samplesheet.samples:
-                    if design_id in info_by_design:
-                        info_by_design[design_id]["samples"].append(curr_spl)
+                    info_by_design[design_id]["samples"].add(curr_spl)
     elif samplesheet.header["Application"] == "Amplicon - DS" or samplesheet.header["Workflow"] == "Amplicon - DS":
         manifest_A = os.path.basename(samplesheet.manifests["A"])
         design_id = manifest_A.split("_A.txt")[0]
@@ -194,11 +212,8 @@ def getDesigns(samplesheet_path):
                 "name": design_id.split("_")[1],
                 "version": design_id.split("_")[2]
             },
-            "samples": []
+            "samples": {spl["Library_Basename"]: spl for spl in samplesheet.samples}
         }
-        for curr_spl in samplesheet.samples:
-            if design_id in info_by_design:
-                info_by_design[design_id]["samples"].append(curr_spl)
     return info_by_design.values()
 
 
@@ -278,7 +293,7 @@ def getWfConfig(cfg_path):
                 sequences: /work/fescudie/bank/Homo_sapiens/DNA/GRCh37_Ensembl75_std/without_contig/Homo_sapiens.GRCh37.75.dna.woutContigs.fa
                 assembly: GRCh37
                 with_chr: False
-            app_dir: /save/fescudie/IUCT/WF_NAME/current
+            app_folder: /save/fescudie/IUCT/WF_NAME/current
             adapters_folder: /save/fescudie/IUCT/WF_NAME/current/resources/adapters
             designs_folder: /save/fescudie/IUCT/WF_NAME/current/resources/designs
         workflows:
@@ -286,7 +301,7 @@ def getWfConfig(cfg_path):
                 apply_on:
                     protocol: Amplicon - DS
                     designs: [TSCA_INCa_V2]  # None: without design ; []: all designs ; [A, B]: with design A or B
-                app_dir:
+                app_folder:
                 adapters_folder:
                 designs_folder:
                 reference:
@@ -424,7 +439,7 @@ def getADSACmd(in_spl_folder, out_run_folder, wf_param):
         wf_param["resources"],
         {"ASSEMBLY": wf_param["resources"]["reference"]["assembly"]}
     )
-    app_exec = os.path.join(wf_rsc["app_dir"], "app", "bin", "jflow_cli.py")
+    app_exec = os.path.join(wf_rsc["app_folder"], "app", "bin", "jflow_cli.py")
     cmd = [
         app_exec, "amplicondsannot",
         "--RNA-selection", wf_rsc["design"]["selected_RNA"],
@@ -459,7 +474,7 @@ def getADIVaRCmd(in_spl_folder, out_run_folder, wf_param):
         wf_param["resources"],
         {"ASSEMBLY": wf_param["resources"]["reference"]["assembly"]}
     )
-    app_exec = os.path.join(wf_rsc["app_dir"], "app", "bin", "jflow_cli.py")
+    app_exec = os.path.join(wf_rsc["app_folder"], "app", "bin", "jflow_cli.py")
     cmd = [
         app_exec, "adivar",
         "--R1-end-adapter", wf_rsc["design"]["3prim_adapter"],
@@ -504,8 +519,8 @@ def getMIAmSCmd(in_spl_folder, out_run_folder, wf_param):
         wf_param["resources"],
         {"ASSEMBLY": wf_param["resources"]["reference"]["assembly"]}
     )
-    app_env_bin = os.path.join(wf_rsc["app_dir"], "envs", "miniconda3", "bin")
-    app_exec = os.path.join(wf_rsc["app_dir"], "jflow", "bin", "jflow_cli.py")
+    app_env_bin = os.path.join(wf_rsc["app_folder"], "envs", "miniconda3", "bin")
+    app_exec = os.path.join(wf_rsc["app_folder"], "jflow", "bin", "jflow_cli.py")
     cmd = [
         "unset", "PYTHONPATH", ";",
         "source", os.path.join(app_env_bin, "activate"), "MIAmS", "&&",
@@ -530,9 +545,87 @@ def getMIAmSCmd(in_spl_folder, out_run_folder, wf_param):
     return Cmd(cmd, True)
 
 
+def getoryciCmd(in_spl_folder, out_run_folder, wf_param):
+    """
+    Return the command to launch varaiant calling and annotation from capture analysis.
+
+    :param in_spl_folder: Path to the sample folder (containing fastq and the samplesheet).
+    :type in_spl_folder: str
+    :param out_run_folder: Path to the workflow output folder.
+    :type out_run_folder: str
+    :param wf_param: Workflow's configuration.
+    :type wf_param: dict
+    :return: The command to run MIAmS.
+    :rtype: Cmd
+    """
+    wf_rsc = getRenderedPlaceholders(
+        wf_param["resources"],
+        {"ASSEMBLY": wf_param["resources"]["parameters"]["reference"]["assembly"]}
+    )
+    analysis_id = str(uuid.uuid1())
+    work_folder = os.path.join(wf_rsc["work_folder"], analysis_id)
+    # Get fastq pathes
+    R1 = []
+    R2 = []
+    for filename in sorted(os.listdir(in_spl_folder)):
+        if "_".join(filename.split("_")[0:2]) in wf_param["samples"]:
+            filepath = os.path.join(in_spl_folder, filename)
+            if "_R1_" in filename:
+                R1.append(filepath)
+            else:
+                R2.append(filepath)
+    # Get control
+    pos_ctrl_lib_names = set()
+    pos_ctrl_path = wf_rsc["parameters"]["analysis"]["evalPositiveCtrl_rule"]["expected_variants"]
+    if pos_ctrl_path is not None and os.path.exists(pos_ctrl_path):
+        for curr_R1, curr_R2 in zip(R1, R2):
+            if re.match(wf_rsc["control"]["pos_ctrl_regexp"], os.path.basename(curr_R1)):
+                name = os.path.basename(curr_R1).split("_R1")[0]
+                pos_ctrl_lib_names.add(name)
+    # Write config file
+    run_folder = os.path.dirname(os.path.dirname(os.path.dirname(in_spl_folder)))
+    config_path = os.path.join(work_folder, "config.yml")
+    if not os.path.exists(work_folder):
+        os.makedirs(work_folder)
+    with open(config_path, "w") as FH_cfg:
+        wf_cfg = copy.deepcopy(wf_rsc["parameters"])
+        wf_cfg["interop"] = os.path.join(run_folder, "InterOp")
+        wf_cfg["R1"] = R1
+        wf_cfg["R2"] = R2
+        wf_cfg["analysis"]["evalPositiveCtrl_rule"]["samples"] = list(pos_ctrl_lib_names)
+        FH_cfg.write(yaml.dump(wf_cfg))
+    # Create command
+    cmd = []
+    if "pre_set" in wf_rsc["environment"] and wf_rsc["environment"]["pre_set"] is not None:
+        cmd = wf_rsc["environment"]["pre_set"].split() + ["&&"]
+    cmd += [
+        "source", os.path.join(wf_rsc["environment"]["conda_bin"], "activate"),
+        "&&",
+        "snakemake",
+        "--use-conda",
+        "--jobs", "100",
+        "--latency-wait", "100",
+        "--drmaa", '" -V -q {cluster.queue} -l mem={cluster.vmem} -l h_vmem={cluster.vmem} -pe smp {cluster.threads} -l pri_normal=1 -N {cluster.name}"',  # -l mem={cluster.vmem} because the cluster does not support different values for mem and vmem
+        "--conda-prefix", wf_rsc["environment"]["conda_prefix"],
+        "--cluster-config", os.path.join(wf_rsc["app_folder"], "config", "cluster.json"),
+        "--snakefile", os.path.join(wf_rsc["app_folder"], "Snakefile"),
+        "--configfile", config_path,
+        "--directory", work_folder,
+        ">", os.path.join(work_folder, "wf_log.txt"),
+        "2>", os.path.join(work_folder, "wf_stderr.txt"),
+        "&&",
+        "rm", "-r", os.path.join(work_folder, ".snakemake"), os.path.join(work_folder, "snakejob.*"),
+        "&&",
+        "mv", work_folder + os.path.sep + "*", out_run_folder,
+        "&&",
+        "rm", "-r", work_folder
+    ]
+    return Cmd(cmd, True)
+
+
 def archivate(profiles_folder, run, workflows, log):
     """
-    Archivate run and workflows data.
+    Archive run and workflows data.
 
     :param profiles_folder: Path to the folder containing profiles describing the data to archivate.
     :type profiles_folder: str
@@ -637,7 +730,7 @@ if __name__ == "__main__":
     group_output.add_argument('-w', '--workflow-config', required=True, help='The path to the file containing configuration for workflows.')
     group_mail = parser.add_argument_group('Mail')  # Mail
     group_mail.add_argument('--mail-recipients', nargs='+', help='Mails of the recipients.')
-    group_mail.add_argument('--mail-sender', help='Mail of the sender (it may be a not  existing adrsesses).')
+    group_mail.add_argument('--mail-sender', help='Mail of the sender (it may be a not  existing adresses).')
     group_mail.add_argument('--mail-smtp', help='The SMTP server used to send mail.')
     args = parser.parse_args()
     analyses_cfg = getWfConfig(args.workflow_config)
@@ -741,8 +834,8 @@ if __name__ == "__main__":
                         out_run_storage = in_run_folder
                         if args.storage_folder is not None:
                             out_run_storage = os.path.join(args.storage_folder, run_id)
-                        cmd_load = getLoadCmd(out_run_storage, wf_by_id, log)
-                        cmd_load.run(log)
+                        cmd_load = getLoadCmd(out_run_storage, wf_by_id)
+                        # cmd_load.run(log)
                         # Log end process
                         with open(completed_analyses_file, "w") as FH:
                             FH.write(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
