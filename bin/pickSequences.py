@@ -50,7 +50,7 @@ if __name__ == "__main__":
     group_input.add_argument('-s', '--input-sequences', required=True, help='Path to the file containing the sequences (format: fasta or fastq).')
     group_input.add_argument('-i', '--input-ids', required=True, help='Path to the file containing the selected IDs (format: TXT). One ID by line.')
     group_output = parser.add_argument_group('Outputs')  # Outputs
-    group_output.add_argument('-o', '--output-sequences', help='Path to the filtered file (format: same as input). [Default: %(default)s]')
+    group_output.add_argument('-o', '--output-sequences', required=True, help='Path to the filtered file (format: same as input).')
     args = parser.parse_args()
 
     # Logger
