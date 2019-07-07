@@ -26,8 +26,8 @@ __status__ = 'prod'
 import sys
 import logging
 import argparse
-from anacore.maf import MAFIO
-from anacore.annotVcf import AnnotVCFIO, VCFRecord, getName
+from anacore.maf import MAFIO, getName
+from anacore.annotVcf import AnnotVCFIO, VCFRecord
 
 
 ########################################################################
