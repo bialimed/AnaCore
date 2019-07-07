@@ -18,11 +18,23 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 from anacore.sv import HashedSVIO
+
+
+def getName(record):
+    """
+    Return an unique name to identified the variant.
+
+    :param record: A MAF record.
+    :type record: dict
+    :return: The variant name.
+    :rtype: str
+    """
+    return "{}:{}={}/{}".format(record["Chromosome"], record["Start_Position"], record["Reference_Allele"], record["Tumor_Seq_Allele2"])
 
 
 class MAFIO(HashedSVIO):

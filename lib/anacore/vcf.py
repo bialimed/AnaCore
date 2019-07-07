@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.20.0'
+__version__ = '1.20.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -940,7 +940,7 @@ class VCFIO(AbstractFile):
             ("." if record.qual is None else str(record.qual)),
             ("." if record.filter is None else ";".join(record.filter))])
         # Info
-        if record.info is None or len(self.info) == 0:
+        if record.info is None or len(record.info) == 0 or len(self.info) == 0:
             line += "\t."
         else:
             info_fields = list()
@@ -954,7 +954,7 @@ class VCFIO(AbstractFile):
                         info_fields.append(key + "=" + str(record.info[key]))
             line += "\t" + ";".join(info_fields)
         # Format
-        if len(self.format) != 0:
+        if len(self.format) != 0:  # the VCF contains a column format
             # Format column
             if record.format is None or record.format == ".":
                 line += "\t."
@@ -1041,7 +1041,10 @@ class VCFIO(AbstractFile):
                 'Description="' + self.format[tag]["description"] + '"' +
                 '>\n'
             )
-        self.file_handle.write("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([spl for spl in self.samples]) + "\n")
+        last_header_line = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
+        if len(self.format) != 0 or len(self.samples) != 0:
+            last_header_line += "\tFORMAT\t" + "\t".join([spl for spl in self.samples])
+        self.file_handle.write(last_header_line + "\n")
 
 
 def getAlleleRecord(FH_vcf, record, idx_alt):

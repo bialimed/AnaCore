@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2017 IUCT-O
+# Copyright (C) 2019 IUCT-O
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
 #
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT-O'
+__copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -32,7 +32,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.sequenceIO import SequenceFileReader, FastaIO, FastqIO
+from anacore.vcf import VCFIO
 
 
 ########################################################################
@@ -42,15 +42,15 @@ from anacore.sequenceIO import SequenceFileReader, FastaIO, FastqIO
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser(description="Filter sequence file on list of sequences IDs.")
-    parser.add_argument('-m', '--mode', choices=["select", "remove"], default="select", help='The sequences with IDs provided are selected (-- mode select) or removed (--mode remove). [Default: %(default)s]')
-    parser.add_argument('-t', '--stringency', choices=["lenient", "strict"], default="strict", help='In strict mode the script raise an exception if at least one of the selected IDs is missing in sequences file. [Default: %(default)s]')
+    parser = argparse.ArgumentParser(description="Filter variants file on list of variants name.")
+    parser.add_argument('-m', '--mode', choices=["select", "remove"], default="select", help='The variants with names provided are selected (-- mode select) or removed (--mode remove). [Default: %(default)s]')
+    parser.add_argument('-t', '--stringency', choices=["lenient", "strict"], default="strict", help='In strict mode the script raise an exception if at least one of the selected names is missing in variants file. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
-    group_input.add_argument('-s', '--input-sequences', required=True, help='Path to the file containing the sequences (format: fasta or fastq).')
-    group_input.add_argument('-i', '--input-ids', required=True, help='Path to the file containing the selected IDs (format: TXT). One ID by line.')
+    group_input.add_argument('-a', '--input-variants', required=True, help='Path to the file containing the variants (format: VCF).')
+    group_input.add_argument('-i', '--input-ids', required=True, help='Path to the file containing the selected IDs (format: TXT). One ID by line in format: $chrom:$start=$ref/$alt.')
     group_output = parser.add_argument_group('Outputs')  # Outputs
-    group_output.add_argument('-o', '--output-sequences', required=True, help='Path to the filtered file (format: same as input).')
+    group_output.add_argument('-o', '--output-variants', required=True, help='Path to the filtered file (format: VCF).')
     args = parser.parse_args()
 
     # Logger
@@ -67,29 +67,39 @@ if __name__ == "__main__":
             selected_ids[line.strip()] = 0
 
     # Filter sequence file
-    with SequenceFileReader.factory(args.input_sequences) as FH_seq:
-        out_cls = FastqIO if issubclass(FastqIO, FH_seq.__class__) else FastaIO
-        with out_cls(args.output_sequences, "w") as FH_out:
+    with VCFIO(args.input_variants) as FH_in:
+        with VCFIO(args.output_variants, "w") as FH_out:
+            # Header
+            FH_out.copyHeader(FH_in)
+            filter_title = "{}ID".format("sel" if args.mode == "select" else "remv")
+            if filter_title in FH_out.filter:
+                idx = 1
+                while filter_title + str(idx) in filter_title:
+                    idx += 1
+                filter_title += str(idx)
+            FH_out.filter[filter_title] = "{} variants by list of names".format(args.mode.capitalize())
+            FH_out._writeHeader()
+            # Records
             if args.mode == "select":
-                for record in FH_seq:
-                    if record.id in selected_ids:
+                for record in FH_in:
+                    if record.getName() in selected_ids:
                         selected_ids[record.id] = 1
                         FH_out.write(record)
             else:
-                for record in FH_seq:
-                    if record.id in selected_ids:
+                for record in FH_in:
+                    if record.getName() in selected_ids:
                         selected_ids[record.id] = 1
                     else:
                         FH_out.write(record)
 
-    # Check retrieved and missing sequences
+    # Check retrieved and missing variants
     missing = list()
     for curr_id in selected_ids:
         if selected_ids[curr_id] != 1:
             missing.append(curr_id)
     if len(missing) != 0:
-        msg = 'The following sequences cannot be found in  "{}": {}'.format(
-            args.input_sequences, ", ".join(missing)
+        msg = 'The following variants cannot be found in  "{}": {}'.format(
+            args.input_variants, ", ".join(missing)
         )
         if args.stringency == "strict":
             log.error(msg)
