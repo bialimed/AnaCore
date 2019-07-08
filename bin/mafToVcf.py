@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                                     "Feature": record["Feature"],
                                     "HGVSc": record["HGVSc"],
                                     "HGVSp": record["HGVSp"],
-                                    "RefSeq": record["RefSeq"]
+                                    "RefSeq": record["RefSeq"].replace(";", "&")
                                 }]
                             },
                             pFormat=["AD", "AF", "DP"],
