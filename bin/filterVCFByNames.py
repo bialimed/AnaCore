@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -83,12 +83,12 @@ if __name__ == "__main__":
             if args.mode == "select":
                 for record in FH_in:
                     if record.getName() in selected_ids:
-                        selected_ids[record.id] = 1
+                        selected_ids[record.getName()] = 1
                         FH_out.write(record)
             else:
                 for record in FH_in:
                     if record.getName() in selected_ids:
-                        selected_ids[record.id] = 1
+                        selected_ids[record.getName()] = 1
                     else:
                         FH_out.write(record)
 
