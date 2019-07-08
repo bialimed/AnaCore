@@ -69,7 +69,7 @@ if __name__ == "__main__":
     log.info("{} samples, {} variants and {} records.".format(len(samples), len(occur_by_id), nb_records))
 
     # Convert
-    log.info("Convert MAF.")
+    log.info("Convert to VCF.")
     with MAFIO(args.input_variants) as FH_in:
         with AnnotVCFIO(args.output_variants, "w") as FH_out:
             # Header
