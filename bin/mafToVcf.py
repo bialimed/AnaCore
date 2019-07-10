@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
                             position=int(record["Start_Position"]),
                             knownSNPId=(record["dbSNP_RS"] if record["dbSNP_RS"] != "novel" and record["dbSNP_RS"] != "" else None),  # Empty is used for variants do not present in dbSNP but present in other db
                             refAllele=record["Reference_Allele"],
-                            altAlleles=record["Tumor_Seq_Allele2"],
+                            altAlleles=[record["Tumor_Seq_Allele2"]],
                             qual=(float(record["Score"]) if record["Score"] != "" else None),
                             pFilter=record["FILTER"].split(","),
                             info={
