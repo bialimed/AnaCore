@@ -141,8 +141,9 @@ if __name__ == "__main__":
                         FH_out.write(variant)
     # Log process
     log.info(
-        "{:.2%} of variants have been removed ({}/{})".format(
+        "{:.2%} of variants have been {} ({}/{})".format(
             0 if nb_variants == 0 else (nb_variants - nb_kept) / nb_variants,
+            "tagged" if args.mode == "tag" else "removed",
             nb_variants - nb_kept,
             nb_variants
         )
