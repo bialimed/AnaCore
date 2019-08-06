@@ -86,7 +86,7 @@ if __name__ == "__main__":
                         for gene in annot[args.gene_field].split(","):
                             if gene in pathways_by_gene:
                                 pathways = pathways | pathways_by_gene[gene]
-                    annot["Pathways"] = "&".join([curr_pathway.replace(",", "%2C") for curr_pathway in sorted(pathways)])
+                    annot["Pathways"] = "&".join([curr_pathway.replace(",", "%2C").replace("&", "%26") for curr_pathway in sorted(pathways)])
                 FH_out.write(record)
 
     log.info("End of job")
