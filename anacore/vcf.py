@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.20.1'
+__version__ = '1.21.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -938,16 +938,17 @@ class VCFIO(AbstractFile):
             record.ref,
             ",".join(record.alt),
             ("." if record.qual is None else str(record.qual)),
-            ("." if record.filter is None else ";".join(record.filter))])
+            ("." if record.filter is None else ";".join(record.filter))
+        ])
         # Info
         if record.info is None or len(record.info) == 0 or len(self.info) == 0:
             line += "\t."
         else:
             info_fields = list()
             for key in sorted(record.info):
-                if self.info[key]["number"] is None or self.info[key]["number"] > 1:
+                if self.info[key]["number"] is None or self.info[key]["number"] > 1:  # The info may cointain a list of values
                     info_fields.append(key + "=" + ",".join(map(str, record.info[key])))
-                else:
+                else:  # The info contains a flag or a uniq value
                     if self.info[key]["type"] is None:  ############################################## Flag
                         info_fields.append(key)
                     else:
@@ -955,36 +956,40 @@ class VCFIO(AbstractFile):
             line += "\t" + ";".join(info_fields)
         # Format
         if len(self.format) != 0:  # the VCF contains a column format
-            # Format column
-            if record.format is None or record.format == ".":
+            if record.format is None or record.format == ".":  # Current record does not contain information on samples
+                # Format column
                 line += "\t."
-            else:
-                line += "\t" + ":".join(record.format)
-            # Samples columns
-            for spl in self.samples:
-                if record.samples is None or len(record.samples) == 0:
-                    line += "\t" + ":".join(["." for idx in range(len(record.format))])
-                elif record.format is None:  # Current record does not contain information for samples
+                # Samples columns
+                for spl in self.samples:
                     line += "\t."
+            else:  # Current record contains information on samples
+                # Format column
+                line += "\t" + ":".join(record.format)
+                # Samples columns
+                if record.samples is None or len(record.samples) == 0:
+                    for spl in self.samples:
+                        line += "\t" + ":".join(["." for elt in record.format])
                 else:
-                    spl_fields = list()
-                    for key in record.format:
-                        if key not in record.samples[spl]:
-                            spl_fields.append(".")
-                        else:
-                            if self.format[key]["number"] is None or self.format[key]["number"] > 1:
-                                values = list()
-                                for current_val in record.samples[spl][key]:
-                                    val = (str(current_val) if current_val is not None else ".")
-                                    values.append(val)
-                                spl_fields.append(",".join(values))
+                    for spl_name in self.samples:
+                        record_spl = record.samples[spl_name]
+                        spl_fields = list()
+                        for key in record.format:
+                            if key not in record_spl:
+                                spl_fields.append(".")
                             else:
-                                if self.format[key]["type"] is None:  ############################################## Flag
-                                    spl_fields.append(key)
-                                else:
-                                    val = (str(record.samples[spl][key]) if record.samples[spl][key] is not None else ".")
-                                    spl_fields.append(val)
-                    line += "\t" + ":".join(spl_fields)
+                                if self.format[key]["number"] is None or self.format[key]["number"] > 1:  # The info may cointain a list of values
+                                    values = list()
+                                    for current_val in record_spl[key]:
+                                        val = (str(current_val) if current_val is not None else ".")
+                                        values.append(val)
+                                    spl_fields.append(",".join(values))
+                                else:  # The info contains a flag or a uniq value
+                                    if self.format[key]["type"] is None:  ############################################## Flag
+                                        spl_fields.append(key)
+                                    else:
+                                        val = (str(record_spl[key]) if record_spl[key] is not None else ".")
+                                        spl_fields.append(val)
+                        line += "\t" + ":".join(spl_fields)
         return line
 
     def copyHeader(self, model):
