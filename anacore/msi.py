@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.0'
+__version__ = '1.7.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -892,3 +892,67 @@ class MSIReport:
         """
         with open(out_path, "w") as FH_out:
             json.dump(msi_samples, FH_out, sort_keys=True, default=toDict)
+
+
+def getNbSupporting(report, method="model", loci=None):
+    """
+    Return the number of samples by locus class.
+
+    :param in_report: List of MSISample.
+    :type in_report: list()
+    :param method: Evaluated method.
+    :type method: str
+    :param loci: List of evaluated loci.
+    :type loci: list
+    :return: The number of samples by locus class. Each item is dict with following keys: locus_name, locus_id, status and support.
+    :rtype: list
+    """
+    # Init loci from report if the argument is None
+    if loci is None:
+        loci = set()
+        for spl in report:
+            for locus_id in spl.loci:
+                loci.add(locus_id)
+    # Get count by status by locus
+    nb_by_locus = {}
+    for spl in report:
+        for locus_id in loci:
+            locus = spl.loci[locus_id]
+            if locus_id not in nb_by_locus:
+                nb_by_locus[locus_id] = {
+                    "locus_name": locus.name,
+                    "supp_by_status": {elt: 0 for elt in Status.authorizedValues()}
+                }
+            if method in locus.results:
+                locus_status = locus.results[method].status
+                nb_by_locus[locus_id]["supp_by_status"][locus_status] += 1
+    # To list
+    counts = []
+    for locus_id, locus_info in nb_by_locus.items():
+        for status, support in locus_info["supp_by_status"].items():
+            counts.append({
+                "locus_id": locus_id,
+                "locus_name": locus_info["locus_name"],
+                "status": status,
+                "support": support
+            })
+    return counts
+
+
+def getIncompleteModels(in_report, min_support_model=20):
+    """
+    Return the list of locus class model with an unsufficient number of supporting samples.
+
+    :param in_report: Path to a MSIReport file.
+    :type in_report: str
+    :param min_support_model: The minimum number of sample in locus class to validate the model.
+    :type min_support_model: int
+    :return: The list of locus class model with with an unsufficient number of supporting samples. Each item is dict with following keys: locus_name, locus_id, status and support.
+    :rtype: list
+    """
+    incomplete_models = []
+    report = MSIReport.parse(in_report)
+    for curr_model in getNbSupporting(report, method="model"):
+        if curr_model["status"] in [Status.stable, Status.unstable] and curr_model["support"] < min_support_model:
+            incomplete_models.append(curr_model)
+    return incomplete_models
