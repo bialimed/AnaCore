@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.1'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -114,8 +114,9 @@ class AnnotVCFIO(VCFIO):
         :return: The VCF line.
         :rtype: str
         """
-        std_record = deepcopy(record)
+        std_record = record
         if self.annot_field in record.info:
+            std_record = deepcopy(record)
             if record.info[self.annot_field] is None or len(record.info[self.annot_field]) == 0:  # ANN is empty
                 std_record.info.pop(self.annot_field, None)
             else:  # The variant has consequence(s)
@@ -132,7 +133,7 @@ class AnnotVCFIO(VCFIO):
         return super().recToVCFLine(std_record)
 
     def _writeHeader(self):
-        """Write VCF header"""
+        """Write VCF header."""
         # Manage declaration of ANN in header
         match = re.search("(Format: [^ ]+)", self.info[self.annot_field]["description"])
         old_titles = match.group(1)
