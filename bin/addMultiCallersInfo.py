@@ -87,7 +87,7 @@ if __name__ == "__main__":
                 FH_out.info["SRC"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Variant callers where the variant is identified"}
                 if args.min_AF is not None:
                     FH_out.filter[args.lowAF_tag] = "Variants with population AF <= {} in all variant callers".format(args.min_AF)
-                FH_out._writeHeader()
+                FH_out.writeHeader()
                 # Records
                 for record in FH_in:
                     variant_name = record.getName()

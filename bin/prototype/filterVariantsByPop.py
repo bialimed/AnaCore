@@ -109,7 +109,7 @@ if __name__ == "__main__":
                     args.others_number_valid_DP,
                     args.others_DP_threshold
                 )
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             nb_var = 0
             nb_valid = 0

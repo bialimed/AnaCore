@@ -43,15 +43,23 @@ from anacore.vcf import VCFIO, getAlleleRecord
 ########################################################################
 def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     """
-    @summary: Returns the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
-    @param chrom: [str] The variant region name.
-    @param pos: [int] The variant position.
-    @param ref: [str] The reference allele at the position.
-    @param alt: [str] The variant allele at the position.
-    @param aln_file: [str] The path to the alignment file (format: BAM). The AD and DP are retrieved from reads of this file. This file must be indexed.
-    @param selected_RG: [list] The ID of RG used in AD and DP. Default: all read groups.
-    @returns: [list] The first element is the AD, the second is the DP.
-    @warning: Reads ID must be unique in SAM. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
+    Return the allele depth (AD) and the depth (DP) for the specified variant. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
+
+    :param chrom: The variant region name.
+    :type chrom: str
+    :param pos: The variant position.
+    :type pos: int
+    :param ref: The reference allele at the position.
+    :type ref: str
+    :param alt: The variant allele at the position.
+    :type alt: str
+    :param aln_file: The path to the alignment file (format: BAM). The AD and DP are retrieved from reads of this file. This file must be indexed.
+    :type aln_file: str
+    :param selected_RG: The ID of RG used in AD and DP. Default: all read groups.
+    :type selected_RG: list
+    :returns: The first element is the AD, the second is the DP.
+    :rtype: list
+    :warning: Reads ID must be unique in SAM. These counts are expressed in number of reads: if the R1 and the R2 of a sequence has overlaps the variant, each is counted.
     """
     ref_start = pos
     ref_end = pos + len(ref.replace("-", "")) - 1
@@ -195,7 +203,7 @@ if __name__ == "__main__":
         FH_out.format["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths."}
         FH_out.format["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth."}
         FH_out.samples = [spl for spl in sorted(aln_by_samples)]
-        FH_out._writeHeader()
+        FH_out.writeHeader()
 
         # Records
         for allele_id in variants:

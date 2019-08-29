@@ -83,7 +83,7 @@ if __name__ == "__main__":
         with VCFIO(args.input_variants) as FH_in_vcf:
             # Header
             FH_out_vcf.copyHeader(FH_in_vcf)
-            FH_out_vcf._writeHeader()
+            FH_out_vcf.writeHeader()
             # Records
             for record in FH_in_vcf:
                 if record.ref == VCFRecord.getEmptyAlleleMarker() or any([alt == VCFRecord.getEmptyAlleleMarker() for alt in record.alt]):  # record is a standardized in/del

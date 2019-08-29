@@ -78,7 +78,7 @@ if __name__ == "__main__":
                         "description": ""
                     }
             FH_out.samples = [args.new_spl_name]
-            FH_out._writeHeader()
+            FH_out.writeHeader()
 
             # Records
             for record in FH_in:

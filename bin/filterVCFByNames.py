@@ -78,7 +78,7 @@ if __name__ == "__main__":
                     idx += 1
                 filter_title += str(idx)
             FH_out.filter[filter_title] = "{} variants by list of names".format(args.mode.capitalize())
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             if args.mode == "select":
                 for record in FH_in:

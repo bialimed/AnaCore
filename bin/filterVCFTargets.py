@@ -119,7 +119,7 @@ if __name__ == "__main__":
                 # Writes header
                 FH_out.copyHeader(FH_in)
                 FH_out.filter["OOT"] = 'The variant is out of targeted regions (' + args.input_targets + ').'
-                FH_out._writeHeader()
+                FH_out.writeHeader()
                 # Writes variants
                 for variant in FH_in:
                     nb_variants += 1

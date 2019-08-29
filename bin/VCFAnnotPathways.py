@@ -77,7 +77,7 @@ if __name__ == "__main__":
             # Header
             FH_out.copyHeader(FH_in)
             FH_out.ANN_titles.append("Pathways")
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 for annot in record.info[FH_in.annot_field]:

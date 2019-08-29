@@ -91,7 +91,7 @@ if __name__ == "__main__":
             # Header
             FH_out.copyHeader(FH_in)
             FH_out.filter[args.tag_name] = args.tag_description
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 for idx in range(len(record.alt)):

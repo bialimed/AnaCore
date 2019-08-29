@@ -60,7 +60,7 @@ if __name__ == "__main__":
         with VCFIO(args.input_variants) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 if filters.eval(record):

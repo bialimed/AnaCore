@@ -93,7 +93,7 @@ if __name__ == "__main__":
                         FH_out.info[tag] = new
                     else:
                         del(clean_info[tag])
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 for tag, value in record.info.items():

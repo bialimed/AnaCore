@@ -106,7 +106,7 @@ if __name__ == "__main__":
                 # Header
                 FH_out.copyHeader(FH_in)
                 FH_out.filter[args.tag_name] = "The variant is adjacent to an homopolymer (repeat size >= {}).".format(args.homopolym_length)
-                FH_out._writeHeader()
+                FH_out.writeHeader()
                 # Records
                 for alt_record in FH_in:
                     nb_variants += 1

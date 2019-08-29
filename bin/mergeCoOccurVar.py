@@ -247,6 +247,7 @@ def mergedRecord(first, second, ref_seq):
 
 class LoggerAction(argparse.Action):
     """Manages logger level parameters (The value "INFO" becomes logging.info and so on)."""
+
     def __call__(self, parser, namespace, values, option_string=None):
         log_level = None
         if values == "DEBUG":
@@ -313,7 +314,7 @@ if __name__ == "__main__":
                 FH_out.info["MCO_QUAL"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Qualities of the variants merged because their occur on same reads."}
                 FH_out.info["MCO_IR"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Co-occurancy rate between pairs of variants."}
                 FH_out.info["MCO_IC"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Co-occurancy count between pairs of variants."}
-                FH_out._writeHeader()
+                FH_out.writeHeader()
                 # Records
                 prev = None
                 for curr in FH_vcf:

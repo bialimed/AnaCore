@@ -467,7 +467,7 @@ if __name__ == "__main__":
         FH_out.format["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths."}
         FH_out.format["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth."}
         FH_out.samples = [spl for spl in sorted(aln_by_samples)]
-        FH_out._writeHeader()
+        FH_out.writeHeader()
 
         # Records
         for allele_id in variants:

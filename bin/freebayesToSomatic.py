@@ -75,7 +75,7 @@ if __name__ == "__main__":
                 "type_tag": "Integer",
                 "description": "Total depth"
             }
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 fields = ["DP", "AD", "AF"]

@@ -105,7 +105,7 @@ class TestFilterAnnotVCF(unittest.TestCase):
                 "ANN": {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Consequence annotations from Ensembl VEP. Format: Allele|id|is_filtered|FILTER."},
                 "is_filtered": {"type": int, "type_tag": "Integer", "number": 1, "number_tag": "1", "description": "The expected result."}
             }
-            FH_var._writeHeader()
+            FH_var.writeHeader()
             self.variants = [
                 VCFRecord(
                     "artificial_chr1", 10, "alt_00", "G", ["T"], None, ["PASS"],

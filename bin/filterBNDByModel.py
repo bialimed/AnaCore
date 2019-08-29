@@ -103,7 +103,7 @@ if __name__ == "__main__":
             # Header
             FH_out.copyHeader(FH_in)
             FH_out.filter["not_expr_model"] = "Filter fusions do not merge the upstream of a gene with the downstream of another gene with a strand corresponding of the reading strand of each partner."
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             mate_by_id = {}
             for bnd in FH_in:

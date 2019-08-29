@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.21.0'
+__version__ = '1.22.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -30,6 +30,8 @@ from anacore.abstractFile import AbstractFile
 
 
 class VCFRecord:
+    """Class to manage a variant record."""
+
     def __init__(self, region=None, position=None, knownSNPId=None, refAllele=None, altAlleles=None, qual=None, pFilter=None, info=None, pFormat=None, samples=None):
         self.chrom = region
         self.pos = position
@@ -45,6 +47,12 @@ class VCFRecord:
 
     @staticmethod
     def getEmptyAlleleMarker():
+        """
+        Return the marker internally used to represent an empty allele (reference allele in insertion and alternative allele in deletion).
+
+        :return: The marker.
+        :rtype: str
+        """
         return "-"
 
     def __setattr__(self, name, value):
@@ -236,7 +244,7 @@ class VCFRecord:
 
     def standardizeSingleAllele(self):
         """
-        The empty allele marker is replaced by the empty_marker and the alternative and reference allele are reduced to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.
+        Replace empty allele by the empty_marker and reduce the alternative and reference allele to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.
 
         :warnings: This method can only be used on record with only one alternative allele.
         """
@@ -1004,10 +1012,8 @@ class VCFIO(AbstractFile):
         self.info = deepcopy(model.info)
         self.samples = deepcopy(model.samples)
 
-    def _writeHeader(self):
-        """
-        @note: Draft
-        """
+    def writeHeader(self):
+        """Write VCF header."""
         self.file_handle.write("##fileformat=VCFv4.1\n")
         for tag in sorted(self.info):
             if '"' in self.info[tag]["description"]:

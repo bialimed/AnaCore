@@ -96,7 +96,7 @@ artificial_chr2	11	80	11	12""")
         # Create VCF
         with VCFIO(self.tmp_variants, "w") as FH_var:
             FH_var.info = {"target": {"type": str, "type_tag": "String", "number": 1, "number_tag": 1, "description": "The ID of the overlapped target."}}
-            FH_var._writeHeader()
+            FH_var.writeHeader()
             self.variants = [
                 # Substit single nt
                 VCFRecord("artificial_chr1", 14, "alt_00", "G", ["T"], None, None, {"target": None}),  # Before target ; first nt before target

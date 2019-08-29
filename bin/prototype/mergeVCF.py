@@ -198,7 +198,7 @@ if __name__ == "__main__":
             FH_out.info.pop("SAR")
             FH_out.info.pop("SAF")
         FH_out.samples = [spl for spl in sorted(aln_by_samples)]
-        FH_out._writeHeader()
+        FH_out.writeHeader()
 
         # Records
         for allele_id in variants:

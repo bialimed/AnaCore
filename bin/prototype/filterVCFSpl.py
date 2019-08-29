@@ -62,7 +62,7 @@ if __name__ == "__main__":
                 if tag in FH_out.info:
                     FH_out.info[tag]["number_tag"] = "A"
                     FH_out.info[tag]["number"] = None
-            FH_out._writeHeader()
+            FH_out.writeHeader()
 
             # Records
             for record in FH_in:

@@ -123,7 +123,7 @@ if __name__ == "__main__":
             FH_out.copyHeader(FH_in)
             FH_out.filter["popAF"] = "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'."
             FH_out.filter["CSQ"] = "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 VEP_alt = getVEPAlt(record.ref, record.alt)

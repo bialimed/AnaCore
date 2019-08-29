@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -132,7 +132,7 @@ class AnnotVCFIO(VCFIO):
                 std_record.info[self.annot_field] = csq_fields
         return super().recToVCFLine(std_record)
 
-    def _writeHeader(self):
+    def writeHeader(self):
         """Write VCF header."""
         # Manage declaration of ANN in header
         match = re.search("(Format: [^ ]+)", self.info[self.annot_field]["description"])
@@ -144,7 +144,7 @@ class AnnotVCFIO(VCFIO):
             "Format: " + "|".join(self.ANN_titles)
         )
         # Write header
-        super()._writeHeader()
+        super().writeHeader()
 
 
 class VEPVCFIO(AnnotVCFIO):

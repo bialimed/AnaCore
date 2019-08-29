@@ -111,7 +111,7 @@ if __name__ == "__main__":
         with AnnotVCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 filterRecordAnnot(record, kept_ID, args.without_version, FH_in.annot_field)

@@ -42,9 +42,12 @@ from anacore.sequenceIO import FastaIO
 ########################################################################
 def getSeqByChr(genome_path):
     """
-    @summary: Returns by chromosome name the sequence of this chromosome.
-    @param genome_path: [str] Path to the genome file (format: fasta).
-    @return: [dict] By chromosome name the sequence of this chromosome in uppercase.
+    Return by chromosome name the sequence of this chromosome.
+
+    :param genome_path: Path to the genome file (format: fasta).
+    :type genome_path: str
+    :return: By chromosome name the sequence of this chromosome in uppercase.
+    :rtype: dict
     """
     genome_by_chr = dict()
     FH_seq = FastaIO(genome_path)
@@ -53,16 +56,22 @@ def getSeqByChr(genome_path):
     FH_seq.close()
     return genome_by_chr
 
+
 def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard):
     """
-    @summary: Writes in a new file the standardized version of each variant. The standardization constists in three steps:
-        1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
-        2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
-        3- The allele is replaced by the most upstream allele that can have the same alternative sequence (example: a deletion in homopolymer is moved to first nucleotid of this homopolymer).
-    @param genome_path: [str] Path to the genome file (format: fasta).
-    @param in_variant_file: [str] Path to the variants file (format: VCF).
-    @param out_variant_file: [str] Path to the standardized variants file (format: VCF).
-    @param trace_unstandard: [bool] True if you want to keep the trace of the variant before standardization in INFO.
+    Write in a new file the standardized version of each variant. The standardization constists in three steps:
+      1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
+      2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
+      3- The allele is replaced by the most upstream allele that can have the same alternative sequence (example: a deletion in homopolymer is moved to first nucleotid of this homopolymer).
+
+    :param genome_path: Path to the genome file (format: fasta).
+    :type genome_path: str
+    :param in_variant_file: Path to the variants file (format: VCF).
+    :type in_variant_file: str
+    :param out_variant_file: Path to the standardized variants file (format: VCF).
+    :type out_variant_file: str
+    :param trace_unstandard: True if you want to keep the trace of the variant before standardization in INFO.
+    :type trace_unstandard: bool
     """
     genome_by_chr = getSeqByChr(genome_path)
     with VCFIO(out_variant_file, "w") as FH_out:
@@ -71,7 +80,7 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard)
             FH_out.copyHeader(FH_in)
             if trace_unstandard:
                 FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": 1, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 curr_chrom = genome_by_chr[record.chrom]
@@ -83,12 +92,15 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard)
 
 def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
     """
-    @summary: Writes in a new file the standardized version of each variant. The standardization constists in two steps:
-        1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
-        2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
-    @param in_variant_file: [str] Path to the variants file (format: VCF).
-    @param out_variant_file: [str] Path to the standardized variants file (format: VCF).
-    @param trace_unstandard: [bool] True if you want to keep the trace of the variant before standardization in INFO.
+    Write in a new file the standardized version of each variant. The standardization constists in two steps:
+      1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
+      2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
+    :param in_variant_file: Path to the variants file (format: VCF).
+    :type in_variant_file: str
+    :param out_variant_file: Path to the standardized variants file (format: VCF).
+    :type out_variant_file: str
+    :param trace_unstandard: True if you want to keep the trace of the variant before standardization in INFO.
+    :type trace_unstandard: bool
     """
     with VCFIO(out_variant_file, "w") as FH_out:
         with VCFIO(in_variant_file) as FH_in:
@@ -96,7 +108,7 @@ def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
             FH_out.copyHeader(FH_in)
             if trace_unstandard:
                 FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": 1, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 for alt_idx, alt in enumerate(record.alt):
@@ -105,7 +117,6 @@ def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
                         alt_record.info["UNSTD"] = "{}:{}={}/{}".format(alt_record.chrom, alt_record.pos, alt_record.ref, "/".join(alt_record.alt))
                     alt_record.standardizeSingleAllele()
                     FH_out.write(alt_record)
-
 
 
 ########################################################################

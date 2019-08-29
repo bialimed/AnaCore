@@ -79,7 +79,7 @@ if __name__ == "__main__":
         with AnnotVCFIO(args.input_variants, annot_field=args.annotation_field) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 if record_filters is None or record_filters.eval(record):

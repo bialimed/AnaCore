@@ -181,7 +181,7 @@ if __name__ == "__main__":
                 "number_tag": ".",
                 "description": "Consequence annotations. Format: " + "|".join(FH_out.ANN_titles)
             }
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 if record.info["SVTYPE"] == "BND":

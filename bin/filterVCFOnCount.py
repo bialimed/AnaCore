@@ -116,7 +116,7 @@ if __name__ == "__main__":
             FH_out.filter["libSpe"] = 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in one of the sample and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.'
             FH_out.filter["lowAF"] = 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in all the samples and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.'
             FH_out.filter["lowDP"] = 'The variant has a depth lower than ' + str(args.DP_threshold) + ' in all the samples.'
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 for alt_idx, alt in enumerate(record.alt):

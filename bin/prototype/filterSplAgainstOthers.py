@@ -67,7 +67,7 @@ if __name__ == "__main__":
             FH_out.info["SUP"] = { "type": int, "type_tag": "Integer", "number": 1, "number_tag": "1", "description": "The number of samples in group supporting variant (AD >= " + str(args.AD_threshold) + " and AF >= " + str(args.AF_threshold) + "." }
             FH_out.info["CONT"] = { "type": int, "type_tag": "Integer", "number": 1, "number_tag": "1", "description": "The number of samples out group supporting variant (AD >= " + str(args.AD_threshold) + " or AF >= " + str(args.AF_threshold) + "." }
             FH_out.filter["SPEC"] = "The variant is not specific at the group" + ("" if args.group_name is None else " " + args.group_name) + " (" + ", ".join(args.samples_names) + "). The variant is specific if: (1) the ratio number_of_support_samples_in_group/number_of_samples_in_group is >= " + str(args.nb_spl_ratio_threshold) + " ; (2) the number of support samples out of the group is <= " + str(args.max_contradict) + " ; (3) at least " + str(args.others_valid_DP) + " samples out of the group have DP >= " + str(args.others_DP_threshold) + "."
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 for idx in range(len(record.alt)):

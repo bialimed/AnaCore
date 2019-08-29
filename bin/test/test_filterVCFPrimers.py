@@ -81,7 +81,7 @@ class FilterVCFPrimers(unittest.TestCase):
         # Create VCF
         with VCFIO(self.tmp_variants, "w") as FH_var:
             FH_var.info = {"ZOI": {"type": str, "type_tag": "String", "number": 1, "number_tag": 1, "description": "If the variant can be in interest area."} }
-            FH_var._writeHeader()
+            FH_var.writeHeader()
             self.variants = [
                 VCFRecord("artificial_chr1", 6, "alt_0", "A", ["AA"], None, None, {"ZOI": "no"}),
                 VCFRecord("artificial_chr1", 8, "alt_1", "TT", ["T"], None, None, {"ZOI": "no"}),

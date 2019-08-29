@@ -127,7 +127,7 @@ artificial_chr6	102	557	102	103""")
         # Create VCF
         with VCFIO(self.tmp_variants, "w") as FH_var:
             FH_var.info = {"is_filtered": {"type": int, "type_tag": "Integer", "number": 1, "number_tag": 1, "description": "1 if the variant is adjacent to an homopolymer."}}
-            FH_var._writeHeader()
+            FH_var.writeHeader()
             self.variants = [
                 # Substit single nt
                 VCFRecord("artificial_chr1", 14, "alt_00", "G", ["T"], None, None, {"is_filtered": 0}),  # Without adjacent homopolymers

@@ -153,7 +153,7 @@ def writeHeader(FH_in, FH_out, args):
     FH_out.filter["CSQ"] = "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
     FH_out.filter["ANN.CSQ"] = "The annotation consequence does not correspond at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
     FH_out.filter["ANN.COLLOC"] = "The annotation corresponds to a collocated variant."
-    FH_out._writeHeader()
+    FH_out.writeHeader()
 
 
 def getVEPAlt(ref, alt):

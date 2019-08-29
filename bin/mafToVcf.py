@@ -88,7 +88,7 @@ if __name__ == "__main__":
                 "AF": {"type": float, "type_tag": "Float", "number": 1, "number_tag": "1", "description": "Allele frequency in tumor"},
                 "DP": {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth in tumor"}
             }
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 variants_id = getName(record)

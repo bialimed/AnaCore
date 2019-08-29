@@ -167,7 +167,7 @@ if __name__ == "__main__":
             # Header
             FH_out.copyHeader(FH_in)
             FH_out.filter["PRIM"] = 'The variant is located on an amplicon primer (amplicon desgin: ' + args.input_regions + ').'
-            FH_out._writeHeader()
+            FH_out.writeHeader()
             # Records
             for record in FH_in:
                 for alt_idx, alt in enumerate(record.alt):

@@ -57,7 +57,7 @@ if __name__ == "__main__":
         # Header
         setFusionCatcherVCFHeader(FH_out, args.annotation_field)
         FH_out.samples = [args.sample_name]
-        FH_out._writeHeader()
+        FH_out.writeHeader()
         # Records
         with FusionCatcherIO(args.input_fusions, "r", args.sample_name, args.annotation_field) as FH_in:
             for first_bnd, second_bnd in FH_in:

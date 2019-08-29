@@ -70,7 +70,7 @@ class FilterVCFByAnnot(unittest.TestCase):
                 "ANN": {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Consequence annotations from Ensembl VEP. Format: Allele|Consequence|Feature|gnomAD_AF|expected_filter."},
                 "expected_filter": {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "The expected filters."}
             }
-            FH_var._writeHeader()
+            FH_var.writeHeader()
             self.variants = [
                 VCFRecord(
                     "artificial_chr1", 14, "alt_00", "G", ["T"], None, None,
