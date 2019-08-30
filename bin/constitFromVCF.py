@@ -41,7 +41,7 @@ from anacore.vcf import VCFIO, getAlleleRecord
 ########################################################################
 def getBiggerCluster(freq_by_spl, max_freq_diff):
     """
-    Returns the bigger group of samples with similar frequencies.
+    Return the bigger group of samples with similar frequencies.
 
     :param freq_by_spl: The frequency by sample.
     :type freq_by_spl: dict

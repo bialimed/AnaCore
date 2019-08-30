@@ -32,7 +32,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO
+from anacore.vcf import VCFIO, HeaderInfoAttr, HeaderFilterAttr
 
 
 ########################################################################
@@ -84,9 +84,9 @@ if __name__ == "__main__":
             with VCFIO(curr_in) as FH_in:
                 # Header
                 FH_out.copyHeader(FH_in)
-                FH_out.info["SRC"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Variant callers where the variant is identified"}
+                FH_out.info["SRC"] = HeaderInfoAttr("SRC", "Variant callers where the variant is identified", type="String", number=".")
                 if args.min_AF is not None:
-                    FH_out.filter[args.lowAF_tag] = "Variants with population AF <= {} in all variant callers".format(args.min_AF)
+                    FH_out.filter[args.lowAF_tag] = HeaderFilterAttr(args.lowAF_tag, "Variants with population AF <= {} in all variant callers".format(args.min_AF))
                 FH_out.writeHeader()
                 # Records
                 for record in FH_in:

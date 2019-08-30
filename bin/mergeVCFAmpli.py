@@ -35,7 +35,7 @@ sys.path.append(LIB_DIR)
 
 from anacore.bed import getAreasByChr
 from anacore.region import Region
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderInfoAttr, HeaderFormatAttr
 
 
 ########################################################################
@@ -102,7 +102,7 @@ def getADPReads(chrom, pos, ref, alt, aln_file, selected_RG=None):
     """
     ref_start = pos
     ref_end = pos + len(ref.replace("-", "")) - 1
-    if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
+    if selected_RG is not None: selected_RG = {RG: 1 for RG in selected_RG}
     # Retrieve reads
     inspect_start = ref_start - 1
     inspect_end = ref_end
@@ -258,7 +258,7 @@ def getAlnAndQual(aln_file, chrom, inspect_start, inspect_end, selected_RG, max_
               provide inspected_start equal to the previous position of the insertion (example:
               position of A in A/ATC).
     """
-    if selected_RG is not None: selected_RG = {RG:1 for RG in selected_RG}
+    if selected_RG is not None: selected_RG = {RG: 1 for RG in selected_RG}
     reads = dict()
     quals = dict()
     with pysam.AlignmentFile(aln_file, "rb") as FH_sam:
@@ -460,12 +460,12 @@ if __name__ == "__main__":
     with VCFIO(args.output_variants, "w") as FH_out:
         # Header
         FH_out.copyHeader(FH_vcf)
-        FH_out.info["AF"] = {"type": float, "type_tag": "Float", "number": None, "number_tag": "A", "description": "The alleles frequencies for the group of samples."}
-        FH_out.info["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths for the group of samples."}
-        FH_out.info["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Combined depth across samples."}
-        FH_out.format["AF"] = {"type": float, "type_tag": "Float", "number": None, "number_tag": "A", "description": "The alleles frequencies."}
-        FH_out.format["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths."}
-        FH_out.format["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth."}
+        FH_out.info["AF"] = HeaderInfoAttr("AF", type="Float", number="A", description="The alleles frequencies for the group of samples.")
+        FH_out.info["AD"] = HeaderInfoAttr("AD", type="Integer", number="A", description="The alleles depths for the group of samples.")
+        FH_out.info["DP"] = HeaderInfoAttr("DP", type="Integer", number="1", description="Combined depth across samples.")
+        FH_out.format["AF"] = HeaderFormatAttr("AF", type="Float", number="A", description="The alleles frequencies.")
+        FH_out.format["AD"] = HeaderFormatAttr("AD", type="Integer", number="A", description="The alleles depths.")
+        FH_out.format["DP"] = HeaderFormatAttr("DP", type="Integer", number="1", description="Depth.")
         FH_out.samples = [spl for spl in sorted(aln_by_samples)]
         FH_out.writeHeader()
 

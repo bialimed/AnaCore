@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderInfoAttr
 from anacore.sequenceIO import FastaIO
 
 
@@ -79,7 +79,7 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard)
             # Header
             FH_out.copyHeader(FH_in)
             if trace_unstandard:
-                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": 1, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
+                FH_out.info["UNSTD"] = HeaderInfoAttr("UNSTD", type="String", number="1", description="The variant id (chromosome:position=reference/alternative) before standardization.")
             FH_out.writeHeader()
             # Records
             for record in FH_in:
@@ -90,11 +90,13 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard)
                         alt_record.info["UNSTD"] = "{}:{}={}/{}".format(alt_record.chrom, alt_record.pos, alt_record.ref, "/".join(alt_record.alt))
                     FH_out.write(alt_record.getMostUpstream(curr_chrom))
 
+
 def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
     """
     Write in a new file the standardized version of each variant. The standardization constists in two steps:
       1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
       2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
+
     :param in_variant_file: Path to the variants file (format: VCF).
     :type in_variant_file: str
     :param out_variant_file: Path to the standardized variants file (format: VCF).
@@ -107,7 +109,7 @@ def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
             # Header
             FH_out.copyHeader(FH_in)
             if trace_unstandard:
-                FH_out.info["UNSTD"] = {"type": str, "type_tag": "String", "number": 1, "number_tag": "1", "description": "The variant id (chromosome:position=reference/alternative) before standardization."}
+                FH_out.info["UNSTD"] = HeaderInfoAttr("UNSTD", type="String", number="1", description="The variant id (chromosome:position=reference/alternative) before standardization.")
             FH_out.writeHeader()
             # Records
             for record in FH_in:

@@ -30,7 +30,7 @@ import logging
 import argparse
 from statistics import mean
 from anacore.sequenceIO import FastaIO
-from anacore.vcf import VCFIO, VCFRecord
+from anacore.vcf import VCFIO, VCFRecord, HeaderInfoAttr
 
 
 ########################################################################
@@ -310,10 +310,10 @@ if __name__ == "__main__":
             with VCFIO(args.input_variants) as FH_vcf:
                 # Header
                 FH_out.copyHeader(FH_vcf)
-                FH_out.info["MCO_VAR"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Name of the variants merged because their occur on same reads."}
-                FH_out.info["MCO_QUAL"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Qualities of the variants merged because their occur on same reads."}
-                FH_out.info["MCO_IR"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Co-occurancy rate between pairs of variants."}
-                FH_out.info["MCO_IC"] = {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Co-occurancy count between pairs of variants."}
+                FH_out.info["MCO_VAR"] = HeaderInfoAttr("MCO_VAR", "Name of the variants merged because their occur on same reads.", type="String", number=".")
+                FH_out.info["MCO_QUAL"] = HeaderInfoAttr("MCO_QUAL", "Qualities of the variants merged because their occur on same reads.", type="String", number=".")
+                FH_out.info["MCO_IR"] = HeaderInfoAttr("MCO_IR", "Co-occurancy rate between pairs of variants.", type="String", number=".")
+                FH_out.info["MCO_IC"] = HeaderInfoAttr("MCO_IC", "Co-occurancy count between pairs of variants.", type="String", number=".")
                 FH_out.writeHeader()
                 # Records
                 prev = None

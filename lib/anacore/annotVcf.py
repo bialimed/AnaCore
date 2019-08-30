@@ -86,7 +86,7 @@ class AnnotVCFIO(VCFIO):
         super()._parseHeader()
         if self.annot_field in self.info:
             # Get ANN fields
-            match = re.search("Format: ([^ ]+)", self.info[self.annot_field]["description"])
+            match = re.search("Format: ([^ ]+)", self.info[self.annot_field].description)
             if match is None:
                 raise Exception("The {} description cannot be parsed in file {}.".format(self.annot_field, self.filepath))
             titles_str = match.group(1)
@@ -135,11 +135,11 @@ class AnnotVCFIO(VCFIO):
     def writeHeader(self):
         """Write VCF header."""
         # Manage declaration of ANN in header
-        match = re.search("(Format: [^ ]+)", self.info[self.annot_field]["description"])
+        match = re.search("(Format: [^ ]+)", self.info[self.annot_field].description)
         old_titles = match.group(1)
         if old_titles.endswith("."):
             old_titles = old_titles[:-1]
-        self.info[self.annot_field]["description"] = self.info[self.annot_field]["description"].replace(
+        self.info[self.annot_field].description = self.info[self.annot_field].description.replace(
             old_titles,
             "Format: " + "|".join(self.ANN_titles)
         )

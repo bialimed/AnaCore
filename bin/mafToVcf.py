@@ -27,7 +27,7 @@ import sys
 import logging
 import argparse
 from anacore.maf import MAFIO, getName
-from anacore.annotVcf import AnnotVCFIO, VCFRecord
+from anacore.annotVcf import AnnotVCFIO, VCFRecord, HeaderInfoAttr, HeaderFormatAttr
 
 
 ########################################################################
@@ -76,17 +76,17 @@ if __name__ == "__main__":
             FH_out.samples = samples
             FH_out.ANN_titles = ["Allele", "Consequence", "SYMBOL", "Feature_type", "Feature", "HGVSc", "HGVSp", "RefSeq"]
             FH_out.info = {
-                "SC": {"type": int, "type_tag": "Integer", "number": 1, "number_tag": "1", "description": "Mutated sample count"},
-                "AD": {"type": int, "type_tag": "Integer", "number": 1, "number_tag": "1", "description": "Allele depth in tumor"},
-                "AF": {"type": float, "type_tag": "Float", "number": 1, "number_tag": "1", "description": "Allele frequency in tumor"},
-                "ANN": {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Consequence annotations. Format: #TOREPLACE#"},
-                "DP": {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth in tumor"},
-                "VarType": {"type": str, "type_tag": "String", "number": 1, "description": "Type of mutation. TNP (tri-nucleotide polymorphism) is analogous to DNP (di-nucleotide polymorphism) but for three consecutive nucleotides. ONP (oligo-nucleotide polymorphism) is analogous to TNP but for consecutive runs of four or more (SNP, DNP, TNP, ONP, INS, DEL, or Consolidated)"}
+                "SC": HeaderInfoAttr("SC", "Mutated sample count", type="Integer", number="1"),
+                "AD": HeaderInfoAttr("AD", "Allele depth in tumor", type="Integer", number="1"),
+                "AF": HeaderInfoAttr("AF", "Allele frequency in tumor", type="Float", number="1"),
+                "ANN": HeaderInfoAttr("ANN", "Consequence annotations. Format: #TOREPLACE#", type="String", number="."),
+                "DP": HeaderInfoAttr("DP", "Depth in tumor", type="Integer", number="1"),
+                "VarType": HeaderInfoAttr("VarType", "Type of mutation. TNP (tri-nucleotide polymorphism) is analogous to DNP (di-nucleotide polymorphism) but for three consecutive nucleotides. ONP (oligo-nucleotide polymorphism) is analogous to TNP but for consecutive runs of four or more (SNP, DNP, TNP, ONP, INS, DEL, or Consolidated)", type="String", number="1")
             }
             FH_out.format = {
-                "AD": {"type": int, "type_tag": "Integer", "number": 1, "number_tag": "1", "description": "Allele depth in tumor"},
-                "AF": {"type": float, "type_tag": "Float", "number": 1, "number_tag": "1", "description": "Allele frequency in tumor"},
-                "DP": {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth in tumor"}
+                "AD": HeaderFormatAttr("AD", "Allele depth in tumor", type="Integer", number="1"),
+                "AF": HeaderFormatAttr("AF", "Allele frequency in tumor", type="Float", number="1"),
+                "DP": HeaderFormatAttr("DP", "Depth in tumor", type="Integer", number="1")
             }
             FH_out.writeHeader()
             # Records

@@ -60,8 +60,7 @@ if __name__ == "__main__":
                 del(FH_out.samples[idx])
             for tag in ["AD", "AF"]:
                 if tag in FH_out.info:
-                    FH_out.info[tag]["number_tag"] = "A"
-                    FH_out.info[tag]["number"] = None
+                    FH_out.info[tag].number = "A"
             FH_out.writeHeader()
 
             # Records

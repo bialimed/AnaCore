@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderFilterAttr
 from anacore.sv import HashedSVIO
 
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         with VCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.filter[args.tag_name] = args.tag_description
+            FH_out.filter[args.tag_name] = HeaderFilterAttr(args.tag_name, args.tag_description)
             FH_out.writeHeader()
             # Records
             for record in FH_in:

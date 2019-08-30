@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.annotVcf import AnnotVCFIO, getAlleleRecord
+from anacore.annotVcf import AnnotVCFIO, getAlleleRecord, HeaderFilterAttr
 
 
 ########################################################################
@@ -121,8 +121,8 @@ if __name__ == "__main__":
         with AnnotVCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.filter["popAF"] = "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'."
-            FH_out.filter["CSQ"] = "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
+            FH_out.filter["popAF"] = HeaderFilterAttr("popAF", "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'.")
+            FH_out.filter["CSQ"] = HeaderFilterAttr("CSQ", "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'.")
             FH_out.writeHeader()
             # Records
             for record in FH_in:

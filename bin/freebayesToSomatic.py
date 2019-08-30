@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO
+from anacore.vcf import VCFIO, HeaderInfoAttr
 
 
 ########################################################################
@@ -54,27 +54,24 @@ if __name__ == "__main__":
         with VCFIO(args.input_variants) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.info["AD"] = {
-                "number": None,
-                "number_tag": "A",
-                "type": int,
-                "type_tag": "Integer",
-                "description": "Allele depth"
-            }
-            FH_out.info["AF"] = {
-                "number": None,
-                "number_tag": "A",
-                "type": float,
-                "type_tag": "Float",
-                "description": "Allele frequency"
-            }
-            FH_out.info["DP"] = {
-                "number": 1,
-                "number_tag": "1",
-                "type": int,
-                "type_tag": "Integer",
-                "description": "Total depth"
-            }
+            FH_out.info["AD"] = HeaderInfoAttr(
+                id="AD",
+                number="A",
+                type="Integer",
+                description="Allele depth"
+            )
+            FH_out.info["AF"] = HeaderInfoAttr(
+                id="AF",
+                number="A",
+                type="Float",
+                description="Allele frequency"
+            )
+            FH_out.info["DP"] = HeaderInfoAttr(
+                id="AD",
+                number="1",
+                type="Integer",
+                description="Total depth"
+            )
             FH_out.writeHeader()
             # Records
             for record in FH_in:

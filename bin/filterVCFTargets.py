@@ -32,7 +32,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, VCFRecord
+from anacore.vcf import VCFIO, VCFRecord, HeaderFilterAttr
 from anacore.sequenceIO import IdxFastaIO
 from anacore.bed import getSortedAreasByChr
 
@@ -118,7 +118,7 @@ if __name__ == "__main__":
             with VCFIO(args.output_variants, "w") as FH_out:
                 # Writes header
                 FH_out.copyHeader(FH_in)
-                FH_out.filter["OOT"] = 'The variant is out of targeted regions (' + args.input_targets + ').'
+                FH_out.filter["OOT"] = HeaderFilterAttr('OOT', 'The variant is out of targeted regions (' + args.input_targets + ').')
                 FH_out.writeHeader()
                 # Writes variants
                 for variant in FH_in:

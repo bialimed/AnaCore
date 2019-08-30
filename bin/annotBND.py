@@ -35,7 +35,7 @@ sys.path.append(LIB_DIR)
 
 from anacore.gtf import loadModel
 from anacore.genomicRegion import Intron
-from anacore.annotVcf import AnnotVCFIO, VCFIO
+from anacore.annotVcf import AnnotVCFIO, VCFIO, HeaderInfoAttr
 from anacore.region import Region, splittedByRef
 
 
@@ -174,13 +174,12 @@ if __name__ == "__main__":
             # Header
             FH_out.copyHeader(FH_in)
             FH_out.ANN_titles = ["SYMBOL", "Gene", "Feature", "Feature_type", "STRAND", "EXON", "INTRON", "CDS_position", "Protein_position", "GENE_SHARD"]
-            FH_out.info[args.annotation_field] = {
-                "type": str,
-                "type_tag": "String",
-                "number": None,
-                "number_tag": ".",
-                "description": "Consequence annotations. Format: " + "|".join(FH_out.ANN_titles)
-            }
+            FH_out.info[args.annotation_field] = HeaderInfoAttr(
+                id=args.annotation_field,
+                type="String",
+                number=".",
+                description="Consequence annotations. Format: " + "|".join(FH_out.ANN_titles)
+            )
             FH_out.writeHeader()
             # Records
             for record in FH_in:

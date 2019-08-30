@@ -33,7 +33,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderInfoAttr, HeaderFormatAttr
 
 
 ########################################################################
@@ -196,12 +196,12 @@ if __name__ == "__main__":
     with VCFIO(args.output_variants, "w") as FH_out:
         # Header
         FH_out.copyHeader(FH_vcf)
-        FH_out.info["AF"] = {"type": float, "type_tag": "Float", "number": None, "number_tag": "A", "description": "The alleles frequencies for the group of samples."}
-        FH_out.info["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths for the group of samples."}
-        FH_out.info["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Combined depth across samples."}
-        FH_out.format["AF"] = {"type": float, "type_tag": "Float", "number": None, "number_tag": "A", "description": "The alleles frequencies."}
-        FH_out.format["AD"] = {"type": int, "type_tag": "Integer", "number": None, "number_tag": "A", "description": "The alleles depths."}
-        FH_out.format["DP"] = {"type": int, "type_tag": "Integer", "number": 1, "description": "Depth."}
+        FH_out.info["AF"] = HeaderInfoAttr("AF", type="Float", number="A", description="The alleles frequencies for the group of samples.")
+        FH_out.info["AD"] = HeaderInfoAttr("AD", type="Integer", number="A", description="The alleles depths for the group of samples.")
+        FH_out.info["DP"] = HeaderInfoAttr("DP", type="Integer", number="1", description="Combined depth across samples.")
+        FH_out.format["AF"] = HeaderFormatAttr("AF", type="Float", number="A", description="The alleles frequencies.")
+        FH_out.format["AD"] = HeaderFormatAttr("AD", type="Integer", number="A", description="The alleles depths.")
+        FH_out.format["DP"] = HeaderFormatAttr("DP", type="Integer", number="1", description="Depth.")
         FH_out.samples = [spl for spl in sorted(aln_by_samples)]
         FH_out.writeHeader()
 
@@ -237,4 +237,4 @@ if __name__ == "__main__":
             curr_var.info["AF"][0] = round(curr_var.info["AD"][0] / curr_var.info["DP"], args.AF_precision)
             # Write variant
             FH_out.write(curr_var)
-    logging.info("End of process")
+    logging.info("End of job")

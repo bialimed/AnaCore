@@ -35,7 +35,7 @@ APP_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 LIB_DIR = os.path.join(APP_DIR, "lib")
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFRecord
+from anacore.vcf import VCFRecord, HeaderInfoAttr
 from anacore.annotVcf import AnnotVCFIO
 
 BIN_DIR = os.path.dirname(CURRENT_DIR)
@@ -102,8 +102,8 @@ class TestFilterAnnotVCF(unittest.TestCase):
         with AnnotVCFIO(self.tmp_variants, "w") as FH_var:
             FH_var.ANN_titles = ["Allele", "id", "is_filtered", "FILTER"]
             FH_var.info = {
-                "ANN": {"type": str, "type_tag": "String", "number": None, "number_tag": ".", "description": "Consequence annotations from Ensembl VEP. Format: Allele|id|is_filtered|FILTER."},
-                "is_filtered": {"type": int, "type_tag": "Integer", "number": 1, "number_tag": "1", "description": "The expected result."}
+                "ANN": HeaderInfoAttr("ANN", "Consequence annotations from Ensembl VEP. Format: Allele|id|is_filtered|FILTER.", type="String", number="."),
+                "is_filtered": HeaderInfoAttr("is_filtered", "The expected result.", type="Integer", number="1")
             }
             FH_var.writeHeader()
             self.variants = [

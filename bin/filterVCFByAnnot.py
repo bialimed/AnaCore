@@ -32,7 +32,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.annotVcf import AnnotVCFIO, getAlleleRecord
+from anacore.annotVcf import AnnotVCFIO, getAlleleRecord, HeaderFilterAttr
 
 
 ########################################################################
@@ -146,13 +146,13 @@ def writeHeader(FH_in, FH_out, args):
     FH_out.copyHeader(FH_in)
     if "FILTER" not in FH_out.ANN_titles:
         FH_out.ANN_titles.append("FILTER")
-    FH_out.filter["popAF"] = "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'."
-    FH_out.filter["ANN.popAF"] = "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'."  # Is distinct of popAF because annotations can contain collocated variants
+    FH_out.filter["popAF"] = HeaderFilterAttr("popAF", "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'.")
+    FH_out.filter["ANN.popAF"] = HeaderFilterAttr("ANN.popAF", "The variant is present with more of " + str(args.polym_threshold * 100) + "% in one of the following population: '" + "' ".join(args.polym_populations) + "'.")  # Is distinct of popAF because annotations can contain collocated variants
     if args.input_selected_RNA is not None:
-        FH_out.filter["ANN.RNA"] = "The annotation RNA is not one of the selected ({}).".format(args.input_selected_RNA)
-    FH_out.filter["CSQ"] = "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
-    FH_out.filter["ANN.CSQ"] = "The annotation consequence does not correspond at one in the following list: '" + "' ".join(args.kept_consequences) + "'."
-    FH_out.filter["ANN.COLLOC"] = "The annotation corresponds to a collocated variant."
+        FH_out.filter["ANN.RNA"] = HeaderFilterAttr("ANN.RNA", "The annotation RNA is not one of the selected ({}).".format(args.input_selected_RNA))
+    FH_out.filter["CSQ"] = HeaderFilterAttr("CSQ", "The variant has no consequence corresponding at one in the following list: '" + "' ".join(args.kept_consequences) + "'.")
+    FH_out.filter["ANN.CSQ"] = HeaderFilterAttr("ANN.CSQ", "The annotation consequence does not correspond at one in the following list: '" + "' ".join(args.kept_consequences) + "'.")
+    FH_out.filter["ANN.COLLOC"] = HeaderFilterAttr("ANN.COLLOC", "The annotation corresponds to a collocated variant.")
     FH_out.writeHeader()
 
 

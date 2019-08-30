@@ -18,15 +18,177 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.22.0'
+__version__ = '1.23.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-
-import re
+import sys
 import warnings
 from copy import deepcopy
 from anacore.abstractFile import AbstractFile
+
+
+def getHeaderAttr(header_line):
+    """
+    Return an instance of HeaderAttr or a child corresponding to the VCF line.
+
+    :param header_line: Declaration line declaration of an VCF attributes from the VCF header.
+    :type header_line: str
+    :return: An instance of HeaderAttr or a child corresponding to the VCF line.
+    :rtype: HeaderAttr or a child
+    """
+    # Get content
+    header_category, header_content = header_line.split("=", 1)  # ##INFO=<ID=AD,Version="1">
+    header_category = header_category[2:]  # ##INFO to INFO
+    header_content = header_content[1:-1]  # <ID=AD,Version="1"> to ID=AD,Version="1"
+    # Get attributes
+    attributes = {}
+    stack = ""
+    opened_quote = False
+    for curr_char in header_content:
+        if curr_char == "," and not opened_quote:
+            key, val = stack.split("=", 1)
+            attributes[key.lower()] = val
+            stack = ""
+            opened_quote = False
+        elif curr_char == '"':
+            if stack[-1] == '\\':
+                stack = stack[:-1] + '"'  # replace '\"' by '"'
+            else:
+                if opened_quote:  # The quote is the second
+                    opened_quote = False
+                else:  # The quote is the first
+                    opened_quote = True
+        else:
+            stack += curr_char
+    if stack != "":
+        key, val = stack.split("=", 1)
+        attributes[key.lower()] = val
+    # Return
+    header_class_name = "Header{}Attr".format(header_category.capitalize())
+    header_class = getattr(sys.modules[__name__], header_class_name)
+    return header_class(**attributes)
+
+
+class HeaderAttr:
+    """Class to manage a dict attribute of the VCF header: one tag FORMAT, one tag INFO, one tag FILTER ..."""
+
+    def __init__(self, id, **kwargs):
+        super().__setattr__("datastore", kwargs)
+        self.id = id
+        self._required_attr = ["ID"]  # List of required attributes names.
+        self._without_quote = {"ID"}  # List of required attributes without quote in str value.
+
+    def keys(self):
+        """
+        Return the list of the attribute’s keys.
+
+        :return: list of the attribute’s keys.
+        :rtype: list
+        """
+        return self.datastore.keys()
+
+    def items(self):
+        """
+        Return the list of the dictionary’s items ((key, value) pairs).
+
+        :return: List of the dictionary’s items.
+        :rtype: list
+        """
+        return self.datastore.items()
+
+    def __delattr__(self, name):
+        if name[0] != "_":
+            del self.datastore[name]
+        else:
+            super().delattr(name)
+
+    def __setattr__(self, name, value):
+        if name[0] != "_":
+            self.datastore[name] = value
+        else:
+            super().__setattr__(name, value)
+
+    def __getattr__(self, name):
+        value = None
+        if name[0] != "_":
+            value = self.datastore[name]
+        else:
+            value = super().__getattr__(name)
+        return value
+
+    def __str__(self):
+        pre_attr = []
+        for key in self._required_attr:
+            if key in self._without_quote:
+                pre_attr.append('{}={}'.format(key, self.datastore[key.lower()]))
+            else:
+                pre_attr.append('{}="{}"'.format(key, self.datastore[key.lower()].replace('"', '\\"')))
+        extra_keys = {elt.lower() for elt in self.keys()} - {elt.lower() for elt in self._required_attr}
+        if len(extra_keys) != 0:
+            for key in sorted(extra_keys):
+                pre_attr.append('{}="{}"'.format(key.capitalize(), self.datastore[key].replace('"', '\\"')))
+        return "<{}>".format(",".join(pre_attr))
+
+    def __repr__(self):
+        return self.datastore.__repr__()
+
+
+class HeaderDescAttr(HeaderAttr):
+    """Class to manage VCF header attribute where ID and Description are required."""
+
+    def __init__(self, id, description, **kwargs):
+        super().__init__(id, **kwargs)
+        self.description = description
+        self._required_attr = ["ID", "Description"]
+
+    def __setattr__(self, name, value):
+        super().__setattr__(name, value)
+
+
+class HeaderTypedAttr(HeaderDescAttr):
+    """Class to manage VCF header attribute where ID, Description, Type and Number are required."""
+
+    def __init__(self, id, description, type="String", number="1", **kwargs):
+        super().__init__(id, description, **kwargs)
+        self.type = type
+        self.number = number
+        self._required_attr = ["ID", "Number", "Type", "Description"]  # List of required attributes names.
+        self._without_quote = {"ID", "Number", "Type"}  # List of required attributes without quote in str value.
+
+    def __setattr__(self, name, value):
+        if name == "type":
+            type_fct = {
+                "String": str,
+                "Integer": int,
+                "Float": float,
+                "Character": str,
+                "Flag": None
+            }
+            self._type = type_fct[value]
+        elif name == "number":
+            self._number = None
+            if value not in [".", "A", "R", "G"]:
+                self._number = int(value)
+        super().__setattr__(name, value)
+
+
+class HeaderFilterAttr(HeaderDescAttr):
+    """Class to manage a FILTER attribute of VCF header."""
+
+    pass
+
+
+class HeaderFormatAttr(HeaderTypedAttr):
+    """Class to manage a FORMAT attribute of VCF header."""
+
+    pass
+
+
+class HeaderInfoAttr(HeaderTypedAttr):
+    """Class to manage an INFO attribute of VCF header."""
+
+    pass
 
 
 class VCFRecord:
@@ -771,9 +933,10 @@ class VCFIO(AbstractFile):
         """
         AbstractFile.__init__(self, filepath, mode)
         self.samples = list()
-        self.filter = dict()  # { "q10":"Quality below 10" }
-        self.info = dict()  # { "IDREP":{"type": int, "number": 1, "description": "Number of times RU is repeated in indel allele."} }
-        self.format = dict()  # { "GT":{"type": str, "number": 1, "description": "Genotype"} }
+        self.filter = dict()  # {"q10": <HeaderFilterAttr>}
+        self.info = dict()  # {"IDREP": <HeaderInfoAttr>, "AD": <HeaderInfoAttr>}
+        self.format = dict()  # {"GT": <HeaderFormatAttr>, "AD": <HeaderFormatAttr>}
+        self.extra_header = list()  # ["##source=myImputationProgramV3.1", "##phasing=partial"]
         if mode == "r":
             self._parseHeader()
 
@@ -808,50 +971,19 @@ class VCFIO(AbstractFile):
 
     def _parseHeaderLine(self):
         """Parse one VCF header line to update info, filter, format or samples attributes."""
-        type_fct = {
-            "String": str,
-            "Integer": int,
-            "Float": float,
-            "Character": str,
-            "Flag": None
-        } ################################################################### Flag
         if self.current_line.startswith("##INFO"):
-            line = self.current_line[8:-1]  # Remove "##INFO=<" and ">"
-            match = re.search('ID=([^,]+)', line)
-            id = match.group(1)
-            match = re.search('Type=([^,]+)', line)
-            type = match.group(1)
-            match = re.search('Description="([^"]+)"', line)
-            description = match.group(1)
-            match = re.search('Number=([^,]+)', line)
-            number_tag = match.group(1)
-            number = None
-            if match.group(1) not in [".", "A", "R", "G"]:
-                number = int(match.group(1))
-            self.info[id] = {"type": type_fct[type], "type_tag": type, "number": number, "number_tag": number_tag, "description": description}
+            curr_attr = getHeaderAttr(self.current_line)
+            self.info[curr_attr.id] = curr_attr
         elif self.current_line.startswith("##FILTER"):
-            line = self.current_line[8:-1]  # Remove "##FILTER=<" and ">"
-            match = re.search('ID=([^,]+)', line)
-            id = match.group(1)
-            match = re.search('Description="([^"]+)"', line)
-            description = match.group(1)
-            self.filter[id] = description
+            curr_attr = getHeaderAttr(self.current_line)
+            self.filter[curr_attr.id] = curr_attr
         elif self.current_line.startswith("##FORMAT"):
-            line = self.current_line[10:-1]  # Remove "##FORMAT=<" and ">"
-            match = re.search('ID=([^,]+)', line)
-            id = match.group(1)
-            match = re.search('Type=([^,]+)', line)
-            type = match.group(1)
-            match = re.search('Description="([^"]+)"', line)
-            description = match.group(1)
-            match = re.search('Number=([^,]+)', line)
-            number_tag = match.group(1)
-            number = None
-            if match.group(1) not in [".", "A", "R", "G"]:
-                number = int(match.group(1))
-            self.format[id] = {"type": type_fct[type], "type_tag": type, "number": number, "number_tag": number_tag, "description": description}
+            curr_attr = getHeaderAttr(self.current_line)
+            self.format[curr_attr.id] = curr_attr
         elif self.current_line.startswith("#CHROM\tPOS"):
             self.samples = [spl.strip() for spl in self.current_line.split("\t")[9:]]
+        elif not self.current_line.startswith("##fileformat="):
+            self.extra_header.append(self.current_line)
 
     def _parseLine(self):
         """
@@ -877,12 +1009,12 @@ class VCFIO(AbstractFile):
                 for tag_and_value in fields[7].split(';'):
                     if "=" in tag_and_value:
                         tag, value = tag_and_value.split('=', 1)
-                        if self.info[tag]["number"] is None:
-                            info[tag] = [self.info[tag]["type"](list_elt) for list_elt in value.split(",")]
-                        elif self.info[tag]["number"] == 1:
-                            info[tag] = self.info[tag]["type"](value)
-                        elif self.info[tag]["number"] > 1:
-                            info[tag] = [self.info[tag]["type"](list_elt) for list_elt in value.split(",")]
+                        if self.info[tag]._number is None:
+                            info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
+                        elif self.info[tag]._number == 1:
+                            info[tag] = self.info[tag]._type(value)
+                        elif self.info[tag]._number > 1:
+                            info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
                         else:  # Number == 0
                             info[tag] = None
                     else:
@@ -901,18 +1033,18 @@ class VCFIO(AbstractFile):
                         for field_idx, field_data in enumerate(spl_cell.split(':')):
                             field_id = variation.format[field_idx]
                             field_format = self.format[field_id]
-                            if field_format["number"] is None or field_format["number"] > 1:
+                            if field_format._number is None or field_format._number > 1:
                                 spl_data[field_id] = list()
                                 for list_elt in field_data.split(","):
                                     if list_elt == ".":
                                         spl_data[field_id].append(None)
                                     else:
-                                        spl_data[field_id].append(self.format[field_id]["type"](list_elt))
-                            elif field_format["number"] == 1:
+                                        spl_data[field_id].append(self.format[field_id]._type(list_elt))
+                            elif field_format._number == 1:
                                 if field_data == ".":
                                     spl_data[field_id] = None
                                 else:
-                                    spl_data[field_id] = self.format[field_id]["type"](field_data)
+                                    spl_data[field_id] = self.format[field_id]._type(field_data)
                             else:  # Number == 0
                                 spl_data[field_id] = None
                     data_by_spl[self.samples[spl_idx]] = spl_data
@@ -954,10 +1086,10 @@ class VCFIO(AbstractFile):
         else:
             info_fields = list()
             for key in sorted(record.info):
-                if self.info[key]["number"] is None or self.info[key]["number"] > 1:  # The info may cointain a list of values
+                if self.info[key]._number is None or self.info[key]._number > 1:  # The info may cointain a list of values
                     info_fields.append(key + "=" + ",".join(map(str, record.info[key])))
                 else:  # The info contains a flag or a uniq value
-                    if self.info[key]["type"] is None:  ############################################## Flag
+                    if self.info[key]._type is None:  ############################################## Flag
                         info_fields.append(key)
                     else:
                         info_fields.append(key + "=" + str(record.info[key]))
@@ -985,14 +1117,14 @@ class VCFIO(AbstractFile):
                             if key not in record_spl:
                                 spl_fields.append(".")
                             else:
-                                if self.format[key]["number"] is None or self.format[key]["number"] > 1:  # The info may cointain a list of values
+                                if self.format[key]._number is None or self.format[key]._number > 1:  # The info may cointain a list of values
                                     values = list()
                                     for current_val in record_spl[key]:
                                         val = (str(current_val) if current_val is not None else ".")
                                         values.append(val)
                                     spl_fields.append(",".join(values))
                                 else:  # The info contains a flag or a uniq value
-                                    if self.format[key]["type"] is None:  ############################################## Flag
+                                    if self.format[key]._type is None:  ############################################## Flag
                                         spl_fields.append(key)
                                     else:
                                         val = (str(record_spl[key]) if record_spl[key] is not None else ".")
@@ -1011,47 +1143,19 @@ class VCFIO(AbstractFile):
         self.format = deepcopy(model.format)
         self.info = deepcopy(model.info)
         self.samples = deepcopy(model.samples)
+        self.extra_header = deepcopy(model.extra_header)
 
     def writeHeader(self):
         """Write VCF header."""
         self.file_handle.write("##fileformat=VCFv4.1\n")
+        for curr in self.extra_header:
+            self.file_handle.write(curr + "\n")
         for tag in sorted(self.info):
-            if '"' in self.info[tag]["description"]:
-                raise Exception("In a VCF the description in INFO header must not contains double quotes: {}".format(self.info[tag]["description"]))
-            number_tag = self.info[tag]["number"] if self.info[tag]["number"] is not None else "."
-            if "number_tag" in self.info[tag]:
-                number_tag = self.info[tag]["number_tag"]
-            self.file_handle.write(
-                '##INFO=<' +
-                'ID=' + tag + ',' +
-                'Number=' + str(number_tag) + ',' +
-                'Type=' + self.info[tag]["type_tag"] + ',' +
-                'Description="' + self.info[tag]["description"] + '"' +
-                '>\n'
-            )
+            self.file_handle.write('##INFO={}\n'.format(self.info[tag]))
         for tag in sorted(self.filter):
-            if '"' in self.filter[tag]:
-                raise Exception("In a VCF the description in FILTER header must not contains double quotes: {}".format(self.filter[tag]))
-            self.file_handle.write(
-                '##FILTER=<' +
-                'ID=' + tag + ',' +
-                'Description="' + self.filter[tag] + '"' +
-                '>\n'
-            )
+            self.file_handle.write('##FILTER={}\n'.format(self.filter[tag]))
         for tag in sorted(self.format):
-            if '"' in self.format[tag]["description"]:
-                raise Exception("In a VCF the description in INFO header must not contains double quotes: {}".format(self.format[tag]["description"]))
-            number_tag = self.format[tag]["number"] if self.format[tag]["number"] is not None else "."
-            if "number_tag" in self.format[tag]:
-                number_tag = self.format[tag]["number_tag"]
-            self.file_handle.write(
-                '##FORMAT=<' +
-                'ID=' + tag + ',' +
-                'Number=' + str(number_tag) + ',' +
-                'Type=' + self.format[tag]["type_tag"] + ',' +
-                'Description="' + self.format[tag]["description"] + '"' +
-                '>\n'
-            )
+            self.file_handle.write('##FORMAT={}\n'.format(self.format[tag]))
         last_header_line = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
         if len(self.format) != 0 or len(self.samples) != 0:
             last_header_line += "\tFORMAT\t" + "\t".join([spl for spl in self.samples])
@@ -1081,11 +1185,11 @@ def getAlleleRecord(FH_vcf, record, idx_alt):
     )
     # Info
     for key in sorted(record.info):
-        if FH_vcf.info[key]["number_tag"] == "A":
+        if FH_vcf.info[key].number == "A":
             new_record.info[key] = [record.info[key][idx_alt]]
-        elif FH_vcf.info[key]["number_tag"] == "R":
+        elif FH_vcf.info[key].number == "R":
             new_record.info[key] = [record.info[key][0], record.info[key][idx_alt + 1]]
-        elif FH_vcf.info[key]["number"] is None or FH_vcf.info[key]["number"] > 1:
+        elif FH_vcf.info[key]._number is None or FH_vcf.info[key]._number > 1:
             new_record.info[key] = [elt for elt in record.info[key]]
         else:
             new_record.info[key] = record.info[key]
@@ -1094,11 +1198,11 @@ def getAlleleRecord(FH_vcf, record, idx_alt):
         new_record.samples[spl] = dict()
         for key in record.format:
             if key in record.samples[spl]:
-                if FH_vcf.format[key]["number_tag"] == "A":
+                if FH_vcf.format[key].number == "A":
                     new_record.samples[spl][key] = [record.samples[spl][key][idx_alt]]
-                elif FH_vcf.format[key]["number_tag"] == "R":
+                elif FH_vcf.format[key].number == "R":
                     new_record.samples[spl][key] = [record.samples[spl][key][0], record.samples[spl][key][idx_alt + 1]]
-                elif FH_vcf.format[key]["number"] is None or FH_vcf.format[key]["number"] > 1:
+                elif FH_vcf.format[key]._number is None or FH_vcf.format[key]._number > 1:
                     new_record.samples[spl][key] = [elt for elt in record.samples[spl][key]]
                 else:
                     new_record.samples[spl][key] = record.samples[spl][key]

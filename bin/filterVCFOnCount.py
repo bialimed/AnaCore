@@ -32,7 +32,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderFilterAttr
 
 
 ########################################################################
@@ -42,10 +42,14 @@ from anacore.vcf import VCFIO, getAlleleRecord
 ########################################################################
 def getFilterTag(DP_is_ok, AF_is_ok):
     """
-    @summary: Returns the tag corresponding to the filters results (DP and AF) for the variant.
-    @param DP_is_ok: [list] Each element is a sample's result against the DP's filter. Example: [False, True] => sample 1 has an insufficient DP and sample 2 has a sufficient DP.
-    @param AF_is_ok: [list] Each element is a sample's result against the AF's filter. Example: [True, False] => sample 1 has a sufficient AF and sample 2 has an insufficient AF.
-    @return: [str] The filter tag.
+    Return the tag corresponding to the filters results (DP and AF) for the variant.
+
+    :param DP_is_ok: Each element is a sample's result against the DP's filter. Example: [False, True] => sample 1 has an insufficient DP and sample 2 has a sufficient DP.
+    :type DP_is_ok: list
+    :param AF_is_ok: Each element is a sample's result against the AF's filter. Example: [True, False] => sample 1 has a sufficient AF and sample 2 has an insufficient AF.
+    :type AF_is_ok: list
+    :return: The filter tag.
+    :rtype: str
     """
     tag = "PASS"
     if not DP_is_ok[0] and not DP_is_ok[1]:  # -- **
@@ -111,11 +115,11 @@ if __name__ == "__main__":
         with VCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.filter["incomplete"] = 'The variant has a sufficient frequency in one sample (AF>=' + str(args.AF_threshold * 100) + '% and DP>=' + str(args.DP_threshold) + ') but the depth in second sample it has an insufficiant depth (the AF cannot be take into account).'
-            FH_out.filter["invalid"] = 'The variant has an insufficient frequency in one sample (AF<' + str(args.AF_threshold * 100) + '% and DP>=' + str(args.DP_threshold) + ') but the depth in second sample it has an insufficiant depth (the AF cannot be take into account).'
-            FH_out.filter["libSpe"] = 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in one of the sample and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.'
-            FH_out.filter["lowAF"] = 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in all the samples and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.'
-            FH_out.filter["lowDP"] = 'The variant has a depth lower than ' + str(args.DP_threshold) + ' in all the samples.'
+            FH_out.filter["incomplete"] = HeaderFilterAttr("incomplete", 'The variant has a sufficient frequency in one sample (AF>=' + str(args.AF_threshold * 100) + '% and DP>=' + str(args.DP_threshold) + ') but the depth in second sample it has an insufficiant depth (the AF cannot be take into account).')
+            FH_out.filter["invalid"] = HeaderFilterAttr("invalid", 'The variant has an insufficient frequency in one sample (AF<' + str(args.AF_threshold * 100) + '% and DP>=' + str(args.DP_threshold) + ') but the depth in second sample it has an insufficiant depth (the AF cannot be take into account).')
+            FH_out.filter["libSpe"] = HeaderFilterAttr("libSpe", 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in one of the sample and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.')
+            FH_out.filter["lowAF"] = HeaderFilterAttr("lowAF", 'The variant has a frequency lower than ' + str(args.AF_threshold * 100) + '% in all the samples and depth is superior than ' + str(args.DP_threshold) + ' in all the samples.')
+            FH_out.filter["lowDP"] = HeaderFilterAttr("lowDP", 'The variant has a depth lower than ' + str(args.DP_threshold) + ' in all the samples.')
             FH_out.writeHeader()
             # Records
             for record in FH_in:

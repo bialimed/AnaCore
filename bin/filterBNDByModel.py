@@ -34,7 +34,7 @@ LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
 from anacore.region import Region
-from anacore.annotVcf import AnnotVCFIO, VCFIO
+from anacore.annotVcf import AnnotVCFIO, VCFIO, HeaderFilterAttr
 
 
 ########################################################################
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         with AnnotVCFIO(args.input_variants) as FH_in:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.filter["not_expr_model"] = "Filter fusions do not merge the upstream of a gene with the downstream of another gene with a strand corresponding of the reading strand of each partner."
+            FH_out.filter["not_expr_model"] = HeaderFilterAttr("not_expr_model", "Filter fusions do not merge the upstream of a gene with the downstream of another gene with a strand corresponding of the reading strand of each partner.")
             FH_out.writeHeader()
             # Records
             mate_by_id = {}

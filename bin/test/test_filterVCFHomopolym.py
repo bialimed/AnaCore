@@ -35,7 +35,7 @@ APP_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 LIB_DIR = os.path.join(APP_DIR, "lib")
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, VCFRecord
+from anacore.vcf import VCFIO, VCFRecord, HeaderInfoAttr
 from anacore.sequenceIO import FastaIO, Sequence
 
 BIN_DIR = os.path.dirname(CURRENT_DIR)
@@ -126,7 +126,7 @@ artificial_chr6	102	557	102	103""")
 
         # Create VCF
         with VCFIO(self.tmp_variants, "w") as FH_var:
-            FH_var.info = {"is_filtered": {"type": int, "type_tag": "Integer", "number": 1, "number_tag": 1, "description": "1 if the variant is adjacent to an homopolymer."}}
+            FH_var.info = {"is_filtered": HeaderInfoAttr("is_filtered", "1 if the variant is adjacent to an homopolymer.", type="Integer", number="1")}
             FH_var.writeHeader()
             self.variants = [
                 # Substit single nt

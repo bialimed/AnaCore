@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderFormatAttr
 
 
 ########################################################################
@@ -67,16 +67,14 @@ if __name__ == "__main__":
                 if field in FH_in.format:
                     FH_out.format[field] = FH_in.format[field]
                     if field != "DP":
-                        FH_out.format[field]["number"] = None
-                        FH_out.format[field]["number_tag"] = "A"
+                        FH_out.format[field].number = "A"
                 else:
-                    FH_out.format[field] = {
-                        "type": int if field != "AF" else float,
-                        "type_tag": "Integer" if field != "AF" else "Float",
-                        "number": None,
-                        "number_tag": "A",
-                        "description": ""
-                    }
+                    FH_out.format[field] = HeaderFormatAttr(
+                        id=field,
+                        type=("Integer" if field != "AF" else "Float"),
+                        number="A",
+                        description=""
+                    )
             FH_out.samples = [args.new_spl_name]
             FH_out.writeHeader()
 

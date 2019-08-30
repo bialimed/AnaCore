@@ -35,7 +35,7 @@ sys.path.append(LIB_DIR)
 from anacore.bed import BEDIO
 from anacore.sequenceIO import FastaIO
 from anacore.region import Region, RegionList
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderFilterAttr
 
 
 ########################################################################
@@ -166,7 +166,7 @@ if __name__ == "__main__":
         with VCFIO(args.output_variants, "w") as FH_out:
             # Header
             FH_out.copyHeader(FH_in)
-            FH_out.filter["PRIM"] = 'The variant is located on an amplicon primer (amplicon desgin: ' + args.input_regions + ').'
+            FH_out.filter["PRIM"] = HeaderFilterAttr('PRIM', 'The variant is located on an amplicon primer (amplicon desgin: ' + args.input_regions + ').')
             FH_out.writeHeader()
             # Records
             for record in FH_in:

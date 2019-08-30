@@ -31,7 +31,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO
+from anacore.vcf import VCFIO, HeaderInfoAttr
 
 
 ########################################################################
@@ -51,11 +51,11 @@ def getCleanningRules(variant_caller):
     info_by_caller = {
         "vardict": {
             "REFBIAS": {
-                "declaration": {"type": int, "type_tag": "Integer", "number_tag": "2", "number": 2, "description": "Reference depth by strand"},
+                "declaration": HeaderInfoAttr("REFBIAS", "Reference depth by strand", type="Integer", number="2"),
                 "process": lambda val: [int(elt) for elt in val.split(":")]
             },
             "VARBIAS": {
-                "declaration": {"type": int, "type_tag": "Integer", "number_tag": "2", "number": 2, "description": "Variant depth by strand"},
+                "declaration": HeaderInfoAttr("REFBIAS", "Variant depth by strand", type="Integer", number="2"),
                 "process": lambda val: [int(elt) for elt in val.split(":")]
             }
         }
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 if tag in clean_info:
                     prev = FH_out.info[tag]
                     new = clean_info[tag]["declaration"]
-                    if prev["type_tag"] != new["type_tag"] or prev["number_tag"] != new["number_tag"]:
+                    if prev.type != new.type or prev.number != new.number:
                         FH_out.info[tag] = new
                     else:
                         del(clean_info[tag])

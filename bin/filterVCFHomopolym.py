@@ -32,7 +32,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO, getAlleleRecord
+from anacore.vcf import VCFIO, getAlleleRecord, HeaderFilterAttr
 from anacore.sequenceIO import IdxFastaIO
 
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             with VCFIO(args.output_variants, "w") as FH_out:
                 # Header
                 FH_out.copyHeader(FH_in)
-                FH_out.filter[args.tag_name] = "The variant is adjacent to an homopolymer (repeat size >= {}).".format(args.homopolym_length)
+                FH_out.filter[args.tag_name] = HeaderFilterAttr(args.tag_name, "The variant is adjacent to an homopolymer (repeat size >= {}).".format(args.homopolym_length))
                 FH_out.writeHeader()
                 # Records
                 for alt_record in FH_in:

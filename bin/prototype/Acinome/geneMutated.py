@@ -59,13 +59,13 @@ for idx_vcf, current_vcf in enumerate(sys.argv[2:]):
                     if "AF" in allele_record.samples[spl_name]:
                         frequencies = allele_record.samples[spl_name]["AF"]
                         print(frequencies)
-                        if FH_vcf.info["AF"]["number_tag"] == "R":
+                        if FH_vcf.info["AF"].number == "R":
                             allele_freq = frequencies[1]
                         else:
                             allele_freq = frequencies[0]
                     elif "AD" in allele_record.samples[spl_name]:
                         frequencies = allele_record.samples[spl_name]["AD"]
-                        if FH_vcf.format["AD"]["number_tag"] == "R":
+                        if FH_vcf.format["AD"].number == "R":
                             allele_freq = frequencies[1]/float(spl_depth)
                         else:
                             allele_freq = frequencies[0]/float(spl_depth)

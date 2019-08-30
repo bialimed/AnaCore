@@ -32,7 +32,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
 sys.path.append(LIB_DIR)
 
-from anacore.vcf import VCFIO
+from anacore.vcf import VCFIO, HeaderFilterAttr
 
 
 ########################################################################
@@ -77,7 +77,7 @@ if __name__ == "__main__":
                 while filter_title + str(idx) in filter_title:
                     idx += 1
                 filter_title += str(idx)
-            FH_out.filter[filter_title] = "{} variants by list of names".format(args.mode.capitalize())
+            FH_out.filter[filter_title] = HeaderFilterAttr(filter_title, "{} variants by list of names".format(args.mode.capitalize()))
             FH_out.writeHeader()
             # Records
             if args.mode == "select":
