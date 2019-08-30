@@ -25,7 +25,7 @@ __status__ = 'prod'
 import re
 import uuid
 from anacore.sv import HashedSVIO
-from anacore.vcf import VCFRecord
+from anacore.vcf import VCFRecord, HeaderInfoAttr, HeaderFormatAttr
 
 
 def getCoordDictFromCoordStr(coord):
@@ -88,21 +88,21 @@ def setFusionCatcherVCFHeader(vcf_io, annotation_field="FCANN"):
     """
     # INFO
     vcf_io.info = {
-        "MATEID": {"type": str, "type_tag": "String", "number_tag": "A", "number": None, "description": "ID of mate breakend."},
-        "SVTYPE": {"type": str, "type_tag": "String", "number": 1, "description": "Type of structural variant."},
-        "SOURCES": {"type": str, "type_tag": "String", "number": None, "description": "Aligning method used for mapping the reads and finding the fusion genes. Here are two methods used which are: (i) BOWTIE = only Bowtie aligner is used for mapping the reads on the genome and exon-exon fusion junctions, (ii) BOWTIE+BLAT = Bowtie aligner is used for mapping reads on the genome and BLAT is used for mapping reads for finding the fusion junction, (iii) BOWTIE+STAR = Bowtie aligner is used for mapping reads on the genome and STAR is used for mapping reads for finding the fusion junction, (iv) BOWTIE+BOWTIE2 = Bowtie aligner is used for mapping reads on the genome and Bowtie2 is used for mapping reads for finding the fusion junction."},
-        "RNA_FIRST": {"type": None, "type_tag": "Flag", "number": 0, "description": "For RNA fusions, this break-end is 5' in the fusion transcript."},
-        "RNA_CONTIG": {"type": str, "type_tag": "String", "number": 1, "description": "The sequence of the breakend spanning contig."},
-        annotation_field: {"type": str, "type_tag": "String", "number": None, "description": "Consequence annotations. Format: SYMBOL|Gene|EXON|Effect."}
+        "MATEID": HeaderInfoAttr("MATEID", type="String", number="A", description="ID of mate breakend."),
+        "SVTYPE": HeaderInfoAttr("SVTYPE", type="String", number="1", description="Type of structural variant."),
+        "SOURCES": HeaderInfoAttr("SOURCES", type="String", number=".", description="Aligning method used for mapping the reads and finding the fusion genes. Here are two methods used which are: (i) BOWTIE = only Bowtie aligner is used for mapping the reads on the genome and exon-exon fusion junctions, (ii) BOWTIE+BLAT = Bowtie aligner is used for mapping reads on the genome and BLAT is used for mapping reads for finding the fusion junction, (iii) BOWTIE+STAR = Bowtie aligner is used for mapping reads on the genome and STAR is used for mapping reads for finding the fusion junction, (iv) BOWTIE+BOWTIE2 = Bowtie aligner is used for mapping reads on the genome and Bowtie2 is used for mapping reads for finding the fusion junction."),
+        "RNA_FIRST": HeaderInfoAttr("RNA_FIRST", type="Flag", number="0", description="For RNA fusions, this break-end is 5' in the fusion transcript."),
+        "RNA_CONTIG": HeaderInfoAttr("RNA_CONTIG", type="String", number="1", description="The sequence of the breakend spanning contig."),
+        annotation_field: HeaderInfoAttr(annotation_field, type="String", number=".", description="Consequence annotations. Format: SYMBOL|Gene|EXON|Effect.")
     }
     # ANN_titles
     vcf_io.ANN_titles = ["SYMBOL", "Gene", "EXON", "Effect"]
     # FORMAT
     vcf_io.format = {
-        "PR": {"type": int, "type_tag": "Integer", "number": 1, "description": "Count of pairs of reads supporting the fusion (including also the multimapping reads)."},
-        "SR": {"type": int, "type_tag": "Integer", "number": 1, "description": "Count of unique reads (i.e. unique mapping positions) mapping on the fusion junction. Shortly, here are counted all the reads which map on fusion junction minus the PCR duplicated reads."},
-        "CM": {"type": int, "type_tag": "Integer", "number": 1, "description": "Count of reads mapping simultaneously on both genes which form the fusion gene. This is an indication how similar are the DNA/RNA sequences of the genes forming the fusion gene (i.e. what is their homology because highly homologous genes tend to appear show as candidate fusion genes). In case of completely different sequences of the genes involved in forming a fusion gene then here it is expected to have the value zero."},
-        "LA": {"type": int, "type_tag": "Integer", "number": 1, "description": "Longest anchor (hangover) found among the unique reads mapping on the fusion junction."}
+        "PR": HeaderFormatAttr("PR", type="Integer", number="1", description="Count of pairs of reads supporting the fusion (including also the multimapping reads)."),
+        "SR": HeaderFormatAttr("SR", type="Integer", number="1", description="Count of unique reads (i.e. unique mapping positions) mapping on the fusion junction. Shortly, here are counted all the reads which map on fusion junction minus the PCR duplicated reads."),
+        "CM": HeaderFormatAttr("CM", type="Integer", number="1", description="Count of reads mapping simultaneously on both genes which form the fusion gene. This is an indication how similar are the DNA/RNA sequences of the genes forming the fusion gene (i.e. what is their homology because highly homologous genes tend to appear show as candidate fusion genes). In case of completely different sequences of the genes involved in forming a fusion gene then here it is expected to have the value zero."),
+        "LA": HeaderFormatAttr("LA", type="Integer", number="1", description="Longest anchor (hangover) found among the unique reads mapping on the fusion junction.")
     }
 
 
