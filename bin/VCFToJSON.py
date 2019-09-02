@@ -19,11 +19,12 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.1'
+__version__ = '2.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
+import re
 import sys
 import json
 import logging
@@ -213,6 +214,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--populations-prefixes', default=["exac", "gnomad", "1kg", "esp"], nargs='+', help='The prefixes used to determine database name in population allele frequency fields (example: "gnomAD" is used in gnomAD_AF, gnomAD_EUR_AF). [Default: %(default)s]')
     parser.add_argument('-a', '--annotation-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     parser.add_argument('-c', '--calling-source', default=None, help='Add source of the calling in support information.')
+    parser.add_argument('-m', '--merged-sources', action="store_true", help='Indicates that variants file come from a merge of several variants calling with anacore.mergeVCFCaller.py.')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file file containing variants and annotated with VEP v88+ (format: VCF).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
@@ -228,6 +230,12 @@ if __name__ == "__main__":
     # Convert VCF in python dict
     json_data = list()
     with AnnotVCFIO(args.input_variants, "r", args.annotation_field) as FH_vcf:
+        # Get sources IDs for VCF coming from merged sources
+        id_by_src = None
+        if args.merged_sources:
+            SRC_id_desc = FH_vcf.info["SRC"].description.split("Possible values: ")[1].replace("'", '"')
+            id_by_src = json.loads(SRC_id_desc)
+        # Records
         for record in FH_vcf:
             for idx_alt in range(len(record.alt)):
                 allele_record = getAlleleRecord(FH_vcf, record, idx_alt)
@@ -242,12 +250,30 @@ if __name__ == "__main__":
                     "assembly": (None if args.assembly_id is None else args.assembly_id)
                 }
                 # Support information
-                curr_json["supports"] = [{
-                    "filters": allele_record.filter,
-                    "quality": allele_record.qual,
-                    "libraries": [{"alt_depth": allele_record.getAltAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples],
-                    "source": args.calling_source
-                }]
+                if not args.merged_sources:  # The VCF contains results from one variants caller
+                    curr_json["supports"] = [{
+                        "filters": allele_record.filter,
+                        "quality": allele_record.qual,
+                        "libraries": [{"alt_depth": allele_record.getAltAD(library)[0], "depth": allele_record.getDP(library), "name": library} for library in FH_vcf.samples],
+                        "source": args.calling_source
+                    }]
+                else:  # The VCF contains results from several variants caller
+                    curr_json["supports"] = []
+                    for curr_idx, curr_src in enumerate(allele_record.info["SRC"]):
+                        src_id = id_by_src[curr_src]
+                        src_filters = []
+                        for curr_filter in allele_record.filter:
+                            if not re.match("^s\d+_", curr_filter):  # Filters common between all sources
+                                src_filters.append(curr_filter)
+                            elif curr_filter.startswith("{}_".format(src_id)):  # Filters coming from the current source
+                                src_filters.append(curr_filter.split("_", 1)[1])
+                        curr_json["supports"].append({
+                            "filters": src_filters,
+                            "quality": (allele_record.info["{}_VCQUAL".format(src_id)] if "{}_VCQUAL".format(src_id) in allele_record.info else None),
+                            "libraries": [{"alt_depth": library["ADSRC"][curr_idx], "depth": library["DPSRC"][curr_idx], "name": name} for name, library in allele_record.samples.items()],
+                            "source": curr_src
+                        })
+                # Annotations
                 if FH_vcf.annot_field in allele_record.info:
                     # Identical known variants, AF in populations and annotations
                     curr_json["xref"], curr_json["pop_AF"], curr_json["annot"], curr_json["collocated_annot"] = getAnnotSummary(

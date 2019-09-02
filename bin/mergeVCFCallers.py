@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -52,7 +52,11 @@ def getNewHeaderAttr(args):
     """
     final_filter = {}
     final_info = {
-        "SRC": HeaderInfoAttr("SRC", type="String", number=".", description="Variant callers where the variant is identified {}".format(args.calling_sources))
+        "SRC": HeaderInfoAttr(
+            "SRC", type="String", number=".", description="Variant callers where the variant is identified. Possible values: {}".format(
+                {name: "s" + str(idx) for idx, name in enumerate(args.calling_sources)}
+            )
+        )
     }
     final_format = {
         "AD": HeaderFormatAttr("AD", type="Integer", number="A", description="Allele Depth"),
@@ -93,7 +97,7 @@ def getNewHeaderAttr(args):
                     data.source = args.calling_sources[idx_in]
                     final_info[new_tag] = data
             qual_tag = "s{}_VCQUAL".format(idx_in)
-            final_info[qual_tag] = HeaderInfoAttr(qual_tag, type="Integer", number="1", description="The variant quality", source=args.calling_sources[idx_in])
+            final_info[qual_tag] = HeaderInfoAttr(qual_tag, type="Float", number="1", description="The variant quality", source=args.calling_sources[idx_in])
             # FORMAT
             for tag, data in FH_vcf.format.items():
                 new_tag = "s{}_{}".format(idx_in, tag)
@@ -264,9 +268,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Merge VCF coming from different calling on same sample(s). It is strongly recommended to apply this script after standardization and before annotation and filtering/tagging.')
     parser.add_argument('-a', '--annotations-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     parser.add_argument('-s', '--shared-filters', nargs='*', default=["lowAF", "OOT", "homoP", "popAF", "CSQ", "ANN.COLLOC", "ANN.RNA", "ANN.CSQ", "ANN.popAF"], help='Filters tags applying to the variant and independent of caller like filters on annotations. These filters are not renamed to add caller ID as suffix. [Default: %(default)s]')
-    parser.add_argument('-c', '--calling-sources', nargs='+', help='Name of the source in same order of --inputs-variants.')
+    parser.add_argument('-c', '--calling-sources', required=True, nargs='+', help='Name of the source in same order of --inputs-variants.')
     group_input = parser.add_argument_group('Inputs')  # Inputs
-    group_input.add_argument('-i', '--inputs-variants', nargs='+', help='Path to the variants files coming from different callers (format: VCF). The order determine the which AF and AD are retained: the first caller where it is found in this list.')
+    group_input.add_argument('-i', '--inputs-variants', required=True, nargs='+', help='Path to the variants files coming from different callers (format: VCF). The order determine the which AF and AD are retained: the first caller where it is found in this list.')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_input.add_argument('-o', '--output-variants', required=True, help='Path to the merged variants file (format: VCF).')
     args = parser.parse_args()
