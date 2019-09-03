@@ -19,12 +19,13 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import logging
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +56,7 @@ def getCleanningRules(variant_caller):
                 "process": lambda val: [int(elt) for elt in val.split(":")]
             },
             "VARBIAS": {
-                "declaration": HeaderInfoAttr("REFBIAS", "Variant depth by strand", type="Integer", number="2"),
+                "declaration": HeaderInfoAttr("VARBIAS", "Variant depth by strand", type="Integer", number="2"),
                 "process": lambda val: [int(elt) for elt in val.split(":")]
             }
         }
@@ -79,6 +80,12 @@ if __name__ == "__main__":
     group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
     args = parser.parse_args()
 
+    # Logger
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    log = logging.getLogger(os.path.basename(__file__))
+    log.setLevel(logging.INFO)
+    log.info("Command: " + " ".join(sys.argv))
+
     # Process
     clean_info = getCleanningRules(args.variant_caller)
     with VCFIO(args.output_variants, "w") as FH_out:
@@ -100,3 +107,4 @@ if __name__ == "__main__":
                     if tag in clean_info:
                         record.info[tag] = clean_info[tag]["process"](value)
                 FH_out.write(record)
+    log.info("End of job")
