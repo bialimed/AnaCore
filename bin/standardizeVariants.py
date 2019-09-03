@@ -19,12 +19,13 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.1'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import logging
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -138,8 +139,15 @@ if __name__ == "__main__":
     group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted file (format: VCF).')
     args = parser.parse_args()
 
+    # Logger
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    log = logging.getLogger(os.path.basename(__file__))
+    log.setLevel(logging.INFO)
+    log.info("Command: " + " ".join(sys.argv))
+
     # Process
     if args.input_genome is None:
         stdOnly(args.input_variants, args.output_variants, args.trace_unstandard)
     else:
         stdAndMove(args.input_genome, args.input_variants, args.output_variants, args.trace_unstandard)
+    log.info("End of job")
