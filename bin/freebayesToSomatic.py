@@ -19,12 +19,13 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import logging
 import argparse
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -49,6 +50,12 @@ if __name__ == "__main__":
     group_output.add_argument('-o', '--output-variants', required=True, help='The path to the outputted variants file (format: VCF).')
     args = parser.parse_args()
 
+    # Logger
+    logging.basicConfig(format='%(asctime)s -- [%(filename)s][pid:%(process)d][%(levelname)s] -- %(message)s')
+    log = logging.getLogger(os.path.basename(__file__))
+    log.setLevel(logging.INFO)
+    log.info("Command: " + " ".join(sys.argv))
+
     # Process
     with VCFIO(args.output_variants, "w") as FH_out:
         with VCFIO(args.input_variants) as FH_in:
@@ -67,7 +74,7 @@ if __name__ == "__main__":
                 description="Allele frequency"
             )
             FH_out.info["DP"] = HeaderInfoAttr(
-                id="AD",
+                id="DP",
                 number="1",
                 type="Integer",
                 description="Total depth"
@@ -83,3 +90,4 @@ if __name__ == "__main__":
                 record.info["AD"] = record.getPopAltAD()
                 record.info["AF"] = [round(elt, 5) for elt in record.getPopAltAF()]
                 FH_out.write(record)
+    log.info("End of job")
