@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -43,10 +43,14 @@ from anacore.sequenceIO import Sequence, FastqIO
 ########################################################################
 def writeReport(combined, R1, out_report):
     """
-    @summary: Writes report file for combination results.
-    @param combined: [str] Path to the file containing the combined reads (format: fastq).
-    @param R1: [str] Path to the initial R1 file (format: fastq).
-    @param out_report: [str] Path to the outputted report file (format: json).
+    Write report file for combination results.
+
+    :param combined: Path to the file containing the combined reads (format: fastq).
+    :type combined: str
+    :param R1: Path to the initial R1 file (format: fastq).
+    :type R1: str
+    :param out_report: Path to the outputted report file (format: json).
+    :type out_report: str
     """
     report = {
         "nb_combined_pairs": 0,
@@ -75,19 +79,25 @@ def writeReport(combined, R1, out_report):
 
 def nucRevCom(seq):
     """
-    @summary: Returns the reverse complementent of the sequence.
-    @param seq: [str] The sequence to process.
-    @return: [str] The reverse complement of the sequence.
+    Return the reverse complementent of the sequence.
+
+    :param seq: The sequence to process.
+    :type seq: str
+    :return: The reverse complement of the sequence.
+    :rtype: str
     """
-    complement_rules = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'N': 'N'}
+    complement_rules = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'N': 'N', 'a': 't', 't': 'a', 'g': 'c', 'c': 'g', 'n': 'n'}
     return "".join([complement_rules[base] for base in seq[::-1]])
 
 
 def seqRevCom(seq):
     """
-    @summary: Returns the reverse complement of the object sequence.
-    @param seq: [Sequence] The sequence to process.
-    @return: [Sequence] The reverse complement of the object sequence.
+    Return the reverse complement of the object sequence.
+
+    :param seq: [Sequence] The sequence to process.
+    :type seq: anacore.sequenceIO.Sequence
+    :return: The reverse complement of the object sequence.
+    :rtype: anacore.sequenceIO.Sequence
     """
     return Sequence(
         seq.id,
@@ -99,9 +109,12 @@ def seqRevCom(seq):
 
 def process(args, log):
     """
-    @summary: Combines R1 and R2 by their overlapping segment.
-    param args: [Namespace] The namespace extract from the script arguments.
-    param log: [Logger] The logger of the script.
+    Combine R1 and R2 by their overlapping segment.
+
+    :param args: The namespace extract from the script arguments.
+    :type args: Namespace
+    :param log: The logger of the script.
+    :type log: logging.Logger
     """
     nb_pairs = 0
     combined = 0
@@ -122,30 +135,17 @@ def process(args, log):
                     while is_valid and can_be_better:  # For each shift
                         nb_support = 0
                         nb_contradict = 0
-                        consensus_seq = ""
-                        consensus_qual = ""
                         curr_overlap_len = min(R1_len - R1_start, R2_len - R2_start)
                         if best_overlap is not None and R1_start != 0 and curr_overlap_len < best_overlap["nb_support"]:  # R1 is first and overlap become lower than nb support
                             can_be_better = False
                         else:
                             # Evaluate overlap
                             R1_ov_s = R1.string[R1_start:R1_start + curr_overlap_len]
-                            R1_ov_q = R1.quality[R1_start:R1_start + curr_overlap_len]
                             R2_ov_s = R2.string[R2_start:R2_start + curr_overlap_len]
-                            R2_ov_q = R2.quality[R2_start:R2_start + curr_overlap_len]
-                            for nt_R1, qual_R1, nt_R2, qual_R2 in zip(R1_ov_s, R1_ov_q, R2_ov_s, R2_ov_q):  # For each nt in overlap
+                            for nt_R1, nt_R2, in zip(R1_ov_s, R2_ov_s):  # For each nt in overlap
                                 if nt_R1 == nt_R2:
                                     nb_support += 1
-                                    consensus_seq += nt_R1
-                                    consensus_qual += max(qual_R1, qual_R2)
-                                else:
-                                    nb_contradict += 1
-                                    if qual_R1 >= qual_R2:
-                                        consensus_seq += nt_R1
-                                        consensus_qual += qual_R1
-                                    else:
-                                        consensus_seq += nt_R2
-                                        consensus_qual += qual_R2
+                            nb_contradict = curr_overlap_len - nb_support
                             # Filter consensus and select the best
                             if nb_support >= max_nb_support:
                                 if float(nb_contradict) / curr_overlap_len <= args.max_contradict_ratio:
@@ -153,8 +153,6 @@ def process(args, log):
                                     best_overlap = {
                                         "nb_support": nb_support,
                                         "nb_contradict": nb_contradict,
-                                        "consensus_seq": consensus_seq,
-                                        "consensus_qual": consensus_qual,
                                         "R1_start": R1_start,
                                         "R2_start": R2_start,
                                         "length": curr_overlap_len
@@ -183,8 +181,23 @@ def process(args, log):
                         # Write combined sequence
                         if valid_frag_len:
                             combined += 1
-                            complete_seq = best_overlap["consensus_seq"]
-                            complete_qual = best_overlap["consensus_qual"]
+                            complete_seq = ""
+                            complete_qual = ""
+                            R1_ov_s = R1.string[best_overlap["R1_start"]:best_overlap["R1_start"] + best_overlap["length"]]
+                            R1_ov_q = R1.quality[best_overlap["R1_start"]:best_overlap["R1_start"] + best_overlap["length"]]
+                            R2_ov_s = R2.string[best_overlap["R2_start"]:best_overlap["R2_start"] + best_overlap["length"]]
+                            R2_ov_q = R2.quality[best_overlap["R2_start"]:best_overlap["R2_start"] + best_overlap["length"]]
+                            for nt_R1, qual_R1, nt_R2, qual_R2 in zip(R1_ov_s, R1_ov_q, R2_ov_s, R2_ov_q):  # For each nt in overlap
+                                if nt_R1 == nt_R2:
+                                    complete_seq += nt_R1
+                                    complete_qual += max(qual_R1, qual_R2)
+                                else:
+                                    if qual_R1 >= qual_R2:
+                                        complete_seq += nt_R1
+                                        complete_qual += qual_R1
+                                    else:
+                                        complete_seq += nt_R2
+                                        complete_qual += qual_R2
                             if best_overlap["R1_start"] > 0:  # If R1 start before R2 (insert size > read length)
                                 complete_seq = R1.string[0:best_overlap["R1_start"]] + complete_seq + R2.string[best_overlap["length"]:]
                                 complete_qual = R1.quality[0:best_overlap["R1_start"]] + complete_qual + R2.quality[best_overlap["length"]:]
