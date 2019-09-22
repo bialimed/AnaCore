@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.23.0'
+__version__ = '1.24.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -26,6 +26,30 @@ import sys
 import warnings
 from copy import deepcopy
 from anacore.abstractFile import AbstractFile
+
+
+def decodeInfoValue(val):
+    """
+    Return text where special characters was unescaped. This method is used to read values coming from INFO or FORMAT.
+
+    :param val: A string value of an item of INFO or FORMAT.
+    :type val: str
+    :return: Text where special characters was unescaped (%3A, %3B, %3D, %2C).
+    :rtype: str
+    """
+    return val.replace("%3A", ":").replace("%3B", ";").replace("%3D", "=").replace("%2C", ",")
+
+
+def encodeInfoValue(val):
+    """
+    Return text where special characters was escaped. This method is used to write values coming from INFO or FORMAT.
+
+    :param val: A string value of an item of INFO or FORMAT.
+    :type val: str
+    :return: Text where special characters was escaped (:, ;, =, ,).
+    :rtype: str
+    """
+    return val.replace(":", "%3A").replace(";", "%3B").replace("=", "%3D").replace(",", "%2C")
 
 
 def getHeaderAttr(header_line):
@@ -1010,11 +1034,19 @@ class VCFIO(AbstractFile):
                     if "=" in tag_and_value:
                         tag, value = tag_and_value.split('=', 1)
                         if self.info[tag]._number is None:
-                            info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
+                            if self.info[tag].type == "String":
+                                info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
+                            else:
+                                info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
                         elif self.info[tag]._number == 1:
                             info[tag] = self.info[tag]._type(value)
+                            if self.info[tag].type == "String":
+                                info[tag] = decodeInfoValue(info[tag])
                         elif self.info[tag]._number > 1:
-                            info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
+                            if self.info[tag].type == "String":
+                                info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
+                            else:
+                                info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
                         else:  # Number == 0
                             info[tag] = None
                     else:
@@ -1039,12 +1071,17 @@ class VCFIO(AbstractFile):
                                     if list_elt == ".":
                                         spl_data[field_id].append(None)
                                     else:
-                                        spl_data[field_id].append(self.format[field_id]._type(list_elt))
+                                        value = self.format[field_id]._type(list_elt)
+                                        if self.format[field_id].type == "String":
+                                            value = decodeInfoValue(value)
+                                        spl_data[field_id].append(value)
                             elif field_format._number == 1:
                                 if field_data == ".":
                                     spl_data[field_id] = None
                                 else:
                                     spl_data[field_id] = self.format[field_id]._type(field_data)
+                                    if self.format[field_id].type == "String":
+                                        spl_data[field_id] = decodeInfoValue(spl_data[field_id])
                             else:  # Number == 0
                                 spl_data[field_id] = None
                     data_by_spl[self.samples[spl_idx]] = spl_data
@@ -1087,12 +1124,14 @@ class VCFIO(AbstractFile):
             info_fields = list()
             for key in sorted(record.info):
                 if self.info[key]._number is None or self.info[key]._number > 1:  # The info may cointain a list of values
-                    info_fields.append(key + "=" + ",".join(map(str, record.info[key])))
+                    values = [encodeInfoValue(str(elt)) for elt in record.info[key]]
+                    info_fields.append(key + "=" + ",".join(values))
                 else:  # The info contains a flag or a uniq value
                     if self.info[key]._type is None:  ############################################## Flag
                         info_fields.append(key)
                     else:
-                        info_fields.append(key + "=" + str(record.info[key]))
+                        value = encodeInfoValue(str(record.info[key]))
+                        info_fields.append(key + "=" + value)
             line += "\t" + ";".join(info_fields)
         # Format
         if len(self.format) != 0:  # the VCF contains a column format
@@ -1120,15 +1159,15 @@ class VCFIO(AbstractFile):
                                 if self.format[key]._number is None or self.format[key]._number > 1:  # The info may cointain a list of values
                                     values = list()
                                     for current_val in record_spl[key]:
-                                        val = (str(current_val) if current_val is not None else ".")
-                                        values.append(val)
+                                        value = (encodeInfoValue(str(current_val)) if current_val is not None else ".")
+                                        values.append(value)
                                     spl_fields.append(",".join(values))
                                 else:  # The info contains a flag or a uniq value
                                     if self.format[key]._type is None:  ############################################## Flag
                                         spl_fields.append(key)
                                     else:
-                                        val = (str(record_spl[key]) if record_spl[key] is not None else ".")
-                                        spl_fields.append(val)
+                                        value = (encodeInfoValue(str(record_spl[key])) if record_spl[key] is not None else ".")
+                                        spl_fields.append(value)
                         line += "\t" + ":".join(spl_fields)
         return line
 
