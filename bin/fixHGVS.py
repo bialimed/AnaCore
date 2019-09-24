@@ -152,7 +152,7 @@ if __name__ == "__main__":
     hgvs_mapper = getAssemblyMapper(args.assembly_version, args.input_UTA_config)
 
     # Write
-    nb_records = {"analysed": 0, "fixed_HGVSc": 0, "fixed_HGVSp": 0}
+    nb_records = {"analysed": 0, "fixed_HGVSg": 0, "fixed_HGVSc": 0, "fixed_HGVSp": 0}
     with AnnotVCFIO(args.output_variants, "w", annot_field=args.annotations_field) as FH_out:
         with AnnotVCFIO(args.input_variants, annot_field=args.annotations_field) as FH_in:
             # Header
@@ -188,14 +188,27 @@ if __name__ == "__main__":
                             "transcripts": {tr.split(".")[0]: tr for tr in hgvs_mapper.relevant_transcripts(hgvs_g)},
                         }
                 # Update annotations
+                is_fixed_HGVSg = False
                 is_fixed_HGVSc = False
                 is_fixed_HGVSp = False
                 for annot in record.info[args.annotations_field]:
+                    # Trace
                     old = {
+                        "g": "" if "HGVSg" not in annot or annot["HGVSg"] is None else annot["HGVSg"],
                         "c": "" if "HGVSc" not in annot or annot["HGVSc"] is None else annot["HGVSc"],
                         "p": "" if "HGVSp" not in annot or annot["HGVSp"] is None else annot["HGVSp"]
                     }
+                    # HGVSg
                     hgvs_g = hgvs_by_allele[annot["Allele"]]["HGVSg"]
+                    str_hgvs_g = str(hgvs_g)
+                    if not(old["g"] == "" and str_hgvs_g.endswith(":g.?")):
+                        if str_hgvs_g.endswith("="):
+                            match = re.search("\d([ATGCN]+>[ATGCN]+)$", old["c"])
+                            str_hgvs_g = str_hgvs_g.replace("=", match.group(1))
+                        annot["HGVSg"] = str_hgvs_g
+                        if old["g"] != str_hgvs_g:
+                            is_fixed_HGVSg = True
+                    # HGVSc or HGVSp
                     transcripts = hgvs_by_allele[annot["Allele"]]["transcripts"]
                     curr_tr_id = annot["Feature"].split(".")[0]
                     if curr_tr_id in transcripts:
@@ -221,12 +234,15 @@ if __name__ == "__main__":
                         except hgvs.exceptions.HGVSUsageError:
                             pass
                 # Trace results
+                if is_fixed_HGVSg:
+                    nb_records["fixed_HGVSg"] += 1
                 if is_fixed_HGVSc:
                     nb_records["fixed_HGVSc"] += 1
                 if is_fixed_HGVSp:
                     nb_records["fixed_HGVSp"] += 1
                 FH_out.write(record)
     # Log
+    log.info("{}/{} variants have been fixed on HGVSg.".format(nb_records["fixed_HGVSg"], nb_records["analysed"]))
     log.info("{}/{} variants have been fixed on one of their HGVSc.".format(nb_records["fixed_HGVSc"], nb_records["analysed"]))
     log.info("{}/{} variants have been fixed on one of their HGVSp.".format(nb_records["fixed_HGVSp"], nb_records["analysed"]))
     log.info("End of job")
