@@ -240,7 +240,6 @@ artificial_chr2	11	80	11	12""")
             for idx, alt in enumerate(record.alt):
                 id = "{} {}:{}={}/{}".format(record.id, record.chrom, record.pos, record.ref, alt)
                 expected[id] = sorted([ann for ann in record.info["expectedANN"] if ann.split("|")[2] == str(idx)])
-                print(id, expected[id])
         observed = {}
         with VCFIO(self.tmp_output) as FH_results:
             for record in FH_results:
