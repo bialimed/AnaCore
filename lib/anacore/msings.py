@@ -40,7 +40,7 @@ class MSINGSAnalysis(HashedSVIO):
         :param mode: Mode to open the file ('r', 'w', 'a').
         :type mode: str
         """
-        super().__init__(filepath, mode, "\t", "")
+        super().__init__(filepath, mode, "\t")
         if mode == "w":
             self.titles = ["Position", "Name", "Average_Depth", "Number_of_Peaks", "Standard_Deviation", "IndelLength:AlleleFraction:SupportingCalls"]
 

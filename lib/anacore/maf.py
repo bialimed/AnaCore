@@ -52,7 +52,7 @@ class MAFIO(HashedSVIO):
         :rtype: MAFIO
         """
         self.version = "2.4"
-        super().__init__(filepath, mode, "\t", "")
+        super().__init__(filepath, mode, "\t")
 
     def _parseHeader(self):
         """Parse MAF header to set the attribute titles."""

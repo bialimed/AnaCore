@@ -57,7 +57,7 @@ def getNbOccur(in_profile, nb_distinct_reads):
     """
     # Get profile
     profile = None
-    with HashedSVIO(in_profile) as FH_in:
+    with HashedSVIO(in_profile, title_starter="#") as FH_in:
         profile = FH_in.read()
     # Get nb_occurences
     nb_occurences = []

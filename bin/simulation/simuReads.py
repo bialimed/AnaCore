@@ -64,7 +64,7 @@ def revcom(seq):
 
 def getVariantsProfile(profile_path, min_allele_freq=None):
     profiles = list()
-    with HashedSVIO(profile_path) as FH_profile:
+    with HashedSVIO(profile_path, title_starter="#") as FH_profile:
         for record in FH_profile:  # Type   Occurence Freq_min    Freq_max    Lg_min  Lg_max
             curr_profile = {
                 "type": record["Type"],

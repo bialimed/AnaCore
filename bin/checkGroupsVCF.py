@@ -59,7 +59,7 @@ def getGroupsData(groups_path, samples, sample_tag="Sample", group_tag="Group", 
     without_group = {}
     processed_by_spl = {spl: False for spl in samples}
     # Parse groups information
-    with HashedSVIO(groups_path, separator=separator) as FH_gp:
+    with HashedSVIO(groups_path, separator=separator, title_starter="#") as FH_gp:
         for record in FH_gp:
             sample = record[sample_tag]
             group = record[group_tag]

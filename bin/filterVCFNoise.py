@@ -51,7 +51,7 @@ def getNoise(input_noise):
     """
     expected_titles = ["Chromosome", "Position", "Reference_allele", "Alternative_allele", "Noise_rate"]
     noise_by_var = dict()
-    with HashedSVIO(input_noise) as FH_noise:
+    with HashedSVIO(input_noise, title_starter="#") as FH_noise:
         if FH_noise.titles != expected_titles:
             raise Exception(
                 'The header line in "{}" does not correpond to "#{}".'.format(

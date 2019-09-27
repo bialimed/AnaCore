@@ -11,7 +11,7 @@ def getOverlap( CNV_list ):
 		change_start = False
 		change_end = False
 		if current_CNV["start"] >= prev_start and current_CNV["start"] <= prev_end:
-			change_start = True	
+			change_start = True
 		if current_CNV["end"] <= prev_end and current_CNV["end"] >= prev_start:
 			change_end = True
 		if not change_start and not change_end:
@@ -34,7 +34,7 @@ def getOverlap( CNV_list ):
 
 for in_path in sys.argv[1:]:
 	CNV = list()
-	FH_in = SVIO(in_path, "r", ",")
+	FH_in = SVIO(in_path, "r", ",", "#")
 	try:
 		for record in FH_in:
 			if record["CNV Id"].strip() != "":
