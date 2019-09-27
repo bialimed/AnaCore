@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -159,10 +159,10 @@ def process(args, log):
                                     }
                             # Next shift
                             if R1_start == 0:
-                                R2_start -= 1
-                                if R2_start == -1:
-                                    R2_start = 0
+                                if R2_start == 0:
                                     R1_start = 1
+                                else:
+                                    R2_start -= 1
                             else:
                                 R1_start += 1
                                 if R1_len - R1_start < args.min_overlap:
