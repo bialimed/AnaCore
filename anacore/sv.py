@@ -28,7 +28,7 @@ from anacore.abstractFile import isEmpty, AbstractFile
 class SVIO(AbstractFile):
     """Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a list."""
 
-    def __init__(self, filepath, mode="r", separator="\t", title_starter="#", has_title=True):
+    def __init__(self, filepath, mode="r", separator="\t", title_starter=None, has_title=True):
         """
         Build and return an instance of SVIO.
 
@@ -161,7 +161,7 @@ class SVIO(AbstractFile):
 class HashedSVIO(SVIO):
     """Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a dict indexed by columns titles."""
 
-    def __init__(self, filepath, mode="r", separator="\t", title_starter="#"):
+    def __init__(self, filepath, mode="r", separator="\t", title_starter=None):
         """
         Build and return an instance of HashedSVIO.
 

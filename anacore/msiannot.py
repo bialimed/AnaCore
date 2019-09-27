@@ -43,7 +43,7 @@ class MSIAnnot(HashedSVIO):
         :return: The new instance.
         :rtype: HashedSVIO
         """
-        super().__init__(filepath, mode, separator="\t", title_starter="")
+        super().__init__(filepath, mode, separator="\t")
         valid_titles = ["sample", "locus_position", "method_id", "key", "value", "type"]
         if mode == "w":
             self.titles = valid_titles

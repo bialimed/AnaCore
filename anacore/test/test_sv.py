@@ -142,7 +142,7 @@ class TestSVIO(unittest.TestCase):
                 self.assertEqual(self.data["rows"][record_idx], readed_records)
 
     def testIterTSV(self):
-        with SVIO(self.tmp_in_tsv) as FH_in:
+        with SVIO(self.tmp_in_tsv, title_starter="#") as FH_in:
             # Header
             self.assertEqual(FH_in.titles, self.data["titles"])
             # Records
@@ -151,7 +151,7 @@ class TestSVIO(unittest.TestCase):
 
     def testWriteDSV(self):
         # Write file
-        with SVIO(self.tmp_out_dsv, "w", separator=".") as FH_out:
+        with SVIO(self.tmp_out_dsv, "w", separator=".", title_starter="#") as FH_out:
             FH_out.titles = self.data["titles"]
             for row in self.data["rows"]:
                 FH_out.write(row)
@@ -168,7 +168,7 @@ class TestSVIO(unittest.TestCase):
     def testAppendDSV(self):
         split_limit = 3  # Numbers of row in first write
         # 1st write step
-        with SVIO(self.tmp_out_dsv, "a", separator=".") as FH_out:
+        with SVIO(self.tmp_out_dsv, "a", separator=".", title_starter="#") as FH_out:
             FH_out.titles = self.data["titles"]
             for row in self.data["rows"][:split_limit]:
                 FH_out.write(row)
@@ -185,7 +185,7 @@ class TestSVIO(unittest.TestCase):
                 self.assertEqual(expected_row, readed_row)
             self.assertEqual(split_limit, nb_rows)
         # 2nd write step
-        with SVIO(self.tmp_out_dsv, "a", separator=".") as FH_out:
+        with SVIO(self.tmp_out_dsv, "a", separator=".", title_starter="#") as FH_out:
             self.assertEqual(self.data["titles"], FH_out.titles)  # Assert titles retrieval
             for row in self.data["rows"][split_limit:]:
                 FH_out.write(row)
@@ -204,7 +204,7 @@ class TestSVIO(unittest.TestCase):
 
     def testAppendEmptyDSV(self):
         # Write file
-        with SVIO(self.tmp_out_dsv, "a", separator=".") as FH_out:
+        with SVIO(self.tmp_out_dsv, "a", separator=".", title_starter="#") as FH_out:
             FH_out.titles = self.data["titles"]
             for row in self.data["rows"]:
                 FH_out.write(row)
@@ -223,7 +223,7 @@ class TestSVIO(unittest.TestCase):
         with gzip.open(self.tmp_out_dsv_gz, "wt") as FH_out:
             pass
         # Write file
-        with SVIO(self.tmp_out_dsv_gz, "a", separator=".") as FH_out:
+        with SVIO(self.tmp_out_dsv_gz, "a", separator=".", title_starter="#") as FH_out:
             FH_out.titles = self.data["titles"]
             for row in self.data["rows"]:
                 FH_out.write(row)
@@ -243,7 +243,7 @@ class TestSVIO(unittest.TestCase):
     def testAppendCompressedDSV(self):
         split_limit = 3  # Numbers of row in first write
         # 1st write step
-        with SVIO(self.tmp_out_dsv_gz, "a", separator=".") as FH_out:
+        with SVIO(self.tmp_out_dsv_gz, "a", separator=".", title_starter="#") as FH_out:
             FH_out.titles = self.data["titles"]
             for row in self.data["rows"][:split_limit]:
                 FH_out.write(row)
@@ -260,7 +260,7 @@ class TestSVIO(unittest.TestCase):
                 self.assertEqual(expected_row, readed_row)
         self.assertEqual(split_limit, nb_rows)
         # 2st write step
-        with SVIO(self.tmp_out_dsv_gz, "a", separator=".") as FH_out:
+        with SVIO(self.tmp_out_dsv_gz, "a", separator=".", title_starter="#") as FH_out:
             self.assertEqual(self.data["titles"], FH_out.titles)  # Assert titles retrieval
             for row in self.data["rows"][split_limit:]:
                 FH_out.write(row)

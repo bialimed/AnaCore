@@ -124,7 +124,7 @@ class FusionCatcherIO(HashedSVIO):
         :return: The new instance.
         :rtype: FusionCatcherIO
         """
-        super().__init__(filepath, mode, "\t", "")
+        super().__init__(filepath, mode, "\t")
         self.annot_field = annot_field
         self.sample_name = sample_name
         if self.titles is None:
