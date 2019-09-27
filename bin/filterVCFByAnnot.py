@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -156,52 +156,11 @@ def writeHeader(FH_in, FH_out, args):
     FH_out.writeHeader()
 
 
-def getVEPAlt(ref, alt):
-    """
-    Return the alternative allele in same format as annotation allele in VEP.
-
-    :param ref: The reference allele.
-    :type ref: str
-    :param alt: The alternative allele.
-    :type alt: str
-    :return: The alternative allele in same format as annotation allele in VEP.
-    :rtype: str
-    """
-    alleles = [ref] + alt
-    # Replace empty marker by empty string
-    for idx, cur_allele in enumerate(alleles):
-        if cur_allele == "-":
-            alleles[idx] = ""
-    # Select shorter allele
-    shorter_allele = alleles[0]
-    for current_alt in alleles[1:]:
-        if len(current_alt) < len(shorter_allele):
-            shorter_allele = current_alt
-    # Trim alleles
-    trim = True
-    while len(shorter_allele) != 0 and shorter_allele != "" and trim:
-        for cur_allele in alleles:
-            if len(cur_allele) == 0:
-                trim = False
-            elif cur_allele[0] != shorter_allele[0]:
-                trim = False
-        if trim:
-            shorter_allele = shorter_allele[1:]
-            for idx, cur_allele in enumerate(alleles):
-                alleles[idx] = cur_allele[1:]
-    # Replace empty by empty_marker
-    for idx, cur_allele in enumerate(alleles):
-        if cur_allele == "":
-            alleles[idx] = "-"
-    return alleles[1:]
-
-
 ########################################################################
 #
 # MAIN
 #
 ########################################################################
-# format see http://www.ensembl.org/info/docs/tools/vep/vep_formats.html#json
 if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Filters variants and their annotations on annotations. In "remove" mode the annotations are deleted if they not fit criteria and the variant is removed if none of his annotations fit criterias.')
@@ -215,7 +174,7 @@ if __name__ == "__main__":
     group_filter.add_argument('-r', '--input-selected-RNA', help='The path to the file describing the RNA kept for each gene (format: TSV). Except the lines starting with a sharp each line has the following format: <GENE>\t<RNA_ID>.')
     group_filter.add_argument('-w', '--rna-without-version', action='store_true', help='With this option the version number of the reference RNA is not used in filter.')
     group_input = parser.add_argument_group('Inputs')  # Inputs
-    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file containing variants annotated with VEP v88+ (format: VCF).')
+    group_input.add_argument('-i', '--input-variants', required=True, help='The path to the file containing annotated variants (format: VCF). CAUTION: The annotations produced by VEP must be corrected to be coherent between ALT and INFO.annotation.Allele (by default VEP normalizes INFO.annotation.Allele but not ALT).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-o', '--output-variants', required=True, help='The path to the filtered file (format: VCF).')
     args = parser.parse_args()
@@ -236,10 +195,8 @@ if __name__ == "__main__":
             writeHeader(FH_in, FH_out, args)
             # Records
             for record in FH_in:
-                VEP_alt = getVEPAlt(record.ref, record.alt)
                 for alt_idx, alt in enumerate(record.alt):
                     alt_record = getAlleleRecord(FH_in, record, alt_idx)
-                    alt_record.standardizeSingleAllele()
                     # Evaluates annotations
                     annot_pass = False
                     record_is_filtered_on_polym = False
@@ -251,7 +208,7 @@ if __name__ == "__main__":
                                 old_filters = set(annot["FILTER"].split(","))
                         annot["FILTER"] = set()
                         # Not same variant
-                        tagCollocated(annot, VEP_alt[alt_idx])
+                        tagCollocated(annot, alt)
                         # Polymorphism
                         tagAnnotPolymophism(annot, args.polym_populations, args.polym_threshold)
                         if "ANN.COLLOC" not in annot["FILTER"] and "ANN.popAF" in annot["FILTER"]:  # The variant is not a collocated and is polymorphism

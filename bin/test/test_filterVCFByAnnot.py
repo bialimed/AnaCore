@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -192,6 +192,50 @@ class FilterVCFByAnnot(unittest.TestCase):
                             {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"}
                         ],
                         "expected_filter": ["CSQ", "popAF"],
+                    }
+                ),
+                VCFRecord(
+                    "artificial_chr1", 14, "alt_14", "G", ["GT"], None, None,
+                    {
+                        "ANN": [
+                            {"Allele": "GT", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.popAF"},
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"},
+                            {"Allele": "T", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"}
+                        ],
+                        "expected_filter": ["popAF"],
+                    }
+                ),
+                VCFRecord(
+                    "artificial_chr1", 15, "alt_15", "-", ["T"], None, None,
+                    {
+                        "ANN": [
+                            {"Allele": "GT", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"},
+                            {"Allele": "T", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.popAF"},
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"}
+                        ],
+                        "expected_filter": ["popAF"],
+                    }
+                ),
+                VCFRecord(
+                    "artificial_chr1", 14, "alt_15", "G", ["-"], None, None,
+                    {
+                        "ANN": [
+                            {"Allele": "-", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.popAF"},
+                            {"Allele": "G", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"},
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"}
+                        ],
+                        "expected_filter": ["popAF"],
+                    }
+                ),
+                VCFRecord(
+                    "artificial_chr1", 14, "alt_16", "GG", ["G"], None, None,
+                    {
+                        "ANN": [
+                            {"Allele": "-", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"},
+                            {"Allele": "G", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.01&0.01", "gnomAD_AF": 0.001, "expected_filter": "ANN.popAF"},
+                            {"Allele": "C", "Consequence": "missense_variant", "Feature": "ENST_selected1", "EUR_AF": "0.05&0.05", "gnomAD_AF": 0.001, "expected_filter": "ANN.COLLOC&ANN.popAF"}
+                        ],
+                        "expected_filter": ["popAF"],
                     }
                 )
             ]
