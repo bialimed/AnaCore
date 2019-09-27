@@ -28,7 +28,7 @@ Vue.component('pos-ctrl-card-content', {
             return new ThresholdAlert(
                 {1:"warning", 0:"good"},
                 "",
-                "variants have been lost",
+                "lost variants",
                 "/" + this.nb_expected_variants
             )
         },
@@ -36,7 +36,7 @@ Vue.component('pos-ctrl-card-content', {
             return new ThresholdAlert(
                 {1:"danger", 0:"good"},
                 "",
-                "variants with an AF >= " + this.max_sensitivity * 100 + "% have been lost",
+                "lost variants with an expected AF >= " + this.max_sensitivity * 100 + "%",
                 "/" + this.nb_expected_strong_variants
             )
         },
