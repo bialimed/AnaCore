@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.0'
+__version__ = '2.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -42,34 +42,6 @@ from anacore.annotVcf import AnnotVCFIO, getAlleleRecord, VCFRecord
 # FUNCTIONS
 #
 ########################################################################
-def isSameAlt(var_record, var_annot):
-    """
-    Evaluate an annotation of a variant and return False if it concerns an collocated variant and not the same variant.
-
-    :param var_record: The variant. It must contain only one alternative allele.
-    :type var_record: anacore.vcf.VCFRecord
-    :param var_annot: One annotation of the variant (for example coming from ANN INFO field produced by VEP).
-    :type var_annot: dict
-    :return: True if the var_record and var_annot concern the same alternative allele.
-    :rtype: boolean
-    """
-    record_alt_str = var_record.alt[0].replace(".", "").replace("-", "").upper()
-    annot_alt_str = var_annot["Allele"].replace(".", "").replace("-", "").upper()
-    is_self_variant = (record_alt_str == annot_alt_str)
-    if not is_self_variant:
-        std_record = VCFRecord(
-            var_record.chrom,
-            var_record.pos,
-            None,
-            var_record.ref,
-            var_record.alt
-        )
-        std_record.standardizeSingleAllele()
-        record_alt_str = std_record.alt[0].replace(".", "").replace("-", "").upper()
-        is_self_variant = (record_alt_str == annot_alt_str)
-    return is_self_variant
-
-
 def getAnnotSummary(allele_record, initial_alt, annot_field="ANN", pop_prefixes=None, pathogenicity_fields=None, logger=None):
     """
     Return a summary of the diffrent annotations of the variant. This summary is about identical known variants (xref), AF in populations (pop_AF), annotations of the variant and annotations of the collocated variants.
@@ -95,7 +67,7 @@ def getAnnotSummary(allele_record, initial_alt, annot_field="ANN", pop_prefixes=
     variant_annot = list()
     collocated_annot = list()
     for annot in allele_record.info[annot_field]:
-        is_self_variant = isSameAlt(allele_record, annot)
+        is_self_variant = (initial_alt == annot["Allele"])
         # Similar knowns variants
         if is_self_variant and annot["Existing_variation"] is not None:
             for db_id in annot["Existing_variation"].split("&"):
@@ -237,7 +209,7 @@ if __name__ == "__main__":
             id_by_src = json.loads(SRC_id_desc)
         # Records
         for record in FH_vcf:
-            for idx_alt in range(len(record.alt)):
+            for idx_alt, alt in enumerate(record.alt):
                 allele_record = getAlleleRecord(FH_vcf, record, idx_alt)
                 allele_record.standardizeSingleAllele()
                 curr_json = dict()
@@ -278,7 +250,7 @@ if __name__ == "__main__":
                     # Identical known variants, AF in populations and annotations
                     curr_json["xref"], curr_json["pop_AF"], curr_json["annot"], curr_json["collocated_annot"] = getAnnotSummary(
                         allele_record,
-                        record.alt[idx_alt],
+                        alt,
                         args.annotation_field,
                         args.populations_prefixes,
                         args.pathogenicity_fields,
