@@ -26,8 +26,6 @@ __status__ = 'prod'
 import re
 import os
 import sys
-import yaml
-import copy
 import logging
 import argparse
 import requests
@@ -52,14 +50,14 @@ class RunMutalyzerLegend:
     def __init__(self, legend_data):
         """
         Build and return an instance of RunMutalyzerLegend.
-        
+
         :param legend_data: Legend field from runMutalyzer[Light].
         :type legend_data: list
         :return: The new instance.
         :rtype: RunMutalyzerLegend
         """
         self.data = legend_data
-    
+
     def getIdByName(self):
         """
         Return element accession by name. Example: {"KIT_v001": "NM_000222.2", "KIT_i001": "NP_000213.1"}.
@@ -93,7 +91,7 @@ class RunMutalyzerLegend:
 def getHGVSgFromRec(record, acc_by_chrom=None, annotations_field="ANN"):
     """
     Return HGVSg from annotated VCF record.
-    
+
     :param record: Annotated VCF record.
     :type record: anacore.annotVcf.VCFRecord
     :param acc_by_chrom: Chromosome RefSeq accession by chromosome name.
@@ -121,7 +119,7 @@ def getHGVSgFromRec(record, acc_by_chrom=None, annotations_field="ANN"):
 def parseDesc(desc_data, id_by_name):
     """
     Return HGVS by RefSeq accession from proteinDescriptions or transcriptDescriptions of runMutalyzer[Light].
-    
+
     :param desc_data: proteinDescriptions or transcriptDescriptions from runMutalyzer[Light].
     :type desc_data: list
     :param id_by_name: Protein/Transcript RefSeq accession by name. Example: {"KIT_v001": "NM_000222.2", "KIT_i001": "NP_000213.1"}.
@@ -159,7 +157,7 @@ def parseDesc(desc_data, id_by_name):
 def getHGVSByTr(res_data):
     """
     Return HGVSg, HGVSc/n and HGVSp by transcript base RefSeq accession from runMutalyzer[Light].
-    
+
     :param res_data: Results from runMutalyzer[Light] (required fields: legend, genomicDescription, transcriptDescriptions and proteinDescriptions).
     :type res_data: list
     :return: HGVSg, HGVSc/n and HGVSp by transcript base RefSeq accession.
@@ -175,8 +173,8 @@ def getHGVSByTr(res_data):
     for tr_base_ac, HGVSc in HGVSc_by_tr.items():
         HGVSp = ""
         if tr_base_ac not in prot_by_tr:
-           if tr_base_ac[1] != "R":  # Correspond to mRNA and the link with prot does not exist
-               raise Exception("The protein ID for the transcript {} cannot be found".format(tr_base_ac))
+            if tr_base_ac[1] != "R":  # Correspond to mRNA and the link with prot does not exist
+                raise Exception("The protein ID for the transcript {} cannot be found".format(tr_base_ac))
         else:
             prot_base_acc = prot_by_tr[tr_base_ac]
             HGVSp = HGVSp_by_prot[prot_base_acc]
@@ -216,7 +214,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Fix or add HGVSg, HGVSc and HGVSp on variants annotations. The HGVS used are based on biocommons/hgvs.')
     parser.add_argument('-a', '--annotations-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     parser.add_argument('-l', '--logging-level', default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], action=LoggerAction, help='The logger level. [Default: %(default)s]')
-    parser.add_argument('-m', '--mutalizer-url', default="https://mutalyzer.nl", help='URL to the mutalizer server. [Default: %(default)s]')
+    parser.add_argument('-m', '--mutalyzer-url', default="https://mutalyzer.nl", help='URL to the mutalizer server. [Default: %(default)s]')
     parser.add_argument('-p', '--proxy-url', help='URL to the proxy server if the http(s) connexions are only allowed through a proxy.')
     parser.add_argument('-s', '--assembly-version', default="GRCh38", help='Human genome assembly version used in alignment, variants calling and variants annotation. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)
@@ -264,12 +262,12 @@ if __name__ == "__main__":
                 old_HGVSg = getHGVSgFromRec(record, acc_by_chrom, FH_in.annot_field)
                 param_hgvsg = urllib.parse.quote(old_HGVSg, safe='')
                 param_fields = urllib.parse.quote(",".join(["legend", "proteinDescriptions", "transcriptDescriptions", "genomicDescription"]), safe='')
-                url_request = '{}/json/runMutalyzerLight?build={};variant={};extra={}'.format(args.mutalizer_url, param_assembly, param_hgvsg, param_fields)
+                url_request = '{}/json/runMutalyzerLight?build={};variant={};extra={}'.format(args.mutalyzer_url, param_assembly, param_hgvsg, param_fields)
                 log.debug(url_request)
                 response = requests.get(
-					url_request,
-					proxies=(None if args.proxy_url is None else {"https": args.proxy_url, "http": args.proxy_url})
-				)
+                    url_request,
+                    proxies=(None if args.proxy_url is None else {"https": args.proxy_url, "http": args.proxy_url})
+                )
                 if response.status_code != 200:
                     raise Exception("Request {} has failed.".format(url_request))
                 res_data = response.json()
