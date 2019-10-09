@@ -132,10 +132,10 @@ def getVariantRegion(variant):
     @warnings: This function can only be used on variant with only one alternative allele.
     """
     std_variant = deepcopy(variant)
-    std_variant.standardizeSingleAllele()
+    std_variant.normalizeSingleAllele()
     return Region(
         std_variant.pos,
-        std_variant.pos + len(std_variant.ref) - 1,  # Works also with standardized insertion
+        std_variant.pos + len(std_variant.ref) - 1,  # Works also with nomalized insertion
         None,
         std_variant.chrom
     )

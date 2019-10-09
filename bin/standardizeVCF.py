@@ -75,7 +75,7 @@ def stdizeVCF(FH_ref, FH_in, FH_out, trace_unstandard=False, log=None):
             # Previous
             unstd = {"chrom": alt_record.chrom, "pos": alt_record.pos, "ref": alt_record.ref, "alt": alt_record.alt[0]}
             # To minimal string
-            alt_record.standardizeSingleAllele()
+            alt_record.normalizeSingleAllele()
             # Move to upstream
             alt_record = alt_record.getMostUpstream(chrom)
             # Add previous nt

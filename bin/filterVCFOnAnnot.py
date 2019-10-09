@@ -129,7 +129,7 @@ if __name__ == "__main__":
                 VEP_alt = getVEPAlt(record.ref, record.alt)
                 for alt_idx, alt in enumerate(record.alt):
                     alt_record = getAlleleRecord(FH_in, record, alt_idx)
-                    alt_record.standardizeSingleAllele()
+                    alt_record.normalizeSingleAllele()
                     # Evaluates polymorphism
                     is_polymophism = isPolymophism(alt_record, VEP_alt[alt_idx], args.polym_populations, args.polym_threshold, FH_in.annot_field)
                     # Evaluates consequences

@@ -174,7 +174,7 @@ if __name__ == "__main__":
                 std_record = None
                 if record.isIndel():
                     std_record = copy.deepcopy(record)
-                    std_record.standardizeSingleAllele()
+                    std_record.normalizeSingleAllele()
                 # Get HGVSg by annotation allele
                 for annot in record.info[args.annotations_field]:
                     if annot["Allele"] not in hgvs_by_allele:

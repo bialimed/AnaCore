@@ -211,7 +211,7 @@ if __name__ == "__main__":
         for record in FH_vcf:
             for idx_alt, alt in enumerate(record.alt):
                 allele_record = getAlleleRecord(FH_vcf, record, idx_alt)
-                allele_record.standardizeSingleAllele()
+                allele_record.normalizeSingleAllele()
                 curr_json = dict()
                 # Coord information
                 curr_json["coord"] = {

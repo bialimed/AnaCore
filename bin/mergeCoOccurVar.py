@@ -318,7 +318,7 @@ if __name__ == "__main__":
                 # Records
                 prev = None
                 for curr in FH_vcf:
-                    curr.standardizeSingleAllele()
+                    curr.normalizeSingleAllele()
                     prev_is_merged = False
                     if prev is not None:
                         if prev.chrom == curr.chrom:

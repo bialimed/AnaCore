@@ -100,7 +100,7 @@ def addVCFVariants( variants, vcf_path, vcf_idx, spl_name=None ):
                 alt_record = getAlleleRecord( FH_vcf, record, idx_alt )
                 alt_record.ref = record.ref.upper()
                 alt_record.alt[0] = alt_record.alt[0].upper()
-                alt_record.standardizeSingleAllele()
+                alt_record.normalizeSingleAllele()
                 variant_id = alt_record.chrom + ":" + str(alt_record.pos) + "=" + alt_record.ref + "/" + alt_record.alt[0]
                 if variant_id not in variants:
                     variants[variant_id] = {

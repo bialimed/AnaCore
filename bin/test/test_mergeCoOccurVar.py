@@ -295,8 +295,8 @@ insDelNoStd_CAAA/CGTGA_2_alt	0	chr1	3	60	15M3I1M2D103M	*	0	0	AAGCCCTGATCACGCGTGA
                         FH_bam.write(rec)
             pysam.index(self.tmp_bam_path)
             # Eval
-            first.standardizeSingleAllele()
-            second.standardizeSingleAllele()
+            first.normalizeSingleAllele()
+            second.normalizeSingleAllele()
             with pysam.AlignmentFile(self.tmp_bam_path) as FH_aln:
                 setRefPos(first)
                 setRefPos(second)

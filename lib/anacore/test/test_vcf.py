@@ -385,44 +385,44 @@ class TestVCFRecord(unittest.TestCase):
             # Assert
             self.assertEqual(expected_records, observed_records)
 
-    def testStandardizeSingleAllele(self):
+    def testnormalizeSingleAllele(self):
         # Test substitution one nt
         substitution = VCFRecord("artificial_1", 18, None, "TC", ["TA"], 230)
-        substitution.standardizeSingleAllele()
+        substitution.normalizeSingleAllele()
         self.assertTrue(substitution.ref == "C" and substitution.alt[0] == "A" and substitution.pos == 19)
         # Test substitution multi nt
         substitution = VCFRecord("artificial_1", 18, None, "TCtgA", ["TaGCc"], 230)
-        substitution.standardizeSingleAllele()
+        substitution.normalizeSingleAllele()
         self.assertTrue(substitution.ref == "CTGA" and substitution.alt[0] == "AGCC" and substitution.pos == 19)
         # Test substitution multi nt with possible remove
         substitution = VCFRecord("artificial_1", 18, None, "TCtgATT", ["TaGGctT"], 230)
-        substitution.standardizeSingleAllele()
+        substitution.normalizeSingleAllele()
         self.assertTrue(substitution.ref == "CTGA" and substitution.alt[0] == "AGGC" and substitution.pos == 19)
 
         # Test insertion
         insertion = VCFRecord("artificial_1", 18, None, "T", ["TA"], 230)
-        insertion.standardizeSingleAllele()
+        insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "-" and insertion.alt[0] == "A" and insertion.pos == 19)
         # Test insertion multi nt and remove upstream and downstream
         insertion = VCFRecord("artificial_1", 18, None, "TGAT", ["TCGAGAT"], 230)
-        insertion.standardizeSingleAllele()
+        insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "-" and insertion.alt[0] == "CGA" and insertion.pos == 19)
         # Test insertion multi nt with possible remove and downstream and without complete standardization
         insertion = VCFRecord("artificial_1", 18, None, "TCtgATTAGC", ["TaGGctTATGCGC"], 230)
-        insertion.standardizeSingleAllele()
+        insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "CTGATTA" and insertion.alt[0] == "AGGCTTATGC" and insertion.pos == 19)
 
         # Test deletion
         insertion = VCFRecord("artificial_1", 18, None, "TA", ["T"], 230)
-        insertion.standardizeSingleAllele()
+        insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "A" and insertion.alt[0] == "-" and insertion.pos == 19)
         # Test insertion multi nt and remove upstream and downstream
         insertion = VCFRecord("artificial_1", 18, None, "TCGAGAT", ["TGAT"], 230)
-        insertion.standardizeSingleAllele()
+        insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "CGA" and insertion.alt[0] == "-" and insertion.pos == 19)
         # Test insertion multi nt with possible remove and downstream and without complete standardization
         insertion = VCFRecord("artificial_1", 18, None, "TaGGctTATGCGC", ["TCtgATTAGC"], 230)
-        insertion.standardizeSingleAllele()
+        insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "AGGCTTATGC" and insertion.alt[0] == "CTGATTA" and insertion.pos == 19)
 
     def testGetMostUpstream(self):

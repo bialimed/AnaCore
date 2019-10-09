@@ -229,7 +229,7 @@ class VCFRecord:
         self.info = info if info is not None else dict()
         self.format = pFormat if pFormat is not None else list()
         self.samples = samples if samples is not None else dict()
-        self._standardized = None
+        self._normalized = None
 
     @staticmethod
     def getEmptyAlleleMarker():
@@ -245,12 +245,12 @@ class VCFRecord:
         if value is not None:
             if name == "ref":
                 value = (VCFRecord.getEmptyAlleleMarker() if value == "" else value)
-                super(VCFRecord, self).__setattr__("_standardized", None)
+                super(VCFRecord, self).__setattr__("_normalized", None)
             elif name == "alt":
                 value = [(VCFRecord.getEmptyAlleleMarker() if elt == "" else elt) for elt in value]
-                super(VCFRecord, self).__setattr__("_standardized", None)
+                super(VCFRecord, self).__setattr__("_normalized", None)
             elif name == "pos" or name == "chrom":
-                super(VCFRecord, self).__setattr__("_standardized", None)
+                super(VCFRecord, self).__setattr__("_normalized", None)
         super(VCFRecord, self).__setattr__(name, value)
 
     def containsIndel(self):
@@ -297,10 +297,10 @@ class VCFRecord:
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
-        if self._standardized is None:
-            self._standardized = deepcopy(self)
-            self._standardized.standardizeSingleAllele()
-        record = self._standardized
+        if self._normalized is None:
+            self._normalized = deepcopy(self)
+            self._normalized.normalizeSingleAllele()
+        record = self._normalized
         start = record.pos
         if record.ref == VCFRecord.getEmptyAlleleMarker():
             start -= 0.5
@@ -334,10 +334,10 @@ class VCFRecord:
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
-        if self._standardized is None:
-            self._standardized = deepcopy(self)
-            self._standardized.standardizeSingleAllele()
-        record = self._standardized
+        if self._normalized is None:
+            self._normalized = deepcopy(self)
+            self._normalized.normalizeSingleAllele()
+        record = self._normalized
         end = record.pos
         if record.ref == VCFRecord.getEmptyAlleleMarker():
             end -= 0.5
@@ -428,7 +428,7 @@ class VCFRecord:
             record_type = "variation"
         return record_type
 
-    def standardizeSingleAllele(self):
+    def normalizeSingleAllele(self):
         """
         Replace empty allele by the empty_marker and reduce the alternative and reference allele to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.
 
@@ -454,7 +454,7 @@ class VCFRecord:
             record.alt = [alt]
 
         if len(self.alt) > 1:
-            raise Exception("The function 'standardizeSingleAllele' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'normalizeSingleAllele' cannot be used on multi-allelic variant.")
         self.ref = self.ref.upper()
         self.alt[0] = self.alt[0].upper()
         # Deletion or insertion with marker
@@ -470,7 +470,7 @@ class VCFRecord:
                 twoSideTrimming(self)
                 if self.alt[0] != VCFRecord.getEmptyAlleleMarker():
                     warnings.warn(
-                        'The deletion "{}/{}" at location {}:{} cannot be standardized.'.format(
+                        'The deletion "{}/{}" at location {}:{} cannot be normalized.'.format(
                             self.ref, self.alt[0], self.chrom, self.pos
                         )
                     )
@@ -484,7 +484,7 @@ class VCFRecord:
                 twoSideTrimming(self)
                 if self.ref != VCFRecord.getEmptyAlleleMarker():
                     warnings.warn(
-                        'The insertion "{}/{}" at location {}:{} cannot be standardized.'.format(
+                        'The insertion "{}/{}" at location {}:{} cannot be normalized.'.format(
                             self.ref, self.alt[0], self.chrom, self.pos
                         )
                     )
@@ -498,17 +498,17 @@ class VCFRecord:
 
         :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).
         :type ref_seq: str
-        :return: The standardized most upstream variant (see standardizeSingleAllele).
+        :return: The normalized most upstream variant (see normalizeSingleAllele).
         :rtype: VCFRecord
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
-        if self._standardized is None:
-            self._standardized = deepcopy(self)
-            self._standardized.standardizeSingleAllele()
-        new_record = self._standardized
-        if new_record.ref == VCFRecord.getEmptyAlleleMarker() or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Standardized indel
+        if self._normalized is None:
+            self._normalized = deepcopy(self)
+            self._normalized.normalizeSingleAllele()
+        new_record = self._normalized
+        if new_record.ref == VCFRecord.getEmptyAlleleMarker() or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker():  # normalized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
@@ -540,17 +540,17 @@ class VCFRecord:
 
         :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).
         :type ref_seq: str
-        :return: The standardized most downstream variant (see standardizeSingleAllele).
+        :return: The normalized most downstream variant (see normalizeSingleAllele).
         :rtype: VCFRecord
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
-        if self._standardized is None:
-            self._standardized = deepcopy(self)
-            self._standardized.standardizeSingleAllele()
-        new_record = self._standardized
-        if new_record.ref == VCFRecord.getEmptyAlleleMarker() or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Standardized indel
+        if self._normalized is None:
+            self._normalized = deepcopy(self)
+            self._normalized.normalizeSingleAllele()
+        new_record = self._normalized
+        if new_record.ref == VCFRecord.getEmptyAlleleMarker() or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Normalized indel
             uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]

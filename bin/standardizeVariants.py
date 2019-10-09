@@ -58,9 +58,9 @@ def getSeqByChr(genome_path):
     return genome_by_chr
 
 
-def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard):
+def normAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard):
     """
-    Write in a new file the standardized version of each variant. The standardization constists in three steps:
+    Write in a new file the normalized version of each variant. The normalization constists in three steps:
       1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
       2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
       3- The allele is replaced by the most upstream allele that can have the same alternative sequence (example: a deletion in homopolymer is moved to first nucleotid of this homopolymer).
@@ -69,7 +69,7 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard)
     :type genome_path: str
     :param in_variant_file: Path to the variants file (format: VCF).
     :type in_variant_file: str
-    :param out_variant_file: Path to the standardized variants file (format: VCF).
+    :param out_variant_file: Path to the normalized variants file (format: VCF).
     :type out_variant_file: str
     :param trace_unstandard: True if you want to keep the trace of the variant before standardization in INFO.
     :type trace_unstandard: bool
@@ -92,15 +92,15 @@ def stdAndMove(genome_path, in_variant_file, out_variant_file, trace_unstandard)
                     FH_out.write(alt_record.getMostUpstream(curr_chrom))
 
 
-def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
+def normOnly(in_variant_file, out_variant_file, trace_unstandard):
     """
-    Write in a new file the standardized version of each variant. The standardization constists in two steps:
+    Write in a new file the normalized version of each variant. The normalization constists in two steps:
       1- The variants with multiple alternative alleles are splitted in one record by alternative allele.
       2- In each allele the empty allele marker is replaced by a dot and alternative and reference allele are reduced to the minimal string (example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.).
 
     :param in_variant_file: Path to the variants file (format: VCF).
     :type in_variant_file: str
-    :param out_variant_file: Path to the standardized variants file (format: VCF).
+    :param out_variant_file: Path to the normalized variants file (format: VCF).
     :type out_variant_file: str
     :param trace_unstandard: True if you want to keep the trace of the variant before standardization in INFO.
     :type trace_unstandard: bool
@@ -118,7 +118,7 @@ def stdOnly(in_variant_file, out_variant_file, trace_unstandard):
                     alt_record = getAlleleRecord(FH_in, record, alt_idx)
                     if trace_unstandard:
                         alt_record.info["UNSTD"] = "{}:{}={}/{}".format(alt_record.chrom, alt_record.pos, alt_record.ref, "/".join(alt_record.alt))
-                    alt_record.standardizeSingleAllele()
+                    alt_record.normalizeSingleAllele()
                     FH_out.write(alt_record)
 
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 
     # Process
     if args.input_genome is None:
-        stdOnly(args.input_variants, args.output_variants, args.trace_unstandard)
+        normOnly(args.input_variants, args.output_variants, args.trace_unstandard)
     else:
-        stdAndMove(args.input_genome, args.input_variants, args.output_variants, args.trace_unstandard)
+        normAndMove(args.input_genome, args.input_variants, args.output_variants, args.trace_unstandard)
     log.info("End of job")
