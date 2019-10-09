@@ -19,9 +19,9 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'dev'
+__status__ = 'prod'
 
 import re
 import os
@@ -217,6 +217,7 @@ if __name__ == "__main__":
     parser.add_argument('-a', '--annotations-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     parser.add_argument('-l', '--logging-level', default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], action=LoggerAction, help='The logger level. [Default: %(default)s]')
     parser.add_argument('-m', '--mutalizer-url', default="https://mutalyzer.nl", help='URL to the mutalizer server. [Default: %(default)s]')
+    parser.add_argument('-p', '--proxy-url', help='URL to the proxy server if the http(s) connexions are only allowed through a proxy.')
     parser.add_argument('-s', '--assembly-version', default="GRCh38", help='Human genome assembly version used in alignment, variants calling and variants annotation. [Default: %(default)s]')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     group_input = parser.add_argument_group('Inputs')  # Inputs
@@ -265,7 +266,10 @@ if __name__ == "__main__":
                 param_fields = urllib.parse.quote(",".join(["legend", "proteinDescriptions", "transcriptDescriptions", "genomicDescription"]), safe='')
                 url_request = '{}/json/runMutalyzerLight?build={};variant={};extra={}'.format(args.mutalizer_url, param_assembly, param_hgvsg, param_fields)
                 log.debug(url_request)
-                response = requests.get(url_request)
+                response = requests.get(
+					url_request,
+					proxies=(None if args.proxy_url is None else {"https": args.proxy_url, "http": args.proxy_url})
+				)
                 if response.status_code != 200:
                     raise Exception("Request {} has failed.".format(url_request))
                 res_data = response.json()
@@ -286,8 +290,6 @@ if __name__ == "__main__":
                         contains_colloc_annot = True
                     else:  # Annotation come from the alternative allele
                         tr_base_acc = annot["Feature"].split(".")[0]
-                        # ~ if tr_base_acc not in HGVS_by_tr:
-                            # ~ log.warning("HGVS for variant {} on transcript {} will not be fixed.".format(record.getName(), tr_base_acc))
                         if tr_base_acc in HGVS_by_tr:
                             # Trace
                             old = {
