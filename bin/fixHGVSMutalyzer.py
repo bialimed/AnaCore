@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -175,7 +175,7 @@ def getHGVSByTr(res_data):
         HGVSp = ""
         if tr_base_ac not in prot_by_tr:
             if tr_base_ac[1] != "R":  # Correspond to mRNA and the link with prot does not exist
-                raise Exception("The protein ID for the transcript {} cannot be found".format(tr_base_ac))
+                raise Exception("The protein ID for the transcript {} cannot be found in mutalyzer data: {}".format(tr_base_ac, res_data))
         else:
             prot_base_acc = prot_by_tr[tr_base_ac]
             HGVSp = HGVSp_by_prot[prot_base_acc]
