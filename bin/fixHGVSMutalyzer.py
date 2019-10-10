@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -112,7 +112,8 @@ def getHGVSgFromRec(record, acc_by_chrom=None, annotations_field="ANN"):
         if not hgvs_g.startswith("NC"):
             chr_acc = acc_by_chrom[record.chrom]
             hgvs_g = hgvs_g.replace(record.chrom + ":", chr_acc + ":")
-    # else: empty HGVSg
+    else:  # Empty HGVSg
+        hgvs_g = None
     return hgvs_g
 
 
@@ -260,67 +261,70 @@ if __name__ == "__main__":
                     raise Exception("The record {} is multi-allelic.".format(record.getName()))
                 # Get info from mutalyzer
                 old_HGVSg = getHGVSgFromRec(record, acc_by_chrom, FH_in.annot_field)
-                param_hgvsg = urllib.parse.quote(old_HGVSg, safe='')
-                param_fields = urllib.parse.quote(",".join(["legend", "proteinDescriptions", "transcriptDescriptions", "genomicDescription"]), safe='')
-                url_request = '{}/json/runMutalyzerLight?build={};variant={};extra={}'.format(args.mutalyzer_url, param_assembly, param_hgvsg, param_fields)
-                log.debug(url_request)
-                response = requests.get(
-                    url_request,
-                    proxies=(None if args.proxy_url is None else {"https": args.proxy_url, "http": args.proxy_url})
-                )
-                if response.status_code != 200:
-                    raise Exception("Request {} has failed.".format(url_request))
-                res_data = response.json()
-                # Store all HGVS by transcript base accession
-                mutalyzer_tr = {elt["id"].split(".")[0] for elt in res_data["legend"] if "id" in elt}
-                annot_tr = {annot["Feature"].split(".")[0] for annot in record.info[args.annotations_field]}
-                if len(annot_tr - mutalyzer_tr) != 0:
-                    log.warning("All the transcripts annotated for variant {} cannot be found in used version of mutalyzer. Missing transcripts: {}".format(record.getName(), sorted(annot_tr - mutalyzer_tr)))
-                HGVS_by_tr = getHGVSByTr(res_data)
-                # Update annotations
-                is_fixed_HGVSg = False
-                is_fixed_HGVSc = False
-                is_fixed_HGVSp = False
-                contains_colloc_annot = False
-                new_annot = []
-                for annot in record.info[args.annotations_field]:
-                    if annot["Allele"] != record.alt[0]:  # Annotation come from a collocated alternative allele
-                        contains_colloc_annot = True
-                    else:  # Annotation come from the alternative allele
-                        tr_base_acc = annot["Feature"].split(".")[0]
-                        if tr_base_acc in HGVS_by_tr:
-                            # Trace
-                            old = {
-                                "g": "" if "HGVSg" not in annot or annot["HGVSg"] is None else annot["HGVSg"],
-                                "c": "" if "HGVSc" not in annot or annot["HGVSc"] is None else annot["HGVSc"],
-                                "p": "" if "HGVSp" not in annot or annot["HGVSp"] is None else annot["HGVSp"]
-                            }
-                            # HGVSg
-                            annot["HGVSg"] = HGVS_by_tr[tr_base_acc]["HGVSg"]
-                            if old["g"] != annot["HGVSg"]:
-                                is_fixed_HGVSg = True
-                                # ~ print("HGVSg", record.getName(), annot["HGVSg"], annot["Feature"], old["g"], annot["HGVSg"], True, sep="\t")
-                            # HGVSc
-                            annot["HGVSc"] = HGVS_by_tr[tr_base_acc]["HGVSc"]
-                            if old["c"] != annot["HGVSc"]:
-                                is_fixed_HGVSc = True
-                            # ~ print("HGVSc", record.getName(), annot["HGVSg"], annot["Feature"], old["c"], annot["HGVSc"], old["c"] != annot["HGVSc"], sep="\t")
-                            # HGVSp
-                            annot["HGVSp"] = HGVS_by_tr[tr_base_acc]["HGVSp"]
-                            if old["p"] != annot["HGVSp"]:
-                                is_fixed_HGVSp = True
-                            # ~ print("HGVSp", record.getName(), annot["HGVSg"], annot["Feature"], old["p"], annot["HGVSp"], old["p"] != annot["HGVSp"].replace("(", "").replace(")", ""), sep="\t")
-                        new_annot.append(annot)
-                record.info[args.annotations_field] = new_annot
-                # Trace results
-                if is_fixed_HGVSg:
-                    nb_records["fixed_HGVSg"] += 1
-                if is_fixed_HGVSc:
-                    nb_records["fixed_HGVSc"] += 1
-                if is_fixed_HGVSp:
-                    nb_records["fixed_HGVSp"] += 1
-                if contains_colloc_annot:
-                    nb_records["contains_colloc_annot"] += 1
+                if old_HGVSg is None:
+                    log.warning("The variant {} does not contain any HGVSg.".format(record.getName()))
+                else:
+                    param_hgvsg = urllib.parse.quote(old_HGVSg, safe='')
+                    param_fields = urllib.parse.quote(",".join(["legend", "proteinDescriptions", "transcriptDescriptions", "genomicDescription"]), safe='')
+                    url_request = '{}/json/runMutalyzerLight?build={};variant={};extra={}'.format(args.mutalyzer_url, param_assembly, param_hgvsg, param_fields)
+                    log.debug(url_request)
+                    response = requests.get(
+                        url_request,
+                        proxies=(None if args.proxy_url is None else {"https": args.proxy_url, "http": args.proxy_url})
+                    )
+                    if response.status_code != 200:
+                        raise Exception("Request {} has failed.".format(url_request))
+                    res_data = response.json()
+                    # Store all HGVS by transcript base accession
+                    mutalyzer_tr = {elt["id"].split(".")[0] for elt in res_data["legend"] if "id" in elt}
+                    annot_tr = {annot["Feature"].split(".")[0] for annot in record.info[args.annotations_field]}
+                    if len(annot_tr - mutalyzer_tr) != 0:
+                        log.warning("All the transcripts annotated for variant {} cannot be found in used version of mutalyzer. Missing transcripts: {}".format(record.getName(), sorted(annot_tr - mutalyzer_tr)))
+                    HGVS_by_tr = getHGVSByTr(res_data)
+                    # Update annotations
+                    is_fixed_HGVSg = False
+                    is_fixed_HGVSc = False
+                    is_fixed_HGVSp = False
+                    contains_colloc_annot = False
+                    new_annot = []
+                    for annot in record.info[args.annotations_field]:
+                        if annot["Allele"] != record.alt[0]:  # Annotation come from a collocated alternative allele
+                            contains_colloc_annot = True
+                        else:  # Annotation come from the alternative allele
+                            tr_base_acc = annot["Feature"].split(".")[0]
+                            if tr_base_acc in HGVS_by_tr:
+                                # Trace
+                                old = {
+                                    "g": "" if "HGVSg" not in annot or annot["HGVSg"] is None else annot["HGVSg"],
+                                    "c": "" if "HGVSc" not in annot or annot["HGVSc"] is None else annot["HGVSc"],
+                                    "p": "" if "HGVSp" not in annot or annot["HGVSp"] is None else annot["HGVSp"]
+                                }
+                                # HGVSg
+                                annot["HGVSg"] = HGVS_by_tr[tr_base_acc]["HGVSg"]
+                                if old["g"] != annot["HGVSg"]:
+                                    is_fixed_HGVSg = True
+                                    # ~ print("HGVSg", record.getName(), annot["HGVSg"], annot["Feature"], old["g"], annot["HGVSg"], True, sep="\t")
+                                # HGVSc
+                                annot["HGVSc"] = HGVS_by_tr[tr_base_acc]["HGVSc"]
+                                if old["c"] != annot["HGVSc"]:
+                                    is_fixed_HGVSc = True
+                                # ~ print("HGVSc", record.getName(), annot["HGVSg"], annot["Feature"], old["c"], annot["HGVSc"], old["c"] != annot["HGVSc"], sep="\t")
+                                # HGVSp
+                                annot["HGVSp"] = HGVS_by_tr[tr_base_acc]["HGVSp"]
+                                if old["p"] != annot["HGVSp"]:
+                                    is_fixed_HGVSp = True
+                                # ~ print("HGVSp", record.getName(), annot["HGVSg"], annot["Feature"], old["p"], annot["HGVSp"], old["p"] != annot["HGVSp"].replace("(", "").replace(")", ""), sep="\t")
+                            new_annot.append(annot)
+                    record.info[args.annotations_field] = new_annot
+                    # Trace results
+                    if is_fixed_HGVSg:
+                        nb_records["fixed_HGVSg"] += 1
+                    if is_fixed_HGVSc:
+                        nb_records["fixed_HGVSc"] += 1
+                    if is_fixed_HGVSp:
+                        nb_records["fixed_HGVSp"] += 1
+                    if contains_colloc_annot:
+                        nb_records["contains_colloc_annot"] += 1
                 FH_out.write(record)
     # Log
     if nb_records["contains_colloc_annot"] != 0:
