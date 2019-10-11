@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -73,18 +73,18 @@ class RunMutalyzerLegend:
 
     def getProtBytr(self):
         """
-        Return protein accession by transcript base accessione.
+        Return protein accession by transcript accession.
 
-        :return: Protein accession by transcript base accession.
+        :return: Protein accession by transcript accession.
         :rtype: dict
         """
         prot_by_tr = {}
         id_by_name = self.getIdByName()
         for elt_name, elt_id in id_by_name.items():
             if "_i" in elt_name:
-                prot_base_acc = elt_id.split(".")[0]
-                tr_base_acc = id_by_name[elt_name.replace("_i", "_v")].split(".")[0]
-                prot_by_tr[tr_base_acc] = prot_base_acc
+                prot_acc = elt_id
+                tr_acc = id_by_name[elt_name.replace("_i", "_v")]
+                prot_by_tr[tr_acc] = prot_acc
         return prot_by_tr
 
 
@@ -136,20 +136,18 @@ def parseDesc(desc_data, id_by_name):
             elt_acc = elt_name
             if elt_name in id_by_name:
                 elt_acc = id_by_name[elt_name]
-            elt_base_acc = elt_acc.split(".")[0]
             if change == "?":
-                HGVS_by_elt[elt_base_acc] = ""
+                HGVS_by_elt[elt_acc] = ""
             else:
-                HGVS_by_elt[elt_base_acc] = "{}:{}.{}".format(elt_acc, hgvs_type, change)
+                HGVS_by_elt[elt_acc] = "{}:{}.{}".format(elt_acc, hgvs_type, change)
         else:
             match_std = re.search("(.+):(.)\.(.+)", elt)
             if match_std:
                 elt_acc, hgvs_type, change = match_std.groups()
-                elt_base_acc = elt_acc.split(".")[0]
                 if change == "?":
-                    HGVS_by_elt[elt_base_acc] = ""
+                    HGVS_by_elt[elt_acc] = ""
                 else:
-                    HGVS_by_elt[elt_base_acc] = "{}:{}.{}".format(elt_acc, hgvs_type, change)
+                    HGVS_by_elt[elt_acc] = "{}:{}.{}".format(elt_acc, hgvs_type, change)
             else:
                 raise Exception("The feature description {} cannot be parsed.".format(elt))
     return HGVS_by_elt
@@ -171,19 +169,23 @@ def getHGVSByTr(res_data):
     HGVSc_by_tr = parseDesc(res_data["transcriptDescriptions"], id_by_name)
     HGVSp_by_prot = parseDesc(res_data["proteinDescriptions"], id_by_name)
     HGVS_by_tr = {}
-    for tr_base_ac, HGVSc in HGVSc_by_tr.items():
+    for tr_acc, HGVSc in HGVSc_by_tr.items():
         HGVSp = ""
-        if tr_base_ac not in prot_by_tr:
-            if tr_base_ac[1] != "R":  # Correspond to mRNA and the link with prot does not exist
-                raise Exception("The protein ID for the transcript {} cannot be found in mutalyzer data: {}".format(tr_base_ac, res_data))
+        if tr_acc not in prot_by_tr:
+           if tr_acc[1] != "R":  # Correspond to mRNA and the link with prot does not exist
+               raise Exception("The protein ID for the transcript {} cannot be found".format(tr_acc))
         else:
-            prot_base_acc = prot_by_tr[tr_base_ac]
-            HGVSp = HGVSp_by_prot[prot_base_acc]
-        HGVS_by_tr[tr_base_ac] = {
-            "HGVSg": new_HGVSg,
-            "HGVSc": HGVSc,
-            "HGVSp": HGVSp
-        }
+            prot_acc = prot_by_tr[tr_acc]
+            HGVSp = HGVSp_by_prot[prot_acc]
+        tr_base_ac, tr_acc_version = tr_acc.split(".")
+        tr_acc_version = int(tr_acc_version)
+        if tr_base_ac not in HGVS_by_tr or tr_acc_version > HGVS_by_tr[tr_base_ac]["acc_version"]:
+            HGVS_by_tr[tr_base_ac] = {
+                "acc_version": tr_acc_version,
+                "HGVSg": new_HGVSg,
+                "HGVSc": HGVSc,
+                "HGVSp": HGVSp
+            }
     return HGVS_by_tr
 
 
@@ -212,7 +214,7 @@ class LoggerAction(argparse.Action):
 ########################################################################
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser(description='Fix or add HGVSg, HGVSc and HGVSp on variants annotations. The HGVS used are based on biocommons/hgvs.')
+    parser = argparse.ArgumentParser(description='Fix or add HGVSg, HGVSc and HGVSp on variants annotations. The HGVS used are based on mutalyzer.')
     parser.add_argument('-a', '--annotations-field', default="ANN", help='Field used to store annotations. [Default: %(default)s]')
     parser.add_argument('-l', '--logging-level', default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], action=LoggerAction, help='The logger level. [Default: %(default)s]')
     parser.add_argument('-m', '--mutalyzer-url', default="https://mutalyzer.nl", help='URL to the mutalizer server. [Default: %(default)s]')
