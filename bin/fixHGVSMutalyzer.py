@@ -44,6 +44,92 @@ from anacore.sv import HashedSVIO
 # FUNCTIONS
 #
 ########################################################################
+class Accession:
+    """Class to manipulate accession number."""
+
+    def __init__(self, id, version=None, source=None):
+        """
+        Build and return an instance of Accession.
+
+        :param id: ID of the element (from NCBI accession: NP_001245144.1 => id.version).
+        :type id: str
+        :param version: Version of the element (from NCBI accession: NP_001245144.1 => id.version).
+        :type version: int
+        :param source: Source of the element. Example: NCBI or ENSEMBL
+        :type source: str
+        :return: The new instance.
+        :rtype: Accession
+        """
+        self.id = id
+        self.version = int(version) if version is not None else None
+        self.source = source
+
+    def __str__(self):
+        repr = self.id
+        if self.version is not None:
+            repr = "{}.{}".format(self.id, self.version)
+        return repr
+
+
+class HGVS:
+    """Class to manipulate HGVS information."""
+
+    def __init__(self, accession, type, change):
+        """
+        Build and return an instance of HGVS.
+
+        :param accession: Accesion of the alterated element.
+        :type accession: Accession
+        :param type: HGVS type: "g" or "c" or "p".
+        :type type: str
+        :param change: Change on element alterated (from HGVS string: "accession:type.change").
+        :type change: str
+        :return: The new instance.
+        :rtype: HGVS
+        """
+        self.accession = accession
+        self.type = type
+        self.change = change
+
+    def isPredicted(self):
+        """
+        Return True if the change come from prediction (opposite to experimetal evidence).
+
+        :return: True if the change come from prediction (opposite to experimetal evidence).
+        :rtype: bool
+        """
+        return "(" in self.change or ")" in self.change
+
+    def __str__(self):
+        return "{}:{}.{}".format(self.accession, self.type, self.change)
+
+    @staticmethod
+    def fromStr(hgvs_str):
+        """
+        Return an instance of HGVS from an HGVS string.
+
+        :param hgvs_str: The HGVS string to parse.
+        :type hgvs_str: str
+        :return: The instance of HGVS.
+        :rtype: HGVS
+        """
+        hgvs = None
+        match = re.search("^(.+)\.(.+):(.)\.(.+)$", hgvs_str)
+        if match is not None:
+            acc_id, acc_version, hgvs_type, hgvs_change = match.groups()
+            acc_obj = Accession(acc_id, acc_version)
+            hgvs = HGVS(acc_obj, hgvs_type, hgvs_change)
+        else:
+            match = re.search("^(.+):(.)\.(.+)$", hgvs_str)
+            if match is not None:
+                acc_id, hgvs_type, hgvs_change = match.groups()
+                acc_obj = Accession(acc_id)
+                hgvs = HGVS(acc_obj, hgvs_type, hgvs_change)
+            else:
+                raise Exception('The HGVS "{}" has an invalid format.'.format(hgvs_str))
+        return hgvs
+
+
 class RunMutalyzerLegend:
     """Class to manipulate field legend from runMutalyzer[Light]."""
 
@@ -207,6 +293,41 @@ class LoggerAction(argparse.Action):
         setattr(namespace, self.dest, log_level)
 
 
+def getConsistentHGVS(new_hgvs_str, old_hgvs_str):
+    """
+    Return the HGVS string coming from mutalyzer or the HGVS fixed on several known bug.
+
+    :param new_hgvs_str: The HGVS coming from mutalyzer.
+    :type new_hgvs_str: str
+    :param old_hgvs_str: The previously HGVS.
+    :type old_hgvs_str: str
+    :return: The consensus HGVS string.
+    :rtype: str
+    """
+    new_hgvs = None if new_hgvs_str == "" else HGVS.fromStr(new_hgvs_str)
+    old_hgvs = None if old_hgvs_str == "" else HGVS.fromStr(old_hgvs_str)
+    final_hgvs_str = new_hgvs_str
+    if new_hgvs is None:
+        final_hgvs_str = old_hgvs_str
+    else:
+        if new_hgvs.change == "?":
+            final_hgvs_str = ""
+        if old_hgvs_str != "":
+            if new_hgvs.change == "?":
+                final_hgvs_str = old_hgvs_str
+            else:
+                # No change because ref sequence from HGVS database contains the alt
+                if "=" in new_hgvs.change and new_hgvs.type != "p":
+                    match = re.search("\d([ATGCN]+>[ATGCN]+)$", old_hgvs)
+                    if match is not None:
+                        final_hgvs_str = final_hgvs_str.replace("=", match.group(1))
+                # Keep consistency on accession version
+                if str(old_hgvs) != str(new_hgvs):
+                    if old_hgvs.change == new_hgvs.change and old_hgvs.accession.id == new_hgvs.accession.id:
+                        final_hgvs_str = old_hgvs_str
+    return final_hgvs_str
+
+
 ########################################################################
 #
 # MAIN
@@ -255,7 +376,7 @@ if __name__ == "__main__":
                 FH_out.ANN_titles.append("HGVSp")
             FH_out.writeHeader()
             # Records
-            # ~ print("HGVS_type", "Variant", "HGVS_g", "Feature", "Old_HGVS", "New_HGVS", "Fixed", sep="\t")
+            # print("HGVS_type", "Variant", "HGVS_g", "Feature", "Old_HGVS", "New_HGVS", "Fixed", sep="\t")
             param_assembly = urllib.parse.quote(args.assembly_version, safe='')
             for record in FH_in:
                 nb_records["analysed"] += 1
@@ -278,8 +399,8 @@ if __name__ == "__main__":
                         raise Exception("Request {} has failed.".format(url_request))
                     res_data = response.json()
                     # Store all HGVS by transcript base accession
-                    mutalyzer_tr = {elt["id"].split(".")[0] for elt in res_data["legend"] if "id" in elt}
-                    annot_tr = {annot["Feature"].split(".")[0] for annot in record.info[args.annotations_field]}
+                    mutalyzer_tr = {elt["id"].split(".")[0] for elt in res_data["legend"] if "id" in elt and not elt["id"].startswith("ENS")}
+                    annot_tr = {annot["Feature"].split(".")[0] for annot in record.info[args.annotations_field] if not annot["Feature"].startswith("ENS")}
                     if len(annot_tr - mutalyzer_tr) != 0:
                         log.warning("All the transcripts annotated for variant {} cannot be found in used version of mutalyzer. Missing transcripts: {}".format(record.getName(), sorted(annot_tr - mutalyzer_tr)))
                     HGVS_by_tr = getHGVSByTr(res_data)
@@ -302,20 +423,20 @@ if __name__ == "__main__":
                                     "p": "" if "HGVSp" not in annot or annot["HGVSp"] is None else annot["HGVSp"]
                                 }
                                 # HGVSg
-                                annot["HGVSg"] = HGVS_by_tr[tr_base_acc]["HGVSg"]
+                                annot["HGVSg"] = getConsistentHGVS(HGVS_by_tr[tr_base_acc]["HGVSg"], old["g"])
                                 if old["g"] != annot["HGVSg"]:
                                     is_fixed_HGVSg = True
-                                    # ~ print("HGVSg", record.getName(), annot["HGVSg"], annot["Feature"], old["g"], annot["HGVSg"], True, sep="\t")
+                                    # print("HGVSg", record.getName(), annot["HGVSg"], annot["Feature"], old["g"], annot["HGVSg"], True, sep="\t")
                                 # HGVSc
-                                annot["HGVSc"] = HGVS_by_tr[tr_base_acc]["HGVSc"]
+                                annot["HGVSc"] = getConsistentHGVS(HGVS_by_tr[tr_base_acc]["HGVSc"], old["c"])
                                 if old["c"] != annot["HGVSc"]:
                                     is_fixed_HGVSc = True
-                                # ~ print("HGVSc", record.getName(), annot["HGVSg"], annot["Feature"], old["c"], annot["HGVSc"], old["c"] != annot["HGVSc"], sep="\t")
+                                # print("HGVSc", record.getName(), annot["HGVSg"], annot["Feature"], old["c"], annot["HGVSc"], old["c"] != annot["HGVSc"], sep="\t")
                                 # HGVSp
-                                annot["HGVSp"] = HGVS_by_tr[tr_base_acc]["HGVSp"]
+                                annot["HGVSp"] = getConsistentHGVS(HGVS_by_tr[tr_base_acc]["HGVSp"], old["p"])
                                 if old["p"] != annot["HGVSp"]:
                                     is_fixed_HGVSp = True
-                                # ~ print("HGVSp", record.getName(), annot["HGVSg"], annot["Feature"], old["p"], annot["HGVSp"], old["p"] != annot["HGVSp"].replace("(", "").replace(")", ""), sep="\t")
+                                # print("HGVSp", record.getName(), annot["HGVSg"], annot["Feature"], old["p"], annot["HGVSp"], old["p"].replace("(", "").replace(")", "") != annot["HGVSp"].replace("(", "").replace(")", ""), sep="\t")
                             new_annot.append(annot)
                     record.info[args.annotations_field] = new_annot
                     # Trace results
