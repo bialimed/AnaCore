@@ -37,6 +37,7 @@ sys.path.append(LIB_DIR)
 
 from anacore.annotVcf import AnnotVCFIO
 from anacore.sv import HashedSVIO
+from anacore.hgvs import HGVS, RunMutalyzerDescription, RunMutalyzerLegend
 
 
 ########################################################################
@@ -44,136 +45,6 @@ from anacore.sv import HashedSVIO
 # FUNCTIONS
 #
 ########################################################################
-class Accession:
-    """Class to manipulate accession number."""
-
-    def __init__(self, id, version=None, source=None):
-        """
-        Build and return an instance of Accession.
-
-        :param id: ID of the element (from NCBI accession: NP_001245144.1 => id.version).
-        :type id: str
-        :param version: Version of the element (from NCBI accession: NP_001245144.1 => id.version).
-        :type version: int
-        :param source: Source of the element. Example: NCBI or ENSEMBL
-        :type source: str
-        :return: The new instance.
-        :rtype: Accession
-        """
-        self.id = id
-        self.version = int(version) if version is not None else None
-        self.source = source
-
-    def __str__(self):
-        repr = self.id
-        if self.version is not None:
-            repr = "{}.{}".format(self.id, self.version)
-        return repr
-
-
-class HGVS:
-    """Class to manipulate HGVS information."""
-
-    def __init__(self, accession, type, change):
-        """
-        Build and return an instance of HGVS.
-
-        :param accession: Accesion of the alterated element.
-        :type accession: Accession
-        :param type: HGVS type: "g" or "c" or "p".
-        :type type: str
-        :param change: Change on element alterated (from HGVS string: "accession:type.change").
-        :type change: str
-        :return: The new instance.
-        :rtype: HGVS
-        """
-        self.accession = accession
-        self.type = type
-        self.change = change
-
-    def isPredicted(self):
-        """
-        Return True if the change come from prediction (opposite to experimetal evidence).
-
-        :return: True if the change come from prediction (opposite to experimetal evidence).
-        :rtype: bool
-        """
-        return "(" in self.change or ")" in self.change
-
-    def __str__(self):
-        return "{}:{}.{}".format(self.accession, self.type, self.change)
-
-    @staticmethod
-    def fromStr(hgvs_str):
-        """
-        Return an instance of HGVS from an HGVS string.
-
-        :param hgvs_str: The HGVS string to parse.
-        :type hgvs_str: str
-        :return: The instance of HGVS.
-        :rtype: HGVS
-        """
-        hgvs = None
-        match = re.search("^(.+)\.(.+):(.)\.(.+)$", hgvs_str)
-        if match is not None:
-            acc_id, acc_version, hgvs_type, hgvs_change = match.groups()
-            acc_obj = Accession(acc_id, acc_version)
-            hgvs = HGVS(acc_obj, hgvs_type, hgvs_change)
-        else:
-            match = re.search("^(.+):(.)\.(.+)$", hgvs_str)
-            if match is not None:
-                acc_id, hgvs_type, hgvs_change = match.groups()
-                acc_obj = Accession(acc_id)
-                hgvs = HGVS(acc_obj, hgvs_type, hgvs_change)
-            else:
-                raise Exception('The HGVS "{}" has an invalid format.'.format(hgvs_str))
-        return hgvs
-
-
-class RunMutalyzerLegend:
-    """Class to manipulate field legend from runMutalyzer[Light]."""
-
-    def __init__(self, legend_data):
-        """
-        Build and return an instance of RunMutalyzerLegend.
-
-        :param legend_data: Legend field from runMutalyzer[Light].
-        :type legend_data: list
-        :return: The new instance.
-        :rtype: RunMutalyzerLegend
-        """
-        self.data = legend_data
-
-    def getIdByName(self):
-        """
-        Return element accession by name. Example: {"KIT_v001": "NM_000222.2", "KIT_i001": "NP_000213.1"}.
-
-        :return: element accession by name. Example: {"KIT_v001": "NM_000222.2", "KIT_i001": "NP_000213.1"}.
-        :rtype: dict
-        """
-        id_by_name = {}
-        for elt in self.data:
-            if "id" in elt and "name" in elt:
-                id_by_name[elt["name"]] = elt["id"]
-        return id_by_name
-
-    def getProtBytr(self):
-        """
-        Return protein accession by transcript accession.
-
-        :return: Protein accession by transcript accession.
-        :rtype: dict
-        """
-        prot_by_tr = {}
-        id_by_name = self.getIdByName()
-        for elt_name, elt_id in id_by_name.items():
-            if "_i" in elt_name:
-                prot_acc = elt_id
-                tr_acc = id_by_name[elt_name.replace("_i", "_v")]
-                prot_by_tr[tr_acc] = prot_acc
-        return prot_by_tr
-
-
 def getHGVSgFromRec(record, acc_by_chrom=None, annotations_field="ANN"):
     """
     Return HGVSg from annotated VCF record.
@@ -203,42 +74,6 @@ def getHGVSgFromRec(record, acc_by_chrom=None, annotations_field="ANN"):
     return hgvs_g
 
 
-def parseDesc(desc_data, id_by_name):
-    """
-    Return HGVS by RefSeq accession from proteinDescriptions or transcriptDescriptions of runMutalyzer[Light].
-
-    :param desc_data: proteinDescriptions or transcriptDescriptions from runMutalyzer[Light].
-    :type desc_data: list
-    :param id_by_name: Protein/Transcript RefSeq accession by name. Example: {"KIT_v001": "NM_000222.2", "KIT_i001": "NP_000213.1"}.
-    :type id_by_name: dict
-    :return: HGVS by RefSeq accession.
-    :rtype: dict
-    """
-    HGVS_by_elt = {}
-    for elt in desc_data:
-        match_renamed = re.search("(.+)\((.+)\):(.)\.(.+)", elt)
-        if match_renamed:
-            ref_acc, elt_name, hgvs_type, change = match_renamed.groups()
-            elt_acc = elt_name
-            if elt_name in id_by_name:
-                elt_acc = id_by_name[elt_name]
-            if change == "?":
-                HGVS_by_elt[elt_acc] = ""
-            else:
-                HGVS_by_elt[elt_acc] = "{}:{}.{}".format(elt_acc, hgvs_type, change)
-        else:
-            match_std = re.search("(.+):(.)\.(.+)", elt)
-            if match_std:
-                elt_acc, hgvs_type, change = match_std.groups()
-                if change == "?":
-                    HGVS_by_elt[elt_acc] = ""
-                else:
-                    HGVS_by_elt[elt_acc] = "{}:{}.{}".format(elt_acc, hgvs_type, change)
-            else:
-                raise Exception("The feature description {} cannot be parsed.".format(elt))
-    return HGVS_by_elt
-
-
 def getHGVSByTr(res_data):
     """
     Return HGVSg, HGVSc/n and HGVSp by transcript base RefSeq accession from runMutalyzer[Light].
@@ -252,14 +87,14 @@ def getHGVSByTr(res_data):
     id_by_name = legend.getIdByName()
     prot_by_tr = legend.getProtBytr()
     new_HGVSg = res_data["genomicDescription"]
-    HGVSc_by_tr = parseDesc(res_data["transcriptDescriptions"], id_by_name)
-    HGVSp_by_prot = parseDesc(res_data["proteinDescriptions"], id_by_name)
+    HGVSc_by_tr = RunMutalyzerDescription(res_data["transcriptDescriptions"]).getByAccession(id_by_name)
+    HGVSp_by_prot = RunMutalyzerDescription(res_data["proteinDescriptions"]).getByAccession(id_by_name)
     HGVS_by_tr = {}
     for tr_acc, HGVSc in HGVSc_by_tr.items():
         HGVSp = ""
         if tr_acc not in prot_by_tr:
-           if tr_acc[1] != "R":  # Correspond to mRNA and the link with prot does not exist
-               raise Exception("The protein ID for the transcript {} cannot be found".format(tr_acc))
+            if tr_acc[1] != "R":  # Correspond to mRNA and the link with prot does not exist
+                raise Exception("The protein ID for the transcript {} cannot be found".format(tr_acc))
         else:
             prot_acc = prot_by_tr[tr_acc]
             HGVSp = HGVSp_by_prot[prot_acc]
@@ -273,24 +108,6 @@ def getHGVSByTr(res_data):
                 "HGVSp": HGVSp
             }
     return HGVS_by_tr
-
-
-class LoggerAction(argparse.Action):
-    """Manages logger level parameters (The value "INFO" becomes logging.info and so on)."""
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        log_level = None
-        if values == "DEBUG":
-            log_level = logging.DEBUG
-        elif values == "INFO":
-            log_level = logging.INFO
-        elif values == "WARNING":
-            log_level = logging.WARNING
-        elif values == "ERROR":
-            log_level = logging.ERROR
-        elif values == "CRITICAL":
-            log_level = logging.CRITICAL
-        setattr(namespace, self.dest, log_level)
 
 
 def getConsistentHGVS(new_hgvs_str, old_hgvs_str):
@@ -326,6 +143,24 @@ def getConsistentHGVS(new_hgvs_str, old_hgvs_str):
                     if old_hgvs.change == new_hgvs.change and old_hgvs.accession.id == new_hgvs.accession.id:
                         final_hgvs_str = old_hgvs_str
     return final_hgvs_str
+
+
+class LoggerAction(argparse.Action):
+    """Manages logger level parameters (The value "INFO" becomes logging.info and so on)."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        log_level = None
+        if values == "DEBUG":
+            log_level = logging.DEBUG
+        elif values == "INFO":
+            log_level = logging.INFO
+        elif values == "WARNING":
+            log_level = logging.WARNING
+        elif values == "ERROR":
+            log_level = logging.ERROR
+        elif values == "CRITICAL":
+            log_level = logging.CRITICAL
+        setattr(namespace, self.dest, log_level)
 
 
 ########################################################################
