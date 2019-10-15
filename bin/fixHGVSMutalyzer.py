@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -92,10 +92,7 @@ def getHGVSByTr(res_data):
     HGVS_by_tr = {}
     for tr_acc, HGVSc in HGVSc_by_tr.items():
         HGVSp = ""
-        if tr_acc not in prot_by_tr:
-            if tr_acc[1] != "R":  # Correspond to mRNA and the link with prot does not exist
-                raise Exception("The protein ID for the transcript {} cannot be found".format(tr_acc))
-        else:
+        if tr_acc in prot_by_tr:  # if the mRNA is linked to a protein (for predicted mRNA and some variants out of CDS runMutalyzer does not return any protein)
             prot_acc = prot_by_tr[tr_acc]
             HGVSp = HGVSp_by_prot[prot_acc]
         tr_base_ac, tr_acc_version = tr_acc.split(".")
