@@ -1,5 +1,17 @@
 #!/usr/bin/env python
+import os
+import re
 from distutils.core import setup
+
+
+def get_version():
+    version = None
+    notes_filepath = "RELEASES_NOTES.md"
+    if os.path.exists(notes_filepath):
+        with open(notes_filepath) as FH:
+            first_line = FH.readline()
+            version = re.search("^\#\s+.+\s+(.+)\s+\[", first_line).groups()[0]  # Example: "# v2.5.0 [DEV]"
+    return version
 
 
 def load_requirements(path):
@@ -11,7 +23,7 @@ def load_requirements(path):
 
 setup(
     name='anacore',
-    version='2.5.0',
+    version=get_version(),
     description='Libraries to read/write/process standard files in NGS.',
     long_description='Anapath Core is package containing libraries to read/write/process standard files in NGS. It has been developped for Anatomo-Cytopathologie department of IUCT Oncopole.',
     author='Frederic Escudie',
