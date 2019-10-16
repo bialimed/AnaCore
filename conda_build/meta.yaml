@@ -1,0 +1,21 @@
+{% set version = "2.5.0" %}
+
+package:
+    name: anacore-utils
+    version: {{ version }}
+
+source:
+    path: ..
+
+requirements:
+    build:
+        - python 3.6.7
+        - setuptools
+    run:
+        - python 3.6.7
+
+about:
+    summary: "Python libraries and scripts to manage NGS data."
+    license: GNU GPL v3
+    #home: https://github.com/fescudie/anacore
+    #doc_source_url: https://github.com/fescudie/anacore/blob/{{ version }}/README
