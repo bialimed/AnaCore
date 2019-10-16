@@ -14,6 +14,19 @@ def get_version():
     return version
 
 
+def load_scripts(path):
+    scripts = []
+    for filename in os.listdir(path):
+        filepath = os.path.join(path, filename)
+        if os.path.isdir(filepath):
+            if filename != "test":
+                load_scripts(filepath)
+        else:
+            if filename.endswith(".py") and not filename.startswith("__"):
+                scripts.append(filepath)
+    return scripts
+
+
 def load_requirements(path):
     requirements = []
     with open(path) as FH:
@@ -22,13 +35,13 @@ def load_requirements(path):
 
 
 setup(
-    name='anacore',
+    name='anacore-bin',
     version=get_version(),
-    description='Libraries to read/write/process standard files in NGS.',
-    long_description='Anapath Core is package containing libraries to read/write/process standard files in NGS. It has been developped for Anatomo-Cytopathologie department of IUCT Oncopole.',
+    description='Scripts to process NGS analyses.',
     author='Frederic Escudie',
     author_email='escudie.frederic@iuct-oncopole.fr',
     license='GNU GPL v3',
-    packages=["anacore"],
-    install_requires=load_requirements("requirements.txt")
+    packages=["bin"],
+    install_requires=load_requirements("requirements.txt"),
+    scripts=load_scripts("bin")
 )
