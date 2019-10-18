@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -477,7 +477,21 @@ two	28	98	14	15"""
                 self.expected_rec["one"].string[31:42],
                 FH.getSub("one", 32, 42)
             )
-
+            # nt on first and second line
+            self.assertEqual(
+                self.expected_rec["one"].string[29:35],
+                FH.getSub("one", 30, 35)
+            )
+            # nt on second and third line
+            self.assertEqual(
+                self.expected_rec["one"].string[57:63],
+                FH.getSub("one", 58, 63)
+            )
+            # nt on first, second and third line
+            self.assertEqual(
+                self.expected_rec["one"].string[29:63],
+                FH.getSub("one", 30, 63)
+            )
 
 ########################################################################
 #
