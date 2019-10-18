@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.0'
+__version__ = '2.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -608,8 +608,8 @@ class IdxFastaIO(FastaIO):
         :rtype: str
         """
         end = self.index[id].length if end is None else end
-        read_start = self.index[id].offset + start - 1 + int(start / self.index[id].line_bases)
-        read_end = self.index[id].offset + end - 1 + int(end / self.index[id].line_bases)
+        read_start = self.index[id].offset + start - 1 + int((start - 1) / self.index[id].line_bases)
+        read_end = self.index[id].offset + end - 1 + int((end - 1) / self.index[id].line_bases)
         self.file_handle.seek(read_start)
         seq = self.file_handle.read(read_end - read_start + 1).replace("\n", "").replace("\r", "")
         return seq
