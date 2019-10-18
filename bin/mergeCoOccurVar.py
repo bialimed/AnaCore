@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -29,7 +29,12 @@ import pysam
 import logging
 import argparse
 from statistics import mean
-from anacore.sequenceIO import FastaIO
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
+sys.path.append(LIB_DIR)
+
+from anacore.sequenceIO import IdxFastaIO
 from anacore.vcf import VCFIO, VCFRecord, HeaderInfoAttr
 
 
@@ -272,6 +277,10 @@ if __name__ == "__main__":
     """
     :todo:
       - merge by group not upstream to downstream
+      - pb: if one variant on haplotype A and is located between two others on the haplotype B
+      - pb: variants are not standardized to upstream in alignment
+      - pb: distance can be change with upstream and downstream movement of variants
+      - pb: AAA/- and AA/-, in this case the AAA/- are count in AA/-
       - count fragment overlapping the two and not the reads (increase length)
     """
     # Manage parameters
@@ -296,73 +305,67 @@ if __name__ == "__main__":
     log.setLevel(args.logging_level)
     log.info("Command: " + " ".join(sys.argv))
 
-    # Load reference sequences
-    log.info("Load reference sequences")
-    seq_by_chrom = {}
-    with FastaIO(args.input_sequences) as FH_seq:
-        for record in FH_seq:
-            seq_by_chrom[record.id] = record.string
-
     # Merge variants
-    log.info("Process merge")
-    with VCFIO(args.output_variants, "w") as FH_out:
-        with pysam.AlignmentFile(args.input_aln, "rb") as FH_aln:
-            with VCFIO(args.input_variants) as FH_vcf:
-                # Header
-                FH_out.copyHeader(FH_vcf)
-                FH_out.info["MCO_VAR"] = HeaderInfoAttr("MCO_VAR", "Name of the variants merged because their occur on same reads.", type="String", number=".")
-                FH_out.info["MCO_QUAL"] = HeaderInfoAttr("MCO_QUAL", "Qualities of the variants merged because their occur on same reads.", type="String", number=".")
-                FH_out.info["MCO_IR"] = HeaderInfoAttr("MCO_IR", "Co-occurancy rate between pairs of variants.", type="String", number=".")
-                FH_out.info["MCO_IC"] = HeaderInfoAttr("MCO_IC", "Co-occurancy count between pairs of variants.", type="String", number=".")
-                FH_out.writeHeader()
-                # Records
-                prev = None
-                for curr in FH_vcf:
-                    curr.normalizeSingleAllele()
-                    prev_is_merged = False
+    with IdxFastaIO(args.input_sequences, use_cache=True) as FH_seq:
+        with VCFIO(args.output_variants, "w") as FH_out:
+            with pysam.AlignmentFile(args.input_aln, "rb") as FH_aln:
+                with VCFIO(args.input_variants) as FH_vcf:
+                    # Header
+                    FH_out.copyHeader(FH_vcf)
+                    FH_out.info["MCO_VAR"] = HeaderInfoAttr("MCO_VAR", "Name of the variants merged because their occur on same reads.", type="String", number=".")
+                    FH_out.info["MCO_QUAL"] = HeaderInfoAttr("MCO_QUAL", "Qualities of the variants merged because their occur on same reads.", type="String", number=".")
+                    FH_out.info["MCO_IR"] = HeaderInfoAttr("MCO_IR", "Co-occurancy rate between pairs of variants.", type="String", number=".")
+                    FH_out.info["MCO_IC"] = HeaderInfoAttr("MCO_IC", "Co-occurancy count between pairs of variants.", type="String", number=".")
+                    FH_out.writeHeader()
+                    # Records
+                    prev = None
+                    for curr in FH_vcf:
+                        curr.normalizeSingleAllele()
+                        prev_is_merged = False
+                        if prev is not None:
+                            if prev.chrom == curr.chrom:
+                                setRefPos(prev)
+                                setRefPos(curr)
+                                if prev.start > curr.start:  # Fix order problem after standardization
+                                    aux = prev
+                                    prev = curr
+                                    curr = aux
+                                if curr.start - prev.end <= args.max_distance:  # The two records are close together
+                                    chrom_seq = FH_seq.get(curr.chrom).string
+                                    prev_AF = prev.getPopAltAF()[0]
+                                    curr_AF = curr.getPopAltAF()[0]
+                                    AF_diff = 1 - (min(prev_AF, curr_AF) / max(prev_AF, curr_AF))
+                                    if AF_diff <= args.AF_diff_rate:  # The two records have similar frequencies
+                                        prev.isIns = prev.isInsertion()
+                                        curr.isIns = curr.isInsertion()
+                                        # Set supporting reads
+                                        setSupportingReads(prev, curr, chrom_seq, FH_aln, log)
+                                        # Check co-occurence
+                                        if len(prev.supporting_reads) == 0 and len(curr.supporting_reads) == 0:
+                                            log.warning("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
+                                        else:
+                                            intersection_count = len(prev.supporting_reads & curr.supporting_reads)
+                                            intersection_rate = intersection_count / len(prev.supporting_reads | curr.supporting_reads)
+                                            log.info("{} and {} intersection rate: {:.5} ; number: {}.".format(prev.getName(), curr.getName(), intersection_rate, intersection_count))
+                                            if intersection_rate >= args.intersection_rate and intersection_count >= args.intersection_count:
+                                                # Merge variants
+                                                prev_is_merged = True
+                                                merged = mergedRecord(prev, curr, chrom_seq)
+                                                log.info("Merge {} and {} in {}.".format(prev.getName(), curr.getName(), merged.getName()))
+                                                merged.info["MCO_IR"] = []
+                                                if "MCO_IR" in prev.info:
+                                                    for curr_IR in prev.info["MCO_IR"]:
+                                                        merged.info["MCO_IR"].append(curr_IR)
+                                                merged.info["MCO_IR"].append(round(intersection_rate, 4))
+                                                merged.info["MCO_IC"] = []
+                                                if "MCO_IC" in prev.info:
+                                                    for curr_IC in prev.info["MCO_IC"]:
+                                                        merged.info["MCO_IC"].append(curr_IC)
+                                                merged.info["MCO_IC"].append(intersection_count)
+                                                curr = merged
+                            if not prev_is_merged:
+                                FH_out.write(prev)
+                        prev = curr
                     if prev is not None:
-                        if prev.chrom == curr.chrom:
-                            setRefPos(prev)
-                            setRefPos(curr)
-                            if prev.start > curr.start:  # Fix order problem after standardization
-                                aux = prev
-                                prev = curr
-                                curr = aux
-                            if curr.start - prev.end < args.max_distance:  # The two records are close together
-                                prev_AF = prev.getPopAF()[0]
-                                curr_AF = curr.getPopAF()[0]
-                                AF_diff = 1 - (min(prev_AF, curr_AF) / max(prev_AF, curr_AF))
-                                if AF_diff <= args.AF_diff_rate:  # The two records have similar frequencies
-                                    prev.isIns = prev.isInsertion()
-                                    curr.isIns = curr.isInsertion()
-                                    # Set supporting reads
-                                    setSupportingReads(prev, curr, seq_by_chrom[prev.chrom], FH_aln, log)
-                                    # Check co-occurence
-                                    if len(prev.supporting_reads) == 0 and len(curr.supporting_reads) == 0:
-                                        log.warning("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
-                                    else:
-                                        intersection_count = len(prev.supporting_reads & curr.supporting_reads)
-                                        intersection_rate = intersection_count / len(prev.supporting_reads | curr.supporting_reads)
-                                        log.info("{} and {} intersection rate: {:.5} ; number: {}.".format(prev.getName(), curr.getName(), intersection_rate, intersection_count))
-                                        if intersection_rate >= args.intersection_rate and intersection_count >= args.intersection_count:
-                                            # Merge variants
-                                            prev_is_merged = True
-                                            merged = mergedRecord(prev, curr, seq_by_chrom[prev.chrom])
-                                            log.info("Merge {} and {} in {}.".format(prev.getName(), curr.getName(), merged.getName()))
-                                            merged.info["MCO_IR"] = []
-                                            if "MCO_IR" in prev.info:
-                                                for curr_IR in prev.info["MCO_IR"]:
-                                                    merged.info["MCO_IR"].append(curr_IR)
-                                            merged.info["MCO_IR"].append(round(intersection_rate, 4))
-                                            merged.info["MCO_IC"] = []
-                                            if "MCO_IC" in prev.info:
-                                                for curr_IC in prev.info["MCO_IC"]:
-                                                    merged.info["MCO_IC"].append(curr_IC)
-                                            merged.info["MCO_IC"].append(intersection_count)
-                                            curr = merged
-                        if not prev_is_merged:
-                            FH_out.write(prev)
-                    prev = curr
-                if prev is not None:
-                    FH_out.write(prev)
+                        FH_out.write(prev)
     log.info("End of job")
