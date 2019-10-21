@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.1'
+__version__ = '2.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -607,9 +607,15 @@ class IdxFastaIO(FastaIO):
         :return: The sequence selected.
         :rtype: str
         """
+        endline_marker_len = self.index[id].line_width - self.index[id].line_bases
+        # Start position
+        start_line_idx = int((start - 1) / self.index[id].line_bases)
+        read_start = self.index[id].offset + start - 1 + start_line_idx * endline_marker_len
+        # End position
         end = self.index[id].length if end is None else end
-        read_start = self.index[id].offset + start - 1 + int((start - 1) / self.index[id].line_bases)
-        read_end = self.index[id].offset + end - 1 + int((end - 1) / self.index[id].line_bases)
+        end_line_idx = int((end - 1) / self.index[id].line_bases)
+        read_end = self.index[id].offset + end - 1 + end_line_idx * endline_marker_len
+        # Get sequence
         self.file_handle.seek(read_start)
         seq = self.file_handle.read(read_end - read_start + 1).replace("\n", "").replace("\r", "")
         return seq
@@ -627,10 +633,7 @@ class IdxFastaIO(FastaIO):
             if self.cached.id == id:
                 return self.cached
         # The sequence is not already cached
-        start = self.index[id].offset
-        read_length = self.index[id].length + int(self.index[id].length / self.index[id].line_bases)
-        self.file_handle.seek(start)
-        seq = self.file_handle.read(read_length).replace("\n", "").replace("\r", "")
+        seq = self.getSub(id, 1, None)
         selected = Sequence(id, seq)
         if self.use_cache:
             self.cached = selected
