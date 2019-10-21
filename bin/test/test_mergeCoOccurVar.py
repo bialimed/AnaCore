@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '2.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -38,7 +38,8 @@ sys.path.append(BIN_DIR)
 sys.path.append(LIB_DIR)
 
 from anacore.vcf import VCFRecord
-from mergeCoOccurVar import mergedRecord, setSupportingReads, setRefPos
+from anacore.sequenceIO import IdxFastaIO
+from mergeCoOccurVar import mergedRecord, getIncludingReads, getSupportingReads, setRefPos
 
 BIN_DIR = os.path.dirname(CURRENT_DIR)
 os.environ['PATH'] = BIN_DIR + os.pathsep + os.environ['PATH']
@@ -59,7 +60,7 @@ class LoggerSilencer:
 class SetSupportingReads(unittest.TestCase):
     def tearDown(self):
         # Clean temporary files
-        for curr_file in [self.tmp_sam_path, self.tmp_bam_path, self.tmp_bam_path + ".bai"]:
+        for curr_file in [self.tmp_fasta_path, self.tmp_faidx_path, self.tmp_sam_path, self.tmp_bam_path, self.tmp_bam_path + ".bai"]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 
@@ -68,9 +69,15 @@ class SetSupportingReads(unittest.TestCase):
         unique_id = str(uuid.uuid1())
         self.tmp_sam_path = os.path.join(tmp_folder, unique_id + ".sam")
         self.tmp_bam_path = os.path.join(tmp_folder, unique_id + ".bam")
+        self.tmp_fasta_path = os.path.join(tmp_folder, unique_id + ".fa")
+        self.tmp_faidx_path = os.path.join(tmp_folder, unique_id + ".fa.fai")
         self.ref_seq = "ggaagccctgatcACGCAAATCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgcattggggtg"
         #               | | | | | |  |  |  |  |
         #               1 3 5 7 9 11 14 17 20 23
+        with open(self.tmp_fasta_path, "w") as FH_seq:
+            FH_seq.write(">chr1\n{}".format(self.ref_seq))
+        with open(self.tmp_faidx_path, "w") as FH_faidx:
+            FH_faidx.write("chr1\t{}\t6\t200\t201".format(len(self.ref_seq)))
         self.reads_content = """>subtit_AAA/CAC_1_alt
 ggaagccctgatcACGCCACTCTCGGCATGCCGATTaagtgtgctctgaacaggacgaactggatttcctcatggaagccctgatcatcagcaaattcaaccaccagaacattgttcgctgca
 >subtit_AAA/CAC_2_alt
@@ -285,40 +292,43 @@ insDelNoStd_CAAA/CGTGA_2_alt	0	chr1	3	60	15M3I1M2D103M	*	0	0	AAGCCCTGATCACGCGTGA
         ]
 
     def testSetSupportingReads(self):
-        for first, second, aln_content in self.test_cases:
-            # Write BAM
-            with open(self.tmp_sam_path, "w") as FH_sam:
-                FH_sam.write(aln_content)
-            with pysam.AlignmentFile(self.tmp_sam_path) as FH_sam:
-                with pysam.AlignmentFile(self.tmp_bam_path, "wb", template=FH_sam) as FH_bam:
-                    for rec in FH_sam:
-                        FH_bam.write(rec)
-            pysam.index(self.tmp_bam_path)
-            # Eval
-            first.normalizeSingleAllele()
-            second.normalizeSingleAllele()
-            with pysam.AlignmentFile(self.tmp_bam_path) as FH_aln:
-                setRefPos(first)
-                setRefPos(second)
-                first.isIns = first.isInsertion()
-                second.isIns = second.isInsertion()
-                setSupportingReads(first, second, self.ref_seq, FH_aln, LoggerSilencer())
-                # Check supporting first
-                expected = sorted([
-                    "{}_{}".format(first.id, curr_suffix) for curr_suffix in ["1_alt", "2_alt", "4_mixUp"]
-                ])
-                self.assertEqual(
-                    sorted(first.supporting_reads),
-                    expected
-                )
-                # Check supporting first
-                expected = sorted([
-                    "{}_{}".format(second.id, curr_suffix) for curr_suffix in ["1_alt", "2_alt", "5_mixDown"]
-                ])
-                self.assertEqual(
-                    sorted(second.supporting_reads),
-                    expected
-                )
+        with IdxFastaIO(self.tmp_fasta_path) as FH_seq:
+            for first, second, aln_content in self.test_cases:
+                # Write BAM
+                with open(self.tmp_sam_path, "w") as FH_sam:
+                    FH_sam.write(aln_content)
+                with pysam.AlignmentFile(self.tmp_sam_path) as FH_sam:
+                    with pysam.AlignmentFile(self.tmp_bam_path, "wb", template=FH_sam) as FH_bam:
+                        for rec in FH_sam:
+                            FH_bam.write(rec)
+                pysam.index(self.tmp_bam_path)
+                # Eval
+                first.normalizeSingleAllele()
+                second.normalizeSingleAllele()
+                with pysam.AlignmentFile(self.tmp_bam_path) as FH_aln:
+                    setRefPos(first, FH_seq)
+                    setRefPos(second, FH_seq)
+                    first.isIns = first.isInsertion()
+                    second.isIns = second.isInsertion()
+                    shared_reads = getIncludingReads(FH_aln, "chr1", first.upstream_start, second.downstream_end)
+                    first.supporting_reads = getSupportingReads(first, self.ref_seq, FH_aln, LoggerSilencer()) & shared_reads
+                    second.supporting_reads = getSupportingReads(second, self.ref_seq, FH_aln, LoggerSilencer()) & shared_reads
+                    # Check supporting first
+                    expected = sorted([
+                        "{}_{}".format(first.id, curr_suffix) for curr_suffix in ["1_alt", "2_alt", "4_mixUp"]
+                    ])
+                    self.assertEqual(
+                        sorted(first.supporting_reads),
+                        expected
+                    )
+                    # Check supporting first
+                    expected = sorted([
+                        "{}_{}".format(second.id, curr_suffix) for curr_suffix in ["1_alt", "2_alt", "5_mixDown"]
+                    ])
+                    self.assertEqual(
+                        sorted(second.supporting_reads),
+                        expected
+                    )
 
 
 class MergeCoOccurVar(unittest.TestCase):

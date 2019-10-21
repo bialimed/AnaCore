@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '2.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -79,58 +79,178 @@ def getAlnCmp(read, ref_seq):
     return ref_aln, read_aln
 
 
-def setRefPos(variant):
+def setRefPos(variant, seq_handler, padding=200):
     """
     Add start and end attributes in VCFRecord. For insertions the start is defined on the first position before the insertion and the end on the last position affected by the insertion.
 
     :param variant: The variant to update.
     :type variant: anacore.vcf.VCFRecord
     """
-    variant.start = int(variant.refStart())
-    if variant.isInsertion():
-        if variant.start == int(variant.refStart() + 0.5):
-            variant.start -= 1
-    variant.end = int(variant.refEnd())
+    if variant.ref == VCFRecord.getEmptyAlleleMarker() or variant.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Normalized indel
+        # Most upstream
+        variant.upstream_start, variant.upstream_end = getStartEnd(variant)
+        # Most downstream
+        sub_region = seq_handler.getSub(variant.chrom, variant.pos - 2, variant.pos + len(variant.ref) + padding)
+        chrom_pos = variant.pos
+        variant.pos = 3  # Switch position from chromosome to position from subregion
+        downstream_var = variant.getMostDownstream(sub_region)
+        variant.pos = chrom_pos + variant.pos - 3  # Switch position from subregion to position from chromosome
+        downstream_var.pos = variant.pos
+        variant.downstream_start, variant.downstream_end = getStartEnd(downstream_var)
+    else:
+        variant.upstream_start, variant.upstream_end = getStartEnd(variant)
+        variant.downstream_start = variant.upstream_start
+        variant.downstream_end = variant.upstream_end
 
 
-def setSupportingReads(prev, curr, chrom_seq, FH_aln, log):
+def getStartEnd(variant):
     """
-    Add supporting reads for each variant. Only the reads overlapping the positions of the two variants are take into account.
+    Return reference start and end for a variant. For insertions the start is defined on the first position before the insertion and the end on the last position affected by the insertion.
 
-    :param prev: The upstream variant to update.
-    :type prev: anacore.vcf.VCFRecord updated with setRefPos() and isIns
-    :param curr: The donstream variant to update.
-    :type curr: anacore.vcf.VCFRecord updated with setRefPos() and isIns
+    :param variant: The variant.
+    :type variant: anacore.vcf.VCFRecord
+    :return: start and end.
+    :rtype: tuple
+    """
+    start = int(variant.refStart())
+    if variant.isInsertion():
+        if start == int(variant.refStart() + 0.5):
+            start -= 1
+    end = int(variant.refEnd())
+    return start, end
+
+
+def getReadRefAlt(ref_aln, read_aln, ref_start, target_is_ins, target_start, target_end):
+    """
+    Return reference sequence and read sequence for the selected target.
+
+    :param ref_aln: Reference sequence in alignment.
+    :type ref_aln: str
+    :param read_aln: Read sequence in alignment.
+    :type read_aln: str
+    :param ref_start: Start position for the alignment on the reference (1-based).
+    :type ref_start: int
+    :param target_is_ins: The anlyzed target correspond to an exon.
+    :type target_is_ins: bool
+    :param target_start: Start reference position for the target (1-based).
+    :type target_start: int
+    :param target_end: End reference position for the target (1-based).
+    :type target_end: int
+    :return: Reference and alternative sequence for the read.
+    :rtype: tuple
+    """
+    alt = read_aln[target_start - ref_start:target_end - ref_start + 1]
+    ref = ref_aln[target_start - ref_start:target_end - ref_start + 1]
+    if target_is_ins:
+        while len(ref[0]) > 0 and len(alt[0]) > 0 and alt[0][0] == ref[0][0]:
+            alt[0] = alt[0][1:]
+            ref[0] = ref[0][1:]
+    return ref, alt
+
+
+def getIncludingReads(FH_aln, chrom_id, target_start, target_end):
+    """
+    Return read ID of reads including the target.
+
+    :param FH_aln: The file handle to the alignments file.
+    :type FH_aln: pysam.AlignmentFile
+    :param chrom_id: Chromosome ID.
+    :type chrom_id: str
+    :param target_start: Start position for target.
+    :type target_start: int
+    :param target_end: End position for target.
+    :type target_end: int
+    :return: Reads IDs of reads including the target.
+    :rtype: set
+    """
+    including_reads = set()
+    for read in FH_aln.fetch(chrom_id, target_start - 1, target_end):
+        if not read.is_duplicate:
+            reads_pos = read.get_reference_positions()
+            if len(reads_pos) != 0:  # Skip alignment with problem
+                ref_start = reads_pos[0] + 1  # 0-based to 1-based
+                ref_end = reads_pos[-1] + 1  # 0-based to 1-based
+                includes = (ref_start <= target_start and ref_end >= target_end)
+                if includes:
+                    including_reads.add(read.query_name)
+    return including_reads
+
+
+def getSupportingReads(var, chrom_seq, FH_aln, log):
+    """
+    Return read ID of reads supporting the altenative variant.
+
+    :param var: The variant.
+    :type var: anacore.vcf.VCFRecord updated with setRefPos() and isIns
     :param chrom_seq: The sequence of the chromosome.
     :type chrom_seq: str
     :param FH_aln: The file handle to the alignments file. The variants must have been defined from this alignments file.
     :type FH_aln: pysam.AlignmentFile
     :param log: The logger object.
     :type log: logging.Logger
+    :return: The list of supporting reads IDs.
+    :rtype: set
     """
-    prev.supporting_reads = set()
-    curr.supporting_reads = set()
-    for read in FH_aln.fetch(curr.chrom, prev.start, curr.end):
+    supporting_reads = set()
+    is_insertion = var.isInsertion()
+    for read in FH_aln.fetch(var.chrom, var.upstream_start - 1, var.downstream_end):
         if not read.is_duplicate:
             reads_pos = read.get_reference_positions()
             if len(reads_pos) != 0:  # Skip alignment with problem
                 ref_start = reads_pos[0] + 1  # 0-based to 1-based
                 ref_end = reads_pos[-1] + 1  # 0-based to 1-based
-                overlap_the_two = (ref_start <= prev.start and ref_end >= prev.end) and (ref_start <= curr.start and ref_end >= curr.end)
-                if overlap_the_two:
+                overlap_var = (ref_start <= var.upstream_start and ref_end >= var.downstream_end)
+                if overlap_var:
                     ref_aln, read_aln = getAlnCmp(read, chrom_seq[ref_start - 1:ref_end])
-                    for var in [prev, curr]:
-                        alt = read_aln[var.start - ref_start:var.end - ref_start + 1]
-                        ref = ref_aln[var.start - ref_start:var.end - ref_start + 1]
-                        if var.isIns:
-                            while len(ref[0]) > 0 and len(alt[0]) > 0 and alt[0][0] == ref[0][0]:
-                                alt[0] = alt[0][1:]
-                                ref[0] = ref[0][1:]
-                        var_alt = var.alt[0].upper().replace(VCFRecord.getEmptyAlleleMarker(), "")
-                        var_ref = var.ref.upper().replace(VCFRecord.getEmptyAlleleMarker(), "")
-                        if "".join(alt).upper() == var_alt and "".join(ref).upper() == var_ref:  # Is present
+                    var_alt = var.alt[0].upper().replace(VCFRecord.getEmptyAlleleMarker(), "")
+                    var_ref = var.ref.upper().replace(VCFRecord.getEmptyAlleleMarker(), "")
+                    # Test with upstream coordinates
+                    ref, alt = getReadRefAlt(ref_aln, read_aln, ref_start, is_insertion, var.upstream_start, var.upstream_end)
+                    if "".join(alt).upper() == var_alt and "".join(ref).upper() == var_ref:  # The alternative is present on most upstream coordinates
+                        log.debug("{}\t{}/{}\t'{}'\t'{}'\t{}".format(read.query_name, var.ref, var.alt[0], "".join(ref), "".join(alt), read.cigarstring))
+                        supporting_reads.add(read.query_name)  # Fragment is overlapping if at least one of his read is ovelapping
+                    # Test with downstream coordinates
+                    elif var.upstream_start != var.downstream_start:
+                        ref, alt = getReadRefAlt(ref_aln, read_aln, ref_start, is_insertion, var.downstream_start, var.downstream_end)
+                        if "".join(alt).upper() == var_alt and "".join(ref).upper() == var_ref:  # The alternative is present on most downstream coordinates
                             log.debug("{}\t{}/{}\t'{}'\t'{}'\t{}".format(read.query_name, var.ref, var.alt[0], "".join(ref), "".join(alt), read.cigarstring))
-                            var.supporting_reads.add(read.query_name)  # Fragment is overlapping if at least one of his read is ovelapping
+                            supporting_reads.add(read.query_name)  # Fragment is overlapping if at least one of his read is ovelapping
+    return supporting_reads
+
+
+def areColocated(first, second):
+    """
+    Return True if one of the two variants is included in the location of the other.
+
+    :param first: The variant.
+    :type first: anacore.vcf.VCFRecord updated with setRefPos()
+    :param second: The variant.
+    :type second: anacore.vcf.VCFRecord updated with setRefPos()
+    :return: True if one of the two variants is included in the location of the other.
+    :rtype: bool
+    """
+    first_up = set([elt for elt in range(first.upstream_start, first.upstream_end + 1)])
+    second_up = set([elt for elt in range(second.upstream_start, second.upstream_end + 1)])
+    first_down = set([elt for elt in range(first.downstream_start, first.downstream_end + 1)])
+    second_down = set([elt for elt in range(second.downstream_start, second.downstream_end + 1)])
+    included = False
+    if len(first_up - second_up) == 0:
+        included = True
+    elif len(first_up - second_down) == 0:
+        included = True
+    elif len(first_down - second_up) == 0:
+        included = True
+    elif len(first_down - second_down) == 0:
+        included = True
+    elif len(second_up - first_up) == 0:
+        included = True
+    elif len(second_down - first_up) == 0:
+        included = True
+    elif len(second_up - first_down) == 0:
+        included = True
+    elif len(second_down - first_down) == 0:
+        included = True
+    return included
 
 
 def mergedRecord(first, second, ref_seq):
@@ -275,13 +395,7 @@ class LoggerAction(argparse.Action):
 ########################################################################
 if __name__ == "__main__":
     """
-    :todo:
-      - merge by group not upstream to downstream
-      - pb: if one variant on haplotype A and is located between two others on the haplotype B
-      - pb: variants are not standardized to upstream in alignment
-      - pb: distance can be change with upstream and downstream movement of variants
-      - pb: AAA/- and AA/-, in this case the AAA/- are count in AA/-
-      - count fragment overlapping the two and not the reads (increase length)
+    :todo: count fragment overlapping the two and not the reads (increase length)
     """
     # Manage parameters
     parser = argparse.ArgumentParser(description='Groups variants occuring in same reads.')
@@ -293,8 +407,8 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--max-distance', default=10, type=int, help='Maximum distance between two merged variants. [Default: %(default)s]')
     group_input = parser.add_argument_group('Inputs')  # Inputs
     group_input.add_argument('-a', '--input-aln', required=True, help='Path to the alignment file (format: BAM).')
-    group_input.add_argument('-i', '--input-variants', required=True, help='Path to the variants file (format: VCF). Variants must be ordered by position. They should not be move to upstream.')
-    group_input.add_argument('-s', '--input-sequences', required=True, help='Path to the reference sequences file (format: fasta).')
+    group_input.add_argument('-i', '--input-variants', required=True, help='Path to the variants file (format: VCF). Variants must be ordered by position and should be move to upstream.')
+    group_input.add_argument('-s', '--input-sequences', required=True, help='Path to the reference sequences file (format: fasta with faidx).')
     group_output = parser.add_argument_group('Outputs')  # Outputs
     group_output.add_argument('-o', '--output-variants', required=True, help='Path to the variant file. (format: VCF).')
     args = parser.parse_args()
@@ -318,54 +432,90 @@ if __name__ == "__main__":
                     FH_out.info["MCO_IC"] = HeaderInfoAttr("MCO_IC", "Co-occurancy count between pairs of variants.", type="String", number=".")
                     FH_out.writeHeader()
                     # Records
-                    prev = None
+                    prev_list = list()
                     for curr in FH_vcf:
+                        chrom_seq = FH_seq.get(curr.chrom).string
                         curr.normalizeSingleAllele()
-                        prev_is_merged = False
-                        if prev is not None:
-                            if prev.chrom == curr.chrom:
-                                setRefPos(prev)
-                                setRefPos(curr)
-                                if prev.start > curr.start:  # Fix order problem after standardization
-                                    aux = prev
-                                    prev = curr
-                                    curr = aux
-                                if curr.start - prev.end <= args.max_distance:  # The two records are close together
-                                    chrom_seq = FH_seq.get(curr.chrom).string
-                                    prev_AF = prev.getPopAltAF()[0]
-                                    curr_AF = curr.getPopAltAF()[0]
-                                    AF_diff = 1 - (min(prev_AF, curr_AF) / max(prev_AF, curr_AF))
-                                    if AF_diff <= args.AF_diff_rate:  # The two records have similar frequencies
-                                        prev.isIns = prev.isInsertion()
-                                        curr.isIns = curr.isInsertion()
-                                        # Set supporting reads
-                                        setSupportingReads(prev, curr, chrom_seq, FH_aln, log)
-                                        # Check co-occurence
-                                        if len(prev.supporting_reads) == 0 and len(curr.supporting_reads) == 0:
-                                            log.warning("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
-                                        else:
-                                            intersection_count = len(prev.supporting_reads & curr.supporting_reads)
-                                            intersection_rate = intersection_count / len(prev.supporting_reads | curr.supporting_reads)
-                                            log.info("{} and {} intersection rate: {:.5} ; number: {}.".format(prev.getName(), curr.getName(), intersection_rate, intersection_count))
-                                            if intersection_rate >= args.intersection_rate and intersection_count >= args.intersection_count:
-                                                # Merge variants
-                                                prev_is_merged = True
-                                                merged = mergedRecord(prev, curr, chrom_seq)
-                                                log.info("Merge {} and {} in {}.".format(prev.getName(), curr.getName(), merged.getName()))
-                                                merged.info["MCO_IR"] = []
-                                                if "MCO_IR" in prev.info:
-                                                    for curr_IR in prev.info["MCO_IR"]:
-                                                        merged.info["MCO_IR"].append(curr_IR)
-                                                merged.info["MCO_IR"].append(round(intersection_rate, 4))
-                                                merged.info["MCO_IC"] = []
-                                                if "MCO_IC" in prev.info:
-                                                    for curr_IC in prev.info["MCO_IC"]:
-                                                        merged.info["MCO_IC"].append(curr_IC)
-                                                merged.info["MCO_IC"].append(intersection_count)
-                                                curr = merged
-                            if not prev_is_merged:
-                                FH_out.write(prev)
-                        prev = curr
-                    if prev is not None:
-                        FH_out.write(prev)
+                        curr.supporting_reads = None
+                        setRefPos(curr, FH_seq)
+                        merged_idx = set()
+                        removed_idx = None
+                        for idx, prev in enumerate(prev_list[::-1]):
+                            if removed_idx is None:  # Distance between current variant and previous most upstream variants is ok
+                                if prev.chrom != curr.chrom:
+                                    removed_idx = len(prev_list) - 1 - idx
+                                else:
+                                    variants_distance = max(
+                                        max(0, curr.upstream_start - prev.downstream_end),  # prev is before
+                                        max(0, prev.upstream_start - curr.downstream_end)  # prev is after
+                                    )
+                                    if variants_distance > args.max_distance:  # The two records are close together
+                                        removed_idx = len(prev_list) - 1 - idx
+                                    elif areColocated(curr, prev):
+                                        log.debug("Skip colocated variants {} and {}.".format(prev.getName(), curr.getName()))
+                                    else:  # The two records are close together
+                                        prev_AF = prev.getPopAltAF()[0]
+                                        curr_AF = curr.getPopAltAF()[0]
+                                        AF_diff = 1 - (min(prev_AF, curr_AF) / max(prev_AF, curr_AF))
+                                        log.debug("Allelels frequencies for {} and {}: {:.1%} and {:.1%} (diff rate: {:.2}).".format(prev.getName(), curr.getName(), prev_AF, curr_AF, AF_diff))
+                                        if AF_diff <= args.AF_diff_rate:  # The two records have similar frequencies
+                                            # Set supporting reads
+                                            if prev.supporting_reads is None:
+                                                prev.supporting_reads = getSupportingReads(prev, chrom_seq, FH_aln, log)
+                                            if curr.supporting_reads is None:
+                                                curr.supporting_reads = getSupportingReads(curr, chrom_seq, FH_aln, log)
+                                            shared_reads = getIncludingReads(
+                                                FH_aln,
+                                                curr.chrom,
+                                                min(prev.upstream_start, curr.upstream_start),
+                                                max(prev.downstream_end, curr.downstream_end)
+                                            )
+                                            # Check co-occurence
+                                            if len(shared_reads) == 0:
+                                                log.warning("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
+                                            else:
+                                                prev_support_shared = (prev.supporting_reads & shared_reads)
+                                                curr_support_shared = (curr.supporting_reads & shared_reads)
+                                                intersection_count = len(prev_support_shared & curr_support_shared)
+                                                intersection_rate = intersection_count / len(prev_support_shared | curr_support_shared)
+                                                log.debug("{} and {} intersection rate: {:.5} ; number: {}.".format(prev.getName(), curr.getName(), intersection_rate, intersection_count))
+                                                if intersection_rate >= args.intersection_rate and intersection_count >= args.intersection_count:
+                                                    # Merge variants
+                                                    first = prev
+                                                    second = curr
+                                                    if first.upstream_start > second.upstream_start:
+                                                        first = curr
+                                                        second = prev
+                                                    merged = mergedRecord(first, second, chrom_seq)
+                                                    log.info("Merge {} and {} in {}.".format(prev.getName(), curr.getName(), merged.getName()))
+                                                    merged.info["MCO_IR"] = []
+                                                    if "MCO_IR" in prev.info:
+                                                        for curr_IR in prev.info["MCO_IR"]:
+                                                            merged.info["MCO_IR"].append(curr_IR)
+                                                    merged.info["MCO_IR"].append(round(intersection_rate, 4))
+                                                    merged.info["MCO_IC"] = []
+                                                    if "MCO_IC" in prev.info:
+                                                        for curr_IC in prev.info["MCO_IC"]:
+                                                            merged.info["MCO_IC"].append(curr_IC)
+                                                    merged.info["MCO_IC"].append(intersection_count)
+                                                    merged.normalizeSingleAllele()
+                                                    merged.supporting_reads = None
+                                                    setRefPos(merged, chrom_seq)
+                                                    curr = merged
+                                                    merged_idx.add(len(prev_list) - 1 - idx)
+                        # Write the far records and remove them from the previous ones
+                        if removed_idx is None:
+                            for idx in merged_idx:
+                                del(prev_list[idx])
+                        else:
+                            for idx in merged_idx:
+                                if idx > removed_idx:
+                                    del(prev_list[idx])
+                            for idx in range(removed_idx + 1):
+                                record = prev_list.pop()
+                                if idx not in merged_idx:
+                                    FH_out.write(record)
+                        prev_list.append(curr)
+                    for record in prev_list:
+                        FH_out.write(record)
     log.info("End of job")
