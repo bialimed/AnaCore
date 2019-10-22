@@ -28,6 +28,7 @@ import sys
 import pysam
 import logging
 import argparse
+from copy import deepcopy
 from statistics import mean
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -435,12 +436,13 @@ if __name__ == "__main__":
                     prev_list = list()
                     for curr in FH_vcf:
                         chrom_seq = FH_seq.get(curr.chrom).string
+                        std_curr = deepcopy(curr)
                         curr.normalizeSingleAllele()
                         curr.supporting_reads = None
                         setRefPos(curr, FH_seq)
                         merged_idx = set()
                         removed_idx = None
-                        for idx, prev in enumerate(prev_list[::-1]):
+                        for idx, (prev, std_prev) in enumerate(prev_list[::-1]):
                             if removed_idx is None:  # Distance between current variant and previous most upstream variants is ok
                                 if prev.chrom != curr.chrom:
                                     removed_idx = len(prev_list) - 1 - idx
@@ -502,6 +504,8 @@ if __name__ == "__main__":
                                                     merged.supporting_reads = None
                                                     setRefPos(merged, chrom_seq)
                                                     curr = merged
+                                                    std_curr = deepcopy(curr)
+                                                    std_curr.fastStandardize(FH_seq, 200)
                                                     merged_idx.add(len(prev_list) - 1 - idx)
                         # Write the far records and remove them from the previous ones
                         if removed_idx is None:
@@ -512,10 +516,10 @@ if __name__ == "__main__":
                                 if idx > removed_idx:
                                     del(prev_list[idx])
                             for idx in range(removed_idx + 1):
-                                record = prev_list.pop()
+                                record, std_record = prev_list.pop()
                                 if idx not in merged_idx:
-                                    FH_out.write(record)
-                        prev_list.append(curr)
-                    for record in prev_list:
-                        FH_out.write(record)
+                                    FH_out.write(std_record)
+                        prev_list.append((curr, std_curr))
+                    for record, std_record in prev_list:
+                        FH_out.write(std_record)
     log.info("End of job")
