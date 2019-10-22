@@ -30,6 +30,7 @@ import logging
 import argparse
 from copy import deepcopy
 from statistics import mean
+from collections import deque
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 LIB_DIR = os.path.abspath(os.path.join(os.path.dirname(CURRENT_DIR), "lib"))
@@ -111,7 +112,7 @@ def getStartEnd(variant):
     :param variant: The variant.
     :type variant: anacore.vcf.VCFRecord
     :return: start and end.
-    :rtype: tuple
+    :rtype: (int, int)
     """
     start = int(variant.refStart())
     if variant.isInsertion():
@@ -138,7 +139,7 @@ def getReadRefAlt(ref_aln, read_aln, ref_start, target_is_ins, target_start, tar
     :param target_end: End reference position for the target (1-based).
     :type target_end: int
     :return: Reference and alternative sequence for the read.
-    :rtype: tuple
+    :rtype: (str, str)
     """
     alt = read_aln[target_start - ref_start:target_end - ref_start + 1]
     ref = ref_aln[target_start - ref_start:target_end - ref_start + 1]
@@ -182,7 +183,7 @@ def getSupportingReads(var, chrom_seq, FH_aln, log):
     Return read ID of reads supporting the altenative variant.
 
     :param var: The variant.
-    :type var: anacore.vcf.VCFRecord updated with setRefPos() and isIns
+    :type var: anacore.vcf.VCFRecord updated with iniVariant() and isIns
     :param chrom_seq: The sequence of the chromosome.
     :type chrom_seq: str
     :param FH_aln: The file handle to the alignments file. The variants must have been defined from this alignments file.
@@ -224,9 +225,9 @@ def areColocated(first, second):
     Return True if one of the two variants is included in the location of the other.
 
     :param first: The variant.
-    :type first: anacore.vcf.VCFRecord updated with setRefPos()
+    :type first: anacore.vcf.VCFRecord updated with iniVariant()
     :param second: The variant.
-    :type second: anacore.vcf.VCFRecord updated with setRefPos()
+    :type second: anacore.vcf.VCFRecord updated with iniVariant()
     :return: True if one of the two variants is included in the location of the other.
     :rtype: bool
     """
@@ -252,6 +253,43 @@ def areColocated(first, second):
     elif len(second_down - first_down) == 0:
         included = True
     return included
+
+
+def initVariant(record, FH_seq):
+    """
+    Normalize and add attributes (supporting_reads to None, upstream_start, upstream_end, downstream_start, downstream_end).
+
+    :param record: Record to update.
+    :type record: anacore.vcf.VCFRecord
+    :param FH_seq: File handle to the reference sequences file.
+    :type FH_seq: anacore.sequenceIO.IdxFastaIO
+    """
+    record.normalizeSingleAllele()
+    record.supporting_reads = None
+    setRefPos(record, FH_seq)
+
+
+def traceMerge(record, intersection_rate, intersection_count):
+    """
+    Trace merge info in record.
+
+    :param record: Record to update.
+    :type record: anacore.vcf.VCFRecord
+    :param intersection_rate: Number of reads supporting the two variants against the number of reads supporting the two or only one of the two variants.
+    :type intersection_rate: float
+    :param intersection_count: Number of reads supporting the two variants.
+    :type intersection_count: int
+    """
+    record.info["MCO_IR"] = []
+    if "MCO_IR" in prev.info:
+        for curr_IR in prev.info["MCO_IR"]:
+            record.info["MCO_IR"].append(curr_IR)
+    record.info["MCO_IR"].append(round(intersection_rate, 4))
+    record.info["MCO_IC"] = []
+    if "MCO_IC" in prev.info:
+        for curr_IC in prev.info["MCO_IC"]:
+            record.info["MCO_IC"].append(curr_IC)
+    record.info["MCO_IC"].append(intersection_count)
 
 
 def mergedRecord(first, second, ref_seq):
@@ -433,27 +471,32 @@ if __name__ == "__main__":
                     FH_out.info["MCO_IC"] = HeaderInfoAttr("MCO_IC", "Co-occurancy count between pairs of variants.", type="String", number=".")
                     FH_out.writeHeader()
                     # Records
+                    prev_chrom = None
+                    chrom_var = deque()
                     prev_list = list()
                     for curr in FH_vcf:
                         chrom_seq = FH_seq.get(curr.chrom).string
                         std_curr = deepcopy(curr)
-                        curr.normalizeSingleAllele()
-                        curr.supporting_reads = None
-                        setRefPos(curr, FH_seq)
+                        initVariant(curr, FH_seq)
                         merged_idx = set()
                         removed_idx = None
-                        for idx, (prev, std_prev) in enumerate(prev_list[::-1]):
-                            if removed_idx is None:  # Distance between current variant and previous most upstream variants is ok
-                                if prev.chrom != curr.chrom:
-                                    removed_idx = len(prev_list) - 1 - idx
-                                else:
+                        if prev_chrom is not None and prev_chrom != curr.chrom:  # The chromosome has change between previous and current variant
+                            for prev, std_prev in prev_list:
+                                chrom_var.append(std_prev)
+                            for rec in sorted(chrom_var, key=lambda x: (x.pos, x.refEnd(), x.alt[0])):
+                                FH_out.write(rec)
+                            chrom_var = deque()
+                            prev_chrom = curr.chrom
+                        else:  # The chromosome is the same between previous and current variant
+                            for idx, (prev, std_prev) in enumerate(prev_list[::-1]):
+                                if removed_idx is None:  # Distance between current variant and previous most upstream variants is ok
                                     variants_distance = max(
                                         max(0, curr.upstream_start - prev.downstream_end),  # prev is before
                                         max(0, prev.upstream_start - curr.downstream_end)  # prev is after
                                     )
-                                    if variants_distance > args.max_distance:  # The two records are close together
+                                    if variants_distance > args.max_distance:  # The two records are too far
                                         removed_idx = len(prev_list) - 1 - idx
-                                    elif areColocated(curr, prev):
+                                    elif areColocated(curr, prev):  # The two records are colocated
                                         log.debug("Skip colocated variants {} and {}.".format(prev.getName(), curr.getName()))
                                     else:  # The two records are close together
                                         prev_AF = prev.getPopAltAF()[0]
@@ -466,12 +509,7 @@ if __name__ == "__main__":
                                                 prev.supporting_reads = getSupportingReads(prev, chrom_seq, FH_aln, log)
                                             if curr.supporting_reads is None:
                                                 curr.supporting_reads = getSupportingReads(curr, chrom_seq, FH_aln, log)
-                                            shared_reads = getIncludingReads(
-                                                FH_aln,
-                                                curr.chrom,
-                                                min(prev.upstream_start, curr.upstream_start),
-                                                max(prev.downstream_end, curr.downstream_end)
-                                            )
+                                            shared_reads = getIncludingReads(FH_aln, curr.chrom, min(prev.upstream_start, curr.upstream_start), max(prev.downstream_end, curr.downstream_end))
                                             # Check co-occurence
                                             if len(shared_reads) == 0:
                                                 log.warning("Nothing read overlapp the two evaluated variants: {} and {}. In this condition the merge cannot be evaluated.".format(prev.getName(), curr.getName()))
@@ -489,37 +527,33 @@ if __name__ == "__main__":
                                                         first = curr
                                                         second = prev
                                                     merged = mergedRecord(first, second, chrom_seq)
+                                                    traceMerge(merged, intersection_rate, intersection_count)
                                                     log.info("Merge {} and {} in {}.".format(prev.getName(), curr.getName(), merged.getName()))
-                                                    merged.info["MCO_IR"] = []
-                                                    if "MCO_IR" in prev.info:
-                                                        for curr_IR in prev.info["MCO_IR"]:
-                                                            merged.info["MCO_IR"].append(curr_IR)
-                                                    merged.info["MCO_IR"].append(round(intersection_rate, 4))
-                                                    merged.info["MCO_IC"] = []
-                                                    if "MCO_IC" in prev.info:
-                                                        for curr_IC in prev.info["MCO_IC"]:
-                                                            merged.info["MCO_IC"].append(curr_IC)
-                                                    merged.info["MCO_IC"].append(intersection_count)
-                                                    merged.normalizeSingleAllele()
-                                                    merged.supporting_reads = None
-                                                    setRefPos(merged, chrom_seq)
+                                                    # Prepare merged to become prev
+                                                    merged.fastStandardize(FH_seq, 200)
+                                                    std_curr = deepcopy(merged)
                                                     curr = merged
-                                                    std_curr = deepcopy(curr)
-                                                    std_curr.fastStandardize(FH_seq, 200)
+                                                    initVariant(curr, FH_seq)
                                                     merged_idx.add(len(prev_list) - 1 - idx)
-                        # Write the far records and remove them from the previous ones
-                        if removed_idx is None:
-                            for idx in merged_idx:
-                                del(prev_list[idx])
-                        else:
-                            for idx in merged_idx:
-                                if idx > removed_idx:
+                            # Store the far records and remove them from the previous ones
+                            if removed_idx is None:  # All the variants was close
+                                # Remove individual version of merged variants
+                                for idx in merged_idx:
                                     del(prev_list[idx])
-                            for idx in range(removed_idx + 1):
-                                record, std_record = prev_list.pop()
-                                if idx not in merged_idx:
-                                    FH_out.write(std_record)
+                            else:  # Some variants was too far
+                                # Remove individual version of merged variants
+                                for idx in merged_idx:
+                                    if idx > removed_idx:
+                                        del(prev_list[idx])
+                                # Push too far vairants in chrom_var
+                                for idx in range(removed_idx + 1):
+                                    record, std_record = prev_list.pop()
+                                    if idx not in merged_idx:
+                                        chrom_var.append(std_record)
                         prev_list.append((curr, std_curr))
-                    for record, std_record in prev_list:
-                        FH_out.write(std_record)
+                    # Last chromosome
+                    for prev, std_prev in prev_list:
+                        chrom_var.append(std_prev)
+                    for rec in sorted(chrom_var, key=lambda x: (x.pos, x.refEnd(), x.alt[0])):
+                        FH_out.write(rec)
     log.info("End of job")
