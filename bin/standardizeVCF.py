@@ -34,7 +34,7 @@ sys.path.append(LIB_DIR)
 
 from anacore.vcf import VCFIO, VCFRecord, getAlleleRecord, HeaderInfoAttr
 from anacore.annotVcf import AnnotVCFIO
-from anacore.sequenceIO import FastaIO, IdxFastaIO
+from anacore.sequenceIO import IdxFastaIO
 
 
 ########################################################################
@@ -66,7 +66,6 @@ def stdizeVCF(FH_ref, FH_in, FH_out, trace_unstandard=False, log=None):
     FH_out.writeHeader()
     # Records
     for record in FH_in:
-        chrom = FH_ref.get(record.chrom).string
         collocated_records = []
         for alt_idx, alt in enumerate(record.alt):
             alt_record = getAlleleRecord(FH_in, record, alt_idx)
@@ -74,21 +73,8 @@ def stdizeVCF(FH_ref, FH_in, FH_out, trace_unstandard=False, log=None):
                 alt_record.info["UNSTD"] = alt_record.getName()
             # Previous
             unstd = {"chrom": alt_record.chrom, "pos": alt_record.pos, "ref": alt_record.ref, "alt": alt_record.alt[0]}
-            # To minimal string
-            alt_record.normalizeSingleAllele()
-            # Move to upstream
-            alt_record = alt_record.getMostUpstream(chrom)
-            # Add previous nt
-            if alt_record.isIndel():
-                prev_nt = chrom[alt_record.pos - 2]
-                if alt_record.ref == VCFRecord.getEmptyAlleleMarker():  # Insertion
-                    alt_record.ref = prev_nt
-                    alt_record.alt[0] = prev_nt + alt_record.alt[0]
-                    alt_record.pos -= 1
-                elif alt_record.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Deletion
-                    alt_record.ref = prev_nt + alt_record.ref
-                    alt_record.alt[0] = prev_nt
-                    alt_record.pos -= 1
+            # Standardize pos, ref and alt
+            alt_record.fastStandardize(FH_ref, 1000)
             # Update annotations
             if is_annotated and FH_in.annot_field in alt_record.info:
                 cleaned_annot = []
