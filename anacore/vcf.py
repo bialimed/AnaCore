@@ -18,7 +18,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.24.0'
+__version__ = '1.25.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -296,7 +296,7 @@ class VCFRecord:
                 chr1  10  AAAT  TG => returns 10
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
         if self._normalized is None:
             self._normalized = deepcopy(self)
             self._normalized.normalizeSingleAllele()
@@ -333,7 +333,7 @@ class VCFRecord:
                 chr1  10  AAAT  TG => returns 13
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
         if self._normalized is None:
             self._normalized = deepcopy(self)
             self._normalized.normalizeSingleAllele()
@@ -369,7 +369,7 @@ class VCFRecord:
         :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
         is_deletion = False
         ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
         alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
@@ -387,7 +387,7 @@ class VCFRecord:
         :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isIndel' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'isIndel' cannot be used on multi-allelic variant {}.".format(self.getName()))
         is_indel = False
         ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
         alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
@@ -405,7 +405,7 @@ class VCFRecord:
         :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant {}.".format(self.getName()))
         is_insertion = False
         ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
         alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
@@ -427,6 +427,36 @@ class VCFRecord:
         elif len(self.ref) > 1:
             record_type = "variation"
         return record_type
+
+    def fastStandardize(self, seq_handler, padding=500):
+        """
+        Standardize record (move to the most upstream position and remove unecessary nucleotids). This standardization concerns only POS, REF and ALT.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param padding: Number of nucleotids to inspect before variant. Upstream movement is limited to this number of nucleotids.
+        :type padding: int
+        """
+        # Move to upstream
+        sub_start = max(self.pos - padding, 1)
+        real_padding = self.pos - sub_start
+        sub_region = seq_handler.getSub(self.chrom, sub_start, self.pos + len(self.ref))
+        self.pos = real_padding + 1  # Switch position from chromosome to position from subregion
+        upstream_rec = self.getMostUpstream(sub_region)
+        self.pos = upstream_rec.pos - 1 + sub_start  # Switch position from subregion to position from chromosome
+        self.ref = upstream_rec.ref
+        self.alt[0] = upstream_rec.alt[0]
+        # Add previous nt
+        if self.isIndel():
+            prev_nt = seq_handler.getSub(self.chrom, self.pos - 1, self.pos - 1)
+            if self.ref == VCFRecord.getEmptyAlleleMarker():  # Insertion
+                self.ref = prev_nt
+                self.alt[0] = prev_nt + self.alt[0]
+                self.pos -= 1
+            elif self.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Deletion
+                self.ref = prev_nt + self.ref
+                self.alt[0] = prev_nt
+                self.pos -= 1
 
     def normalizeSingleAllele(self):
         """
@@ -454,7 +484,7 @@ class VCFRecord:
             record.alt = [alt]
 
         if len(self.alt) > 1:
-            raise Exception("The function 'normalizeSingleAllele' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'normalizeSingleAllele' cannot be used on multi-allelic variant {}.".format(self.getName()))
         self.ref = self.ref.upper()
         self.alt[0] = self.alt[0].upper()
         # Deletion or insertion with marker
@@ -503,7 +533,7 @@ class VCFRecord:
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant {}.".format(self.getName()))
         if self._normalized is None:
             self._normalized = deepcopy(self)
             self._normalized.normalizeSingleAllele()
@@ -545,7 +575,7 @@ class VCFRecord:
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant.")
+            raise Exception("The function 'getMostDownstream' cannot be used on multi-allelic variant {}.".format(self.getName()))
         if self._normalized is None:
             self._normalized = deepcopy(self)
             self._normalized.normalizeSingleAllele()
