@@ -19,7 +19,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -62,6 +62,6 @@ if __name__ == "__main__":
                     records_by_chr[record.chrom] = list()
                 records_by_chr[record.chrom].append(record)
             for chrom in sorted(records_by_chr):
-                sorted_records = sorted(records_by_chr[chrom], key=lambda x: (x.chrom, x.pos))
+                sorted_records = sorted(records_by_chr[chrom], key=lambda x: (x.chrom, x.pos, x.refEnd(), x.alt[0]))
                 for record in sorted_records:
                     FH_out.write(record)
