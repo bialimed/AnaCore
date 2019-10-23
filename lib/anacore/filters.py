@@ -1,19 +1,5 @@
-#
-# Copyright (C) 2017 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# -*- coding: utf-8 -*-
+"""Classes and functions for managing and processing complex filters like included filters and combined filters with differents operators."""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
@@ -25,12 +11,11 @@ __status__ = 'prod'
 from copy import deepcopy
 
 
-
 class FiltersCombiner:
     """
-    @summary: Wrap as an unique filter a combination of several Filter and
-    FiltersCombiner.
-    @synopsis:
+    Wrap as an unique filter a combination of several Filter and FiltersCombiner.
+
+    :synopsis:
         ...
         age_filter = Filter("<", 10, "age")
         treatment_filter = filter("in", ["20ng", "20ng + pc"], "treatment")
@@ -43,17 +28,22 @@ class FiltersCombiner:
             if filters.eval(curr):
                 print(curr)
     """
+
     def __init__(self, filters, operator="and", name=None, description=None):
         """
-        @param filters: [list] List of Filter and FiltersCombiner evaluated by
-        the instance.
-        @param operator: [str] The type of evaluation processed between filters.
-        With "and" all the filters must have an valid evaluation, with "or" at
-        least one filter must have an valid evaluation, with "xor" only one
-        filter must have an valid evaluation.
-        @param name: [str] The name of the filter.
-        @param description: [str] The description of the filter.
-        @todo: xor.
+        Build and return an instance of FiltersCombiner.
+
+        :param filters: List of Filter and FiltersCombiner evaluated by the instance.
+        :type filters: list
+        :param operator: The type of evaluation processed between filters. With "and" all the filters must have an valid evaluation, with "or" at least one filter must have an valid evaluation, with "xor" only one filter must have an valid evaluation.
+        :type operator: str
+        :param name: The name of the filter.
+        :type name: str
+        :param description: The description of the filter.
+        :type description: str
+        :return: The new instance.
+        :rtype: filters.FiltersCombiner
+        :todo: xor.
         """
         self.description = description
         self.filters = filters
@@ -68,12 +58,13 @@ class FiltersCombiner:
 
     def eval(self, item):
         """
-        @summary: Returns True if the item fits the filters regarding to the
-        operator.
-        @param item: [*] The evaluated element.
-        @return: [bool] True if the item fits the filters regarding to the
-        operator.
-        @todo: xor.
+        Return True if the item fits the filters regarding to the operator.
+
+        :param item: The evaluated element.
+        :type: *
+        :return: True if the item fits the filters regarding to the operator.
+        :rtype: bool
+        :todo: xor.
         """
         is_valid = True
         nb_filters = len(self.filters)
@@ -98,8 +89,9 @@ class FiltersCombiner:
 
 class Filter:
     """
-    @summary: Manages a filter.
-    @synopsis:
+    Manage one filter.
+
+    :synopsis:
         patients = [
             {"age": 8, "treatment": "placebo", "group":["A", "B"]},
             {"age": 9, "treatment": "20ng ip", "group":["C"]},
@@ -125,19 +117,27 @@ class Filter:
             if group_filter.eval(curr):
                 print(curr)
     """
+
     def __init__(self, operator, values, getter=None, aggregator="ratio:1", name=None, description=None, action="select"):
         """
-        @param values: [*] The value(s) used as threshold/reference in item
-        evaluation.
-        @param operator: [str] The operator used in evaluation.
-        @param getter: [str|callable] The property or the function applied on
-        evaluated item to get the evaluated value. See Filter.setGetter().
-        @param aggregator: [str] The rule used when evaluated value is a list.
-        It determines the number of element in list that must fit the filter.
-        @param name: [str] The name of the filter.
-        @param description: [str] The description of the filter.
-        @param action: [str] Determines if the item fitting the filter are kept
-        ("select") or rejected ("exclude") by filter.
+        Build and return an instance of FiltersCombiner.
+
+        :param values: The value(s) used as threshold/reference in item evaluation.
+        :type values: *
+        :param operator: The operator used in evaluation.
+        :type operator: str
+        :param getter: The property or the function applied on evaluated item to get the evaluated value. See Filter.setGetter().
+        :type getter: str or callable
+        :param aggregator: The rule used when evaluated value is a list. It determines the number of element in list that must fit the filter.
+        :type aggregator: str
+        :param name: The name of the filter.
+        :type name: str
+        :param description: The description of the filter.
+        :type description: str
+        :param action: Determines if the item fitting the filter are kept ("select") or rejected ("exclude") by filter.
+        :type action: str
+        :return: The new instance.
+        :rtype: filters.FiltersCombiner
         """
         self.action = action
         if action not in ["select", "exclude"]:
@@ -152,11 +152,12 @@ class Filter:
     @staticmethod
     def fromDict(filter_desc):
         """
-        @summary: Returns an instance of Filter corresponding to the parameters
-        in dictionary.
-        @param filter_desc: [dict] The parameters.
-        @return: [Filter] An instance of Filter corresponding to the parameters
-        in dictionary.
+        Return an instance of Filter corresponding to the parameters in dictionary.
+
+        :param filter_desc: The parameters.
+        :type: dict
+        :return: An instance of Filter corresponding to the parameters in dictionary.
+        :rtype: filters.Filter
         """
         cleaned_desc = deepcopy(filter_desc)
         if "class" in cleaned_desc:
@@ -165,8 +166,10 @@ class Filter:
 
     def toDict(self):
         """
-        @summary: Returns the dictionary corresponding to the instance of Filter.
-        @return: [dict] The dictionary corresponding to the instance of Filter.
+        Return the dictionary corresponding to the instance of Filter.
+
+        :return: The dictionary corresponding to the instance of Filter.
+        :rtype: dict
         """
         obj_dict = {"class": "Filter"}
         for attr_name in dir(self):
@@ -183,22 +186,22 @@ class Filter:
 
     def setOperator(self, new):
         """
-        @summary: Changes the operator used in evaluation.
-        @param new: [str] The new value of the operator.
+        Change the operator used in evaluation.
+
+        :param new: The new value of the operator.
+        :type new: str
         """
         self.operator = new
         self.setFct()
 
     def setAggregator(self, new):
         """
-        @summary: Changes the aggregator used to evaluate a list of values.
-        @param new: [str] The new value of the aggregator. The aggregator must
-        have one of the following form: "nb:INT" or "ratio:FLOAT". The filter
-        is ok if the evaluated list returned by getter has:
-          - a number of values fitting the Filter superior than INT if
-          aggregator is nb:INT.
-          - a ratio of values fitting the Filter superior than FLOAT if
-          aggregator is ratio:FLOAT.
+        Change the aggregator used to evaluate a list of values.
+
+        :param new: [str] The new value of the aggregator. The aggregator must have one of the following form: "nb:INT" or "ratio:FLOAT". The filter is ok if the evaluated list returned by getter has:
+          (1) a number of values fitting the Filter superior than INT if aggregator is nb:INT.
+          (2) a ratio of values fitting the Filter superior than FLOAT if aggregator is ratio:FLOAT.
+        :type new: str
         """
         self.aggregator = new  # nb:X, ratio:X.X
         agg_type, agg_threshold = new.split(":")
@@ -211,16 +214,13 @@ class Filter:
 
     def setGetter(self, new):
         """
-        @summary: Changes the getter used to retrieve evaluated value from evaluated item.
-        @param new: [str|callable] The new value of the getter.
-        This value can take 3 forms:
-            - If the getter is None: the evaluated item himself is used in
-            evaluation.
-            - If the getter is callable: this is the result of this call applied
-            on item that is evaluated. Use a callable is not compatible with
-            Filter.toDict().
-            - If the getter is a string: the getter is parsed by getRecordValue
-            to retrieve a specific property.
+        Change the getter used to retrieve evaluated value from evaluated item.
+
+        :param new: [str|callable] The new value of the getter. This value can take 3 forms:
+          (1) If the getter is None: the evaluated item himself is used in evaluation.
+          (2) If the getter is callable: this is the result of this call applied on item that is evaluated. Use a callable is not compatible with Filter.toDict().
+          (3) If the getter is a string: the getter is parsed by getRecordValue to retrieve a specific property.
+        :type new: str
         """
         self.getter = new
         self._getterFct = None
@@ -292,11 +292,12 @@ class Filter:
 
     def eval(self, item):
         """
-        @summary: Returns True if the item fits the filter and action is select
-        or if the item does not fit the filter and action is exclude.
-        @param item: [*] The evaluated element.
-        @return: [bool] True if the item fits the filter and action is select or
-        if the item does not fit the filter and action is exclude.
+        Return True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.
+
+        :param item: The evaluated element.
+        :type item: *
+        :return: True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.
+        :rtype: bool
         """
         is_valid = False
         # Eval item
@@ -314,9 +315,7 @@ class Filter:
         return is_valid
 
     def setFct(self):
-        """
-        @summary: Sets the evaluation function according to the operator.
-        """
+        """Set the evaluation function according to the operator."""
         if self.operator in ["=", "==", "eq"]:
             self._evalFct = lambda val, ref: val == ref
         elif self.operator in ["!=", "<>", "ne"]:
@@ -343,9 +342,12 @@ class Filter:
 
 def filtersFromDict(filters):
     """
-    @summary: Returns filter from filters descriptor.
-    @param filters: [dict] Filters parameters.
-    @return: [Filter|FiltersCombiner] The filter corresponding to descriptor.
+    Return filter from filters descriptor.
+
+    :param filters: Filters parameters.
+    :type filters: dict
+    :return: The filter corresponding to descriptor.
+    :rtype: filters.Filter or filters.FiltersCombiner
     """
     if "class" not in filters or filters["class"] == "Filter":
         return Filter.fromDict(filters)

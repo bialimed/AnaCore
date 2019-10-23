@@ -1,19 +1,5 @@
-#
-# Copyright (C) 2017 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# -*- coding: utf-8 -*-
+"""Classes and funcions for reading/writing text files."""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
@@ -25,10 +11,15 @@ __status__ = 'prod'
 import os
 import gzip
 
+
 def isEmpty(path):
     """
-    @return: [bool] True if the file does not exists or is empty.
-    @param path: [str] Path to processed file.
+    Return True if the file does not exists or is empty.
+
+    :param path: Path to processed file.
+    :type path: str
+    :return: True if the file does not exists or is empty.
+    :rtype: bool
     """
     is_empty = True
     if os.path.exists(path):
@@ -39,17 +30,22 @@ def isEmpty(path):
                 is_empty = FH.seek(0, 2) == 0
     return is_empty
 
+
 def isGzip(path):
     """
-    @return: [bool] True if the file is gziped.
-    @param path: [str] Path to processed file.
+    Return True if the file is gziped.
+
+    :param path: Path to processed file.
+    :type path: str
+    :return: True if the file is gziped.
+    :rtype: bool
     """
     is_gzip = None
     FH_input = gzip.open(path)
     try:
         FH_input.readline()
         is_gzip = True
-    except:
+    except Exception:
         is_gzip = False
     finally:
         FH_input.close()
@@ -57,10 +53,18 @@ def isGzip(path):
 
 
 class AbstractFile(object):
-    def __init__( self, filepath, mode="r" ):
+    """Class inherited by classes to read and write text file."""
+
+    def __init__(self, filepath, mode="r"):
         """
-        @param filepath: [str] The filepath.
-        @param mode: [str] Mode to open the file ('r', 'w', 'a').
+        Build and return an instance of AbstractFile.
+
+        :param filepath: The filepath.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
+        :return: The new instance.
+        :rtype: abstractFile.AbstractFile
         """
         self.filepath = filepath
         self.mode = mode
@@ -71,24 +75,24 @@ class AbstractFile(object):
         self.current_line_nb = 0
         self.current_line = None
 
-    def close( self ) :
-        """
-        @summary: Closes file handle.
-        """
+    def close(self):
+        """Closes file handle."""
         if hasattr(self, 'file_handle') and self.file_handle is not None:
             self.file_handle.close()
             self.file_handle = None
             self.current_line_nb = None
             self.current_line = None
 
-    def closed( self ):
+    def closed(self):
         """
-        @summary: Returns True if the file is closed.
-        @retrun: [bool] True if the file is closed.
+        Return True if the file is closed.
+
+        :retrun: True if the file is closed.
+        :rtype: bool
         """
         return self.file_handle.closed()
 
-    def __del__( self ):
+    def __del__(self):
         self.close()
 
     def __enter__(self):
@@ -99,30 +103,34 @@ class AbstractFile(object):
 
     def isRecordLine(self, line):
         """
-        @summary: Returns True if the line corresponds to a record (it is not a comment or an header line).
-        @param line: [str] The evaluated line.
-        @return: [bool] True if the line corresponds to a record.
+        Return True if the line corresponds to a record (it is not a comment or an header line).
+
+        :param line: The evaluated line.
+        :type line: str.
+        :return: True if the line corresponds to a record.
+        :rtype: bool
         """
         return True
 
-    def __iter__( self ):
+    def __iter__(self):
         for line in self.file_handle:
             self.current_line = line.rstrip("\n")
             self.current_line_nb += 1
-            if not self.isRecordLine(self.current_line): # Skip non-record line
+            if not self.isRecordLine(self.current_line):  # Skip non-record line
                 continue
             record = None
             try:
                 record = self._parseLine()
-            except:
-                raise IOError( "The line " + str(self.current_line_nb) + " in '" + self.filepath + "' cannot be parsed by " + self.__class__.__name__ + ".\n" +
-                               "Line content : " + self.current_line )
+            except Exception:
+                raise IOError('The line {} in "{}" cannot be parsed by {}. Line content: {}'.format(self.current_line_nb, self.filepath, self.__class__.__name__, self.current_line))
             else:
                 yield record
 
     def read(self):
         """
-        @summary: Returns all the record from the file.
-        @return: [list] The list of records.
+        Return all the record from the file.
+
+        :return: The list of records.
+        :rtype: list
         """
         return [record for record in self]
