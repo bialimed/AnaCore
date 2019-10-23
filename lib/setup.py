@@ -24,8 +24,8 @@ def load_requirements(path):
 setup(
     name='anacore',
     version=get_version(),
-    description='Libraries to read/write/process standard files in NGS.',
-    long_description='Anapath Core is package containing libraries to read/write/process standard files in NGS. It has been developped for Anatomo-Cytopathologie department of IUCT Oncopole.',
+    description='Libraries for reading/writing/processing standard file format in NGS.',
+    long_description='Anapath Core is a package containing libraries for reading/writing/processing standard file format in NGS (BED, fasta, gff, gtf, MAF, newick, VCF, ...).',
     author='Frederic Escudie',
     author_email='escudie.frederic@iuct-oncopole.fr',
     license='GNU GPL v3',
