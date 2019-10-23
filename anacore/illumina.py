@@ -1,19 +1,5 @@
-#
-# Copyright (C) 2017 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# -*- coding: utf-8 -*-
+"""Classes and functions for reading Illumina's files (samplesheet, runInfo, runParameters, ...) and parsing header, filenames and run folder informations."""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
@@ -21,7 +7,6 @@ __license__ = 'GNU General Public License'
 __version__ = '1.14.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
-
 
 import os
 import re
@@ -31,6 +16,8 @@ import xml.etree.ElementTree as ET
 
 
 class SampleSheetIO(object):
+    """Reader for SampleSheet.csv."""
+
     SECTIONS = ["Header", "Manifests", "Reads", "Settings", "Data"]
 
     def __init__(self, path):
@@ -102,7 +89,7 @@ class SampleSheetIO(object):
 
 
 class ADSSampleSheetIO(SampleSheetIO):
-    """Manage SampleSheet designed for AmpliconDS analysis."""
+    """Reader for SampleSheet.csv designed for AmpliconDS analysis."""
 
     def _getSamplesFromData(self, data_section):
         samples = super()._getSamplesFromData(data_section)
@@ -184,6 +171,8 @@ class ADSSampleSheetIO(SampleSheetIO):
 
 
 class RTAComplete(object):
+    """Reader for RTAComplete.txt."""
+
     def __init__(self, path, date_format='%m/%d/%Y,%H:%M:%S'):
         self.filepath = path
         self.end_date = None
@@ -201,7 +190,7 @@ class RTAComplete(object):
 
 
 class RunInfo(object):
-    """Parser for RunInfo.xml"""
+    """Reader for RunInfo.xml."""
 
     def __init__(self, path):
         self.filepath = path
@@ -252,7 +241,7 @@ class RunInfo(object):
 
 
 class RunParameters(object):
-    """Parser for runParameters.xml"""
+    """Reader for runParameters.xml."""
 
     PLATFORMS = ["MiniSeq", "MiSeq", "NextSeq", "HiSeq", "NovaSeq"]
 
@@ -354,6 +343,8 @@ class RunParameters(object):
 
 
 class CompletedJobInfo(object):
+    """Reader for CompletedJobInfo.xml."""
+
     def __init__(self, path, date_format='%Y-%m-%dT%H:%M:%S'):
         self.filepath = path
         self.date_format = date_format

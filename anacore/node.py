@@ -1,19 +1,5 @@
-#
-# Copyright (C) 2015 INRA
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
+# -*- coding: utf-8 -*-
+"""Classes and functions for manipulating/processing Tree."""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2015 INRA'
@@ -26,16 +12,22 @@ import json
 
 
 class Node:
-    """
-    @summary: A node is an element of a tree structure. It is linked with its
-    parent and its children and it is described by several metadata.
-    """
+    """A node is an element of a tree structure. It is linked with its parent and its children and it is described by several metadata."""
+
     def __init__(self, name=None, parent_node=None, children_nodes=None, metadata=None):
         """
-        @param name: [str] The node name.
-        @param parent_node: [Node] The parent node.
-        @param children_nodes: [list] List of children nodes.
-        @param metadata: [dict] The metadata.
+        Build and return an instance of Node.
+
+        :param name: The node name.
+        :type name: str
+        :param parent_node: The parent node.
+        :type parent_node: Node
+        :param children_nodes: List of children nodes.
+        :type children_nodes: list
+        :param metadata: The metadata.
+        :type metadata: dict
+        :return: The new instance.
+        :rtype: node.Node
         """
         self.children = list()
         if children_nodes is not None:
@@ -49,8 +41,10 @@ class Node:
 
     def __str__(self):
         """
-        @summary: Returns a string representation of the node.
-        @return: [str] The representation of the node.
+        Return the “informal” or nicely printable string representation of the object.
+
+        :return: The printable string representation of the object.
+        :rtype: str
         """
         node_str = "-" if self.name is None else self.name
         node_str += "\n\tParent=" + ("-" if self.parent is None or self.parent.name is None else self.parent.name)
@@ -63,10 +57,12 @@ class Node:
 
     def hasChild(self, name=None):
         """
-        @summary: Returns true if the node has the specified child (name is
-        set) or at least one child (name is None).
-        @param name: [str] the name of the searched child.
-        @return: [bool]
+        Return True if the node has the specified child (name is set) or at least one child (name is None).
+
+        :param name: The name of the searched child.
+        :type name: str
+        :return: True if the node has the specified child (name is set) or at least one child (name is None).
+        :rtype: bool
         """
         if name is None:
             return len(self.children) > 0
@@ -76,13 +72,16 @@ class Node:
 
     def getChildByName(self, name):
         """
-        @summary: Returns the specified child node.
-        @param name: [str] the name of the searched child.
-        @return: [Node] The child.
+        Return the specified child node.
+
+        :param name: Name of the searched child.
+        :type name: str
+        :return: The child.
+        :rtype: node.Node
         """
         selected_child = None
         for child in self.children:
-            if child.name is not none and child.name == name:
+            if child.name is not None and child.name == name:
                 selected_child = child
         if selected_child is None:
             raise Exception(
@@ -92,9 +91,10 @@ class Node:
 
     def getAncestors(self):
         """
-        @summary: Returns the ancestors of the node.
-        @return: [list] The list ancestors nodes. The nodes are in parent to
-        child order.
+        Return the ancestors of the node.
+
+        :return: List ancestors nodes. The nodes are in parent to child order.
+        :rtype: list
         """
         ancestors = list()
         if self.parent is not None:
@@ -104,11 +104,12 @@ class Node:
 
     def getDescendants(self, depth=1):
         """
-        @summary: Returns the node descendants with the provided depth from the
-        node. Example: depth=1 returns all the children of the node ; depth=2
-        returns all the grandchildren of the node.
-        @param: [int] The selected depth.
-        @return: [list] The nodes of descendants.
+        Return the node descendants with the provided depth from the node. Example: depth=1 returns all the children of the node ; depth=2 returns all the grandchildren of the node.
+
+        :param depth: The selected depth.
+        :type depth: int
+        :return: Descendants.
+        :rtype: list
         """
         descendants = list()
         if depth == 1:
@@ -120,8 +121,10 @@ class Node:
 
     def getLeaves(self):
         """
-        @summary: Returns leaves.
-        @return: [list] The nodes of leaves.
+        Return leaves.
+
+        :return: Leaves.
+        :rtype: list
         """
         leaves = list()
         if not self.hasChild():
@@ -133,9 +136,10 @@ class Node:
 
     def getDepth(self):
         """
-        @summary: Returns the depth of the node (= the branch length/ = the
-        number of ancestors nodes).
-        @return: [int] The depth of the node. The depth for the root element is 0.
+        Return the depth of the node (= the branch length / = the number of ancestors nodes).
+
+        :return: The depth of the node. The depth for the root element is 0.
+        :rtype: int
         """
         if self.parent is None:
             return 0
@@ -144,8 +148,10 @@ class Node:
 
     def addChild(self, child):
         """
-        @summary: Adds a node as child.
-        @param child: [Node] The added node.
+        Add a node as child.
+
+        :param child: The added node.
+        :type child: node.Node
         """
         if child.name is not None:  # Check duplication for named nodes
             children_names = [child.name for child in self.children]
@@ -161,11 +167,11 @@ class Node:
     @staticmethod
     def fromDict(tree):
         """
-        @summary: Returns nodes representing the tree.
-        @param tree: [dict] Each node is dict with following form: {"name":
-        NAME, "metadata":{...}, "children": OTHER_NODE}. Each attribute is
-        optional.
-        @return: [Node] The node representing the root.
+        Return nodes representing the tree.
+
+        :param tree: [dict] Each node is dict with following form: {"name": NAME, "metadata":{...}, "children": OTHER_NODE}. Each attribute is optional.
+        :return: The node representing the root.
+        :rtype: node.Node
         """
         # Current node
         curr_node = Node()
@@ -185,16 +191,20 @@ class Node:
     @staticmethod
     def fromClusterNode(tree, id_to_name=None, distance_tag="dist", _parent_dist_from_root=0, _root_dist_from_leaves=None):
         """
-        @summary: Returns nodes representing the tree.
-        @param tree: [ClusterNode] The tree returned by numpy.
-        @param id_to_name: [dict] The link between numpy's node id and the node
-        name.
-        @param distance_tag: [str] Tag used to store distance in metadata.
-        @param _parent_dist_from_root: [float] Distance between root and parent
-        node. By default the first node provided is view as root.
-        @param _root_dist_from_leaves: [float] Maximum distance between root and
-        leaves. By default the first node provided is view as root.
-        @return: [Node] The node representing the root.
+        Return nodes representing the tree.
+
+        :param tree: The tree returned by numpy.
+        :type tree: scipy.cluster.hierarchy.ClusterNode
+        :param id_to_name: The link between numpy's node id and the node name.
+        :type id_to_name: dict
+        :param distance_tag: Tag used to store distance in metadata.
+        :type distance_tag: str
+        :param _parent_dist_from_root: Distance between root and parent node. By default the first node provided is view as root.
+        :type _parent_dist_from_root: float
+        :param _root_dist_from_leaves: Maximum distance between root and leaves. By default the first node provided is view as root.
+        :type _root_dist_from_leaves: float
+        :return: The node representing the root.
+        :rtype: node.Node
         """
         if _root_dist_from_leaves is None:  # First node is root
             _root_dist_from_leaves = tree.dist
@@ -223,9 +233,10 @@ class Node:
 
     def toDict(self):
         """
-        @summary: Returns a dictionary representing the instance.
-        @return: [dict] The dictionary representing the instance with following
-        form: {"name": NAME, "metadata":{...}, "children": OTHER_NODE}.
+        Return a dictionary representing the instance.
+
+        :return: The dictionary representing the instance with following form: {"name": NAME, "metadata":{...}, "children": OTHER_NODE}.
+        :rtype: dict
         """
         return {
             "name": self.name,
@@ -235,11 +246,12 @@ class Node:
 
     def toNewick(self, distance_tag=None):
         """
-        @summary: Returns the representation of the tree rooted by the node in
-        newick format.
-        @param distance_tag: [str] The metadata tag for the node distance
-        (default: 'dist'). The distance is not necessary to use this method.
-        @returns: [str] the newick representation of the tree.
+        Return the representation of the tree rooted by the node in newick format.
+
+        :param distance_tag: The metadata tag for the node distance (default: 'dist'). The distance is not necessary to use this method.
+        :type distance_tag: str
+        :returns: Newick representation of the tree.
+        :rtype: str
         """
         if distance_tag is None:
             distance_tag = "dist"
@@ -257,10 +269,10 @@ class Node:
 
     def toExtendedNewick(self):
         """
-        @summary: Returns the representation of the tree rooted by the node in
-        extended newick format. In extended newick the distance tag is replaced
-        by a json represetation of the metadata.
-        @returns: [str] the extended newick representation of the tree.
+        Return the representation of the tree rooted by the node in extended newick format. In extended newick the distance tag is replaced by a json represetation of the metadata.
+
+        :return: Extended newick representation of the tree.
+        :rtype: str
         """
         node_newick = ""
         if self.hasChild():
