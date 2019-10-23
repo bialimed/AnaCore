@@ -1,6 +1,6 @@
 # AnaCore
 
-![coverage](https://img.shields.io/badge/coverage-x%25-inactive)
+![coverage](https://img.shields.io/badge/coverage-47%25-orange)
 
 ## Description
 Anapath Core is a package containing libraries for reading/writing/processing
