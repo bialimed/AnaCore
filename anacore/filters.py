@@ -15,18 +15,21 @@ class FiltersCombiner:
     """
     Wrap as an unique filter a combination of several Filter and FiltersCombiner.
 
-    :synopsis:
-        ...
-        age_filter = Filter("<", 10, "age")
-        treatment_filter = filter("in", ["20ng", "20ng + pc"], "treatment")
-        filters = FiltersCombiner(
-            [age_filter, treatment_filter],
-            "and",
-            "young_with_treatment"
-        )
-        for curr in patients:
-            if filters.eval(curr):
-                print(curr)
+    :Code example:
+        .. highlight:: python
+        .. code-block:: python
+
+            ...
+            age_filter = Filter("<", 10, "age")
+            treatment_filter = filter("in", ["20ng", "20ng + pc"], "treatment")
+            filters = FiltersCombiner(
+                [age_filter, treatment_filter],
+                "and",
+                "young_with_treatment"
+            )
+            for curr in patients:
+                if filters.eval(curr):
+                    print(curr)
     """
 
     def __init__(self, filters, operator="and", name=None, description=None):
@@ -91,31 +94,34 @@ class Filter:
     """
     Manage one filter.
 
-    :synopsis:
-        patients = [
-            {"age": 8, "treatment": "placebo", "group":["A", "B"]},
-            {"age": 9, "treatment": "20ng ip", "group":["C"]},
-            {"age": 11, "treatment": "placebo", "group":["A", "D"]},
-            {"age": 25, "treatment": "20ng ip", "group":["B"]},
-            {"age": 30, "treatment": "20ng pc", "group":["C", "B"]},
-            {"age": 33, "treatment": "20ng pc", "group":["A", "D"]},
-            {"age": 30, "treatment": "placebo", "group":["A", "B"]},
-        ]
-        # Select children
-        children_filter = Filter("<", 13, "age")
-        for curr in patients:
-            if children_filter.eval(curr):
-                print(curr)
-        # Select not placebo
-        treatment_filter = Filter("=", "placebo", "treatment", action="exclude")
-        for curr in patients:
-            if treatment_filter.eval(curr):
-                print(curr)
-        # Select patients with at least group A or group C
-        group_filter = Filter("in", ["A", "C"], "group", aggregator="nb:1")
-        for curr in patients:
-            if group_filter.eval(curr):
-                print(curr)
+    :Code example:
+        .. highlight:: python
+        .. code-block:: python
+
+            patients = [
+                {"age": 8, "treatment": "placebo", "group":["A", "B"]},
+                {"age": 9, "treatment": "20ng ip", "group":["C"]},
+                {"age": 11, "treatment": "placebo", "group":["A", "D"]},
+                {"age": 25, "treatment": "20ng ip", "group":["B"]},
+                {"age": 30, "treatment": "20ng pc", "group":["C", "B"]},
+                {"age": 33, "treatment": "20ng pc", "group":["A", "D"]},
+                {"age": 30, "treatment": "placebo", "group":["A", "B"]},
+            ]
+            # Select children
+            children_filter = Filter("<", 13, "age")
+            for curr in patients:
+                if children_filter.eval(curr):
+                    print(curr)
+            # Select not placebo
+            treatment_filter = Filter("=", "placebo", "treatment", action="exclude")
+            for curr in patients:
+                if treatment_filter.eval(curr):
+                    print(curr)
+            # Select patients with at least group A or group C
+            group_filter = Filter("in", ["A", "C"], "group", aggregator="nb:1")
+            for curr in patients:
+                if group_filter.eval(curr):
+                    print(curr)
     """
 
     def __init__(self, operator, values, getter=None, aggregator="ratio:1", name=None, description=None, action="select"):
