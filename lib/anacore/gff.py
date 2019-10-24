@@ -233,7 +233,7 @@ class GFF3IO(AbstractFile):
         :type encoded_value: str
         :return: Human readable value.
         :rtype: str
-        ..see: RFC 3986 Percent-Encoding
+        :see: RFC 3986 Percent-Encoding.
         """
         decoded_value = encoded_value.replace('%3B', ';').replace('%2C', ',').replace('%3D', '=')
         return decoded_value
@@ -242,6 +242,7 @@ class GFF3IO(AbstractFile):
     def encodedValue(dirty_value):
         """
         Return value after GFF3 attribute cleaning. Cleanning:
+
             - URL escaping rules are used for tags or values containing the following characters: ",=;".
             - Spaces are allowed in this field, but tabs must be replaced by space.
             - Quotes ' and " are deleted.
@@ -250,7 +251,7 @@ class GFF3IO(AbstractFile):
         :type dirty_value: str
         :return: GFF3 encoded value.
         :rtype: str
-        ..see: RFC 3986 Percent-Encoding
+        :see: RFC 3986 Percent-Encoding.
         """
         cleaned_value = dirty_value.replace(';', '%3B')
         cleaned_value = cleaned_value.replace(',', '%2C')

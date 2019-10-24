@@ -202,7 +202,7 @@ class Region:
 
         :param eval_region: The evaluated region.
         :type eval_region: Region
-        :return:The distance between the instance and the evaluated region.
+        :return: The distance between the instance and the evaluated region.
         :rtype: int
         """
         if self.reference.name != eval_region.reference.name:

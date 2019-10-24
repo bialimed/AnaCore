@@ -141,19 +141,21 @@ class Transcript(RegionTree):
         :return: Coordinate on region (1-based).
         :rtype: int
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def getSubFromRegionPos(self, transcript_pos):
         """
         Return exon and coordinate on his from the coordinate on transcript.
-        The coordinate on exon is stranded:
-            With region test:10-20(+) the pos 2 correspond to ref position 12
-            With region test:10-20(-) the pos 2 correspond to ref position 18
+
+        Coordinate on exon is stranded:
+
+        - pos 2 in region test:10-20(+) correspond to ref position 12
+        - pos 2 in region test:10-20(-) correspond to ref position 18
 
         :param transcript_pos: The coordinate on transcript (1-based).
         :type transcript_pos: int
         :return: Exon and coordinate on exon (1-based).
-        :rtype: genomicRegion.Exon, int
+        :rtype: (genomicRegion.Exon, int)
         """
         if transcript_pos > self.length():
             raise ValueError("The position {} is out of transcript {}.".format(transcript_pos, self))
