@@ -13,8 +13,8 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, ...) and objects from NGS.
 
 ### From sources
 #### 1- Download sources
-* [user way] Downloads the latest released release from `https://bitbucket.org/fescudie/anacore/downloads/?tab=tags`.
-* [developper way] Clones the repository from the latest unreleased version: `git clone https://bitbucket.org/fescudie/anacore.git`.
+* [user way] Downloads the latest released release from `https://github.com/bialimed/anacore/releases`.
+* [developper way] Clones the repository from the latest unreleased version: `git clone https://github.com/bialimed/AnaCore.git`.
 
 #### 2- Install
 `python setup.py install --user`
