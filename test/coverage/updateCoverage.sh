@@ -2,8 +2,7 @@
 script_path=`realpath $0`
 coverage_dir=`dirname ${script_path}`
 test_dir=`dirname ${coverage_dir}`
-anacore_dir=`dirname ${test_dir}`
-package_dir=`dirname ${anacore_dir}`
+package_dir=`dirname ${test_dir}`
 
 # Move to coverage directory
 cd ${coverage_dir}

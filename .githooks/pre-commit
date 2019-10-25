@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Unit testing
+`python3 -W ignore -m unittest discover test > /dev/null`
+if [ $? -ne 0 ] ; then
+	exit 1 ;
+fi
+
+# Update coverage badge
+test/coverage/updateCoverage.sh && git add README.md
+if [ $? -ne 0 ] ; then
+	exit 1 ;
+fi
+
+# Exit
+echo -e "[\e[92mSUCCESS\033[0m] Pre-commit check "
+exit 0

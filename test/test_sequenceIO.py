@@ -30,9 +30,9 @@ import filecmp
 import tempfile
 import unittest
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-LIB_DIR = os.path.abspath(os.path.dirname(os.path.dirname(CURRENT_DIR)))
-sys.path.append(LIB_DIR)
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+PACKAGE_DIR = os.path.dirname(TEST_DIR)
+sys.path.append(PACKAGE_DIR)
 
 from anacore.sequenceIO import IdxFastaIO, FastaIO, FastqIO, Sequence
 
