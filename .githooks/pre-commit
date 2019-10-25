@@ -1,13 +1,15 @@
 #!/bin/bash
 
 # Unit testing lib
-`python3 -W ignore -m unittest discover lib/anacore/test > /dev/null`
+`python3 -W ignore -m unittest discover lib/test > /dev/null`
 if [ $? -ne 0 ] ; then
 	exit 1 ;
 fi
 # Update coverage badge for lib
-lib/anacore/test/coverage/updateCoverage.sh
-git add lib/README.md
+lib/test/coverage/updateCoverage.sh && git add lib/README.md
+if [ $? -ne 0 ] ; then
+	exit 1 ;
+fi
 
 # Unit testing bin
 `python3 -W ignore -m unittest discover bin/test > /dev/null`
