@@ -1,0 +1,7 @@
+include README.md
+include RELEASES_NOTES.md
+include anacore/*.py
+include requirements.txt
+include setup.cfg
+include setup.py
+include test/*.py

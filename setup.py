@@ -4,6 +4,13 @@ import re
 from distutils.core import setup
 
 
+def get_long_description():
+    content = ""
+    with open("README.md", encoding='utf-8') as FH:
+        content = FH.read()
+    return content
+
+
 def get_version():
     version = None
     notes_filepath = "RELEASES_NOTES.md"
@@ -23,12 +30,16 @@ def load_requirements(path):
 
 setup(
     name='anacore',
-    version=get_version(),
+    version=get_version() + '-a',
     description='Libraries for managing standard file formats and objects from NGS.',
-    long_description='Anapath Core is a package containing libraries for managing standard file formats (BED, fasta, gff, gtf, MAF, newick, VCF, ...) and objects from NGS.',
     author='Frederic Escudie',
     author_email='escudie.frederic@iuct-oncopole.fr',
     license='GNU GPL v3',
     packages=["anacore"],
-    install_requires=load_requirements("requirements.txt")
+    install_requires=load_requirements("requirements.txt"),
+    url='https://github.com/bialimed/anacore',
+    python_requires='>=3.5',
+    keywords='bio NGS',
+    #long_description_content_type='text/markdown',
+    #long_description=get_long_description()
 )
