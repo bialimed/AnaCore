@@ -5,11 +5,15 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import re
+import time
+import base64
+import requests
+import urllib.parse
 
 
 class Accession:
@@ -108,6 +112,157 @@ class HGVS:
             else:
                 raise Exception('The HGVS "{}" has an invalid format.'.format(hgvs_str))
         return hgvs
+
+
+class MutalyzerBatch:
+    """
+    Manage submission of query batch on a mutalyzer server.
+
+    :Code example:
+        .. highlight:: python
+        .. code-block:: python
+
+            mutalyzer_url = "https://mutalyzer.nl"
+            queries = ["NC_000012.12:g.25245351C>T", "NG_012337.1(SDHD_v001):c.274G>T"]
+            batch = MutalyzerBatch(mutalyzer_url, queries, "NameChecker")
+            for curr_res in batch.syncRequest():
+                print(res)
+    """
+
+    def __init__(self, queries, url="https://mutalyzer.nl", command="NameChecker", proxy_url=None):
+        """
+        Build and return an instance of MutalyzerBatch.
+
+        :param url: URL for the mutalyzer server.
+        :type url: str
+        :param queries: List of queries (example: ["NC_000012.12:g.25245351C>T", "NG_012337.1(SDHD_v001):c.274G>T"]).
+        :type queries: list
+        :param command: Type of the batch job, choose from: NameChecker, SyntaxChecker, PositionConverter and SnpConverter.
+        :type command: str
+        :param proxy_url: URL for the proxy server if necessary.
+        :type proxy_url: str
+        :return: The new instance.
+        :rtype: MutalyzerBatch
+        """
+        self._url = url
+        self._command = command
+        if command not in {"NameChecker", "SyntaxChecker", "PositionConverter", "SnpConverter"}:
+            raise Exception("{} is not in authorized commands: {}".format(command, ["NameChecker", "SyntaxChecker", "PositionConverter", "SnpConverter"]))
+        self._queries = queries
+        self._proxy_url = proxy_url
+        self._status = None
+        self._progress = None
+        self._id = None
+        self._submit_time = None
+        self._complete_time = None
+
+    def getExecTime(self):
+        """
+        Return server execution time for the batch.
+
+        :return: The server execution time for the batch.
+        :rtype: float
+        """
+        return self._complete_time - self._submit_time
+
+    def getRequestURL(self):
+        """
+        Return the request URL to submit the batch.
+
+        :return: The request URL to submit the batch.
+        :rtype: str
+        """
+        request_data = base64.urlsafe_b64encode("\n".join(self._queries).encode("utf-8"))
+        request_data = urllib.parse.quote(request_data, safe='')
+        url = '{}/json/submitBatchJob?process={};data={}'.format(self._url, self._command, request_data)
+        return url
+
+    def submit(self):
+        """Submit the batch."""
+        url_request = self.getRequestURL()
+        self._submit_time = time.time()
+        response = requests.get(
+            url_request,
+            proxies=(None if self._proxy_url is None else {"https": self._proxy_url, "http": self.self._proxy_url})
+        )
+        self._status = "submitted"
+        if response.status_code != 200:
+            self._status = "error"
+            raise Exception("Request {} has failed.".format(url_request))
+        self._id = response.json()
+
+    def updateStatus(self):
+        """Update progress and status of the submitted batch."""
+        url_request = '{}/json/monitorBatchJob?job_id={}'.format(self._url, self._id)
+        response = requests.get(
+            url_request,
+            proxies=(None if self._proxy_url is None else {"https": self._proxy_url, "http": self.self._proxy_url})
+        )
+        if response.status_code != 200:
+            self._status = "error"
+            raise Exception("Request {} has failed.".format(url_request))
+        nb_left = response.json()
+        self._progress = (len(self._queries) - nb_left) / len(self._queries)
+        if nb_left == 0:
+            self._status = "complete"
+            self._complete_time = time.time()
+
+    def getResponse(self):
+        """
+        Return sever result for the submitted batch.
+
+        :return: The sever result for the submitted batch.
+        :rtype: str
+        """
+        url_request = '{}/json/getBatchJob?job_id={}'.format(self._url, self._id)
+        response = requests.get(
+            url_request,
+            proxies=(None if self._proxy_url is None else {"https": self._proxy_url, "http": self.self._proxy_url})
+        )
+        if response.status_code != 200:
+            self._status = "error"
+            raise Exception("Request {} has failed.".format(url_request))
+        self._status = "success"
+        return str(base64.b64decode(response.json()), "utf-8")
+
+    def getParsedResponse(self, time_to_update=2):
+        """
+        Return sever result for the submitted batch in list format.
+
+        :param time_to_update: Number of seconds to wait before retry to get response from server. After the status becomes "complete", the server take few seconds to update last results.
+        :type time_to_update: int
+        :return: The sever result for the submitted batch in list format.
+        :rtype: list
+        """
+        response_lines = self.getResponse().strip().split("\n")
+        while len(response_lines) - 1 < len(self._queries):  # After complete the result must be update on server
+            time.sleep(time_to_update)
+            response_lines = self.getResponse().strip().split("\n")
+        titles = response_lines.pop(0).split("\t")
+        results = []
+        for curr_res in response_lines:
+            curr_res = curr_res.split("\t")
+            results.append({key: val for key, val in zip(titles, curr_res)})
+        return results
+
+    def syncRequest(self, time_to_update=3, first_time_to_update=1):
+        """
+        Return sever result for the batch in list format.
+
+        :param time_to_update: Number of seconds to wait between each update of status from server.
+        :type time_to_update: int
+        :param first_time_to_update: Number of seconds to wait before the first status update after submit.
+        :type first_time_to_update: int
+        :return: The sever result for the batch in list format.
+        :rtype: list
+        """
+        self.submit()
+        time.sleep(first_time_to_update)
+        self.updateStatus()
+        while self._status not in {"error", "complete"}:
+            time.sleep(time_to_update)
+            self.updateStatus()
+        return self.getParsedResponse()
 
 
 class RunMutalyzerLegend:
