@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.14.0'
+__version__ = '1.15.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -173,20 +173,28 @@ class ADSSampleSheetIO(SampleSheetIO):
 class RTAComplete(object):
     """Reader for RTAComplete.txt."""
 
-    def __init__(self, path, date_format='%m/%d/%Y,%H:%M:%S'):
+    def __init__(self, path):
         self.filepath = path
         self.end_date = None
         self.RTA_version = None
-        self.date_format = date_format
         self._parse()
 
     def _parse(self):
         with open(self.filepath) as FH_in:
-            fields = FH_in.read().rsplit(",", 1)  # 11/1/2017,15:11:43.174,Illumina RTA 1.18.54
-            if "." in fields[0] and "." not in self.date_format:
-                fields[0] = fields[0].split(".")[0]
-            self.end_date = datetime.datetime.strptime(fields[0], self.date_format)
-            self.RTA_version = fields[1].rsplit(" ", 1)[0]
+            content = FH_in.read().strip()
+            match = re.fullmatch("(.+/.+/.+,.+),Illumina RTA (.+)", content)
+            if match:  # 11/1/2017,15:11:43.174,Illumina RTA 1.18.54
+                date_str, self.RTA_version = match.groups()
+                if "." in date_str and ".":
+                    date_str = date_str.split(".")[0]
+                self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y,%H:%M:%S')
+            else:
+                match = re.fullmatch("RTA (.+) completed on (.+/.+/.+ .+:.+:.+ ..)", content)
+                if match:  # RTA 2.4.11 completed on 11/14/2019 4:56:45 AM
+                    self.RTA_version, date_str = match.groups()
+                    self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
+                else:
+                    raise Exception('"{}" in {} cannot be parsed by {}.'.format(content, self.filepath, self.__class__.__name__))
 
 
 class RunInfo(object):
@@ -227,10 +235,18 @@ class RunInfo(object):
         }
 
     def _getRunFromRun(self, run_tree):
+        date_str = run_tree.find("Date").text
+        start_date = None
+        if len(date_str) == 6:
+            start_date = datetime.datetime.strptime(date_str, '%y%m%d')
+        elif len(date_str) == 8:
+            start_date = datetime.datetime.strptime(date_str, '%Y%m%d')
+        else:
+            start_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
         return {
             "number": run_tree.attrib["Number"],
             "id": run_tree.attrib["Id"],
-            "start_date": datetime.datetime.strptime(run_tree.find("Date").text, '%y%m%d')
+            "start_date": start_date
         }
 
     def _getFlowcellFromRun(self, run_tree):
@@ -476,6 +492,7 @@ def platformFromInstrumentSerialNumber(instrument_id):
     platform_by_re = {
         # "?": "iSeq",
         "^MN[0-9]{5}$": "MiniSeq",
+        "^ML-..-[0-9]{2}$": "MiniSeq",
         "^M[0-9]{5}$": "MiSeq",
         "^N[SB][0-9]{6}$": "NextSeq",
         "^[CDJKE][0-9]{5}$": "HiSeq",
