@@ -1,0 +1,33 @@
+{% set version = "2.6.0" %}
+{% set numpy_version = "=1.16.5" %}
+
+package:
+  name: anacore
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/bialimed/anacore
+  git_rev: {{ version }}
+
+build:
+  number: 0
+  script: ${PYTHON} setup.py install
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - numpy {{ numpy_version }}
+
+test:
+  imports:
+    - numpy
+    - anacore
+
+about:
+  summary: Anapath Core is a package containing libraries for managing standard file formats (BED, fasta, gff, gtf, MAF, newick, VCF, ...) and objects from NGS.
+  license: GNU GPL v3
+  home: https://github.com/bialimed/anacore
+  doc_source_url: https://github.com/bialimed/anacore/blob/{{ version }}/README.md

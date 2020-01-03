@@ -30,7 +30,7 @@ def load_requirements(path):
 
 setup(
     name='anacore',
-    version=get_version() + '-a',
+    version=get_version(),
     description='Libraries for managing standard file formats and objects from NGS.',
     author='Frederic Escudie',
     author_email='escudie.frederic@iuct-oncopole.fr',

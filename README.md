@@ -8,7 +8,7 @@ Anapath Core is a package containing libraries for managing standard file
 formats (BED, fasta, gff, gtf, MAF, newick, VCF, ...) and objects from NGS.
 
 ## Installation
-### From PIP
+### From PyPI
 `pip install anacore`
 
 ### From sources
