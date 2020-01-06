@@ -84,6 +84,14 @@ class HeaderAttr:
     """Class to manage a dict attribute of the VCF header: one tag FORMAT, one tag INFO, one tag FILTER ..."""
 
     def __init__(self, id, **kwargs):
+        """
+        Build and return an instance of HeaderAttr.
+
+        :param id: Identifier of the attribute.
+        :type id: str
+        :return: The new instance.
+        :rtype: HeaderAttr
+        """
         super().__setattr__("datastore", kwargs)
         self.id = id
         self._required_attr = ["ID"]  # List of required attributes names.
@@ -148,6 +156,16 @@ class HeaderDescAttr(HeaderAttr):
     """Class to manage VCF header attribute where ID and Description are required."""
 
     def __init__(self, id, description, **kwargs):
+        """
+        Build and return an instance of HeaderDescAttr.
+
+        :param id: Identifier of the attribute.
+        :type id: str
+        :param description: Description of the attribute.
+        :type description: str
+        :return: The new instance.
+        :rtype: HeaderDescAttr
+        """
         super().__init__(id, **kwargs)
         self.description = description
         self._required_attr = ["ID", "Description"]
@@ -160,6 +178,20 @@ class HeaderTypedAttr(HeaderDescAttr):
     """Class to manage VCF header attribute where ID, Description, Type and Number are required."""
 
     def __init__(self, id, description, type="String", number="1", **kwargs):
+        """
+        Build and return an instance of HeaderTypedAttr.
+
+        :param id: Identifier of the attribute.
+        :type id: str
+        :param description: Description of the attribute.
+        :type description: str
+        :param type: Data types. Authorized values: Integer (32-bit, signed), Float (32-bit IEEE-754),Flag, Character, or String.
+        :type type: str
+        :param number: Number of values that can be included with the field.
+        :type number: char
+        :return: The new instance.
+        :rtype: HeaderTypedAttr
+        """
         super().__init__(id, description, **kwargs)
         self.type = type
         self.number = number
@@ -204,7 +236,36 @@ class HeaderInfoAttr(HeaderTypedAttr):
 class VCFRecord:
     """Class to manage a variant record."""
 
-    def __init__(self, region=None, position=None, knownSNPId=None, refAllele=None, altAlleles=None, qual=None, pFilter=None, info=None, pFormat=None, samples=None):
+    def __init__(
+          self, region=None, position=None, knownSNPId=None, refAllele=None,
+          altAlleles=None, qual=None, pFilter=None, info=None, pFormat=None,
+          samples=None):
+        """
+        Build and return an instance of VCFRecord.
+
+        :param region: Identifier of the reference region/contig/chromosome containing the variant (example: chr3).
+        :type region: str
+        :param position: Start position for the variant (1-based).
+        :type position: int
+        :param knownSNPId: Semi-colon separated list of unique identifiers where available (example rs numbers from dbSNP).
+        :type knownSNPId: str
+        :param refAllele: Reference allele.
+        :type refAllele: char
+        :param altAlleles: Alternatives alleles.
+        :type altAlleles: list
+        :param qual: Variant quality.
+        :type qual: int
+        :param pFilter: List of filter tags.
+        :type pFilter: list
+        :param info: Variant additionnal information.
+        :type info: dict
+        :param pFormat: List of format tags.
+        :type pFormat: list
+        :param samples: Variant format information by sample.
+        :type samples: dict
+        :return: The new instance.
+        :rtype: VCFRecord
+        """
         self.chrom = region
         self.pos = position
         self.id = knownSNPId
