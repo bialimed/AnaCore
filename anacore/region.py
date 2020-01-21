@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.7.0'
+__version__ = '1.7.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -518,7 +518,7 @@ def iterOverlapped(queries, subjects, check_ref=True):
         while subject_idx < nb_subjects and curr_query.start > subjects[subject_idx].end:
             subject_idx += 1
         first_subject_idx = None
-        overlapping_subjects = []
+        overlapping_subjects = RegionList()
         while subject_idx < nb_subjects and curr_query.end >= subjects[subject_idx].start:
             curr_subject = subjects[subject_idx]
             if not curr_query.start > curr_subject.end:
@@ -543,5 +543,9 @@ def iterOverlappedByRegion(queries_by_chr, subject_by_chr):
     :rtype: A generator on couple (str, Region, RegionList)
     """
     for chrom in sorted(queries_by_chr):
-        for query, overlapping_subjects in iterOverlapped(queries_by_chr[chrom], subject_by_chr[chrom], False):
-            yield(chrom, query, overlapping_subjects)
+        if chrom not in subject_by_chr:
+            for query in queries_by_chr[chrom]:
+                yield(chrom, query, RegionList())
+        else:
+            for query, overlapping_subjects in iterOverlapped(queries_by_chr[chrom], subject_by_chr[chrom], False):
+                yield(chrom, query, overlapping_subjects)
