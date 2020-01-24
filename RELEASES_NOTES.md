@@ -1,5 +1,8 @@
 # Release 2.7.0 [DEV]
 
+### Improvements
+  * Add a classes to manage fusions detected by Arriba and STAR-Fusion in `anacore.fusion`.
+
 ### Bug fixes
   * Fix bug in iterOverlappedByRegion from `anacore.region` when all chromosomes
   of queries are not in subjects.
