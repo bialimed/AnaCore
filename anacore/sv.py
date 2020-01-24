@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -124,8 +124,9 @@ class SVIO(AbstractFile):
         :type record: list.
         """
         if self.current_line_nb == 0 and self.titles is not None:
+            line_starter = "" if self.title_starter is None else self.title_starter
             self.file_handle.write(
-                self.title_starter + self.separator.join(self.titles) + "\n"
+                line_starter + self.separator.join(self.titles) + "\n"
             )
             self.current_line_nb += 1
         self.file_handle.write(self.recordToLine(record) + "\n")
