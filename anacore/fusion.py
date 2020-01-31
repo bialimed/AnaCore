@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -437,8 +437,8 @@ class STARFusionIO(HashedSVIO):
             }
             if side == "Left":
                 info["RNA_FIRST"] = True
-                samples_field[self.sample_name]["JRL"] = fusion_record["JunctionReads"]
-                samples_field[self.sample_name]["SFL"] = fusion_record["SpanningFrags"]
+                samples_field[self.sample_name]["JRL"] = fusion_record["JunctionReads"] if "JunctionReads" in fusion_record else ""
+                samples_field[self.sample_name]["SFL"] = fusion_record["SpanningFrags"] if "SpanningFrags" in fusion_record else ""
             # Record
             breakends.append(
                 VCFRecord(
@@ -528,7 +528,8 @@ class STARFusionIO(HashedSVIO):
         is_valid = False
         try:
             with SVIO(filepath, title_starter="#") as reader:
-                if reader.titles == STARFusionIO.titles:
+                mandatory_fields = set(STARFusionIO.titles) - {"JunctionReads", "SpanningFrags"}
+                if len(mandatory_fields - set(reader.titles)) == 0:  # All mandatory fields of Arriba are in reader
                     is_valid = True
         except FileNotFoundError:
             raise
