@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '2.3.0'
+__version__ = '2.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -340,16 +340,41 @@ class FastqIO:
         :return: The number of sequences.
         :rtype: int
         """
-        nb_line = 0
+        handler = open
+        handler_options = "r"
         if isGzip(filepath):
-            with gzip.open(filepath, "rt") as FH_in:
-                for line in FH_in:
-                    nb_line += 1
-        else:
-            with open(filepath, "r") as FH_in:
-                for line in FH_in:
-                    nb_line += 1
-        return int(nb_line / 4)
+            handler = gzip.open
+            handler_options = "rt"
+        nb_lines = 0
+        with handler(filepath, handler_options) as reader:
+            for line in reader:
+                nb_lines += 1
+        return int(nb_lines / 4)
+
+    @staticmethod
+    def nbSeqAndNt(filepath):
+        """
+        Return the number of sequences and nucleotids in file.
+
+        :param filepath: Path to the file.
+        :type filepath: str
+        :return: The number of sequences and the number of nucleotids.
+        :rtype: int, int
+        """
+        nb_seq = 0
+        nb_nt = 0
+        handler = open
+        handler_options = "r"
+        if isGzip(filepath):
+            handler = gzip.open
+            handler_options = "rt"
+        with handler(filepath, handler_options) as reader:
+            for line in reader:
+                nb_seq += 1
+                nb_nt += len(reader.readline().rstrip())
+                reader.readline()
+                reader.readline()
+        return nb_seq, nb_nt
 
     def write(self, sequence_record):
         """
@@ -515,17 +540,41 @@ class FastaIO:
         :rtype: int
         """
         nb_seq = 0
+        handler = open
+        handler_options = "r"
         if isGzip(filepath):
-            with gzip.open(filepath, "rt") as FH_in:
-                for line in FH_in:
-                    if line.startswith(">"):
-                        nb_seq += 1
-        else:
-            with open(filepath, "r") as FH_in:
-                for line in FH_in:
-                    if line.startswith(">"):
-                        nb_seq += 1
+            handler = gzip.open
+            handler_options = "rt"
+        with handler(filepath, handler_options) as reader:
+            for line in reader:
+                if line.startswith(">"):
+                    nb_seq += 1
         return nb_seq
+
+    @staticmethod
+    def nbSeqAndNt(filepath):
+        """
+        Return the number of sequences and nucleotids in file.
+
+        :param filepath: Path to the file.
+        :type filepath: str
+        :return: The number of sequences and the number of nucleotids.
+        :rtype: int, int
+        """
+        nb_seq = 0
+        nb_nt = 0
+        handler = open
+        handler_options = "r"
+        if isGzip(filepath):
+            handler = gzip.open
+            handler_options = "rt"
+        with handler(filepath, handler_options) as reader:
+            for line in reader:
+                if line.startswith(">"):
+                    nb_seq += 1
+                else:
+                    nb_nt += len(line.rstrip())
+        return nb_seq, nb_nt
 
     def write(self, sequence_record):
         """

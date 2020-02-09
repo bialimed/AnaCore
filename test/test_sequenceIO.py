@@ -1,30 +1,15 @@
 #!/usr/bin/env python3
-#
-# Copyright (C) 2019 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import gzip
 import uuid
 import filecmp
 import tempfile
@@ -71,6 +56,7 @@ class TestFastaIO(unittest.TestCase):
 
         # Temporary files
         self.tmp_multi_line = os.path.join(tmp_folder, unique_id + "_multi.fasta")
+        self.tmp_multi_line_gz = os.path.join(tmp_folder, unique_id + "_multi.fasta.gz")
         self.tmp_mono_line = os.path.join(tmp_folder, unique_id + "_mono.fasta")
         self.tmp_out = os.path.join(tmp_folder, unique_id + "_out.fasta")
 
@@ -110,12 +96,27 @@ ATGAAAAAAAAAAAAANTGATGAAAAAAAAAAAAANTG
 """
         with open(self.tmp_mono_line, "w") as FH_out:
             FH_out.write(content)
+        with gzip.open(self.tmp_multi_line_gz, "wt") as FH_out:
+            FH_out.write(content)
 
     def testNbSeq(self):
         nb_seq = FastaIO.nbSeq(self.tmp_mono_line)
         self.assertEqual(4, nb_seq)
         nb_seq = FastaIO.nbSeq(self.tmp_multi_line)
         self.assertEqual(4, nb_seq)
+        nb_seq = FastaIO.nbSeq(self.tmp_multi_line_gz)
+        self.assertEqual(4, nb_seq)
+
+    def testNbSeqAndNt(self):
+        nb_seq, nb_nt = FastaIO.nbSeqAndNt(self.tmp_mono_line)
+        self.assertEqual(nb_seq, 4)
+        self.assertEqual(nb_nt, 104)
+        nb_seq, nb_nt = FastaIO.nbSeqAndNt(self.tmp_multi_line)
+        self.assertEqual(nb_seq, 4)
+        self.assertEqual(nb_nt, 104)
+        nb_seq, nb_nt = FastaIO.nbSeqAndNt(self.tmp_multi_line_gz)
+        self.assertEqual(nb_seq, 4)
+        self.assertEqual(nb_nt, 104)
 
     def testWrite(self):
         with FastaIO(self.tmp_out, "w") as FH_out:
@@ -128,6 +129,7 @@ ATGAAAAAAAAAAAAANTGATGAAAAAAAAAAAAANTG
         # Valid
         self.assertTrue(FastaIO.isValid(self.tmp_mono_line))
         self.assertTrue(FastaIO.isValid(self.tmp_multi_line))
+        self.assertTrue(FastaIO.isValid(self.tmp_multi_line_gz))
         # Valid long file
         content = ">seq1\nATGC\n>seq2\nATGC\n>seq3\nATGC\n>seq4\nATGC\n>seq5\nATGC\n>seq6\nATGC\n>seq7\nATGC\n>seq8\nATGC\n>seq9\nATGC\n>seq10\nATGC\n>seq11\nATGC\n>seq12\nATGC"
         with open(self.tmp_out, "w") as FH_out:
@@ -168,6 +170,10 @@ ATGAAAAAAAAAAAAANTGATGAAAAAAAAAAAAANTG
             for idx, record in enumerate(FH_in):
                 self.assertTrue(cmpSequences(record, self.expected_rec[idx]))
             self.assertEqual(idx + 1, 4)
+        with FastaIO(self.tmp_multi_line_gz) as FH_in:
+            for idx, record in enumerate(FH_in):
+                self.assertTrue(cmpSequences(record, self.expected_rec[idx]))
+            self.assertEqual(idx + 1, 4)
         with FastaIO(self.tmp_mono_line) as FH_in_mono:
             with FastaIO(self.tmp_multi_line) as FH_in_multi:
                 idx = 0
@@ -179,7 +185,7 @@ ATGAAAAAAAAAAAAANTGATGAAAAAAAAAAAAANTG
 
     def tearDown(self):
         # Clean temporary files
-        for curr_file in [self.tmp_mono_line, self.tmp_multi_line, self.tmp_out]:
+        for curr_file in [self.tmp_mono_line, self.tmp_multi_line, self.tmp_multi_line_gz, self.tmp_out]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 
@@ -191,6 +197,7 @@ class TestFastqIO(unittest.TestCase):
 
         # Temporary files
         self.tmp_seq = os.path.join(tmp_folder, unique_id + "_ref.fastq")
+        self.tmp_seq_gz = os.path.join(tmp_folder, unique_id + "_ref.fastq.gz")
         self.tmp_out = os.path.join(tmp_folder, unique_id + "_out.fastq")
 
         # Expected
@@ -220,6 +227,8 @@ ATGAAAAAAAAAAAAANTG
 
 """
         with open(self.tmp_seq, "w") as FH_out:
+            FH_out.write(content)
+        with gzip.open(self.tmp_seq_gz, "wt") as FH_out:
             FH_out.write(content)
 
     def testQualOffset(self):
@@ -283,9 +292,18 @@ fffdffgggggc_aggaggggfe_afffffgggggfgggggggggddgge_aWdaggggg]]cfffffedfeUeaacff_
         nb_seq = FastqIO.nbSeq(self.tmp_seq)
         self.assertEqual(nb_seq, 4)
 
+    def testNbSeqAndNt(self):
+        nb_seq, nb_nt = FastqIO.nbSeqAndNt(self.tmp_seq)
+        self.assertEqual(nb_seq, 4)
+        self.assertEqual(nb_nt, 41)
+        nb_seq, nb_nt = FastqIO.nbSeqAndNt(self.tmp_seq_gz)
+        self.assertEqual(nb_seq, 4)
+        self.assertEqual(nb_nt, 41)
+
     def testIsValid(self):
         # Valid
         self.assertTrue(FastqIO.isValid(self.tmp_seq))
+        self.assertTrue(FastqIO.isValid(self.tmp_seq_gz))
         # Valid long file
         content = "@seq1\nATGC\n+\n####\n@seq2\nATGC\n+\n####\n@seq3\nATGC\n+\n####\n@seq4\nATGC\n+\n####\n@seq5\nATGC\n+\n####\n@seq6\nATGC\n+\n####\n@seq7\nATGC\n+\n####\n@seq8\nATGC\n+\n####\n@seq9\nATGC\n+\n####\n@seq10\nATGC\n+\n####\n@seq11\nATGC\n+\n####\n"
         with open(self.tmp_out, "w") as FH_out:
@@ -317,6 +335,10 @@ fffdffgggggc_aggaggggfe_afffffgggggfgggggggggddgge_aWdaggggg]]cfffffedfeUeaacff_
             for idx, record in enumerate(FH_in):
                 self.assertTrue(cmpSequences(record, self.expected_rec[idx]))
             self.assertEqual(idx + 1, 4)
+        with FastqIO(self.tmp_seq_gz) as FH_in:
+            for idx, record in enumerate(FH_in):
+                self.assertTrue(cmpSequences(record, self.expected_rec[idx]))
+            self.assertEqual(idx + 1, 4)
         with FastqIO(self.tmp_seq) as FH_in:
             idx = 0
             for rec_expected, rec_observed in zip(self.expected_rec, FH_in):
@@ -326,7 +348,7 @@ fffdffgggggc_aggaggggfe_afffffgggggfgggggggggddgge_aWdaggggg]]cfffffedfeUeaacff_
 
     def tearDown(self):
         # Clean temporary files
-        for curr_file in [self.tmp_seq, self.tmp_out]:
+        for curr_file in [self.tmp_seq, self.tmp_seq_gz, self.tmp_out]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 
