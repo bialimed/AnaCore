@@ -41,10 +41,10 @@ anacore.filters
    :undoc-members:
    :show-inheritance:
 
-anacore.fusionCatcher
+anacore.fusion
 ----------------------------
 
-.. automodule:: anacore.fusionCatcher
+.. automodule:: anacore.fusion
    :members:
    :undoc-members:
    :show-inheritance:

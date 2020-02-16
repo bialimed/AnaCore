@@ -97,10 +97,10 @@ class FusionFileReader(object):
 
         :param filepath: Path to the file (format: TSV).
         :type filepath: str
-        :param *args: Additional arguments.
-        :type *args: list
-        :param **kwargs: Additional keyword arguments.
-        :type **kwargs: dict
+        :param args: Additional arguments.
+        :type args: list
+        :param kwargs: Additional keyword arguments.
+        :type kwargs: dict
         :return: The parser dedicated to the software used to produce the fusions file.
         :rtype: ArribaIO or FusionCatcherIO or STARFusionIO
         """
