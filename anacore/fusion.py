@@ -422,7 +422,7 @@ class STARFusionIO(HashedSVIO):
                 self.annot_field: [{
                     "SYMBOL": gene_symbol,
                     "Gene": gene_id,
-                    "Tags": info_annot_tags
+                    "Tags": "&".join(info_annot_tags)
                 }]
             }
             # SAMPLES
@@ -513,7 +513,7 @@ class STARFusionIO(HashedSVIO):
             "LeftBreakEntropy": first.info["BREAK_ENTROPY"],
             "RightBreakDinuc": second.info["BREAK_DINUC"],
             "RightBreakEntropy": second.info["BREAK_ENTROPY"],
-            "annots": json.dumps(first.info[self.annot_field][0]["Tags"])
+            "annots": json.dumps(first.info[self.annot_field][0]["Tags"].split("&"))
         }
 
     @staticmethod
@@ -748,26 +748,26 @@ class ArribaIO(HashedSVIO):
                     "Type": fusion_record["type"],
                     "GENE_SHARD": fusion_record["direction" + side].replace("stream", ""),
                     "FRAMESHIFT": has_frameshift[fusion_record["reading_frame"]],
-                    "Protein_contig": fusion_record["peptide_sequence"]
+                    "Protein_contig": fusion_record["peptide_sequence"].replace("|", "@")
                 }]
             }
             # SAMPLES
             samples_field = {
                 self.sample_name: {
-                    "PR": fusion_record["discordant_mates"],
-                    "SR": fusion_record["split_reads1"] + fusion_record["split_reads2"],
-                    "SR1": fusion_record["split_reads1"],
-                    "SR2": fusion_record["split_reads2"],
+                    "PR": int(fusion_record["discordant_mates"]),
+                    "SR": int(fusion_record["split_reads1"]) + int(fusion_record["split_reads2"]),
+                    "SR1": int(fusion_record["split_reads1"]),
+                    "SR2": int(fusion_record["split_reads2"]),
                     "CFD": fusion_record["confidence"],
-                    "DPS": None if fusion_record["coverage" + side] == "." else fusion_record["coverage" + side],
+                    "DPS": None if fusion_record["coverage" + side] == "." else int(fusion_record["coverage" + side]),
                     "RFIL": read_level_filters,
-                    "SRL": None if fusion_record["read_identifiers"] == "." else fusion_record["read_identifiers"]
+                    "SRL": [] if fusion_record["read_identifiers"] == "." else fusion_record["read_identifiers"]
                 }
             }
             if side == "1":
                 info["RNA_FIRST"] = True
             else:
-                info["RNA_CONTIG"] = None if fusion_record["fusion_transcript"] == "." else fusion_record["fusion_transcript"],
+                info["RNA_CONTIG"] = None if fusion_record["fusion_transcript"] == "." else fusion_record["fusion_transcript"].replace("|", "@")
             # Record
             breakends.append(
                 VCFRecord(
@@ -843,10 +843,10 @@ class ArribaIO(HashedSVIO):
             "closest_genomic_breakpoint1": "." if "GBP" not in first.info else first.info["GBP"],
             "closest_genomic_breakpoint2": "." if "GBP" not in second.info else second.info["GBP"],
             "filters": arriba_filters,
-            "fusion_transcript": "." if "RNA_CONTIG" not in first.info or first.info["RNA_CONTIG"] is None else first.info["RNA_CONTIG"],
+            "fusion_transcript": "." if "RNA_CONTIG" not in first.info or first.info["RNA_CONTIG"] is None else first.info["RNA_CONTIG"].replace("@", "|"),
             "reading_frame": fs_to_reading_frame[second.info[self.annot_field][0]["FRAMESHIFT"]],
-            "peptide_sequence": "." if first.info[self.annot_field][0]["Protein_contig"] is None else first.info[self.annot_field][0]["Protein_contig"],
-            "read_identifiers": "." if first.samples[self.sample_name]["SRL"] is None else first.samples[self.sample_name]["SRL"],
+            "peptide_sequence": "." if first.info[self.annot_field][0]["Protein_contig"] is None else first.info[self.annot_field][0]["Protein_contig"].replace("@", "|"),
+            "read_identifiers": "." if first.samples[self.sample_name]["SRL"] is None or len(first.samples[self.sample_name]["SRL"]) == 0 else first.samples[self.sample_name]["SRL"],
         }
 
     @staticmethod
@@ -886,7 +886,7 @@ class ArribaIO(HashedSVIO):
             "SVTYPE": HeaderInfoAttr("SVTYPE", type="String", number="1", description="Type of structural variant."),
             "RNA_FIRST": HeaderInfoAttr("RNA_FIRST", type="Flag", number="0", description="For RNA fusions, this break-end is 5' in the fusion transcript."),  # In the fusion transcript, the 'LeftGene' is always 5' relative to the 'RightGene' (https://groups.google.com/forum/#!topic/star-fusion/9rBLT-v5JHI)
             "RNA_CONTIG": HeaderInfoAttr("RNA_CONTIG", type="String", number="A", description="If the parameter -T is set, Arriba puts the transcript sequence in this column. The sequence is assembled from the supporting reads of the most highly expressed transcript."),
-            "GBP": HeaderFormatAttr("GBP", type="String", number=".", description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint."),
+            "GBP": HeaderFormatAttr("GBP", type="String", number="1", description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint."),
             annotation_field: HeaderInfoAttr(annotation_field, type="String", number=".", description="Consequence annotations. Format: SYMBOL|STRAND|Site|Type|GENE_SHARD|FRAMESHIFT|Protein_contig")
         }
         # ANN_titles
