@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.1'
+__version__ = '2.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -303,7 +303,8 @@ class FusionCatcherIO(HashedSVIO):
         is_valid = False
         try:
             with SVIO(filepath) as reader:
-                if reader.titles == FusionCatcherIO.titles:
+                mandatory_fields = set(FusionCatcherIO.titles) - {"Predicted_effect"}
+                if len(mandatory_fields - set(reader.titles)) == 0:
                     is_valid = True
         except FileNotFoundError:
             raise
@@ -436,8 +437,10 @@ class STARFusionIO(HashedSVIO):
             }
             if side == "Left":
                 info["RNA_FIRST"] = True
-                samples_field[self.sample_name]["JRL"] = fusion_record["JunctionReads"] if "JunctionReads" in fusion_record else ""
-                samples_field[self.sample_name]["SFL"] = fusion_record["SpanningFrags"] if "SpanningFrags" in fusion_record else ""
+                if "JunctionReads" in fusion_record:
+                    samples_field[self.sample_name]["JRL"] = fusion_record["JunctionReads"]
+                if "SpanningFrags" in fusion_record:
+                    samples_field[self.sample_name]["SFL"] = fusion_record["SpanningFrags"]
             # Record
             breakends.append(
                 VCFRecord(
@@ -740,7 +743,6 @@ class ArribaIO(HashedSVIO):
             has_frameshift = {"in-frame": "false", "out-of-frame": "true", ".": "."}
             info = {
                 "SVTYPE": "BND",
-                "GBP": None if fusion_record["closest_genomic_breakpoint" + side] == "." else fusion_record["closest_genomic_breakpoint" + side],
                 self.annot_field: [{
                     "SYMBOL": fusion_record["gene" + side],
                     "STRAND": fusion_record["strand" + side + "(gene/fusion)"].split("/")[0],
@@ -751,6 +753,8 @@ class ArribaIO(HashedSVIO):
                     "Protein_contig": fusion_record["peptide_sequence"].replace("|", "@")
                 }]
             }
+            if fusion_record["closest_genomic_breakpoint" + side] != ".":
+                info["GBP"] = fusion_record["closest_genomic_breakpoint" + side]
             # SAMPLES
             samples_field = {
                 self.sample_name: {
@@ -759,15 +763,18 @@ class ArribaIO(HashedSVIO):
                     "SR1": int(fusion_record["split_reads1"]),
                     "SR2": int(fusion_record["split_reads2"]),
                     "CFD": fusion_record["confidence"],
-                    "DPS": None if fusion_record["coverage" + side] == "." else int(fusion_record["coverage" + side]),
-                    "RFIL": read_level_filters,
-                    "SRL": [] if fusion_record["read_identifiers"] == "." else fusion_record["read_identifiers"]
+                    "RFIL": read_level_filters
                 }
             }
+            if fusion_record["coverage" + side] != ".":
+                samples_field[self.sample_name]["DPS"] = int(fusion_record["coverage" + side])
+            if fusion_record["read_identifiers"] != ".":
+                samples_field[self.sample_name]["SRL"] = fusion_record["read_identifiers"].split(",")
             if side == "1":
                 info["RNA_FIRST"] = True
             else:
-                info["RNA_CONTIG"] = None if fusion_record["fusion_transcript"] == "." else fusion_record["fusion_transcript"].replace("|", "@")
+                if fusion_record["fusion_transcript"] != ".":
+                    info["RNA_CONTIG"] = fusion_record["fusion_transcript"].replace("|", "@")
             # Record
             breakends.append(
                 VCFRecord(
@@ -776,7 +783,7 @@ class ArribaIO(HashedSVIO):
                     id,
                     "N",  # ref
                     [],  # alt
-                    pFilter=filters_field,
+                    pFilter=["PASS"] if len(filters_field) == 0 else filters_field,
                     info=info,
                     pFormat=sorted(samples_field[self.sample_name].keys()),
                     samples=samples_field
@@ -813,7 +820,7 @@ class ArribaIO(HashedSVIO):
         fs_to_reading_frame = {".": ".", "false": "in-frame", "true": "out-of-frame"}
         arriba_filters = ""
         if first.filter:
-            arriba_filters = ",".join(first.filters)
+            arriba_filters = ",".join(first.filter)
         if "RFIL" in first.samples[self.sample_name] and first.samples[self.sample_name]["RFIL"]:
             arriba_filters += ",".join(first.samples[self.sample_name]["RFIL"])
         return {
@@ -843,10 +850,10 @@ class ArribaIO(HashedSVIO):
             "closest_genomic_breakpoint1": "." if "GBP" not in first.info else first.info["GBP"],
             "closest_genomic_breakpoint2": "." if "GBP" not in second.info else second.info["GBP"],
             "filters": arriba_filters,
-            "fusion_transcript": "." if "RNA_CONTIG" not in first.info or first.info["RNA_CONTIG"] is None else first.info["RNA_CONTIG"].replace("@", "|"),
+            "fusion_transcript": "." if "RNA_CONTIG" not in first.info else first.info["RNA_CONTIG"].replace("@", "|"),
             "reading_frame": fs_to_reading_frame[second.info[self.annot_field][0]["FRAMESHIFT"]],
             "peptide_sequence": "." if first.info[self.annot_field][0]["Protein_contig"] is None else first.info[self.annot_field][0]["Protein_contig"].replace("@", "|"),
-            "read_identifiers": "." if first.samples[self.sample_name]["SRL"] is None or len(first.samples[self.sample_name]["SRL"]) == 0 else first.samples[self.sample_name]["SRL"],
+            "read_identifiers": "." if "SRL" not in first.samples[self.sample_name] or len(first.samples[self.sample_name]["SRL"]) == 0 else first.samples[self.sample_name]["SRL"],
         }
 
     @staticmethod
@@ -885,7 +892,7 @@ class ArribaIO(HashedSVIO):
             "MATEID": HeaderInfoAttr("MATEID", type="String", number="A", description="ID of mate breakend."),
             "SVTYPE": HeaderInfoAttr("SVTYPE", type="String", number="1", description="Type of structural variant."),
             "RNA_FIRST": HeaderInfoAttr("RNA_FIRST", type="Flag", number="0", description="For RNA fusions, this break-end is 5' in the fusion transcript."),  # In the fusion transcript, the 'LeftGene' is always 5' relative to the 'RightGene' (https://groups.google.com/forum/#!topic/star-fusion/9rBLT-v5JHI)
-            "RNA_CONTIG": HeaderInfoAttr("RNA_CONTIG", type="String", number="A", description="If the parameter -T is set, Arriba puts the transcript sequence in this column. The sequence is assembled from the supporting reads of the most highly expressed transcript."),
+            "RNA_CONTIG": HeaderInfoAttr("RNA_CONTIG", type="String", number="1", description="The transcript sequence assembled from the supporting reads of the most highly expressed transcript."),
             "GBP": HeaderFormatAttr("GBP", type="String", number="1", description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint."),
             annotation_field: HeaderInfoAttr(annotation_field, type="String", number=".", description="Consequence annotations. Format: SYMBOL|STRAND|Site|Type|GENE_SHARD|FRAMESHIFT|Protein_contig")
         }
