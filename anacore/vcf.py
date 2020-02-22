@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.25.0'
+__version__ = '1.26.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -255,7 +255,7 @@ class VCFRecord:
         :type altAlleles: list
         :param qual: Variant quality.
         :type qual: int
-        :param pFilter: List of filter tags.
+        :param pFilter: List of filter tags. It can be in three possible states: (1) if no filter was applied, the field contains an empty list ("." in VCF file); (2) if filters were applied but the record passes filters, the field should contain ["PASS"]; (3) if filters were applied and the record does not pass filters, the field should contain ["filter_name", ...].
         :type pFilter: list
         :param info: Variant additionnal information.
         :type info: dict
@@ -272,10 +272,10 @@ class VCFRecord:
         self.ref = refAllele
         self.alt = altAlleles
         self.qual = qual
-        self.filter = pFilter if pFilter is not None else list()
-        self.info = info if info is not None else dict()
-        self.format = pFormat if pFormat is not None else list()
-        self.samples = samples if samples is not None else dict()
+        self.filter = list() if pFilter is None else pFilter
+        self.info = dict() if info is None else info
+        self.format = list() if pFormat is None else pFormat
+        self.samples = dict() if samples is None else samples
         self._normalized = None
 
     @staticmethod
@@ -1101,7 +1101,8 @@ class VCFIO(AbstractFile):
         variation.ref = fields[3]
         variation.alt = fields[4].split(',')
         variation.qual = float(fields[5]) if fields[5] != "." else None
-        variation.filter = fields[6].split(";") if fields[6] != "." and fields[6] != "" else None
+        if fields[6] != "." and fields[6] != "":
+            variation.filter = fields[6].split(";")
 
         if len(fields) >= 8:
             # Field INFO
@@ -1192,7 +1193,7 @@ class VCFIO(AbstractFile):
             record.ref,
             ",".join(record.alt),
             ("." if record.qual is None else str(record.qual)),
-            ("." if record.filter is None else ";".join(record.filter))
+            ("." if len(record.filter) == 0 else ";".join(record.filter))
         ])
         # Info
         if record.info is None or len(record.info) == 0 or len(self.info) == 0:
