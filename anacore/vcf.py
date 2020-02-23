@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.26.0'
+__version__ = '1.27.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -1126,7 +1126,7 @@ class VCFIO(AbstractFile):
                             else:
                                 info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
                         else:  # Number == 0
-                            info[tag] = None
+                            info[tag] = True  # Flag
                     else:
                         info[tag_and_value] = True
                 variation.info = info
@@ -1205,7 +1205,7 @@ class VCFIO(AbstractFile):
                     values = [encodeInfoValue(str(elt)) for elt in record.info[key]]
                     info_fields.append(key + "=" + ",".join(values))
                 else:  # The info contains a flag or a uniq value
-                    if self.info[key]._type is None:  ############################################## Flag
+                    if self.info[key]._type is None:  # Flag
                         info_fields.append(key)
                     else:
                         value = encodeInfoValue(str(record.info[key]))
@@ -1240,12 +1240,9 @@ class VCFIO(AbstractFile):
                                         value = (encodeInfoValue(str(current_val)) if current_val is not None else ".")
                                         values.append(value)
                                     spl_fields.append(",".join(values))
-                                else:  # The info contains a flag or a uniq value
-                                    if self.format[key]._type is None:  ############################################## Flag
-                                        spl_fields.append(key)
-                                    else:
-                                        value = (encodeInfoValue(str(record_spl[key])) if record_spl[key] is not None else ".")
-                                        spl_fields.append(value)
+                                else:  # The format contains a uniq value
+                                    value = (encodeInfoValue(str(record_spl[key])) if record_spl[key] is not None else ".")
+                                    spl_fields.append(value)
                         line += "\t" + ":".join(spl_fields)
         return line
 
