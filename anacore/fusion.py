@@ -342,6 +342,38 @@ class FusionCatcherIO(HashedSVIO):
         }
 
 
+starfusion_filters = {
+    "GTEx_recurrent_StarF2019": HeaderFilterAttr(
+        "GTEx_recurrent_StarF2019",
+        "Fusions found recurrently in GTEx as mined using STAR-Fusion v1.5.0"
+    ),
+    "BodyMap": HeaderFilterAttr(
+        "BodyMap",
+        "Fusions found by STAR-Fusion as applied to the Illumina Human Body Map reference data"
+    ),
+    "DGD_PARALOGS": HeaderFilterAttr(
+        "DGD_PARALOGS",
+        "Duplicated genes as per the Duplicated Genes Database"
+    ),
+    "HGNC_GENEFAM": HeaderFilterAttr(
+        "HGNC_GENEFAM",
+        "HGNC gene family membership as per ftp://ftp.ebi.ac.uk/pub/databases/genenames/genefam_list.txt.gz"
+    ),
+    "Greger_Normal": HeaderFilterAttr(
+        "Greger_Normal",
+        "Fusion transcripts (mostly from tandem genes) detected based on analysis of RNA-Seq from 1000 genomes project samples. List derived from Greger et al. PLOS One, 2014"
+    ),
+    "Babiceanu_Normal": HeaderFilterAttr(
+        "Babiceanu_Normal",
+        "Recurrent chimeric fusion RNAs in non-cancer tissues and cells as per Babiceanu et al. NAR, 2016"
+    ),
+    "ConjoinG": HeaderFilterAttr(
+        "ConjoinG",
+        "Fused transcripts derived from the Conjoined Gene Database"
+    )
+}
+
+
 class STARFusionIO(HashedSVIO):
     """Class to read and write fusions in STAR-Fusion TSV output format (see https://github.com/STAR-Fusion/STAR-Fusion/wiki#Outputs). The records are in anacore.vcf.VCFRecord format and a fusion is represented by 2 records (breakend for the 5' shard and breakend for the 3' shard)."""
 
@@ -408,6 +440,9 @@ class STARFusionIO(HashedSVIO):
         breakends = []
         large_anchor_support = "1" if fusion_record["LargeAnchorSupport"] == "YES_LDAS" else "0"
         info_annot_tags = [elt.strip() for elt in json.loads(fusion_record["annots"])]
+        filter_field = sorted(list(set(starfusion_filters) & set(info_annot_tags)))
+        if len(filter_field) == 0:
+            filter_field = ["PASS"]
         coord_list = []
         for side, mate_side in [("Left", "Right"), ("Right", "Left")]:
             id = str(uuid.uuid4())
@@ -450,6 +485,7 @@ class STARFusionIO(HashedSVIO):
                     "N",  # ref
                     [],  # alt
                     info=info,
+                    pFilter=filter_field,
                     pFormat=sorted(samples_field[self.sample_name].keys()),
                     samples=samples_field
                 )
@@ -551,6 +587,8 @@ class STARFusionIO(HashedSVIO):
         :param annotation_field: INFO field used for store annotations.
         :type annotation_field: str
         """
+        # FILTERS
+        vcf_io.filter = starfusion_filters
         # INFO
         vcf_io.info = {
             "MATEID": HeaderInfoAttr("MATEID", type="String", number="A", description="ID of mate breakend."),
@@ -732,6 +770,7 @@ class ArribaIO(HashedSVIO):
         filters_from_file = {elt.strip() for elt in fusion_record["filters"].split(",")}
         filters_field = sorted(list(filters_from_file & event_level_filters))
         read_level_filters = sorted(list(filters_from_file - event_level_filters))
+        is_imprecise = False if int(fusion_record["split_reads1"]) + int(fusion_record["split_reads2"]) > 0 else True
         breakends = []
         coord_list = []
         for side, mate_side in [("1", "2"), ("2", "1")]:
@@ -753,6 +792,8 @@ class ArribaIO(HashedSVIO):
                     "Protein_contig": fusion_record["peptide_sequence"].replace("|", "@")
                 }]
             }
+            if is_imprecise:
+                info["IMPRECISE"] = True
             if fusion_record["closest_genomic_breakpoint" + side] != ".":
                 info["GBP"] = fusion_record["closest_genomic_breakpoint" + side]
             # SAMPLES
@@ -889,11 +930,12 @@ class ArribaIO(HashedSVIO):
         """
         # INFO
         vcf_io.info = {
+            "IMPRECISE": HeaderInfoAttr("IMPRECISE", type="Flag", number="0", description="Imprecise structural variation."),
             "MATEID": HeaderInfoAttr("MATEID", type="String", number="A", description="ID of mate breakend."),
             "SVTYPE": HeaderInfoAttr("SVTYPE", type="String", number="1", description="Type of structural variant."),
             "RNA_FIRST": HeaderInfoAttr("RNA_FIRST", type="Flag", number="0", description="For RNA fusions, this break-end is 5' in the fusion transcript."),  # In the fusion transcript, the 'LeftGene' is always 5' relative to the 'RightGene' (https://groups.google.com/forum/#!topic/star-fusion/9rBLT-v5JHI)
             "RNA_CONTIG": HeaderInfoAttr("RNA_CONTIG", type="String", number="1", description="The transcript sequence assembled from the supporting reads of the most highly expressed transcript."),
-            "GBP": HeaderFormatAttr("GBP", type="String", number="1", description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint."),
+            "GBP": HeaderInfoAttr("GBP", type="String", number="1", description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint."),
             annotation_field: HeaderInfoAttr(annotation_field, type="String", number=".", description="Consequence annotations. Format: SYMBOL|STRAND|Site|Type|GENE_SHARD|FRAMESHIFT|Protein_contig")
         }
         # ANN_titles
