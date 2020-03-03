@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.2'
+__version__ = '2.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -66,6 +66,25 @@ def getAltFromCoord(first_coord, second_coord):
     return first_alt, second_alt
 
 
+def getStrand(breakend, is_first):
+    """
+    Return strand from breakend record.
+
+    :param breakend: Breakend defining a part of an RNA fusion.
+    :type breakend: anacore.vcf.VCFRecord
+    :param is_first: The shard is the first in RNA.
+    :type is_first: boolean
+    :return: Strand from breakend record.
+    :rtype: str
+    """
+    strand = None
+    if breakend.alt[0].startswith("[") or breakend.alt[0].startswith("]"):
+        strand = "-" if is_first else "+"
+    else:
+        strand = "+" if is_first else "-"
+    return strand
+
+
 def getCoordStr(breakend, is_first=None):
     """
     Return coordinates elements (chrom, pos and strand) a from breakend record.
@@ -79,12 +98,7 @@ def getCoordStr(breakend, is_first=None):
     """
     if is_first is None:
         is_first = True if "RNA_FIRST" in breakend.info else False
-    breakend_coord = None
-    if breakend.alt[0].startswith("[") or breakend.alt[0].startswith("]"):
-        breakend_coord = {"chrom": breakend.chrom, "pos": breakend.pos, "strand": "-" if is_first else "+"}
-    else:
-        breakend_coord = {"chrom": breakend.chrom, "pos": breakend.pos, "strand": "+" if is_first else "-"}
-    return breakend_coord
+    return {"chrom": breakend.chrom, "pos": breakend.pos, "strand": getStrand(breakend, is_first)}
 
 
 class FusionFileReader(object):
