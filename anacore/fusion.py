@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.0'
+__version__ = '2.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -706,6 +706,10 @@ arriba_event_level_filters = {
     "isoforms": HeaderFilterAttr(
         "isoforms",
         "This filter searches for additional isoforms for those gene pairs that are predicted to be fused in proper orientation. Typically there is a major isoform which is expressed at a high level and a few low expressed isoforms."
+    ),
+    "Imprecise": HeaderFilterAttr(
+        "Imprecise",
+        "RNA fusion candidates for which no spanning contig was found."
     )
 }
 
@@ -785,6 +789,9 @@ class ArribaIO(HashedSVIO):
         filters_field = sorted(list(filters_from_file & event_level_filters))
         read_level_filters = sorted(list(filters_from_file - event_level_filters))
         is_imprecise = False if int(fusion_record["split_reads1"]) + int(fusion_record["split_reads2"]) > 0 else True
+        if is_imprecise:
+            filters_field.append("Imprecise")
+            filters_field.sort()
         breakends = []
         coord_list = []
         for side, mate_side in [("1", "2"), ("2", "1")]:
@@ -875,7 +882,7 @@ class ArribaIO(HashedSVIO):
         fs_to_reading_frame = {".": ".", "false": "in-frame", "true": "out-of-frame"}
         arriba_filters = ""
         if first.filter:
-            arriba_filters = ",".join(first.filter)
+            arriba_filters = ",".join([elt for elt in first.filter if elt != "Imprecise"])
         if "RFIL" in first.samples[self.sample_name] and first.samples[self.sample_name]["RFIL"]:
             arriba_filters += ",".join(first.samples[self.sample_name]["RFIL"])
         return {
