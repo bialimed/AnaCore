@@ -11,6 +11,7 @@
 
 ### Improvements
   * Add a classes to manage fusions detected by Arriba and STAR-Fusion in `anacore.fusion`.
+  * Add classes to manage VCF containing fusions in `anacore.fusion`.
 
 ### Bug fixes
   * Fix bug in iterOverlappedByRegion from `anacore.region` when all chromosomes

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing fusions callers's output. Each record is converted to VCFRecord."""
+"""Classes and functions for reading/writing fusions callers's output and VCF containing fusions. Each record is converted to VCFRecord."""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
@@ -9,10 +9,32 @@ __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import re
+import gzip
 import json
 import uuid
+from anacore.abstractFile import isGzip
 from anacore.sv import HashedSVIO, SVIO
-from anacore.vcf import VCFRecord, HeaderInfoAttr, HeaderFilterAttr, HeaderFormatAttr
+from anacore.annotVcf import AnnotVCFIO
+from anacore.vcf import decodeInfoValue, getAlleleRecord, VCFIO, VCFRecord, HeaderInfoAttr, HeaderFilterAttr, HeaderFormatAttr
+
+
+def getBNDInterval(record):
+    """
+    Return the start and end for BND record (CIPOS is taken into account).
+
+    :param record: The breakend record.
+    :type record: anacore.vcf.VCFRecord
+    :return: Start and end for BND record (CIPOS is taken into account).
+    :rtype: (int, int)
+    """
+    start = record.pos
+    end = record.pos
+    if "CIPOS" in record.info:
+        start += record.info["CIPOS"][0]
+        end += record.info["CIPOS"][1]
+        if "IMPRECISE" in record.info:
+            start -= 1
+    return start, end
 
 
 def getCoordDictFromCoordStr(coord):
@@ -974,3 +996,151 @@ class ArribaIO(HashedSVIO):
             "RFIL": HeaderFormatAttr("RFIL", type="String", number=".", description="Filters which removed one or more of the supporting reads. The number of filtered reads is given in parantheses after the name of the filter. If a filter discarded the event as a whole (all reads), the number of filtered reads is missing."),
             "SRL": HeaderFormatAttr("SRL", type="String", number=".", description="The names of the supporting reads.")
         }
+
+
+class BreakendVCFIO(VCFIO):
+    """Read and write VCF file containing breakends. Each iteration return a couple of breakends (the first and the second in fusion)."""
+
+    def __init__(self, filepath, mode="r"):
+        """
+        Return instance of BreakendVCFIO.
+
+        :param filepath: The filepath.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
+        :return: The new instance.
+        :rtype: anacore.fusionVcf.BreakendVCFIO
+        """
+        super().__init__(filepath, mode)
+        self.index = {}  # By record ID the byte position of start and end of line
+        self.pick_reader = None
+        if mode == "r":
+            if isGzip(filepath):
+                self.pick_reader = gzip.open(filepath, "rt")
+            else:
+                self.pick_reader = open(filepath, "r")
+            self.loadIndex()
+        self._iter_already_processed = set()
+
+    def loadIndex(self):
+        """Parse file and store in index the byte positions (start and end) of each record by record ID."""
+        self.index = {}
+        next_start = 0
+        line_nb = 1
+        line = self.pick_reader.readline()
+        while line:
+            start = next_start
+            next_start = self.pick_reader.tell()
+            if not line.startswith("#"):
+                end = next_start - 1
+                id = line.split(None, 3)[2].strip()
+                self.index[id] = (start, end, line_nb)
+            line = self.pick_reader.readline()
+            line_nb += 1
+
+    def close(self):
+        """Close file handle."""
+        super().close()
+        if self.pick_reader is not None:
+            self.pick_reader.close()
+
+    def get(self, id):
+        """
+        Return record with provided ID.
+
+        :param id: record ID.
+        :type id: str
+        :return: The record.
+        :rtype: anacore.vcf.VCFRecord
+        """
+        # Get current pos
+        current = {
+            "line": self.current_line,
+            "line_nb": self.current_line_nb,
+        }
+        # Get new record
+        start, end, line_nb = self.index[id]
+        self.pick_reader.seek(start)
+        self.current_line = self.pick_reader.read(end - start + 1)
+        self.current_line_nb = line_nb
+        record = self._parseLine()
+        # Jump to previous record
+        self.current_line = current["line"]
+        self.current_line_nb = current["line_nb"]
+        # Return
+        return record
+
+    def isRecordLine(self, line):
+        """
+        Return True if the line corresponds to a new record (it is not a comment, an header line or an already processed fusion).
+
+        :param line: The evaluated line.
+        :type line: str.
+        :return: True if the line corresponds to a record.
+        :rtype: bool
+        """
+        is_record = super().isRecordLine(line)
+        if is_record:
+            id = line.split(None, 3)[2].strip()
+            mate_info = line.split(None, 8)[7].strip()
+            match = re.search("MATEID\=([^;]+);?", mate_info)
+            if match:
+                mate_id = decodeInfoValue(match.groups()[0])
+                fusion_id = " @@ ".join(sorted([id, mate_id]))
+                if fusion_id in self._iter_already_processed:
+                    is_record = False
+        return is_record
+
+    def __iter__(self):
+        for record in super().__iter__():
+            for mate_idx, mate_id in enumerate(record.info["MATEID"]):
+                mate = self.get(mate_id)
+                fusion_id = " @@ ".join(sorted([record.id, mate.id]))
+                if fusion_id not in self._iter_already_processed:
+                    self._iter_already_processed.add(fusion_id)
+                    # Change ID
+                    record_new_id = record.id
+                    alt_record = record
+                    if len(record.alt) > 1:
+                        record_new_id += "_" + str(mate_idx)  # Record must be splitted for each mate
+                        alt_record = getAlleleRecord(record, mate_idx)
+                        alt_record.info["MATEID"] = [record.info["MATEID"][mate_idx]]
+                    mate_new_id = mate.id
+                    alt_mate = mate
+                    if len(mate.alt) > 1:
+                        record_idx = mate.info["MATEID"].index(record.id)
+                        mate_new_id += "_" + record_idx  # Record must be splitted for each mate
+                        alt_mate = getAlleleRecord(mate, record_idx)
+                        alt_mate.info["MATEID"] = [mate.info["MATEID"][record_idx]]
+                    alt_record.id = record_new_id
+                    alt_mate.info["MATEID"] = [record_new_id]
+                    alt_mate.id = mate_new_id
+                    alt_record.info["MATEID"] = [mate_new_id]
+                    # Order by transcript
+                    first = record
+                    second = mate
+                    if "RNA_FIRST" in second.info:
+                        first = mate
+                        second = record
+                    # Return
+                    yield first, second
+
+
+class AnnotBreakendVCFIO(BreakendVCFIO, AnnotVCFIO):
+    """Read and write VCF file containing annotated breakends. Each iteration return a couple of breakends (the first and the second in fusion)."""
+
+    def __init__(self, filepath, mode="r", annot_field="ANN"):
+        """
+        Return instance of AnnotBreakendVCFIO.
+
+        :param filepath: The filepath.
+        :type filepath: str
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str
+        :return: The new instance.
+        :rtype: anacore.fusionVcf.AnnotBreakendVCFIO
+        """
+        self.annot_field = annot_field
+        self.ANN_titles = list()
+        super().__init__(filepath, mode)
