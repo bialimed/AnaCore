@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2020 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -51,6 +51,93 @@ class FusionFileReaderTest(unittest.TestCase):
             {
                 "expected": ArribaIO,
                 "content": '#gene1	gene2	strand1(gene/fusion)	strand2(gene/fusion)	breakpoint1	breakpoint2	site1	site2	type	direction1	direction2	split_reads1	split_reads2	discordant_mates	coverage1	coverage2	confidence	closest_genomic_breakpoint1	closest_genomic_breakpoint2	filters	fusion_transcript	reading_frame	peptide_sequence	read_identifiers'
+            },
+            {
+                "expected": BreakendVCFIO,
+                "content": '''##fileformat=VCFv4.2
+##INFO=<ID=ANN,Number=.,Type=String,Description="Consequence annotations. Format: SYMBOL|Gene|Feature|Feature_type|STRAND|EXON|INTRON|CDS_position|Protein_position|GENE_SHARD">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS">
+##INFO=<ID=IDSRC,Number=.,Type=String,Description="ID of breakend by source">
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
+##INFO=<ID=RNA_FIRST,Number=0,Type=Flag,Description="For RNA fusions, this break-end is 5prim in the fusion transcript.">
+##INFO=<ID=SRC,Number=.,Type=String,Description="Fusions callers where the breakend is identified.">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
+##INFO=<ID=s0_BND_DEPTH,Number=1,Type=Integer,Description="Read depth at local translocation breakend",Source="manta">
+##INFO=<ID=s0_CIEND,Number=2,Type=Integer,Description="Confidence interval around END",Source="manta">
+##INFO=<ID=s0_CIGAR,Number=A,Type=String,Description="CIGAR alignment for each alternate indel allele",Source="manta">
+##INFO=<ID=s0_CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS",Source="manta">
+##INFO=<ID=s0_END,Number=1,Type=Integer,Description="End position of the variant described in this record",Source="manta">
+##INFO=<ID=s0_EVENT,Number=1,Type=String,Description="ID of event associated to breakend",Source="manta">
+##INFO=<ID=s0_HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical homology at event breakpoints",Source="manta">
+##INFO=<ID=s0_HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical homology at event breakpoints",Source="manta">
+##INFO=<ID=s0_IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation",Source="manta">
+##INFO=<ID=s0_LEFT_SVINSSEQ,Number=.,Type=String,Description="Known left side of insertion for an insertion of unknown length",Source="manta">
+##INFO=<ID=s0_MATE_BND_DEPTH,Number=1,Type=Integer,Description="Read depth at remote translocation mate breakend",Source="manta">
+##INFO=<ID=s0_MATE_REF_COUNT,Number=1,Type=Integer,Description="The number of reads supporting the reference allele at the other breakend",Source="manta">
+##INFO=<ID=s0_REF_COUNT,Number=1,Type=Integer,Description="The number of reads supporting the reference allele at this breakend",Source="manta">
+##INFO=<ID=s0_RIGHT_SVINSSEQ,Number=.,Type=String,Description="Known right side of insertion for an insertion of unknown length",Source="manta">
+##INFO=<ID=s0_RNA_CONTIG,Number=1,Type=String,Description="The sequence of the breakend spanning contig",Source="manta">
+##INFO=<ID=s0_RNA_CONTIG_ALN,Number=2,Type=Integer,Description="Length of the spanning contig alignment on each breakend",Source="manta">
+##INFO=<ID=s0_RNA_FwRvReads,Number=2,Type=Integer,Description="For RNA fusions, number of stranded reads supporting forward or reverse direction of transcription",Source="manta">
+##INFO=<ID=s0_RNA_Reads,Number=1,Type=Integer,Description="The number of reads and pairs that potentially support this candidate before refinement and scoring",Source="manta">
+##INFO=<ID=s0_RNA_STRANDED,Number=0,Type=Flag,Description="For RNA fusions, the direction of transcription is known",Source="manta">
+##INFO=<ID=s0_SVINSLEN,Number=.,Type=Integer,Description="Length of insertion",Source="manta">
+##INFO=<ID=s0_SVINSSEQ,Number=.,Type=String,Description="Sequence of insertion",Source="manta">
+##INFO=<ID=s0_SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles",Source="manta">
+##INFO=<ID=s0_VCQUAL,Number=1,Type=Float,Description="The variant quality",Source="manta">
+##INFO=<ID=s1_BREAK_DINUC,Number=1,Type=String,Description="Dinucleotides flanking the breakend of the fragment excluded by the fusion.",Source="STAR_Fusion">
+##INFO=<ID=s1_BREAK_ENTROPY,Number=1,Type=Float,Description="Shannon entropy of the 15 exonic bases flanking the breakpoint. The maximum entropy is 2, representing highest complexity. The lowest would be zero (involving a 15 base mononucleotide run). Low entropy sites should generally be treated as less confident breakpoints.",Source="STAR_Fusion">
+##INFO=<ID=s1_FCANN,Number=.,Type=String,Description="Annotation generated by FusionAnnotator (see: https://github.com/FusionAnnotator/CTAT_HumanFusionLib/wiki). Format: SYMBOL|Gene|Tags",Source="STAR_Fusion">
+##INFO=<ID=s1_SPLICE_TYPE,Number=1,Type=String,Description="Whether the proposed breakpoint occurs at reference exon junctions as provided by the reference transcript structure annotations (ex. gencode).",Source="STAR_Fusion">
+##INFO=<ID=s1_VCQUAL,Number=1,Type=Float,Description="The variant quality",Source="STAR_Fusion">
+##INFO=<ID=s2_FCANN,Number=.,Type=String,Description="Consequence annotations. Format: SYMBOL|STRAND|Site|Type|GENE_SHARD|FRAMESHIFT|Protein_contig",Source="Arriba">
+##INFO=<ID=s2_GBP,Number=1,Type=String,Description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint.",Source="Arriba">
+##INFO=<ID=s2_IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation.",Source="Arriba">
+##INFO=<ID=s2_RNA_CONTIG,Number=1,Type=String,Description="The transcript sequence assembled from the supporting reads of the most highly expressed transcript.",Source="Arriba">
+##INFO=<ID=s2_VCQUAL,Number=1,Type=Float,Description="The variant quality",Source="Arriba">
+##INFO=<ID=s3_FCANN,Number=.,Type=String,Description="Consequence annotations. Format: SYMBOL|Gene|EXON|Effect.",Source="FusionCatcher">
+##INFO=<ID=s3_RNA_CONTIG,Number=1,Type=String,Description="The sequence of the breakend spanning contig.",Source="FusionCatcher">
+##INFO=<ID=s3_SOURCES,Number=.,Type=String,Description="Aligning method used for mapping the reads and finding the fusion genes. Here are two methods used which are: (i) BOWTIE = only Bowtie aligner is used for mapping the reads on the genome and exon-exon fusion junctions, (ii) BOWTIE+BLAT = Bowtie aligner is used for mapping reads on the genome and BLAT is used for mapping reads for finding the fusion junction, (iii) BOWTIE+STAR = Bowtie aligner is used for mapping reads on the genome and STAR is used for mapping reads for finding the fusion junction, (iv) BOWTIE+BOWTIE2 = Bowtie aligner is used for mapping reads on the genome and Bowtie2 is used for mapping reads for finding the fusion junction.",Source="FusionCatcher">
+##INFO=<ID=s3_VCQUAL,Number=1,Type=Float,Description="The variant quality",Source="FusionCatcher">
+##FILTER=<ID=HLA,Description="One breakend is located on HLA.">
+##FILTER=<ID=IG,Description="One breakend is located on immunoglobulin.">
+##FILTER=<ID=Inner,Description="The two breakends are located in the same gene.">
+##FILTER=<ID=Readthrough,Description="The fusion is readthrough (it concerns the two following genes in the same strand in an interval <= 100000).">
+##FILTER=<ID=s0_Imprecise,Description="RNA fusion candidates for which no spanning contig was found",Source="manta">
+##FILTER=<ID=s0_Local,Description="RNA call covering short genomic distance",Source="manta">
+##FILTER=<ID=s0_LowEvidence,Description="RNA fusion calls without both split read and spanning pair support",Source="manta">
+##FILTER=<ID=s1_Babiceanu_Normal,Description="Recurrent chimeric fusion RNAs in non-cancer tissues and cells as per Babiceanu et al. NAR, 2016",Source="STAR_Fusion">
+##FILTER=<ID=s1_BodyMap,Description="Fusions found by STAR-Fusion as applied to the Illumina Human Body Map reference data",Source="STAR_Fusion">
+##FILTER=<ID=s1_ConjoinG,Description="Fused transcripts derived from the Conjoined Gene Database",Source="STAR_Fusion">
+##FILTER=<ID=s1_DGD_PARALOGS,Description="Duplicated genes as per the Duplicated Genes Database",Source="STAR_Fusion">
+##FILTER=<ID=s1_GTEx_recurrent_StarF2019,Description="Fusions found recurrently in GTEx as mined using STAR-Fusion v1.5.0",Source="STAR_Fusion">
+##FILTER=<ID=s1_Greger_Normal,Description="Fusion transcripts (mostly from tandem genes) detected based on analysis of RNA-Seq from 1000 genomes project samples. List derived from Greger et al. PLOS One, 2014",Source="STAR_Fusion">
+##FILTER=<ID=s1_HGNC_GENEFAM,Description="HGNC gene family membership as per ftp://ftp.ebi.ac.uk/pub/databases/genenames/genefam_list.txt.gz",Source="STAR_Fusion">
+##FORMAT=<ID=PR,Number=1,Type=Integer,Description="Count of pairs of reads supporting the fusion">
+##FORMAT=<ID=PRSRC,Number=.,Type=Integer,Description="Count of pairs of reads supporting the fusion by source">
+##FORMAT=<ID=SR,Number=1,Type=Integer,Description="Count of reads mapping on the fusion junction">
+##FORMAT=<ID=SRSRC,Number=.,Type=Integer,Description="Count of reads mapping on the fusion junction by source">
+##FORMAT=<ID=s0_PR,Number=R,Type=Integer,Description="Spanning paired-read support for the ref and alt alleles in the order listed",Source="manta">
+##FORMAT=<ID=s0_SR,Number=R,Type=Integer,Description="Split reads for the ref and alt alleles in the order listed",Source="manta">
+##FORMAT=<ID=s1_FFPM,Number=1,Type=Float,Description="Normalized measures of the fusion-supporting rna-seq fragments (fusion fragments per million total reads).",Source="STAR_Fusion">
+##FORMAT=<ID=s1_JRL,Number=1,Type=String,Description="RNA-Seq fragments containing a read that aligns as a split read at the site of the putative fusion junction.",Source="STAR_Fusion">
+##FORMAT=<ID=s1_PR,Number=1,Type=Integer,Description="Number of RNA-Seq fragments that encompass the fusion junction such that one read of the pair aligns to a different gene than the other paired-end read of that fragment (SpanningFragCount).",Source="STAR_Fusion">
+##FORMAT=<ID=s1_SFL,Number=1,Type=String,Description="RNA-Seq fragments that encompass the fusion junction such that one read of the pair aligns to a different gene than the other paired-end read of that fragment.",Source="STAR_Fusion">
+##FORMAT=<ID=s1_SR,Number=1,Type=Integer,Description="Number of RNA-Seq fragments containing a read that aligns as a split read at the site of the putative fusion junction (JunctionReadCount).",Source="STAR_Fusion">
+##FORMAT=<ID=s1_hasLAS,Number=1,Type=String,Description="This column indicates whether there are split reads that provide long (set to length of 25 bases) alignments on both sides of the putative breakpoint (LargeAnchorSupport).",Source="STAR_Fusion">
+##FORMAT=<ID=s2_CFD,Number=1,Type=String,Description="Each prediction is assigned one of the confidences low, medium, or high. Several characteristics are taken into account, including: the number of supporting reads, the balance of split reads and discordant mates, the distance between the breakpoints, the type of event, whether the breakpoints are intragenic or not, and whether there are other events which corroborate the prediction, e.g. multiple isoforms or balanced translocations.",Source="Arriba">
+##FORMAT=<ID=s2_DPS,Number=1,Type=Integer,Description="Coverage near breakpoint. The coverage is calculated as the number of fragments near the breakpoint on the side of the breakpoint that is retained in the fusion transcript. Note that the coverage calculation counts all fragments (even duplicates).",Source="Arriba">
+##FORMAT=<ID=s2_PR,Number=1,Type=Integer,Description="Number of RNA-Seq fragments that encompass the fusion junction such that one read of the pair aligns to a different gene than the other paired-end read of that fragment.",Source="Arriba">
+##FORMAT=<ID=s2_RFIL,Number=.,Type=String,Description="Filters which removed one or more of the supporting reads. The number of filtered reads is given in parantheses after the name of the filter. If a filter discarded the event as a whole (all reads), the number of filtered reads is missing.",Source="Arriba">
+##FORMAT=<ID=s2_SR,Number=1,Type=Integer,Description="Number of RNA-Seq fragments containing a read that aligns as a split read at the site of the putative fusion junction.",Source="Arriba">
+##FORMAT=<ID=s2_SR1,Number=1,Type=Integer,Description="Number of RNA-Seq fragments containing a read that aligns as a split read at the site of the putative fusion junction with an anchor on first shard.",Source="Arriba">
+##FORMAT=<ID=s2_SR2,Number=1,Type=Integer,Description="Number of RNA-Seq fragments containing a read that aligns as a split read at the site of the putative fusion junction with an anchor on second shard.",Source="Arriba">
+##FORMAT=<ID=s2_SRL,Number=.,Type=String,Description="The names of the supporting reads.",Source="Arriba">
+##FORMAT=<ID=s3_CM,Number=1,Type=Integer,Description="Count of reads mapping simultaneously on both genes which form the fusion gene. This is an indication how similar are the DNA/RNA sequences of the genes forming the fusion gene (i.e. what is their homology because highly homologous genes tend to appear show as candidate fusion genes). In case of completely different sequences of the genes involved in forming a fusion gene then here it is expected to have the value zero.",Source="FusionCatcher">
+##FORMAT=<ID=s3_LA,Number=1,Type=Integer,Description="Longest anchor (hangover) found among the unique reads mapping on the fusion junction.",Source="FusionCatcher">
+##FORMAT=<ID=s3_PR,Number=1,Type=Integer,Description="Count of pairs of reads supporting the fusion (including also the multimapping reads).",Source="FusionCatcher">
+##FORMAT=<ID=s3_SR,Number=1,Type=Integer,Description="Count of unique reads (i.e. unique mapping positions) mapping on the fusion junction. Shortly, here are counted all the reads which map on fusion junction minus the PCR duplicated reads.",Source="FusionCatcher">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample_A'''
             }
         ]
         self.test_exceptions = [
@@ -82,21 +169,22 @@ class FusionFileReaderTest(unittest.TestCase):
 
     def test_factoryParams(self):
         for curr_test in self.test_cases:
-            with open(self.tmp_in, "w") as writer:
-                writer.write(curr_test["content"])
-            with FusionFileReader.factory(self.tmp_in, "r", "splA", annot_field="AnnotField") as reader:
-                self.assertEqual(
-                    curr_test["expected"],
-                    reader.__class__
-                )
-                self.assertEqual(
-                    "splA",
-                    reader.sample_name
-                )
-                self.assertEqual(
-                    "AnnotField",
-                    reader.annot_field
-                )
+            if curr_test["expected"] != BreakendVCFIO:
+                with open(self.tmp_in, "w") as writer:
+                    writer.write(curr_test["content"])
+                with FusionFileReader.factory(self.tmp_in, "r", "splA", annot_field="AnnotField") as reader:
+                    self.assertEqual(
+                        curr_test["expected"],
+                        reader.__class__
+                    )
+                    self.assertEqual(
+                        "splA",
+                        reader.sample_name
+                    )
+                    self.assertEqual(
+                        "AnnotField",
+                        reader.annot_field
+                    )
 
 
 class FusionCatcherIOTest(unittest.TestCase):

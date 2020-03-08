@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.3.0'
+__version__ = '2.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -28,7 +28,7 @@ def getBNDInterval(record):
     :rtype: (int, int)
     """
     start = record.pos
-    end = record.pos
+    end = start
     if "CIPOS" in record.info:
         start += record.info["CIPOS"][0]
         end += record.info["CIPOS"][1]
@@ -88,7 +88,7 @@ def getAltFromCoord(first_coord, second_coord):
     return first_alt, second_alt
 
 
-def getStrand(breakend, is_first):
+def getStrand(breakend, is_first=None):
     """
     Return strand from breakend record.
 
@@ -99,6 +99,8 @@ def getStrand(breakend, is_first):
     :return: Strand from breakend record.
     :rtype: str
     """
+    if is_first is None:
+        is_first = True if "RNA_FIRST" in breakend.info else False
     strand = None
     if breakend.alt[0].startswith("[") or breakend.alt[0].startswith("]"):
         strand = "-" if is_first else "+"
@@ -118,8 +120,6 @@ def getCoordStr(breakend, is_first=None):
     :return: Coordinates in dict format {"chrom": "CHROM", "pos": "POS", "strand":"STRAND"}.
     :rtype: dict
     """
-    if is_first is None:
-        is_first = True if "RNA_FIRST" in breakend.info else False
     return {"chrom": breakend.chrom, "pos": breakend.pos, "strand": getStrand(breakend, is_first)}
 
 
@@ -146,6 +146,11 @@ class FusionFileReader(object):
             return FusionCatcherIO(filepath, *args, **kwargs)
         elif ArribaIO.isValid(filepath):
             return ArribaIO(filepath, *args, **kwargs)
+        elif BreakendVCFIO.isValid(filepath):
+            if "annot_field" in kwargs:
+                return AnnotBreakendVCFIO(filepath, *args, **kwargs)
+            else:
+                return BreakendVCFIO(filepath, *args, **kwargs)
         else:
             raise IOError("The file {} does not have a valid format for 'FusionFileReader'.".format(filepath))
 
@@ -212,13 +217,16 @@ class FusionCatcherIO(HashedSVIO):
         :return: The breakend record for the 5' shard of fusion and the breakend record for the 3' shard.
         :rtype: (anacore.vcf.VCFRecord, anacore.vcf.VCFRecord)
         """
-        filter_field = None if fusion_record["Fusion_description"] == "" else [elt.strip() for elt in fusion_record["Fusion_description"].split(",")]
+        filters_field = [] if fusion_record["Fusion_description"] == "" else sorted([elt.strip() for elt in fusion_record["Fusion_description"].split(",")])
+        if fusion_record["Spanning_unique_reads"] == "0":
+            filters_field.append("Imprecise")
+            filters_field.sort()
         sample_field = {
             self.sample_name: {
-                "PR": fusion_record["Spanning_pairs"],
-                "SR": fusion_record["Spanning_unique_reads"],
-                "CM": fusion_record["Counts_of_common_mapping_reads"],
-                "LA": fusion_record["Longest_anchor_found"]
+                "PR": int(fusion_record["Spanning_pairs"]),
+                "SR": int(fusion_record["Spanning_unique_reads"]),
+                "CM": int(fusion_record["Counts_of_common_mapping_reads"]),
+                "LA": int(fusion_record["Longest_anchor_found"])
             }
         }
         format_field = sorted(sample_field[self.sample_name].keys())
@@ -247,7 +255,7 @@ class FusionCatcherIO(HashedSVIO):
             first_id,
             "N",  # ref
             [first_alt],  # alt
-            pFilter=filter_field,
+            pFilter=filters_field,
             info=first_info,
             pFormat=format_field,
             samples=sample_field
@@ -271,7 +279,7 @@ class FusionCatcherIO(HashedSVIO):
             second_id,
             "N",  # ref
             [second_alt],  # alt
-            pFilter=filter_field,
+            pFilter=filters_field,
             info=second_info,
             pFormat=format_field,
             samples=sample_field
@@ -302,7 +310,7 @@ class FusionCatcherIO(HashedSVIO):
         return {
             "Gene_1_symbol(5end_fusion_partner)": first.info[self.annot_field][0]["SYMBOL"],
             "Gene_2_symbol(3end_fusion_partner)": second.info[self.annot_field][0]["SYMBOL"],
-            "Fusion_description": ",".join(first.filter),
+            "Fusion_description": ",".join([elt for elt in first.filter if elt != "Imprecise"]),
             "Counts_of_common_mapping_reads": first.samples[self.sample_name]["CM"],
             "Spanning_pairs": first.samples[self.sample_name]["PR"],
             "Spanning_unique_reads": first.samples[self.sample_name]["SR"],
@@ -406,6 +414,10 @@ starfusion_filters = {
     "ConjoinG": HeaderFilterAttr(
         "ConjoinG",
         "Fused transcripts derived from the Conjoined Gene Database"
+    ),
+    "Imprecise": HeaderFilterAttr(
+        "Imprecise",
+        "RNA fusion candidates for which no spanning contig was found."
     )
 }
 
@@ -476,9 +488,12 @@ class STARFusionIO(HashedSVIO):
         breakends = []
         large_anchor_support = "1" if fusion_record["LargeAnchorSupport"] == "YES_LDAS" else "0"
         info_annot_tags = [elt.strip() for elt in json.loads(fusion_record["annots"])]
-        filter_field = sorted(list(set(starfusion_filters) & set(info_annot_tags)))
-        if len(filter_field) == 0:
-            filter_field = ["PASS"]
+        filters_field = sorted(list(set(starfusion_filters) & set(info_annot_tags)))
+        if fusion_record["JunctionReadCount"] == "0":
+            filters_field.append("Imprecise")
+            filters_field.sort()
+        if len(filters_field) == 0:
+            filters_field = ["PASS"]
         coord_list = []
         for side, mate_side in [("Left", "Right"), ("Right", "Left")]:
             id = str(uuid.uuid4())
@@ -500,10 +515,10 @@ class STARFusionIO(HashedSVIO):
             # SAMPLES
             samples_field = {
                 self.sample_name: {
-                    "PR": fusion_record["SpanningFragCount"],
-                    "SR": fusion_record["JunctionReadCount"],
+                    "PR": int(fusion_record["SpanningFragCount"]),
+                    "SR": int(fusion_record["JunctionReadCount"]),
                     "hasLAS": large_anchor_support,
-                    "FFPM": fusion_record["FFPM"]
+                    "FFPM": float(fusion_record["FFPM"])
                 }
             }
             if side == "Left":
@@ -521,7 +536,7 @@ class STARFusionIO(HashedSVIO):
                     "N",  # ref
                     [],  # alt
                     info=info,
-                    pFilter=filter_field,
+                    pFilter=filters_field,
                     pFormat=sorted(samples_field[self.sample_name].keys()),
                     samples=samples_field
                 )
@@ -1126,6 +1141,27 @@ class BreakendVCFIO(VCFIO):
                     # Return
                     yield first, second
 
+    @staticmethod
+    def isValid(filepath):
+        """
+        Return true if the file is in VCF output format.
+
+        :param filepath: The file path.
+        :type filepath: str
+        :return: True if the file is in VCF output format.
+        :rtype: bool
+        """
+        is_valid = False
+        try:
+            with VCFIO(filepath) as reader:
+                if "SVTYPE" in reader.info and "MATEID" in reader.info:
+                    is_valid = True
+        except FileNotFoundError:
+            raise
+        except Exception:
+            pass
+        return is_valid
+
 
 class AnnotBreakendVCFIO(BreakendVCFIO, AnnotVCFIO):
     """Read and write VCF file containing annotated breakends. Each iteration return a couple of breakends (the first and the second in fusion)."""
@@ -1143,4 +1179,4 @@ class AnnotBreakendVCFIO(BreakendVCFIO, AnnotVCFIO):
         """
         self.annot_field = annot_field
         self.ANN_titles = list()
-        super().__init__(filepath, mode)
+        BreakendVCFIO.__init__(filepath, mode)
