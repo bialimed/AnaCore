@@ -1027,8 +1027,7 @@ class BreakendVCFIO(VCFIO):
         :return: The new instance.
         :rtype: anacore.fusionVcf.BreakendVCFIO
         """
-        super().__init__(filepath, mode)
-        self.index = {}  # By record ID the byte position of start and end of line
+        self.sv_rec_by_id = {}  # By record ID the byte position of start and end of line
         self.pick_reader = None
         if mode == "r":
             if isGzip(filepath):
@@ -1037,10 +1036,11 @@ class BreakendVCFIO(VCFIO):
                 self.pick_reader = open(filepath, "r")
             self.loadIndex()
         self._iter_already_processed = set()
+        super().__init__(filepath, mode)
 
     def loadIndex(self):
         """Parse file and store in index the byte positions (start and end) of each record by record ID."""
-        self.index = {}
+        self.sv_rec_by_id = {}
         next_start = 0
         line_nb = 1
         line = self.pick_reader.readline()
@@ -1050,7 +1050,7 @@ class BreakendVCFIO(VCFIO):
             if not line.startswith("#"):
                 end = next_start - 1
                 id = line.split(None, 3)[2].strip()
-                self.index[id] = (start, end, line_nb)
+                self.sv_rec_by_id[id] = (start, end, line_nb)
             line = self.pick_reader.readline()
             line_nb += 1
 
@@ -1075,7 +1075,7 @@ class BreakendVCFIO(VCFIO):
             "line_nb": self.current_line_nb,
         }
         # Get new record
-        start, end, line_nb = self.index[id]
+        start, end, line_nb = self.sv_rec_by_id[id]
         self.pick_reader.seek(start)
         self.current_line = self.pick_reader.read(end - start + 1)
         self.current_line_nb = line_nb
@@ -1105,6 +1105,8 @@ class BreakendVCFIO(VCFIO):
                 fusion_id = " @@ ".join(sorted([id, mate_id]))
                 if fusion_id in self._iter_already_processed:
                     is_record = False
+            else:
+                is_record = False
         return is_record
 
     def __iter__(self):
@@ -1112,34 +1114,33 @@ class BreakendVCFIO(VCFIO):
             for mate_idx, mate_id in enumerate(record.info["MATEID"]):
                 mate = self.get(mate_id)
                 fusion_id = " @@ ".join(sorted([record.id, mate.id]))
-                if fusion_id not in self._iter_already_processed:
-                    self._iter_already_processed.add(fusion_id)
-                    # Change ID
-                    record_new_id = record.id
-                    alt_record = record
-                    if len(record.alt) > 1:
-                        record_new_id += "_" + str(mate_idx)  # Record must be splitted for each mate
-                        alt_record = getAlleleRecord(record, mate_idx)
-                        alt_record.info["MATEID"] = [record.info["MATEID"][mate_idx]]
-                    mate_new_id = mate.id
-                    alt_mate = mate
-                    if len(mate.alt) > 1:
-                        record_idx = mate.info["MATEID"].index(record.id)
-                        mate_new_id += "_" + record_idx  # Record must be splitted for each mate
-                        alt_mate = getAlleleRecord(mate, record_idx)
-                        alt_mate.info["MATEID"] = [mate.info["MATEID"][record_idx]]
-                    alt_record.id = record_new_id
-                    alt_mate.info["MATEID"] = [record_new_id]
-                    alt_mate.id = mate_new_id
-                    alt_record.info["MATEID"] = [mate_new_id]
-                    # Order by transcript
-                    first = record
-                    second = mate
-                    if "RNA_FIRST" in second.info:
-                        first = mate
-                        second = record
-                    # Return
-                    yield first, second
+                self._iter_already_processed.add(fusion_id)
+                # Change ID
+                record_new_id = record.id
+                alt_record = record
+                if len(record.alt) > 1:
+                    record_new_id += "_" + str(mate_idx)  # Record must be splitted for each mate
+                    alt_record = getAlleleRecord(record, mate_idx)
+                    alt_record.info["MATEID"] = [record.info["MATEID"][mate_idx]]
+                mate_new_id = mate.id
+                alt_mate = mate
+                if len(mate.alt) > 1:
+                    record_idx = mate.info["MATEID"].sv_rec_by_id(record.id)
+                    mate_new_id += "_" + record_idx  # Record must be splitted for each mate
+                    alt_mate = getAlleleRecord(mate, record_idx)
+                    alt_mate.info["MATEID"] = [mate.info["MATEID"][record_idx]]
+                alt_record.id = record_new_id
+                alt_mate.info["MATEID"] = [record_new_id]
+                alt_mate.id = mate_new_id
+                alt_record.info["MATEID"] = [mate_new_id]
+                # Order by transcript
+                first = record
+                second = mate
+                if "RNA_FIRST" in second.info:
+                    first = mate
+                    second = record
+                # Return
+                yield first, second
 
     @staticmethod
     def isValid(filepath):
@@ -1179,4 +1180,4 @@ class AnnotBreakendVCFIO(BreakendVCFIO, AnnotVCFIO):
         """
         self.annot_field = annot_field
         self.ANN_titles = list()
-        BreakendVCFIO.__init__(filepath, mode)
+        super().__init__(filepath, mode)
