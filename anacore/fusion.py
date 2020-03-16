@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.4.0'
+__version__ = '2.4.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -14,7 +14,7 @@ import json
 import uuid
 from anacore.abstractFile import isGzip
 from anacore.sv import HashedSVIO, SVIO
-from anacore.annotVcf import AnnotVCFIO
+# from anacore.annotVcf import AnnotVCFIO
 from anacore.vcf import decodeInfoValue, getAlleleRecord, VCFIO, VCFRecord, HeaderInfoAttr, HeaderFilterAttr, HeaderFormatAttr
 
 
@@ -1097,13 +1097,13 @@ class BreakendVCFIO(VCFIO):
         """
         is_record = super().isRecordLine(line)
         if is_record:
-            id = line.split(None, 3)[2].strip()
-            mate_info = line.split(None, 8)[7].strip()
+            id = line.split("\t", 3)[2].strip()
+            mate_info = line.split("\t", 8)[7].strip()
             match = re.search("MATEID\=([^;]+);?", mate_info)
             if match:
                 mate_id = decodeInfoValue(match.groups()[0])
                 fusion_id = " @@ ".join(sorted([id, mate_id]))
-                if fusion_id in self._iter_already_processed:
+                if fusion_id in self._iter_already_processed:  # Partial pre-filtering for records without multi-alternatives
                     is_record = False
             else:
                 is_record = False
@@ -1114,33 +1114,34 @@ class BreakendVCFIO(VCFIO):
             for mate_idx, mate_id in enumerate(record.info["MATEID"]):
                 mate = self.get(mate_id)
                 fusion_id = " @@ ".join(sorted([record.id, mate.id]))
-                self._iter_already_processed.add(fusion_id)
-                # Change ID
-                record_new_id = record.id
-                alt_record = record
-                if len(record.alt) > 1:
-                    record_new_id += "_" + str(mate_idx)  # Record must be splitted for each mate
-                    alt_record = getAlleleRecord(record, mate_idx)
-                    alt_record.info["MATEID"] = [record.info["MATEID"][mate_idx]]
-                mate_new_id = mate.id
-                alt_mate = mate
-                if len(mate.alt) > 1:
-                    record_idx = mate.info["MATEID"].sv_rec_by_id(record.id)
-                    mate_new_id += "_" + record_idx  # Record must be splitted for each mate
-                    alt_mate = getAlleleRecord(mate, record_idx)
-                    alt_mate.info["MATEID"] = [mate.info["MATEID"][record_idx]]
-                alt_record.id = record_new_id
-                alt_mate.info["MATEID"] = [record_new_id]
-                alt_mate.id = mate_new_id
-                alt_record.info["MATEID"] = [mate_new_id]
-                # Order by transcript
-                first = record
-                second = mate
-                if "RNA_FIRST" in second.info:
-                    first = mate
-                    second = record
-                # Return
-                yield first, second
+                if fusion_id not in self._iter_already_processed:
+                    self._iter_already_processed.add(fusion_id)
+                    # Change ID
+                    record_new_id = record.id
+                    alt_record = record
+                    if len(record.alt) > 1:
+                        record_new_id += "_" + str(mate_idx)  # Record must be splitted for each mate
+                        alt_record = getAlleleRecord(self, record, mate_idx)
+                        alt_record.info["MATEID"] = [record.info["MATEID"][mate_idx]]
+                    mate_new_id = mate.id
+                    alt_mate = mate
+                    if len(mate.alt) > 1:
+                        record_idx = mate.info["MATEID"].index(record.id)
+                        mate_new_id += "_" + str(record_idx)  # Record must be splitted for each mate
+                        alt_mate = getAlleleRecord(self, mate, record_idx)
+                        alt_mate.info["MATEID"] = [mate.info["MATEID"][record_idx]]
+                    alt_record.id = record_new_id
+                    alt_mate.info["MATEID"] = [record_new_id]
+                    alt_mate.id = mate_new_id
+                    alt_record.info["MATEID"] = [mate_new_id]
+                    # Order by transcript
+                    first = alt_record
+                    second = alt_mate
+                    if "RNA_FIRST" in second.info:
+                        first = alt_mate
+                        second = alt_record
+                    # Return
+                    yield first, second
 
     @staticmethod
     def isValid(filepath):
@@ -1163,21 +1164,33 @@ class BreakendVCFIO(VCFIO):
             pass
         return is_valid
 
-
-class AnnotBreakendVCFIO(BreakendVCFIO, AnnotVCFIO):
-    """Read and write VCF file containing annotated breakends. Each iteration return a couple of breakends (the first and the second in fusion)."""
-
-    def __init__(self, filepath, mode="r", annot_field="ANN"):
+    def write(self, first, second):
         """
-        Return instance of AnnotBreakendVCFIO.
+        Write fusion record in VCF.
 
-        :param filepath: The filepath.
-        :type filepath: str
-        :param mode: Mode to open the file ('r', 'w', 'a').
-        :type mode: str
-        :return: The new instance.
-        :rtype: anacore.fusionVcf.AnnotBreakendVCFIO
+        :param first: The fisrt breakend.
+        :type first: anacore.vcf.VCFRecord
+        :param second: The second breakend.
+        :type second: anacore.vcf.VCFRecord
         """
-        self.annot_field = annot_field
-        self.ANN_titles = list()
-        super().__init__(filepath, mode)
+        super().write(first)
+        super().write(second)
+
+
+# class AnnotBreakendVCFIO(BreakendVCFIO, AnnotVCFIO):
+#     """Read and write VCF file containing annotated breakends. Each iteration return a couple of breakends (the first and the second in fusion)."""
+#
+#     def __init__(self, filepath, mode="r", annot_field="ANN"):
+#         """
+#         Return instance of AnnotBreakendVCFIO.
+#
+#         :param filepath: The filepath.
+#         :type filepath: str
+#         :param mode: Mode to open the file ('r', 'w', 'a').
+#         :type mode: str
+#         :return: The new instance.
+#         :rtype: anacore.fusionVcf.AnnotBreakendVCFIO
+#         """
+#         self.annot_field = annot_field
+#         self.ANN_titles = list()
+#         super().__init__(filepath, mode)
