@@ -41,10 +41,10 @@ class AnnotVCFIO(VCFIO):
         :type model: vcf.VCFIO
         """
         super().copyHeader(model)
-        if hasattr(model, 'annot_field'):
+        if hasattr(model, 'annot_field') and model.annot_field is not None:
             self.annot_field = model.annot_field
-        if hasattr(model, 'ANN_titles'):
-            self.ANN_titles = model.ANN_titles
+            if hasattr(model, 'ANN_titles') and len(model.ANN_titles) != 0:
+                self.ANN_titles = model.ANN_titles
 
     def _parseAnnot(self, record):
         """
