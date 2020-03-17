@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.4.1'
+__version__ = '2.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -14,7 +14,7 @@ import json
 import uuid
 from anacore.abstractFile import isGzip
 from anacore.sv import HashedSVIO, SVIO
-# from anacore.annotVcf import AnnotVCFIO
+from anacore.annotVcf import AnnotVCFIO
 from anacore.vcf import decodeInfoValue, getAlleleRecord, VCFIO, VCFRecord, HeaderInfoAttr, HeaderFilterAttr, HeaderFormatAttr
 
 
@@ -147,10 +147,7 @@ class FusionFileReader(object):
         elif ArribaIO.isValid(filepath):
             return ArribaIO(filepath, *args, **kwargs)
         elif BreakendVCFIO.isValid(filepath):
-            if "annot_field" in kwargs:
-                return AnnotBreakendVCFIO(filepath, *args, **kwargs)
-            else:
-                return BreakendVCFIO(filepath, *args, **kwargs)
+            return BreakendVCFIO(filepath, *args, **kwargs)
         else:
             raise IOError("The file {} does not have a valid format for 'FusionFileReader'.".format(filepath))
 
@@ -177,7 +174,7 @@ class FusionCatcherIO(HashedSVIO):
         "Predicted_effect"
     ]
 
-    def __init__(self, filepath, mode="r", sample_name="sample", annot_field="FCANN"):
+    def __init__(self, filepath, mode="r", annot_field="FCANN", sample_name="sample"):
         """
         Build and return an instance of FusionCatcherIO.
 
@@ -185,10 +182,10 @@ class FusionCatcherIO(HashedSVIO):
         :type filepath: str
         :param mode: Mode to open the file ('r', 'w', 'a').
         :type mode: str
-        :param sample_name: The name of the sample.
-        :type sample_name: str
         :param annot_field: The tag for the field used to store annotations.
         :type annot_field: str
+        :param sample_name: The name of the sample.
+        :type sample_name: str
         :return: The new instance.
         :rtype: FusionCatcherIO
         """
@@ -445,7 +442,7 @@ class STARFusionIO(HashedSVIO):
         "annots"
     ]
 
-    def __init__(self, filepath, mode="r", sample_name="sample", annot_field="FCANN"):
+    def __init__(self, filepath, mode="r", annot_field="FCANN", sample_name="sample"):
         """
         Build and return an instance of STARFusionIO.
 
@@ -453,10 +450,10 @@ class STARFusionIO(HashedSVIO):
         :type filepath: str
         :param mode: Mode to open the file ('r', 'w', 'a').
         :type mode: str
-        :param sample_name: The name of the sample.
-        :type sample_name: str
         :param annot_field: The tag for the field used to store annotations.
         :type annot_field: str
+        :param sample_name: The name of the sample.
+        :type sample_name: str
         :return: The new instance.
         :rtype: STARFusionIO
         """
@@ -781,7 +778,7 @@ class ArribaIO(HashedSVIO):
         "read_identifiers"
     ]
 
-    def __init__(self, filepath, mode="r", sample_name="sample", annot_field="FCANN"):
+    def __init__(self, filepath, mode="r", annot_field="FCANN", sample_name="sample"):
         """
         Build and return an instance of ArribaIO.
 
@@ -789,10 +786,10 @@ class ArribaIO(HashedSVIO):
         :type filepath: str
         :param mode: Mode to open the file ('r', 'w', 'a').
         :type mode: str
-        :param sample_name: The name of the sample.
-        :type sample_name: str
         :param annot_field: The tag for the field used to store annotations.
         :type annot_field: str
+        :param sample_name: The name of the sample.
+        :type sample_name: str
         :return: The new instance.
         :rtype: ArribaIO
         """
@@ -1013,10 +1010,10 @@ class ArribaIO(HashedSVIO):
         }
 
 
-class BreakendVCFIO(VCFIO):
+class BreakendVCFIO(AnnotVCFIO):
     """Read and write VCF file containing breakends. Each iteration return a couple of breakends (the first and the second in fusion)."""
 
-    def __init__(self, filepath, mode="r"):
+    def __init__(self, filepath, mode="r", annot_field=None):
         """
         Return instance of BreakendVCFIO.
 
@@ -1036,7 +1033,7 @@ class BreakendVCFIO(VCFIO):
                 self.pick_reader = open(filepath, "r")
             self.loadIndex()
         self._iter_already_processed = set()
-        super().__init__(filepath, mode)
+        super().__init__(filepath, mode, annot_field)
 
     def loadIndex(self):
         """Parse file and store in index the byte positions (start and end) of each record by record ID."""
@@ -1175,22 +1172,3 @@ class BreakendVCFIO(VCFIO):
         """
         super().write(first)
         super().write(second)
-
-
-# class AnnotBreakendVCFIO(BreakendVCFIO, AnnotVCFIO):
-#     """Read and write VCF file containing annotated breakends. Each iteration return a couple of breakends (the first and the second in fusion)."""
-#
-#     def __init__(self, filepath, mode="r", annot_field="ANN"):
-#         """
-#         Return instance of AnnotBreakendVCFIO.
-#
-#         :param filepath: The filepath.
-#         :type filepath: str
-#         :param mode: Mode to open the file ('r', 'w', 'a').
-#         :type mode: str
-#         :return: The new instance.
-#         :rtype: anacore.fusionVcf.AnnotBreakendVCFIO
-#         """
-#         self.annot_field = annot_field
-#         self.ANN_titles = list()
-#         super().__init__(filepath, mode)

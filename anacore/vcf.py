@@ -1031,6 +1031,8 @@ class VCFIO(AbstractFile):
         :type filepath: str
         :param mode: Mode to open the file ('r', 'w', 'a').
         :type mode: str
+        :return: The new instance
+        :rtype: anacore.vcf.VCFIO
         """
         AbstractFile.__init__(self, filepath, mode)
         self.samples = list()

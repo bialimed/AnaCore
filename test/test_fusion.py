@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2020 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -172,7 +172,7 @@ class FusionFileReaderTest(unittest.TestCase):
             if curr_test["expected"] != BreakendVCFIO:
                 with open(self.tmp_in, "w") as writer:
                     writer.write(curr_test["content"])
-                with FusionFileReader.factory(self.tmp_in, "r", "splA", annot_field="AnnotField") as reader:
+                with FusionFileReader.factory(self.tmp_in, "r", "AnnotField", sample_name="splA") as reader:
                     self.assertEqual(
                         curr_test["expected"],
                         reader.__class__
@@ -516,53 +516,115 @@ class BreakendVCFIOTest(unittest.TestCase):
         # Eval
         self.assertEqual(expected, observed)
 
+    def test_readWithAnnot(self):
+        # Create input tmp
+        content = '''##fileformat=VCFv4.2
+##INFO=<ID=TESTANN,Number=.,Type=String,Description="Annotations. Format: SYMBOL|Gene|Feature|Feature_type|STRAND">
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
+##FILTER=<ID=Inner,Description="The two breakends are located in the same gene.">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+2	321682	bnd_V	T	]13 : 123456]T	6	PASS	TESTANN=SPECC1L|ENSG00000258555|ENST00000358654|Transcript|+;SVTYPE=BND;MATEID=bnd_U
+4	888888	.	T	G	.	PASS	.
+13	123456	bnd_U	C	C[2 : 321682[	6	PASS	TESTANN=NTRK2|ENSG00000148053|ENST00000376213|Transcript|-;MATEID=bnd_V;SVTYPE=BND
+18	888888	.	T	G	.	PASS	.
+20	888888	.	T	G	.	PASS	.'''
+        with open(self.tmp, "w") as writer:
+            writer.write(content)
+        # Expected
+        expected = [
+            "SPECC1L_NTRK2\t+_-"
+        ]
+        # Observed
+        observed = []
+        with BreakendVCFIO(self.tmp, "r", "TESTANN") as reader:
+            for first, second in reader:
+                observed.append(
+                    "{}_{}\t{}_{}".format(
+                        first.info["TESTANN"][0]["SYMBOL"],
+                        second.info["TESTANN"][0]["SYMBOL"],
+                        first.info["TESTANN"][0]["STRAND"],
+                        second.info["TESTANN"][0]["STRAND"]
+                    )
+                )
+        # Eval
+        self.assertEqual(expected, observed)
 
-# class AnnotBreakendVCFIOTest(unittest.TestCase):
-#     def setUp(self):
-#         tmp_folder = tempfile.gettempdir()
-#         unique_id = str(uuid.uuid1())
-#         self.tmp = os.path.join(tmp_folder, unique_id + ".vcf")
-#
-#     def tearDown(self):
-#         # Clean temporary files
-#         for curr_file in [self.tmp]:
-#             if os.path.exists(curr_file):
-#                 os.remove(curr_file)
-#
-#     def test_read(self):
-#         # Create input tmp
-#         content = '''##fileformat=VCFv4.2
-# ##INFO=<ID=TESTANN,Number=1,Type=String,Description="Annotations. Format: SYMBOL|Gene|Feature|Feature_type|STRAND">
-# ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
-# ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
-# ##FILTER=<ID=Inner,Description="The two breakends are located in the same gene.">
-# #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-# 2	321682	bnd_V	T	]13 : 123456]T	6	PASS	TESTANN=SPECC1L|ENSG00000258555|ENST00000358654|Transcript|+;SVTYPE=BND;MATEID=bnd_U
-# 4	888888	.	T	G	.	PASS	.
-# 13	123456	bnd_U	C	C[2 : 321682[	6	PASS	TESTANN=NTRK2|ENSG00000148053|ENST00000376213|Transcript|-;MATEID=bnd_V;SVTYPE=BND
-# 18	888888	.	T	G	.	PASS	.
-# 20	888888	.	T	G	.	PASS	.'''
-#         with open(self.tmp, "w") as writer:
-#             writer.write(content)
-#         # Expected
-#         expected = [
-#             "SPECC1L_NTRK2\t+_-"
-#         ]
-#         # Observed
-#         observed = []
-#         with AnnotBreakendVCFIO(self.tmp, "r", "TESTANN") as reader:
-#             for first, second in reader:
-#                 print(first.info["TESTANN"])
-#                 observed.append(
-#                     "{}_{}\t{}_{}".format(
-#                         first.info["TESTANN"][0]["SYMBOL"],
-#                         second.info["TESTANN"][0]["SYMBOL"],
-#                         first.info["TESTANN"][0]["STRAND"],
-#                         second.info["TESTANN"][0]["STRAND"]
-#                     )
-#                 )
-#         # Eval
-#         self.assertEqual(expected, observed)
+    def test_writeWithAnnot(self):
+        data = [
+            (
+                VCFRecord(
+                    "2", 321682, "bnd_A", "T", ["]13 : 123456]T"], "6", ["PASS"],
+                    {
+                        "MATEID": ["bnd_C"],
+                        "SVTYPE": "BND",
+                        "TESTANN": [{
+                            "SYMBOL": "SPECC1L",
+                            "STRAND": "+"
+                        }]
+                    }
+                ),
+                VCFRecord(
+                    "13", 123456, "bnd_C", "C", ["C[2 : 321682["], "6", ["PASS"],
+                    {
+                        "MATEID": ["bnd_A"],
+                        "SVTYPE": "BND",
+                        "TESTANN": [{
+                            "SYMBOL": "NTRK2",
+                            "STRAND": "-"
+                        }]
+                    }
+                )
+            ),
+            (
+                VCFRecord(
+                    "8", 323698, "bnd_B", "T", ["]15:654321]T"], "30", ["PASS"],
+                    {
+                        "MATEID": ["bnd_D"],
+                        "SVTYPE": "BND"
+                    }
+                ),
+                VCFRecord(
+                    "15", 654321, "bnd_D", "C", ["C[8:323698["], "30", ["PASS"],
+                    {
+                        "MATEID": ["bnd_B"],
+                        "SVTYPE": "BND",
+                        "TESTANN": [
+                            {"SYMBOL": "GENF", "STRAND": "-"},
+                            {"SYMBOL": "GENC", "STRAND": "+"}
+                        ]
+                    }
+                )
+            )
+        ]
+        # Expected
+        expected = '''##fileformat=VCFv4.1
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
+##INFO=<ID=TESTANN,Number=.,Type=String,Description="Annotations. Format: SYMBOL|STRAND">
+##FILTER=<ID=Inner,Description="The two breakends are located in the same gene.">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+2	321682	bnd_A	T	]13 : 123456]T	6	PASS	MATEID=bnd_C;SVTYPE=BND;TESTANN=SPECC1L|+
+13	123456	bnd_C	C	C[2 : 321682[	6	PASS	MATEID=bnd_A;SVTYPE=BND;TESTANN=NTRK2|-
+8	323698	bnd_B	T	]15:654321]T	30	PASS	MATEID=bnd_D;SVTYPE=BND
+15	654321	bnd_D	C	C[8:323698[	30	PASS	MATEID=bnd_B;SVTYPE=BND;TESTANN=GENF|-,GENC|+'''
+        # Observed
+        with BreakendVCFIO(self.tmp, "w", "TESTANN") as writer:
+            writer.info = {
+                "MATEID": HeaderInfoAttr(id="MATEID", number="A", type="String", description="ID of mate breakend."),
+                "SVTYPE": HeaderInfoAttr(id="SVTYPE", number="1", type="String", description="Type of structural variant."),
+                "TESTANN": HeaderInfoAttr(id="TESTANN", number=".", type="String", description="Annotations. Format: SYMBOL|STRAND")
+            }
+            writer.filter = {"MATEID": HeaderFilterAttr(id="Inner", description="The two breakends are located in the same gene.")}
+            writer.ANN_titles = ["SYMBOL", "STRAND"]
+            writer.writeHeader()
+            for first, second in data:
+                writer.write(first, second)
+        observed = None
+        with open(self.tmp) as reader:
+            observed = "".join(reader.readlines()).strip()
+        # Eval
+        self.assertEqual(expected, observed)
 
 
 class UtilsTest(unittest.TestCase):

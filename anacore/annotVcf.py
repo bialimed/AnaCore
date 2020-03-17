@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -121,14 +121,15 @@ class AnnotVCFIO(VCFIO):
     def writeHeader(self):
         """Write VCF header."""
         # Manage declaration of ANN in header
-        match = re.search("(Format: [^ ]+)", self.info[self.annot_field].description)
-        old_titles = match.group(1)
-        if old_titles.endswith("."):
-            old_titles = old_titles[:-1]
-        self.info[self.annot_field].description = self.info[self.annot_field].description.replace(
-            old_titles,
-            "Format: " + "|".join(self.ANN_titles)
-        )
+        if self.annot_field in self.info:
+            match = re.search("(Format: [^ ]+)", self.info[self.annot_field].description)
+            old_titles = match.group(1)
+            if old_titles.endswith("."):
+                old_titles = old_titles[:-1]
+            self.info[self.annot_field].description = self.info[self.annot_field].description.replace(
+                old_titles,
+                "Format: " + "|".join(self.ANN_titles)
+            )
         # Write header
         super().writeHeader()
 
