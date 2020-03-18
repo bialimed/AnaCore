@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.15.0'
+__version__ = '1.16.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -495,6 +495,7 @@ def platformFromInstrumentSerialNumber(instrument_id):
         "^ML-..-[0-9]{2}$": "MiniSeq",
         "^M[0-9]{5}$": "MiSeq",
         "^N[SB][0-9]{6}$": "NextSeq",
+        "^NDX[0-9]{6}": "NextSeq",
         "^[CDJKE][0-9]{5}$": "HiSeq",
         "^A[0-9]{5}$": "NovaSeq"
     }

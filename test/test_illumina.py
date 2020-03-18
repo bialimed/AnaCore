@@ -96,6 +96,39 @@ class TestRunInfo(unittest.TestCase):
                     "run": {'number': '101', 'id': '191113_NB551452_0101_AHW7JJAFXY', 'start_date': datetime(2019, 11, 13, 0, 0)}
                 },
             },
+            {  # NexSeq dual index
+                "content": '''<?xml version="1.0"?>
+<RunInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="4">
+  <Run Id="200316_NDX550421_RUO_0003_AHJK57BGXF" Number="3">
+    <Flowcell>HJK57BGXF</Flowcell>
+    <Instrument>NDX550421_RUO</Instrument>
+    <Date>200316</Date>
+    <Reads>
+      <Read Number="1" NumCycles="151" IsIndexedRead="N" />
+      <Read Number="2" NumCycles="8" IsIndexedRead="Y" />
+      <Read Number="3" NumCycles="8" IsIndexedRead="Y" />
+      <Read Number="4" NumCycles="151" IsIndexedRead="N" />
+    </Reads>
+    <FlowcellLayout LaneCount="4" SurfaceCount="2" SwathCount="3" TileCount="12" SectionPerLane="3" LanePerSection="2">
+      <TileSet TileNamingConvention="FiveDigit">
+        <Tiles>
+        </Tiles>
+      </TileSet>
+    </FlowcellLayout>
+    <ImageDimensions Width="2592" Height="1944" />
+    <ImageChannels>
+      <Name>Red</Name>
+      <Name>Green</Name>
+    </ImageChannels>
+  </Run>
+</RunInfo>''',
+                "expected": {
+                    "flowcell": {'id': 'HJK57BGXF', 'layout': {'LaneCount': '4', 'SurfaceCount': '2', 'SwathCount': '3', 'TileCount': '12', 'SectionPerLane': '3', 'LanePerSection': '2'}},
+                    "instrument": {'id': 'NDX550421_RUO', 'platform': 'NextSeq'},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}],
+                    "run": {'number': '3', 'id': '200316_NDX550421_RUO_0003_AHJK57BGXF', 'start_date': datetime(2020, 3, 16, 0, 0)}
+                },
+            },
             {  # MiSeq dual index
                 "content": '''<?xml version="1.0"?>
 <RunInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="2">
