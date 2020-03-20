@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.16.0'
+__version__ = '1.17.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -259,20 +259,21 @@ class RunInfo(object):
 class RunParameters(object):
     """Reader for runParameters.xml."""
 
-    PLATFORMS = ["MiniSeq", "MiSeq", "NextSeq", "HiSeq", "NovaSeq"]
-
     def __init__(self, path):
         self.filepath = path
-        self.kit = None
-        self.instrument = None
+        self.kit = None  # {"flowcell_id": "H14U5BGXX", "reagent_kit_id": "NS2044178-REAGT"}
+        self.instrument = None  # {"id": "NS500413", "platform": "NextSeq"}
         self.reads_phases = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
-        self.run = None
+        self.run = None  # {"number": "0033", "id": "141107_NS500413_0033_H14U5BGXX", "start_date": datetime}
+        self.post_process = None  # "GenerateFASTQ"
         self._parse()
 
     def _parse(self):
         # Retrieve information by section
         tree = ET.parse(self.filepath)
         root = tree.getroot()
+        if {"Version", "Setup"} == {child.tag for child in root}:  # For HiSeq information are all in <Setup> under <RunParameters>
+            root = [child for child in root if child.tag == "Setup"][0]
         # Process information
         self.instrument = self._getInstrumentFromRoot(root)
         reads_subtree = root.find("Reads")
@@ -282,6 +283,7 @@ class RunParameters(object):
             self.reads_phases = self._getReadsFromSetup(root.find("Setup"))
         self.run = self._getRunFromRoot(root)
         self.kit = self._getKitFromRoot(root)
+        self.post_process = self._getPostProcessFromRoot(root)
 
     def _getReadsFromSetup(self, subtree):
         reads = list()
@@ -314,44 +316,58 @@ class RunParameters(object):
         return reads
 
     def _getInstrumentFromRoot(self, root):
-        # Get instrument platform
-        platform = None
-        max_nb_occur = 0
-        raw_file = str(ET.tostring(root))
-        for curr_platform in RunParameters.PLATFORMS:
-            nb_occur = raw_file.count(curr_platform)
-            if nb_occur > max_nb_occur:
-                platform = curr_platform
-        # Get instrument serial
         serial_number = root.find("ScannerID")
         if serial_number is None:
             serial_number = root.find("InstrumentID")
         serial_number = serial_number.text
-        # Return
         return {
             "id": serial_number,
-            "platform": platform
+            "platform": platformFromInstrumentSerialNumber(serial_number)
         }
 
     def _getRunFromRoot(self, root):
         run_number = root.find("RunNumber")
         if run_number is None:
             run_number = root.find("ScanNumber")
-        run_number = run_number.text
+        run_number = run_number.text.lstrip("0")
         return {
             "number": run_number,
             "id": root.find("RunID").text,
             "start_date": datetime.datetime.strptime(root.find("RunStartDate").text, '%y%m%d')
         }
 
+    def _getPostProcessFromRoot(self, root):
+        workflow = root.find("AnalysisWorkflowType")  # NextSeq style
+        if workflow is None:
+            workflow_markup = root.find("Workflow")  # MiSeq style
+            if workflow_markup is not None:
+                workflow = workflow_markup.find("Analysis")
+            # Else HiSeq does not process any post-processing
+        if workflow is not None:
+            workflow = None if workflow.text == "" else workflow.text
+        return workflow
+
     def _getKitFromRoot(self, root):
         # Flowcell ID
-        flowcell_id = self.run["id"].rsplit("_", 1)[1]  # HiSeq: <RunID>141110_D00267_0193_BHAMVRADXX</RunID> ; NextSeq: <FlowCellSerial> ; MiSeq: <FlowcellRFIDTag> > <SerialNumber>
+        flowcell_id = root.find("FlowCellSerial")  # NextSeq style
+        if flowcell_id is not None:
+            flowcell_id = flowcell_id.text
+        else:
+            flowcell_markup = root.find("FlowcellRFIDTag")  # MiSeq style
+            if flowcell_markup is not None:
+                flowcell_id = flowcell_markup.find("SerialNumber").text
+            else:
+                flowcell_id = root.find("Barcode")  # HiSeq style
+                if flowcell_id is not None:
+                    flowcell_id = flowcell_id.text
+                else:
+                    flowcell_id = self.run["id"].rsplit("_", 1)[1]
         # Reagent kit ID
         reagent_kit_id = root.find("ReagentKitBarcode")
         if reagent_kit_id is None:
             reagent_kit_id = root.find("ReagentKitSerial")
-        reagent_kit_id = reagent_kit_id.text
+        if reagent_kit_id is not None:
+            reagent_kit_id = reagent_kit_id.text
         return {
             "flowcell_id": flowcell_id,
             "reagent_kit_id": reagent_kit_id
