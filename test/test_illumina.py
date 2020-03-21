@@ -342,7 +342,8 @@ class TestRunParameters(unittest.TestCase):
                     "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 6}, {'is_index': True, 'nb_cycles': 0}, {'is_index': False, 'nb_cycles': 151}],
                     "run": {"number": "33", "id": "141107_NS500413_0033_H14U5BGXX", "start_date": datetime(2014, 11, 7)},
                     "kit": {"flowcell_id": "H14U5BGXX", "reagent_kit_id": "NS2044178-REAGT"},
-                    "post_process": "FastQ"
+                    "post_process": "FastQ",
+                    "software": {"RTA": "2.1.3", "CS": "1.3.0.23"}
                 }
             },
             {  # NexSeq without post-process
@@ -449,7 +450,8 @@ class TestRunParameters(unittest.TestCase):
                     "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}],
                     "run": {"number": "4", "id": "200318_NDX550421_RUO_0004_AH5THYAFX2", "start_date": datetime(2020, 3, 18)},
                     "kit": {"flowcell_id": "H5THYAFX2", "reagent_kit_id": "NS4065291-REAGT"},
-                    "post_process": None
+                    "post_process": None,
+                    "software": {"RTA": "2.11.3", "CS": "4.0.1.41"}
                 }
             },
             {  # MiSeq
@@ -533,7 +535,8 @@ class TestRunParameters(unittest.TestCase):
                     "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}],
                     "run": {"number": "149", "id": "141105_M01102_0149_000000000-AAC1Y", "start_date": datetime(2014, 11, 5)},
                     "kit": {"flowcell_id": "000000000-AAC1Y", "reagent_kit_id": "MS2740035-300V2"},
-                    "post_process": "GenerateFASTQ"
+                    "post_process": "GenerateFASTQ",
+                    "software": {"RTA": "1.18.54", "CS": "2.5.0.5"}
                 }
             },
             {  # HiSeq
@@ -681,7 +684,8 @@ class TestRunParameters(unittest.TestCase):
                     "reads_phases": [{'is_index': False, 'nb_cycles': 101}, {'is_index': True, 'nb_cycles': 7}, {'is_index': False, 'nb_cycles': 101}],
                     "run": {"number": "193", "id": "141110_D00267_0193_BHAMVRADXX", "start_date": datetime(2014, 11, 10)},
                     "kit": {"flowcell_id": "HAMVRADXX", "reagent_kit_id": None},
-                    "post_process": None
+                    "post_process": None,
+                    "software": {"RTA": "1.18.61", "CS": "2.2.38"}
                 }
             }
         ]
@@ -698,7 +702,8 @@ class TestRunParameters(unittest.TestCase):
                 "reads_phases": res.reads_phases,
                 "run": res.run,
                 "kit": res.kit,
-                "post_process": res.post_process
+                "post_process": res.post_process,
+                "software": res.software
             })
         self.assertEqual(expected, observed)
 

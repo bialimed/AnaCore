@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.17.0'
+__version__ = '1.18.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -266,6 +266,7 @@ class RunParameters(object):
         self.reads_phases = None  # [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}]
         self.run = None  # {"number": "0033", "id": "141107_NS500413_0033_H14U5BGXX", "start_date": datetime}
         self.post_process = None  # "GenerateFASTQ"
+        self.software = None  # {"RTA": "2.11.3", "CS": "4.0.1.41"}
         self._parse()
 
     def _parse(self):
@@ -284,6 +285,7 @@ class RunParameters(object):
         self.run = self._getRunFromRoot(root)
         self.kit = self._getKitFromRoot(root)
         self.post_process = self._getPostProcessFromRoot(root)
+        self.software = self._getSoftwareFromRoot(root)
 
     def _getReadsFromSetup(self, subtree):
         reads = list()
@@ -371,6 +373,15 @@ class RunParameters(object):
         return {
             "flowcell_id": flowcell_id,
             "reagent_kit_id": reagent_kit_id
+        }
+
+    def _getSoftwareFromRoot(self, root):
+        cs_root_markup = root.find("Setup")
+        if cs_root_markup is None:
+            cs_root_markup = root
+        return {
+            "RTA": root.find("RTAVersion").text,
+            "CS": cs_root_markup.find("ApplicationVersion").text
         }
 
 
