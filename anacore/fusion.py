@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.5.0'
+__version__ = '2.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -744,6 +744,10 @@ arriba_event_level_filters = {
     "Imprecise": HeaderFilterAttr(
         "Imprecise",
         "RNA fusion candidates for which no spanning contig was found."
+    ),
+    "Unstranded": HeaderFilterAttr(
+        "Unstranded",
+        "RNA fusion is not stranded."
     )
 }
 
@@ -818,6 +822,7 @@ class ArribaIO(HashedSVIO):
         :return: The breakend record for the 5' shard of fusion and the breakend record for the 3' shard.
         :rtype: (anacore.vcf.VCFRecord, anacore.vcf.VCFRecord)
         """
+        is_unstranded = fusion_record["strand1(gene/fusion)"][-1] == "." or fusion_record["strand2(gene/fusion)"][-1] == "."
         event_level_filters = set(arriba_event_level_filters)
         filters_from_file = {elt.strip() for elt in fusion_record["filters"].split(",")}
         filters_field = sorted(list(filters_from_file & event_level_filters))
@@ -825,12 +830,24 @@ class ArribaIO(HashedSVIO):
         is_imprecise = False if int(fusion_record["split_reads1"]) + int(fusion_record["split_reads2"]) > 0 else True
         if is_imprecise:
             filters_field.append("Imprecise")
+        if is_unstranded:
+            filters_field.append("Unstranded")
+        if is_imprecise or is_unstranded:
             filters_field.sort()
         breakends = []
         coord_list = []
         for side, mate_side in [("1", "2"), ("2", "1")]:
             id = str(uuid.uuid4())
-            curr_breakpoint = fusion_record["breakpoint" + side] + ":" + fusion_record["strand" + side + "(gene/fusion)"].split("/")[1]
+            strand = fusion_record["strand" + side + "(gene/fusion)"].split("/")[1]
+            if is_unstranded:
+                strand = "+"
+                if side == "1":
+                    if fusion_record["direction1"] == "downstream":  # The first in fusion go to the breakpoint: ---->| or |<----
+                        strand = "-"
+                else:
+                    if fusion_record["direction2"] == "upstream":  # The second in fusion go from the breakpoint: <----| or |---->
+                        strand = "-"
+            curr_breakpoint = fusion_record["breakpoint" + side] + ":" + strand
             coord = getCoordDictFromCoordStr(curr_breakpoint)
             coord_list.append(coord)
             # INFO
@@ -849,6 +866,8 @@ class ArribaIO(HashedSVIO):
             }
             if is_imprecise:
                 info["IMPRECISE"] = True
+            if is_unstranded:
+                info["UNSTRANDED"] = True
             if fusion_record["closest_genomic_breakpoint" + side] != ".":
                 info["GBP"] = fusion_record["closest_genomic_breakpoint" + side]
             # SAMPLES
@@ -916,7 +935,8 @@ class ArribaIO(HashedSVIO):
         fs_to_reading_frame = {".": ".", "false": "in-frame", "true": "out-of-frame"}
         arriba_filters = ""
         if first.filter:
-            arriba_filters = ",".join([elt for elt in first.filter if elt != "Imprecise"])
+            excluded = {"Imprecise", "Unstranded"}
+            arriba_filters = ",".join(sorted(set(first.filter) - excluded))
         if "RFIL" in first.samples[self.sample_name] and first.samples[self.sample_name]["RFIL"]:
             arriba_filters += ",".join(first.samples[self.sample_name]["RFIL"])
         return {
@@ -924,11 +944,11 @@ class ArribaIO(HashedSVIO):
             "gene2": second.info[self.annot_field][0]["SYMBOL"],
             "strand1(gene/fusion)": "{}/{}".format(
                 first.info[self.annot_field][0]["STRAND"],
-                first_coord["strand"]
+                "." if "UNSTRANDED" in first.info else first_coord["strand"]
             ),
             "strand2(gene/fusion)": "{}/{}".format(
                 second.info[self.annot_field][0]["STRAND"],
-                second_coord["strand"]
+                "." if "UNSTRANDED" in first.info else second_coord["strand"]
             ),
             "breakpoint1": "{}:{}".format(first_coord["chrom"], first_coord["chrom"]),
             "breakpoint2": "{}:{}".format(second_coord["chrom"], second_coord["chrom"]),
@@ -985,12 +1005,13 @@ class ArribaIO(HashedSVIO):
         """
         # INFO
         vcf_io.info = {
+            "GBP": HeaderInfoAttr("GBP", type="String", number="1", description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint."),
             "IMPRECISE": HeaderInfoAttr("IMPRECISE", type="Flag", number="0", description="Imprecise structural variation."),
             "MATEID": HeaderInfoAttr("MATEID", type="String", number="A", description="ID of mate breakend."),
-            "SVTYPE": HeaderInfoAttr("SVTYPE", type="String", number="1", description="Type of structural variant."),
-            "RNA_FIRST": HeaderInfoAttr("RNA_FIRST", type="Flag", number="0", description="For RNA fusions, this break-end is 5' in the fusion transcript."),  # In the fusion transcript, the 'LeftGene' is always 5' relative to the 'RightGene' (https://groups.google.com/forum/#!topic/star-fusion/9rBLT-v5JHI)
             "RNA_CONTIG": HeaderInfoAttr("RNA_CONTIG", type="String", number="1", description="The transcript sequence assembled from the supporting reads of the most highly expressed transcript."),
-            "GBP": HeaderInfoAttr("GBP", type="String", number="1", description="The coordinates of the genomic breakpoint which is closest to the transcriptomic breakpoint."),
+            "RNA_FIRST": HeaderInfoAttr("RNA_FIRST", type="Flag", number="0", description="For RNA fusions, this break-end is 5' in the fusion transcript."),  # In the fusion transcript, the 'LeftGene' is always 5' relative to the 'RightGene' (https://groups.google.com/forum/#!topic/star-fusion/9rBLT-v5JHI)
+            "SVTYPE": HeaderInfoAttr("SVTYPE", type="String", number="1", description="Type of structural variant."),
+            "UNSTRANDED": HeaderInfoAttr("UNSTRANDED", type="Flag", number="0", description="Unstranded structural variation."),
             annotation_field: HeaderInfoAttr(annotation_field, type="String", number=".", description="Consequence annotations. Format: SYMBOL|STRAND|Site|Type|GENE_SHARD|FRAMESHIFT|Protein_contig")
         }
         # ANN_titles
