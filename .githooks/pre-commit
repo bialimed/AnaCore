@@ -12,6 +12,12 @@ if [ $? -ne 0 ] ; then
 	exit 1 ;
 fi
 
+# Update documentation
+# cd doc/source && make html > /dev/null && cd - && git add doc/content
+# if [ $? -ne 0 ] ; then
+# 	exit 1 ;
+# fi
+
 # Exit
 echo -e "[\e[92mSUCCESS\033[0m] Pre-commit check "
 exit 0

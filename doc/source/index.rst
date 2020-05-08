@@ -27,7 +27,7 @@ Content
 .. toctree::
    :maxdepth: 4
 
-   source/anacore
+   anacore
 
 
 Copyright

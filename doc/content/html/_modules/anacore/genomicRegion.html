@@ -1,0 +1,648 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>anacore.genomicRegion &mdash; AnaCore  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.genomicRegion</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.genomicRegion</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for manipulating/processing genomic regions defines on references sequences (Gene, Transcripts, Proteins, Regulation sequences, ...).&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 IUCT-O&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.4.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="k">import</span> <span class="n">RegionTree</span><span class="p">,</span> <span class="n">RegionList</span>
+
+
+<div class="viewcode-block" id="Gene"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Gene">[docs]</a><span class="k">class</span> <span class="nc">Gene</span><span class="p">(</span><span class="n">RegionTree</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Exon"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Exon">[docs]</a><span class="k">class</span> <span class="nc">Exon</span><span class="p">(</span><span class="n">RegionTree</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Intron"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Intron">[docs]</a><span class="k">class</span> <span class="nc">Intron</span><span class="p">(</span><span class="n">RegionTree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Intron.</span>
+
+<span class="sd">        :param start: The start position on the reference. This position is 1-based and ascending (start &lt;= end).</span>
+<span class="sd">        :type start: int</span>
+<span class="sd">        :param end: The end position on the reference. This position is 1-based and ascending (start &lt;= end). [Default: start]</span>
+<span class="sd">        :type end: int</span>
+<span class="sd">        :param strand: The strand of the instance (&quot;+&quot; or &quot;-&quot;).</span>
+<span class="sd">        :type strand: str</span>
+<span class="sd">        :param reference: The region object or the region name of the reference.</span>
+<span class="sd">        :type reference: region.Region | str</span>
+<span class="sd">        :param name: The name of the region.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param annot: The annotations of the region.</span>
+<span class="sd">        :type annot: dict</span>
+<span class="sd">        :param parent: The parent region (example: gene for a transcript).</span>
+<span class="sd">        :type parent: region.RegionTree</span>
+<span class="sd">        :param children: The list of sub-regions (example: exons in transcript).</span>
+<span class="sd">        :type children: region.RegionList</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: region.Intron</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">RegionTree</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">annot</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>  <span class="c1"># Prevent add of this intron as child of transcript</span></div>
+
+
+<div class="viewcode-block" id="CDS"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.CDS">[docs]</a><span class="k">class</span> <span class="nc">CDS</span><span class="p">(</span><span class="n">RegionTree</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Transcript"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript">[docs]</a><span class="k">class</span> <span class="nc">Transcript</span><span class="p">(</span><span class="n">RegionTree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to manage a transcript region.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">proteins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Transcript.</span>
+
+<span class="sd">        :param start: The start position on the reference. This position is 1-based and ascending (start &lt;= end).</span>
+<span class="sd">        :type start: int</span>
+<span class="sd">        :param end: The end position on the reference. This position is 1-based and ascending (start &lt;= end). [Default: start]</span>
+<span class="sd">        :type end: int</span>
+<span class="sd">        :param strand: The strand of the instance (&quot;+&quot; or &quot;-&quot;).</span>
+<span class="sd">        :type strand: str</span>
+<span class="sd">        :param reference: The region object or the region name of the reference.</span>
+<span class="sd">        :type reference: region.Region | str</span>
+<span class="sd">        :param name: The name of the region.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param annot: The annotations of the region.</span>
+<span class="sd">        :type annot: dict</span>
+<span class="sd">        :param parent: The gene.</span>
+<span class="sd">        :type parent: region.RegionTree</span>
+<span class="sd">        :param children: The list of exons.</span>
+<span class="sd">        :type children: region.RegionList</span>
+<span class="sd">        :param proteins: The list of proteins produced on transcript. It can exists several proteins on transcript: operon and readthrough.</span>
+<span class="sd">        :type proteins: region.RegionList</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: genomicRegion.Transcript</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">RegionTree</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">annot</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proteins</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">proteins</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setProteins</span><span class="p">(</span><span class="n">proteins</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Transcript.setProteins"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.setProteins">[docs]</a>    <span class="k">def</span> <span class="nf">setProteins</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proteins</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change proteins linked with transcript. Before the add of the new proteins the old are unlinked (prot.transcript is set to None).</span>
+
+<span class="sd">        :param proteins: The new linked proteins.</span>
+<span class="sd">        :type proteins: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Remove previous not in new proteins</span>
+        <span class="k">for</span> <span class="n">idx_prot</span><span class="p">,</span> <span class="n">prot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proteins</span><span class="p">):</span>
+            <span class="n">prot</span><span class="o">.</span><span class="n">transcript</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proteins</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">()</span>
+        <span class="c1"># Add new proteins</span>
+        <span class="k">for</span> <span class="n">curr_prot</span> <span class="ow">in</span> <span class="n">proteins</span><span class="p">:</span>
+            <span class="n">curr_prot</span><span class="o">.</span><span class="n">setTranscript</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Transcript.addProtein"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.addProtein">[docs]</a>    <span class="k">def</span> <span class="nf">addProtein</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protein</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add link with a protein.</span>
+
+<span class="sd">        :param protein: The protein to add.</span>
+<span class="sd">        :type protein: genomicRegion.Protein</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">protein</span><span class="o">.</span><span class="n">setTranscript</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Transcript.length"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return length of the transcript (sum of exons lengths).</span>
+
+<span class="sd">        :return: The length of the transcript.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">curr_exon</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">curr_exon</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">length</span></div>
+
+<div class="viewcode-block" id="Transcript.getPosOnRef"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.getPosOnRef">[docs]</a>    <span class="k">def</span> <span class="nf">getPosOnRef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transcript_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return coordinate on reference sequence from the coordinate on transcript.</span>
+
+<span class="sd">        :param transcript_pos: Coordinate on transcript (1-based).</span>
+<span class="sd">        :type transcript_pos: int.</span>
+<span class="sd">        :return: The coordinate on reference sequence (1-based).</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">exon</span><span class="p">,</span> <span class="n">region_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSubFromRegionPos</span><span class="p">(</span><span class="n">transcript_pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">exon</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">region_pos</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Transcript.getPosOnRegion"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.getPosOnRegion">[docs]</a>    <span class="k">def</span> <span class="nf">getPosOnRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chr_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return coordinate on transcript from the coordinate on reference sequence.</span>
+
+<span class="sd">        :param chr_pos: The coordinate on reference sequence (1-based).</span>
+<span class="sd">        :type chr_pos: int</span>
+<span class="sd">        :return: Coordinate on region (1-based).</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="Transcript.getSubFromRegionPos"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.getSubFromRegionPos">[docs]</a>    <span class="k">def</span> <span class="nf">getSubFromRegionPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transcript_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return exon and coordinate on his from the coordinate on transcript.</span>
+
+<span class="sd">        Coordinate on exon is stranded:</span>
+
+<span class="sd">        - pos 2 in region test:10-20(+) correspond to ref position 12</span>
+<span class="sd">        - pos 2 in region test:10-20(-) correspond to ref position 18</span>
+
+<span class="sd">        :param transcript_pos: The coordinate on transcript (1-based).</span>
+<span class="sd">        :type transcript_pos: int</span>
+<span class="sd">        :return: Exon and coordinate on exon (1-based).</span>
+<span class="sd">        :rtype: (genomicRegion.Exon, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">transcript_pos</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The position </span><span class="si">{}</span><span class="s2"> is out of transcript </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">transcript_pos</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="n">walk_pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">region_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">child</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">while</span> <span class="n">child</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">curr_child_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">region_idx</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">walk_pos</span> <span class="o">&lt;=</span> <span class="n">transcript_pos</span> <span class="ow">and</span> <span class="p">(</span><span class="n">walk_pos</span> <span class="o">+</span> <span class="n">curr_child_length</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">transcript_pos</span><span class="p">:</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">region_idx</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">walk_pos</span> <span class="o">+=</span> <span class="n">curr_child_length</span>
+                <span class="n">region_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">pos_on_child</span> <span class="o">=</span> <span class="n">transcript_pos</span> <span class="o">-</span> <span class="n">walk_pos</span>
+        <span class="k">return</span> <span class="n">child</span><span class="p">,</span> <span class="n">pos_on_child</span></div>
+
+<div class="viewcode-block" id="Transcript.getSubFromRefPos"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.getSubFromRefPos">[docs]</a>    <span class="k">def</span> <span class="nf">getSubFromRefPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chr_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return exon on intron where the chr_pos is located.</span>
+
+<span class="sd">        :param chr_pos: The coordinate on reference sequence (1-based).</span>
+<span class="sd">        :type chr_pos: int</span>
+<span class="sd">        :return: The index of the sub-region containing the chr_pos (1-based) and the object of this sub-region.</span>
+<span class="sd">        :rtype: int, (Intron | Exon)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot return a region position from the reference position because the strand is None (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span>
+            <span class="p">))</span>
+        <span class="k">if</span> <span class="n">chr_pos</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">or</span> <span class="n">chr_pos</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The position </span><span class="si">{}</span><span class="s2"> is out of transcript </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chr_pos</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="n">sub_region_idx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sub_region</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">exons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span>
+        <span class="n">exon_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">chr_pos</span> <span class="o">&gt;</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+                <span class="n">exon_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">chr_pos</span> <span class="o">&lt;</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+                <span class="n">intron_start</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">intron_end</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">sub_region_idx</span> <span class="o">=</span> <span class="n">exon_idx</span>
+                <span class="n">sub_region</span> <span class="o">=</span> <span class="n">Intron</span><span class="p">(</span><span class="n">intron_start</span><span class="p">,</span> <span class="n">intron_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="s2">&quot;intron_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sub_region_idx</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;siblings_idx&quot;</span><span class="p">:</span> <span class="n">sub_region_idx</span><span class="p">},</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sub_region_idx</span> <span class="o">=</span> <span class="n">exon_idx</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">sub_region</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">chr_pos</span> <span class="o">&lt;</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+                <span class="n">exon_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">chr_pos</span> <span class="o">&gt;</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+                <span class="n">intron_end</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">intron_start</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">sub_region_idx</span> <span class="o">=</span> <span class="n">exon_idx</span>
+                <span class="n">sub_region</span> <span class="o">=</span> <span class="n">Intron</span><span class="p">(</span><span class="n">intron_start</span><span class="p">,</span> <span class="n">intron_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="s2">&quot;intron_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sub_region_idx</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;siblings_idx&quot;</span><span class="p">:</span> <span class="n">sub_region_idx</span><span class="p">},</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sub_region_idx</span> <span class="o">=</span> <span class="n">exon_idx</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">sub_region</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">exon_idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">sub_region</span><span class="p">,</span> <span class="n">sub_region_idx</span></div></div>
+
+
+<div class="viewcode-block" id="Protein"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein">[docs]</a><span class="k">class</span> <span class="nc">Protein</span><span class="p">(</span><span class="n">RegionTree</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to manage a protein region.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transcript</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Protein.</span>
+
+<span class="sd">        :param start: The start position on the reference. This position is 1-based and ascending (start &lt;= end).</span>
+<span class="sd">        :type start: int</span>
+<span class="sd">        :param end: The end position on the reference. This position is 1-based and ascending (start &lt;= end). [Default: start]</span>
+<span class="sd">        :type end: int</span>
+<span class="sd">        :param strand: The strand of the instance (&quot;+&quot; or &quot;-&quot;).</span>
+<span class="sd">        :type strand: str</span>
+<span class="sd">        :param reference: The region object or the region name of the reference.</span>
+<span class="sd">        :type reference: region.Region | str</span>
+<span class="sd">        :param name: The name of the region.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param annot: The annotations of the region.</span>
+<span class="sd">        :type annot: dict</span>
+<span class="sd">        :param parent: The gene.</span>
+<span class="sd">        :type parent: region.RegionTree</span>
+<span class="sd">        :param children: The list of CDS.</span>
+<span class="sd">        :type children: region.RegionList</span>
+<span class="sd">        :param transcript: The transcript corresponding to the protein.</span>
+<span class="sd">        :type transcript: region.Transcript</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: genomicRegion.Protein</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">RegionTree</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">annot</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTranscript</span><span class="p">(</span><span class="n">transcript</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Protein.setTranscript"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.setTranscript">[docs]</a>    <span class="k">def</span> <span class="nf">setTranscript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transcript</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add link between self and his transcript.</span>
+
+<span class="sd">        :param transcript: The transcript to link.</span>
+<span class="sd">        :type transcript: genomicRegion.Transcript</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transcript</span> <span class="o">=</span> <span class="n">transcript</span>
+        <span class="k">if</span> <span class="n">transcript</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transcript</span><span class="o">.</span><span class="n">proteins</span><span class="p">:</span>
+                <span class="n">transcript</span><span class="o">.</span><span class="n">proteins</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prot_idx</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">prot_idx</span> <span class="o">=</span> <span class="n">transcript</span><span class="o">.</span><span class="n">proteins</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># Not found</span>
+                <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">prot_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">transcript</span><span class="o">.</span><span class="n">proteins</span><span class="p">[</span><span class="n">prot_idx</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Protein.length"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return length of the protein in nucleotids (sum of CDS lengths).</span>
+
+<span class="sd">        :return: The length of the protein.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">curr_cds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="n">curr_cds</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">length</span></div>
+
+<div class="viewcode-block" id="Protein.aaLength"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.aaLength">[docs]</a>    <span class="k">def</span> <span class="nf">aaLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return length of the protein in amino acids (sum of CDS lengths).</span>
+
+<span class="sd">        :return: The length of the protein.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Protein.getPosOnRef"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.getPosOnRef">[docs]</a>    <span class="k">def</span> <span class="nf">getPosOnRef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protein_pos</span><span class="p">,</span> <span class="n">codon_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return coordinate on reference sequence from the coordinate on protein.</span>
+
+<span class="sd">        :param protein_pos: Coordinate of the amino acid on protein (1-based).</span>
+<span class="sd">        :type protein_pos: int.</span>
+<span class="sd">        :param codon_pos: Coordinate on the codon (1-based).</span>
+<span class="sd">        :type codon_pos: int.</span>
+<span class="sd">        :return: The coordinate on reference sequence (1-based).</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cds</span><span class="p">,</span> <span class="n">cds_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSubFromRegionPos</span><span class="p">(</span><span class="n">protein_pos</span><span class="p">,</span> <span class="n">codon_pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cds</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">cds_pos</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Protein.getPosOnRegion"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.getPosOnRegion">[docs]</a>    <span class="k">def</span> <span class="nf">getPosOnRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chr_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return coordinate on protein from the coordinate on reference sequence.</span>
+
+<span class="sd">        :param chr_pos: The coordinate on reference sequence (1-based).</span>
+<span class="sd">        :type chr_pos: int</span>
+<span class="sd">        :return: Coordinate of the amino acid on protein (1-based) and the coordinate on the codon (1-based). Return None if coordinates are in UTRs or in introns.</span>
+<span class="sd">        :rtype: (int, int) | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">chr_pos</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">or</span> <span class="n">chr_pos</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The position </span><span class="si">{}</span><span class="s2"> is out of protein </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chr_pos</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="n">chained_cds_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNtPosFromRefPos</span><span class="p">(</span><span class="n">chr_pos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chained_cds_pos</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">return</span><span class="p">(</span>
+            <span class="nb">int</span><span class="p">((</span><span class="n">chained_cds_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># aa position (1-based)</span>
+            <span class="p">((</span><span class="n">chained_cds_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># position in aa (1-based)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Protein.getNtPosFromRegionPos"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.getNtPosFromRegionPos">[docs]</a>    <span class="k">def</span> <span class="nf">getNtPosFromRegionPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protein_pos</span><span class="p">,</span> <span class="n">codon_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return nucleotids coordinate on protein from the amino acids coordinate.</span>
+
+<span class="sd">        :param protein_pos: Coordinate of the amino acid on protein (1-based).</span>
+<span class="sd">        :type protein_pos: int.</span>
+<span class="sd">        :param codon_pos: Coordinate on the codon (1-based).</span>
+<span class="sd">        :type codon_pos: int.</span>
+<span class="sd">        :return: The nucleotids coordinate on protein (1-based).</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">protein_pos</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">aaLength</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The position </span><span class="si">{}</span><span class="s2"> is out of protein </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">protein_pos</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">protein_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">codon_pos</span></div>
+
+<div class="viewcode-block" id="Protein.getNtPosFromRefPos"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.getNtPosFromRefPos">[docs]</a>    <span class="k">def</span> <span class="nf">getNtPosFromRefPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chr_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return nucleotids coordinate on protein from coordinate on reference sequence.</span>
+
+<span class="sd">        :param chr_pos: The coordinate on reference sequence (1-based).</span>
+<span class="sd">        :type chr_pos: int</span>
+<span class="sd">        :return: The nucleotids coordinate on protein (1-based). Return None if coordinates are in UTRs or in introns.</span>
+<span class="sd">        :rtype: int | None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot return a region position from the reference position because the strand is None (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span>
+            <span class="p">))</span>
+        <span class="n">chained_cds_pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">cds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span>
+        <span class="n">cds_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">cds</span><span class="p">[</span><span class="n">cds_idx</span><span class="p">]</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">chr_pos</span> <span class="o">&lt;=</span> <span class="n">cds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">end</span> <span class="ow">and</span> <span class="n">chr_pos</span> <span class="o">&gt;=</span> <span class="n">cds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+                <span class="n">chained_cds_pos</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="n">chr_pos</span> <span class="o">&gt;</span> <span class="n">cds</span><span class="p">[</span><span class="n">cds_idx</span><span class="p">]</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+                    <span class="n">chained_cds_pos</span> <span class="o">+=</span> <span class="n">cds</span><span class="p">[</span><span class="n">cds_idx</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+                    <span class="n">cds_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">chained_cds_pos</span> <span class="o">+=</span> <span class="n">chr_pos</span> <span class="o">-</span> <span class="n">cds</span><span class="p">[</span><span class="n">cds_idx</span><span class="p">]</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">chr_pos</span> <span class="o">&lt;=</span> <span class="n">cds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">end</span> <span class="ow">and</span> <span class="n">chr_pos</span> <span class="o">&gt;=</span> <span class="n">cds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+                <span class="n">chained_cds_pos</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">while</span> <span class="n">chr_pos</span> <span class="o">&lt;</span> <span class="n">cds</span><span class="p">[</span><span class="n">cds_idx</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+                    <span class="n">chained_cds_pos</span> <span class="o">+=</span> <span class="n">cds</span><span class="p">[</span><span class="n">cds_idx</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+                    <span class="n">cds_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">chained_cds_pos</span> <span class="o">+=</span> <span class="n">cds</span><span class="p">[</span><span class="n">cds_idx</span><span class="p">]</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="n">chr_pos</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">chained_cds_pos</span></div>
+
+<div class="viewcode-block" id="Protein.getSubFromRegionPos"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.getSubFromRegionPos">[docs]</a>    <span class="k">def</span> <span class="nf">getSubFromRegionPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protein_pos</span><span class="p">,</span> <span class="n">codon_pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return CDS and coordinate on his from the coordinate on protein.</span>
+<span class="sd">        The coordinate on CDS is stranded:</span>
+<span class="sd">            With region test:10-20(+) the pos 2 correspond to ref position 12</span>
+<span class="sd">            With region test:10-20(-) the pos 2 correspond to ref position 18</span>
+
+<span class="sd">        :param protein_pos: Coordinate of the amino acid on protein (1-based).</span>
+<span class="sd">        :type protein_pos: int.</span>
+<span class="sd">        :param codon_pos: Coordinate on the codon (1-based).</span>
+<span class="sd">        :type codon_pos: int.</span>
+<span class="sd">        :return: CDS and coordinate on CDS (1-based).</span>
+<span class="sd">        :rtype: genomicRegion.CDS, int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chained_cds_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNtPosFromRegionPos</span><span class="p">(</span><span class="n">protein_pos</span><span class="p">,</span> <span class="n">codon_pos</span><span class="p">)</span>
+        <span class="n">walk_pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">region_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">child</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">while</span> <span class="n">child</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">curr_child_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">region_idx</span><span class="p">]</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">walk_pos</span> <span class="o">&lt;=</span> <span class="n">chained_cds_pos</span> <span class="ow">and</span> <span class="p">(</span><span class="n">walk_pos</span> <span class="o">+</span> <span class="n">curr_child_length</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">chained_cds_pos</span><span class="p">:</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">region_idx</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">walk_pos</span> <span class="o">+=</span> <span class="n">curr_child_length</span>
+                <span class="n">region_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">pos_on_child</span> <span class="o">=</span> <span class="n">chained_cds_pos</span> <span class="o">-</span> <span class="n">walk_pos</span>
+        <span class="k">return</span> <span class="n">child</span><span class="p">,</span> <span class="n">pos_on_child</span></div>
+
+<div class="viewcode-block" id="Protein.getCDSFromTranscript"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.getCDSFromTranscript">[docs]</a>    <span class="k">def</span> <span class="nf">getCDSFromTranscript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return CDS of the protein from the transcript and his exons. This function is used when CDS are not defined in the protein but exons and protein start and end are defined.</span>
+
+<span class="sd">        :return: The list of CDS of the protein in protein strand order.</span>
+<span class="sd">        :rtype: region.Regionlist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check information completion</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transcript</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;A link with a transcript is required to return CDS for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Start and end for </span><span class="si">{}</span><span class="s2"> are required to return CDS from transcript </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">transcript</span><span class="p">))</span>
+        <span class="c1"># Exons to CDS</span>
+        <span class="n">exons</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transcript</span><span class="o">.</span><span class="n">children</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">end</span><span class="p">))</span>
+        <span class="n">nb_exons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exons</span><span class="p">)</span>
+        <span class="n">idx_exon</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">curr_exon</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">idx_exon</span><span class="p">]</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">&gt;</span> <span class="n">curr_exon</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+            <span class="n">idx_exon</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">curr_exon</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">idx_exon</span><span class="p">]</span>
+        <span class="n">cds</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">curr_exon</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">&gt;=</span> <span class="n">curr_exon</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+            <span class="n">cds_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">curr_exon</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">cds_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">curr_exon</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+            <span class="n">cds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CDS</span><span class="p">(</span><span class="n">cds_start</span><span class="p">,</span> <span class="n">cds_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="p">))</span>
+            <span class="n">idx_exon</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">curr_exon</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">idx_exon</span> <span class="o">&lt;</span> <span class="n">nb_exons</span><span class="p">:</span>
+                <span class="n">curr_exon</span> <span class="o">=</span> <span class="n">exons</span><span class="p">[</span><span class="n">idx_exon</span><span class="p">]</span>
+        <span class="c1"># Sort by strand order</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+            <span class="n">cds</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">cds</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">end</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">start</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="c1"># Return</span>
+        <span class="k">return</span> <span class="n">cds</span></div>
+
+<div class="viewcode-block" id="Protein.contains"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if at least one CDS has an overlap with eval_region.</span>
+
+<span class="sd">        :param eval_region: The evaluated region.</span>
+<span class="sd">        :type eval_region: Region</span>
+<span class="sd">        :return: True if the region contains the evaluated region.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCDSFromTranscript</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cds</span><span class="o">.</span><span class="n">getContainers</span><span class="p">(</span><span class="n">eval_region</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Protein.hasOverlap"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.hasOverlap">[docs]</a>    <span class="k">def</span> <span class="nf">hasOverlap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if at least one CDS has an overlap with eval_region.</span>
+
+<span class="sd">        :param eval_region: The evaluated region.</span>
+<span class="sd">        :type eval_region: Region</span>
+<span class="sd">        :return: True if the protein has an overlap with evaluated region.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">has_overlap</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">eval_region</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">cds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCDSFromTranscript</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">curr_cds</span> <span class="ow">in</span> <span class="n">cds</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">curr_cds</span><span class="o">.</span><span class="n">start</span> <span class="o">&gt;</span> <span class="n">eval_region</span><span class="o">.</span><span class="n">end</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">curr_cds</span><span class="o">.</span><span class="n">end</span> <span class="o">&lt;</span> <span class="n">eval_region</span><span class="o">.</span><span class="n">start</span><span class="p">:</span>
+                    <span class="n">has_overlap</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">has_overlap</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Frédéric Escudié
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

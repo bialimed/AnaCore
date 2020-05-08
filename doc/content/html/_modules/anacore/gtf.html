@@ -1,0 +1,414 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>anacore.gtf &mdash; AnaCore  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.gtf</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.gtf</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing/processing GTF files.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 IUCT-O&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.1.1&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">AbstractFile</span>
+<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="k">import</span> <span class="n">RegionTree</span><span class="p">,</span> <span class="n">RegionList</span>
+<span class="kn">from</span> <span class="nn">anacore.genomicRegion</span> <span class="k">import</span> <span class="n">Gene</span><span class="p">,</span> <span class="n">Transcript</span><span class="p">,</span> <span class="n">Protein</span><span class="p">,</span> <span class="n">Exon</span><span class="p">,</span> <span class="n">CDS</span>
+
+
+<div class="viewcode-block" id="GTFIO"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO">[docs]</a><span class="k">class</span> <span class="nc">GTFIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to manage read and write in GTF file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a structured record from the GTF current line.</span>
+
+<span class="sd">        :return: The record.</span>
+<span class="sd">        :rtype: region.Region</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chrom</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">attributes</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)]</span>
+        <span class="c1"># Core</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">RegionTree</span><span class="p">(</span>
+            <span class="n">start</span><span class="p">,</span>
+            <span class="n">end</span><span class="p">,</span>
+            <span class="n">strand</span><span class="p">,</span>
+            <span class="n">chrom</span>
+        <span class="p">)</span>
+        <span class="c1"># Attributes</span>
+        <span class="n">record_attr</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+            <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="n">feature</span><span class="p">,</span>
+            <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="n">score</span><span class="p">,</span>
+            <span class="s2">&quot;frame&quot;</span><span class="p">:</span> <span class="n">frame</span>
+        <span class="p">}</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">current_attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">):</span>
+            <span class="n">current_attr</span> <span class="o">=</span> <span class="n">current_attr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">current_attr</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;(.+)\s+</span><span class="se">\&quot;</span><span class="s2">([^</span><span class="se">\&quot;</span><span class="s2">]+)</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">current_attr</span><span class="p">)</span>
+                <span class="n">record_attr</span><span class="p">[</span><span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="o">=</span> <span class="n">record_attr</span>
+        <span class="k">return</span> <span class="n">record</span>
+
+<div class="viewcode-block" id="GTFIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the line corresponds to a record (it is not a comment or an header line).</span>
+
+<span class="sd">        :param line: The evaluated line.</span>
+<span class="sd">        :type line: str</span>
+<span class="sd">        :return: True if the line corresponds to a record.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_record</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+            <span class="n">is_record</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">is_record</span></div>
+
+<div class="viewcode-block" id="GTFIO.recordToLine"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO.recordToLine">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the record in GTF format.</span>
+
+<span class="sd">        :param record: The region to process.</span>
+<span class="sd">        :type record: region.Region</span>
+<span class="sd">        :return: The GTF line.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">]:</span>
+                <span class="n">attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="s2">&quot;source&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="s2">&quot;feature&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;feature&quot;</span><span class="p">]),</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="s2">&quot;score&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;score&quot;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="s2">&quot;frame&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;frame&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">line</span></div>
+
+<div class="viewcode-block" id="GTFIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write one line on GTF file.</span>
+
+<span class="sd">        :param record: The object to write.</span>
+<span class="sd">        :type record: region.Region</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_castedRegionTree</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">new_class</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the region casted in the selected class of genomicRegion.</span>
+
+<span class="sd">    :param region: The region to cast.</span>
+<span class="sd">    :type region: region.RegionTree</span>
+<span class="sd">    :param new_class: The new class for the object.</span>
+<span class="sd">    :type new_class: genomicRegion.*</span>
+<span class="sd">    :return: The list of regions corresponding to the selected feature.</span>
+<span class="sd">    :rtype: region.RegionList</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">casted_obj</span> <span class="o">=</span> <span class="n">new_class</span><span class="p">(</span>
+        <span class="n">start</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+        <span class="n">end</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+        <span class="n">strand</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span>
+        <span class="n">reference</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">annot</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">annot</span><span class="p">,</span>
+        <span class="n">parent</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+        <span class="n">children</span><span class="o">=</span><span class="n">region</span><span class="o">.</span><span class="n">children</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">casted_obj</span>
+
+
+<div class="viewcode-block" id="loadModel"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.loadModel">[docs]</a><span class="k">def</span> <span class="nf">loadModel</span><span class="p">(</span><span class="n">gtf_path</span><span class="p">,</span> <span class="n">feature_handle</span><span class="o">=</span><span class="s2">&quot;exons&quot;</span><span class="p">,</span> <span class="n">restrict_to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return genomic model from a GTF. A genomic model is a tree where nodes are genes, transcripts, protein, exons and CDS.</span>
+
+<span class="sd">    :param gtf_path: Path to the GTF containing the annotations.</span>
+<span class="sd">    :type gtf_path: str</span>
+<span class="sd">    :param feature_handle: The type of objects directly accessible in returned list. Authorized values: genes, exons, transcripts, proteins, cds.</span>
+<span class="sd">    :type feature_handle: str</span>
+<span class="sd">    :param restrict_to: If this parameter is used, the model is retricted to this seqname. Default: All the seqname of the GTF are used.</span>
+<span class="sd">    :type restrict_to: str</span>
+<span class="sd">    :return: The list of regions corresponding to the selected feature.</span>
+<span class="sd">    :rtype: region.RegionList</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">feature_handle</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;genes&quot;</span><span class="p">,</span> <span class="s2">&quot;exons&quot;</span><span class="p">,</span> <span class="s2">&quot;transcripts&quot;</span><span class="p">,</span> <span class="s2">&quot;proteins&quot;</span><span class="p">,</span> <span class="s2">&quot;cds&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The retrun type </span><span class="si">{}</span><span class="s2"> for loadModel is invalid.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">feature_handle</span><span class="p">))</span>
+    <span class="n">genes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">transcripts</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">proteins</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">exons</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">()</span>
+    <span class="n">cds</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">()</span>
+    <span class="c1"># Build model from GTF</span>
+    <span class="k">with</span> <span class="n">GTFIO</span><span class="p">(</span><span class="n">gtf_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_in</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">FH_in</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">restrict_to</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">restrict_to</span> <span class="o">==</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;feature&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;exon&quot;</span><span class="p">:</span>
+                    <span class="n">record</span> <span class="o">=</span> <span class="n">_castedRegionTree</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">Exon</span><span class="p">)</span>
+                    <span class="c1"># Transcript</span>
+                    <span class="n">transcript_id</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;transcript_id&quot;</span><span class="p">]</span>
+                    <span class="n">transcript_uid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">transcript_id</span><span class="p">)</span>  <span class="c1"># Add chromosome to prevent collision on sex chromosomes</span>
+                    <span class="k">if</span> <span class="n">transcript_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transcripts</span><span class="p">:</span>
+                        <span class="n">transcript_name</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;transcript_name&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;transcript_name&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="n">transcripts</span><span class="p">[</span><span class="n">transcript_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Transcript</span><span class="p">(</span>
+                            <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">transcript_name</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="s2">&quot;transcript&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">transcript_id</span><span class="p">}</span>
+                        <span class="p">)</span>
+                        <span class="c1"># Parent gene</span>
+                        <span class="n">gene_id</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;gene_id&quot;</span><span class="p">]</span>
+                        <span class="n">gene_uid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gene_id</span><span class="p">)</span>  <span class="c1"># Add chromosome to prevent collision on sex chromosomes</span>
+                        <span class="k">if</span> <span class="n">gene_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">genes</span><span class="p">:</span>
+                            <span class="n">gene_name</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;gene_name&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;gene_name&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="kc">None</span>
+                            <span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">gene_name</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="s2">&quot;gene&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">gene_id</span><span class="p">})</span>
+                            <span class="n">genes</span><span class="p">[</span><span class="n">gene_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">gene</span>
+                        <span class="n">genes</span><span class="p">[</span><span class="n">gene_uid</span><span class="p">]</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">transcripts</span><span class="p">[</span><span class="n">transcript_uid</span><span class="p">])</span>
+                    <span class="n">transcript</span> <span class="o">=</span> <span class="n">transcripts</span><span class="p">[</span><span class="n">transcript_uid</span><span class="p">]</span>
+                    <span class="c1"># Exon</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;transcript_id&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_e&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">transcript</span><span class="o">.</span><span class="n">children</span><span class="p">))</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;exon_id&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;exon_id&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">transcript</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+                    <span class="n">exons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;feature&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;CDS&quot;</span><span class="p">:</span>
+                    <span class="n">record</span> <span class="o">=</span> <span class="n">_castedRegionTree</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">CDS</span><span class="p">)</span>
+                    <span class="c1"># Transcript</span>
+                    <span class="n">transcript_id</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;transcript_id&quot;</span><span class="p">]</span>
+                    <span class="n">transcript_uid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">transcript_id</span><span class="p">)</span>  <span class="c1"># Add chromosome to prevent collision on sex chromosomes</span>
+                    <span class="k">if</span> <span class="n">transcript_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transcripts</span><span class="p">:</span>
+                        <span class="n">transcript_name</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;transcript_name&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;transcript_name&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="n">transcripts</span><span class="p">[</span><span class="n">transcript_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Transcript</span><span class="p">(</span>
+                            <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">transcript_name</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="s2">&quot;transcript&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">transcript_id</span><span class="p">}</span>
+                        <span class="p">)</span>
+                        <span class="c1"># Parent gene</span>
+                        <span class="n">gene_id</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;gene_id&quot;</span><span class="p">]</span>
+                        <span class="n">gene_uid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gene_id</span><span class="p">)</span>  <span class="c1"># Add chromosome to prevent collision on sex chromosomes</span>
+                        <span class="k">if</span> <span class="n">gene_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">genes</span><span class="p">:</span>
+                            <span class="n">gene_name</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;gene_name&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;gene_name&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="kc">None</span>
+                            <span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">gene_name</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="s2">&quot;gene&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">gene_id</span><span class="p">})</span>
+                            <span class="n">genes</span><span class="p">[</span><span class="n">gene_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">gene</span>
+                        <span class="n">genes</span><span class="p">[</span><span class="n">gene_uid</span><span class="p">]</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">transcripts</span><span class="p">[</span><span class="n">transcript_uid</span><span class="p">])</span>
+                    <span class="n">transcript</span> <span class="o">=</span> <span class="n">transcripts</span><span class="p">[</span><span class="n">transcript_uid</span><span class="p">]</span>
+                    <span class="c1"># Protein</span>
+                    <span class="n">protein_id</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;protein_id&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;protein_id&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="s2">&quot;prot:None_tr:&quot;</span> <span class="o">+</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;transcript_id&quot;</span><span class="p">]</span>
+                    <span class="n">protein_uid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">protein_id</span><span class="p">)</span>  <span class="c1"># Add chromosome to prevent collision on sex chromosomes</span>
+                    <span class="n">protein</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">protein_uid</span> <span class="ow">in</span> <span class="n">proteins</span><span class="p">:</span>
+                        <span class="n">protein</span> <span class="o">=</span> <span class="n">proteins</span><span class="p">[</span><span class="n">protein_uid</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">protein</span> <span class="o">=</span> <span class="n">Protein</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">protein_id</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="s2">&quot;protein&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">protein_id</span><span class="p">},</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">transcript</span><span class="p">)</span>
+                        <span class="n">proteins</span><span class="p">[</span><span class="n">protein_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">protein</span>
+                    <span class="c1"># CDS</span>
+                    <span class="n">protein</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+                    <span class="n">cds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;feature&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;gene&quot;</span><span class="p">:</span>
+                    <span class="n">gene_id</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;gene_id&quot;</span><span class="p">]</span>
+                    <span class="n">gene_uid</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gene_id</span><span class="p">)</span>  <span class="c1"># Add chromosome to prevent collision on sex chromosomes</span>
+                    <span class="k">if</span> <span class="n">gene_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">genes</span><span class="p">:</span>
+                        <span class="n">gene_name</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;gene_name&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;gene_name&quot;</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">annot</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="n">gene</span> <span class="o">=</span> <span class="n">Gene</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">gene_name</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="s2">&quot;gene&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">gene_id</span><span class="p">})</span>
+                        <span class="n">genes</span><span class="p">[</span><span class="n">gene_uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">gene</span>
+    <span class="c1"># Sort transcripts because reverse strand are added without exons information and coordinate are initially None</span>
+    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">genes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">gene</span><span class="o">.</span><span class="n">sortChildren</span><span class="p">()</span>
+    <span class="c1"># Select the right handler</span>
+    <span class="n">return_obj</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">feature_handle</span> <span class="o">==</span> <span class="s2">&quot;genes&quot;</span><span class="p">:</span>
+        <span class="n">return_obj</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">(</span><span class="n">genes</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">feature_handle</span> <span class="o">==</span> <span class="s2">&quot;exons&quot;</span><span class="p">:</span>
+        <span class="n">return_obj</span> <span class="o">=</span> <span class="n">exons</span>
+    <span class="k">elif</span> <span class="n">feature_handle</span> <span class="o">==</span> <span class="s2">&quot;transcripts&quot;</span><span class="p">:</span>
+        <span class="n">return_obj</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">(</span><span class="n">transcripts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">feature_handle</span> <span class="o">==</span> <span class="s2">&quot;proteins&quot;</span><span class="p">:</span>
+        <span class="n">return_obj</span> <span class="o">=</span> <span class="n">RegionList</span><span class="p">(</span><span class="n">proteins</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">feature_handle</span> <span class="o">==</span> <span class="s2">&quot;cds&quot;</span><span class="p">:</span>
+        <span class="n">return_obj</span> <span class="o">=</span> <span class="n">cds</span>
+    <span class="k">return</span> <span class="n">return_obj</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Frédéric Escudié
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

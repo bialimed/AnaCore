@@ -1,0 +1,449 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>anacore.gff &mdash; AnaCore  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.gff</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.gff</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing/processing GFF files.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">AbstractFile</span><span class="p">,</span> <span class="n">isEmpty</span>
+<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="k">import</span> <span class="n">Region</span>
+
+
+<div class="viewcode-block" id="GFF3Record"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3Record">[docs]</a><span class="k">class</span> <span class="nc">GFF3Record</span><span class="p">(</span><span class="n">Region</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to manage a record comind from a GFF3.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of GFF3Record.</span>
+
+<span class="sd">        :param seq_id: The ID of the landmark used to establish the coordinate system for the current feature.</span>
+<span class="sd">        :type seq_id: str.</span>
+<span class="sd">        :param source: The source is a free text qualifier intended to describe the algorithm or operating procedure that generated this feature. Typically this is the name of a piece of software, such as &quot;Genescan&quot; or a database name, such as &quot;Genbank.&quot; In effect, the source is used to extend the feature ontology by adding a qualifier to the type creating a new composite type that is a subclass of the type in the type column.</span>
+<span class="sd">        :type source: str.</span>
+<span class="sd">        :param type: The type of the feature (previously called the &quot;method&quot;). This is constrained to be either: (a) a term from the &quot;lite&quot; sequence ontology, SOFA; or (b) a SOFA accession number. The latter alternative is distinguished using the syntax SO:000000.</span>
+<span class="sd">        :type type: str.</span>
+<span class="sd">        :param start: The start of the feature, in 1-based integer coordinates, relative to the landmark given in seq_id. Start is always less than or equal to end.</span>
+<span class="sd">        :type start: int.</span>
+<span class="sd">        :param end: The end of the feature, in 1-based integer coordinates, relative to the landmark given in seq_id. Start is always less than or equal to end.</span>
+<span class="sd">        :type end: int.</span>
+<span class="sd">        :param score: The score of the feature. As in earlier versions of the format, the semantics of the score are ill-defined. It is strongly recommended that E-values be used for sequence similarity features, and that P-values be used for ab initio gene prediction features.</span>
+<span class="sd">        :type score: float.</span>
+<span class="sd">        :param strand: The strand of the instance (&quot;+&quot; or &quot;-&quot;).</span>
+<span class="sd">        :type strand: str.</span>
+<span class="sd">        :param phase: For features of type &quot;CDS&quot;, the phase indicates where the feature begins with reference to the reading frame. The phase is one of the integers 0, 1, or 2, indicating the number of bases that should be removed from the beginning of this feature to reach the first base of the next codon. In other words, a phase of &quot;0&quot; indicates that the next codon begins at the first base of the region described by the current line, a phase of &quot;1&quot; indicates that the next codon begins at the second base of this region, and a phase of &quot;2&quot; indicates that the codon begins at the third base of this region. This is NOT to be confused with the frame, which is simply start modulo 3. For forward strand features, phase is counted from the start field. For reverse strand features, phase is counted from the end field.</span>
+<span class="sd">        :type phase: int.</span>
+<span class="sd">        :param attributes: The annotations of the feature.</span>
+<span class="sd">        :type attributes: dict.</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: GFF3Record</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">cleaned_attributes</span> <span class="o">=</span> <span class="n">attributes</span>
+        <span class="k">if</span> <span class="n">attributes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;Name&quot;</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">attributes</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">]</span>
+            <span class="n">cleaned_attributes</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">attributes</span><span class="p">)</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">cleaned_attributes</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">])</span>
+        <span class="n">Region</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">seq_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cleaned_attributes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="n">phase</span>
+
+    <span class="k">def</span> <span class="nf">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the value of the selected attribute.</span>
+
+<span class="sd">        :param attr_name: The name of the selected attribute.</span>
+<span class="sd">        :type attr_name: str</span>
+<span class="sd">        :return: The value of the attribute.</span>
+<span class="sd">        :rtype: *</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attr_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">attr_name</span> <span class="o">==</span> <span class="s2">&quot;seq_id&quot;</span><span class="p">:</span>
+            <span class="n">attr_value</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;reference&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attr_value</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">attr_value</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the value of the selected attribute.</span>
+
+<span class="sd">        :param attr_name: The name of the selected attribute.</span>
+<span class="sd">        :type attr_name: str</span>
+<span class="sd">        :param attr_value: The new value for the selected attribute.</span>
+<span class="sd">        :type attr_value: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">attr_name</span> <span class="o">==</span> <span class="s2">&quot;seq_id&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setReference</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GFF3Record.addToAnnot"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3Record.addToAnnot">[docs]</a>    <span class="k">def</span> <span class="nf">addToAnnot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add one value on an existing tag.</span>
+
+<span class="sd">        :param tag: tag of the annottation.</span>
+<span class="sd">        :type tag: str.</span>
+<span class="sd">        :param value: value to add.</span>
+<span class="sd">        :type value: str.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annot</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+    <span class="k">def</span> <span class="nf">_annotToGff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a string in GFF3 field format corresponding to the attributes of the record.</span>
+
+<span class="sd">        :return: The record.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gff_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annot</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">gff_str</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">GFF3IO</span><span class="o">.</span><span class="n">encodedValue</span><span class="p">(</span><span class="n">tag</span><span class="p">),</span> <span class="n">GFF3IO</span><span class="o">.</span><span class="n">encodedValue</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">gff_str</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">gff_str</span> <span class="o">=</span> <span class="n">gff_str</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">gff_str</span>
+
+<div class="viewcode-block" id="GFF3Record.toGff"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3Record.toGff">[docs]</a>    <span class="k">def</span> <span class="nf">toGff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the string corrsponding to the GFF3Record in GFF3 format.</span>
+
+<span class="sd">        :return: Line in GFF3 format.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotToGff</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="n">GFF3IO</span><span class="o">.</span><span class="n">encodedValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">attributes</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="n">attributes</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seq_id</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">,</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">),</span>
+            <span class="n">attributes</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GFF3IO"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3IO">[docs]</a><span class="k">class</span> <span class="nc">GFF3IO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to manage read and write in GFF3 file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="n">has_title</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of GFF3IO.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str.</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str.</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: GFF3IO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Convert mode for append in empty file</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span> <span class="ow">and</span> <span class="n">isEmpty</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span>
+        <span class="c1"># Initialise instance</span>
+        <span class="n">AbstractFile</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="c1"># Add header</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;##gff-version 3</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="GFF3IO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3IO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the line corresponds to a record (it is not a comment or an header line).</span>
+
+<span class="sd">        :param line: The evaluated line.</span>
+<span class="sd">        :type line: str</span>
+<span class="sd">        :return: True if the line corresponds to a record.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_record</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+            <span class="n">is_record</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">is_record</span></div>
+
+    <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a structured record from the GFF current line.</span>
+
+<span class="sd">        :return: The record.</span>
+<span class="sd">        :rtype: GFF3Record</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)]</span>
+        <span class="n">gff_record</span> <span class="o">=</span> <span class="n">GFF3Record</span><span class="p">(</span>
+            <span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">])),</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">]),</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="c1"># Parse attributes</span>
+        <span class="n">attributes_field</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">8</span><span class="p">:])</span>
+        <span class="k">if</span> <span class="n">attributes_field</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">):</span>  <span class="c1"># if attributes end with &#39;;&#39;</span>
+            <span class="n">attributes_field</span> <span class="o">=</span> <span class="n">attributes_field</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">attributes_array</span> <span class="o">=</span> <span class="n">attributes_field</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+        <span class="n">cleaned_attributes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes_array</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attribute</span><span class="p">:</span>
+                <span class="n">cleaned_attributes</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">cleaned_attributes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;;&quot;</span> <span class="o">+</span> <span class="n">attribute</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cleaned_attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">cleaned_attributes</span><span class="p">:</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;^([^=]+)=(.*)&quot;</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">GFF3IO</span><span class="o">.</span><span class="n">decodedValue</span><span class="p">(</span><span class="n">matches</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">GFF3IO</span><span class="o">.</span><span class="n">decodedValue</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">matches</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">current_val</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;Name&quot;</span><span class="p">:</span>
+                    <span class="n">gff_record</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">current_val</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">gff_record</span><span class="o">.</span><span class="n">addToAnnot</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">current_val</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gff_record</span>
+
+<div class="viewcode-block" id="GFF3IO.write"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3IO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write one line on GFF file.</span>
+
+<span class="sd">        :param record: The object to write.</span>
+<span class="sd">        :type record: GFF3Record</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">toGff</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="GFF3IO.decodedValue"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3IO.decodedValue">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">decodedValue</span><span class="p">(</span><span class="n">encoded_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the attribute tag/value in human readable format.</span>
+
+<span class="sd">        :param encoded_value: The attribute tag or value to decode.</span>
+<span class="sd">        :type encoded_value: str</span>
+<span class="sd">        :return: Human readable value.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        :see: RFC 3986 Percent-Encoding.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">decoded_value</span> <span class="o">=</span> <span class="n">encoded_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%3B&#39;</span><span class="p">,</span> <span class="s1">&#39;;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%2C&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%3D&#39;</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">decoded_value</span></div>
+
+<div class="viewcode-block" id="GFF3IO.encodedValue"><a class="viewcode-back" href="../../anacore.html#anacore.gff.GFF3IO.encodedValue">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">encodedValue</span><span class="p">(</span><span class="n">dirty_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return value after GFF3 attribute cleaning. Cleanning:</span>
+
+<span class="sd">            - URL escaping rules are used for tags or values containing the following characters: &quot;,=;&quot;.</span>
+<span class="sd">            - Spaces are allowed in this field, but tabs must be replaced by space.</span>
+<span class="sd">            - Quotes &#39; and &quot; are deleted.</span>
+
+<span class="sd">        :param dirty_value: The attribute tag or value to encode.</span>
+<span class="sd">        :type dirty_value: str</span>
+<span class="sd">        :return: GFF3 encoded value.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        :see: RFC 3986 Percent-Encoding.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cleaned_value</span> <span class="o">=</span> <span class="n">dirty_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="s1">&#39;%3B&#39;</span><span class="p">)</span>
+        <span class="n">cleaned_value</span> <span class="o">=</span> <span class="n">cleaned_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;%2C&#39;</span><span class="p">)</span>
+        <span class="n">cleaned_value</span> <span class="o">=</span> <span class="n">cleaned_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;%3D&#39;</span><span class="p">)</span>
+        <span class="n">cleaned_value</span> <span class="o">=</span> <span class="n">cleaned_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">cleaned_value</span> <span class="o">=</span> <span class="n">cleaned_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">cleaned_value</span> <span class="o">=</span> <span class="n">cleaned_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cleaned_value</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Frédéric Escudié
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

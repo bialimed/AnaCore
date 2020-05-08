@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>anacore.msiannot &mdash; AnaCore  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.msiannot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.msiannot</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing MSI annotations files.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 IUCT-O&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.1&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="k">import</span> <span class="n">HashedSVIO</span>
+<span class="kn">from</span> <span class="nn">anacore.msi</span> <span class="k">import</span> <span class="n">Status</span><span class="p">,</span> <span class="n">LocusRes</span><span class="p">,</span> <span class="n">MSILocus</span>
+
+
+<div class="viewcode-block" id="MSIAnnot"><a class="viewcode-back" href="../../anacore.html#anacore.msiannot.MSIAnnot">[docs]</a><span class="k">class</span> <span class="nc">MSIAnnot</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of HashedSVIO.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str.</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str.</span>
+<span class="sd">        :param separator: Separator used between values.</span>
+<span class="sd">        :type separator: str.</span>
+<span class="sd">        :param title_starter: The string used to introduce the title line.</span>
+<span class="sd">        :type title_starter: str.</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: HashedSVIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">valid_titles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="s2">&quot;locus_position&quot;</span><span class="p">,</span> <span class="s2">&quot;method_id&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="n">valid_titles</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">!=</span> <span class="n">valid_titles</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The column present in &quot;</span><span class="si">{}</span><span class="s1">&quot; are invalid they must be: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">valid_titles</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a structured record from the current line.</span>
+
+<span class="sd">        :return: The record defined by the current line.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span>
+        <span class="n">record</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">getCastedValue</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">],</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">record</span>
+
+<div class="viewcode-block" id="MSIAnnot.recordToLine"><a class="viewcode-back" href="../../anacore.html#anacore.msiannot.MSIAnnot.recordToLine">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the record in SV format.</span>
+
+<span class="sd">        :param record: The record to process.</span>
+<span class="sd">        :type record: dict.</span>
+<span class="sd">        :return: The SV line corresponding to the record.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">curr_title</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">titles</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="n">curr_title</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">curr_title</span> <span class="o">==</span> <span class="s2">&quot;value&quot;</span> <span class="ow">and</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="getCastedValue"><a class="viewcode-back" href="../../anacore.html#anacore.msiannot.getCastedValue">[docs]</a><span class="k">def</span> <span class="nf">getCastedValue</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">type_name</span><span class="p">):</span>
+    <span class="n">casted_value</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="n">type_name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">type_name</span> <span class="o">!=</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">type_name</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
+            <span class="n">casted_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">type_name</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
+            <span class="n">casted_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">type_name</span> <span class="o">==</span> <span class="s2">&quot;bool&quot;</span><span class="p">:</span>
+            <span class="n">casted_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">type_name</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="n">casted_value</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The type &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be used in getCastedValue.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">type_name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">casted_value</span></div>
+
+
+<div class="viewcode-block" id="getLocusAnnotDict"><a class="viewcode-back" href="../../anacore.html#anacore.msiannot.getLocusAnnotDict">[docs]</a><span class="k">def</span> <span class="nf">getLocusAnnotDict</span><span class="p">(</span><span class="n">in_annot</span><span class="p">):</span>
+    <span class="n">data_by_spl</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">MSIAnnot</span><span class="p">(</span><span class="n">in_annot</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_in</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">FH_in</span><span class="p">:</span>
+            <span class="c1"># Add sample</span>
+            <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_by_spl</span><span class="p">:</span>
+                <span class="n">data_by_spl</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">data_by_locus</span> <span class="o">=</span> <span class="n">data_by_spl</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;sample&quot;</span><span class="p">]]</span>
+            <span class="c1"># Add locus</span>
+            <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;locus_position&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_by_locus</span><span class="p">:</span>
+                <span class="n">data_by_locus</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;locus_position&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">data_by_res</span> <span class="o">=</span> <span class="n">data_by_locus</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;locus_position&quot;</span><span class="p">]]</span>
+            <span class="c1"># Add result method</span>
+            <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;method_id&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_by_res</span><span class="p">:</span>
+                <span class="n">data_by_res</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;method_id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">data_by_key</span> <span class="o">=</span> <span class="n">data_by_res</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;method_id&quot;</span><span class="p">]]</span>
+            <span class="c1"># Add data</span>
+            <span class="n">data_by_key</span><span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data_by_spl</span></div>
+
+
+<div class="viewcode-block" id="addLociResToSpl"><a class="viewcode-back" href="../../anacore.html#anacore.msiannot.addLociResToSpl">[docs]</a><span class="k">def</span> <span class="nf">addLociResToSpl</span><span class="p">(</span><span class="n">msi_spl</span><span class="p">,</span> <span class="n">data_by_locus</span><span class="p">,</span> <span class="n">res_cls</span><span class="o">=</span><span class="n">LocusRes</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">locus_id</span><span class="p">,</span> <span class="n">data_by_res</span> <span class="ow">in</span> <span class="n">data_by_locus</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Add locus</span>
+        <span class="k">if</span> <span class="n">locus_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">msi_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">:</span>
+            <span class="n">msi_spl</span><span class="o">.</span><span class="n">addLocus</span><span class="p">(</span>
+                <span class="n">MSILocus</span><span class="p">(</span><span class="n">locus_id</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">msi_locus</span> <span class="o">=</span> <span class="n">msi_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">locus_id</span><span class="p">]</span>
+        <span class="c1"># Add result and data</span>
+        <span class="n">addLociResult</span><span class="p">(</span><span class="n">msi_locus</span><span class="p">,</span> <span class="n">data_by_res</span><span class="p">,</span> <span class="n">res_cls</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="addLociResult"><a class="viewcode-back" href="../../anacore.html#anacore.msiannot.addLociResult">[docs]</a><span class="k">def</span> <span class="nf">addLociResult</span><span class="p">(</span><span class="n">msi_locus</span><span class="p">,</span> <span class="n">data_by_res</span><span class="p">,</span> <span class="n">res_cls</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">result_id</span><span class="p">,</span> <span class="n">data_by_key</span> <span class="ow">in</span> <span class="n">data_by_res</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Add result</span>
+        <span class="k">if</span> <span class="n">result_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">msi_locus</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+            <span class="n">msi_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">result_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">res_cls</span><span class="p">(</span><span class="n">Status</span><span class="o">.</span><span class="n">none</span><span class="p">)</span>
+        <span class="n">locus_res</span> <span class="o">=</span> <span class="n">msi_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">result_id</span><span class="p">]</span>
+        <span class="c1"># Add data</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_by_key</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;result_id&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">locus_res</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>  <span class="c1"># The key correspond to an attibute</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">locus_res</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># The key correspond to a data</span>
+                    <span class="n">locus_res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Frédéric Escudié
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

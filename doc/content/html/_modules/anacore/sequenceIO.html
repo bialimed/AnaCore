@@ -1,0 +1,873 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>anacore.sequenceIO &mdash; AnaCore  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.sequenceIO</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.sequenceIO</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for manipulating sequences and reading/writing sequence files and their indices.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie - Plateforme bioinformatique Toulouse&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2015 INRA&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.4.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="k">import</span> <span class="n">SVIO</span>
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">isGzip</span>
+
+
+<div class="viewcode-block" id="Sequence"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.Sequence">[docs]</a><span class="k">class</span> <span class="nc">Sequence</span><span class="p">:</span>
+    <span class="n">dna_complement</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;w&#39;</span><span class="p">:</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span>
+    <span class="p">}</span>
+
+    <span class="n">rna_complement</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;w&#39;</span><span class="p">:</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quality</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Sequence.</span>
+
+<span class="sd">        :param id: Id of the sequence.</span>
+<span class="sd">        :type id: str</span>
+<span class="sd">        :param string: Sequence of the sequence.</span>
+<span class="sd">        :type string: str</span>
+<span class="sd">        :param description: The sequence description.</span>
+<span class="sd">        :type description: str</span>
+<span class="sd">        :param quality: The quality of the sequence (same length as string).</span>
+<span class="sd">        :type quality: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">string</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quality</span> <span class="o">=</span> <span class="n">quality</span>
+
+<div class="viewcode-block" id="Sequence.dnaRevCom"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.Sequence.dnaRevCom">[docs]</a>    <span class="k">def</span> <span class="nf">dnaRevCom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sequence corresponding to the DNA reverse complement.</span>
+
+<span class="sd">        :return: The reverse complement.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Sequence</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">dna_complement</span><span class="p">[</span><span class="n">base</span><span class="p">]</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Sequence.rnaRevCom"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.Sequence.rnaRevCom">[docs]</a>    <span class="k">def</span> <span class="nf">rnaRevCom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sequence corresponding to the RNA reverse complement.</span>
+
+<span class="sd">        :return: The reverse complement.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Sequence</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">rna_complement</span><span class="p">[</span><span class="n">base</span><span class="p">]</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="FaidxRecord"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FaidxRecord">[docs]</a><span class="k">class</span> <span class="nc">FaidxRecord</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Record for faidx (see http://www.htslib.org/doc/faidx.html).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">line_bases</span><span class="p">,</span> <span class="n">line_width</span><span class="p">,</span> <span class="n">qual_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of FaidxRecord.</span>
+
+<span class="sd">        :param name: Name of this reference sequence.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param length: Total length of this reference sequence, in bases.</span>
+<span class="sd">        :type length: int</span>
+<span class="sd">        :param offset: Offset in the FASTA/FASTQ file of this sequence&#39;s first base.</span>
+<span class="sd">        :type offset: int</span>
+<span class="sd">        :param line_bases: The number of bases on each line.</span>
+<span class="sd">        :type line_bases: int</span>
+<span class="sd">        :param line_width: The number of bytes in each line, including the newline.</span>
+<span class="sd">        :type line_width: int</span>
+<span class="sd">        :param qual_offset: Offset of sequence&#39;s first quality within the FASTQ file.</span>
+<span class="sd">        :type qual_offset: int</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: FaidxRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_bases</span> <span class="o">=</span> <span class="n">line_bases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_width</span> <span class="o">=</span> <span class="n">line_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qual_offset</span> <span class="o">=</span> <span class="n">qual_offset</span></div>
+
+
+<div class="viewcode-block" id="Faidx"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.Faidx">[docs]</a><span class="k">class</span> <span class="nc">Faidx</span><span class="p">(</span><span class="n">SVIO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to read and write a faidx file (see http://www.htslib.org/doc/faidx.html).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Faidx.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: Faidx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">has_title</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a structured record from the current line.</span>
+
+<span class="sd">        :return: The record defined by the current line.</span>
+<span class="sd">        :rtype: FaidxItem</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">elt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)):</span>
+            <span class="n">elt</span> <span class="o">=</span> <span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">elt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span>
+            <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FaidxRecord</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Faidx.readById"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.Faidx.readById">[docs]</a>    <span class="k">def</span> <span class="nf">readById</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return all the record from the file.</span>
+
+<span class="sd">        :return: By sequence ID his FaiItem.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">record</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="SequenceFileReader"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.SequenceFileReader">[docs]</a><span class="k">class</span> <span class="nc">SequenceFileReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="SequenceFileReader.factory"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.SequenceFileReader.factory">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">factory</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">FastqIO</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">FastqIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">FastaIO</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">FastaIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;The file &quot;</span> <span class="o">+</span> <span class="n">filepath</span> <span class="o">+</span> <span class="s2">&quot; does not have a valid format for &#39;SequenceFileReader&#39;.&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="FastqIO"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO">[docs]</a><span class="k">class</span> <span class="nc">FastqIO</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class to read and write in fastq file (https://en.wikipedia.org/wiki/FASTQ_format).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of FastqIO.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: FastqIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span> <span class="o">+</span> <span class="s2">&quot;t&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FastqIO.close"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Close file handle it is opened.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;file_handle&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">is_end</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">is_end</span><span class="p">:</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextSeq</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">yield</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">is_end</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="FastqIO.nextSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.nextSeq">[docs]</a>    <span class="k">def</span> <span class="nf">nextSeq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the next sequence.</span>
+
+<span class="sd">        :return: The next sequence or None if it is the end of file.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seq_record</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">prev_file_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">new_file_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">prev_file_pos</span> <span class="o">!=</span> <span class="n">new_file_pos</span><span class="p">:</span>
+                <span class="c1"># Header</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">seq_id</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">seq_desc</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># Sequence</span>
+                <span class="n">seq_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># Separator</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># Quality</span>
+                <span class="n">seq_qual</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># Record</span>
+                <span class="n">seq_record</span> <span class="o">=</span> <span class="n">Sequence</span><span class="p">(</span><span class="n">seq_id</span><span class="p">,</span> <span class="n">seq_str</span><span class="p">,</span> <span class="n">seq_desc</span><span class="p">,</span> <span class="n">seq_qual</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                <span class="s1">&#39;The line </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be parsed by </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">seq_record</span></div>
+
+<div class="viewcode-block" id="FastqIO.qualOffset"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.qualOffset">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">qualOffset</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the offset used to encode the quality in the file.</span>
+
+<span class="sd">        :param filepath: The file path.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: The offset 33 for sanger and Illumina &gt;=1.8, 64 for Solexa and Illumina &lt;1.8 or None if the offset cannot be determined.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">nb_qual</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count_by_qual</span> <span class="o">=</span> <span class="p">{</span><span class="n">elt</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">127</span><span class="p">)}</span>
+        <span class="k">with</span> <span class="n">FastqIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_in</span><span class="p">:</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">nextSeq</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">record</span> <span class="ow">and</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">curr_nt</span><span class="p">,</span> <span class="n">curr_ascii</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">quality</span><span class="p">):</span>
+                    <span class="n">num_ascii</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">curr_ascii</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">num_ascii</span> <span class="o">&lt;</span> <span class="mi">59</span><span class="p">:</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="mi">33</span>
+                        <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">curr_nt</span> <span class="o">!=</span> <span class="s2">&quot;N&quot;</span><span class="p">:</span>
+                        <span class="n">nb_qual</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">count_by_qual</span><span class="p">[</span><span class="n">num_ascii</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">record</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">nextSeq</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">checked_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">nb_qual</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="mi">30</span><span class="p">)</span>  <span class="c1"># Index of the 30 percentile in sorted qualities</span>
+            <span class="n">curr_count_sum</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">curr_ascii</span><span class="p">,</span> <span class="n">curr_count</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">count_by_qual</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">curr_count_sum</span> <span class="o">+=</span> <span class="n">curr_count</span>
+                <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">curr_count_sum</span> <span class="o">&gt;=</span> <span class="n">checked_idx</span><span class="p">:</span>  <span class="c1"># 30% of qualities under this point</span>
+                    <span class="k">if</span> <span class="n">curr_ascii</span> <span class="o">&gt;</span> <span class="mi">84</span><span class="p">:</span>  <span class="c1"># 70% of qualities are superior than Q61 with offset 33 and Q20 with offset 64</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="mi">64</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="mi">33</span>
+        <span class="k">return</span> <span class="n">offset</span></div>
+
+<div class="viewcode-block" id="FastqIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return true if the file is in fastq format.</span>
+
+<span class="sd">        :param filepath: The file path.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: True if the file is in fastq format.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">FH_in</span> <span class="o">=</span> <span class="n">FastqIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">seq_idx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">end_of_file</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">while</span> <span class="n">seq_idx</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">end_of_file</span><span class="p">:</span>
+                <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">curr_line</span><span class="p">:</span>
+                    <span class="n">end_of_file</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">seq_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="c1"># Record ID</span>
+                    <span class="n">header</span> <span class="o">=</span> <span class="n">curr_line</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">header</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;The record </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; has an invalid header.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_idx</span><span class="p">,</span> <span class="n">filepath</span><span class="p">))</span>
+                    <span class="c1"># Record sequence</span>
+                    <span class="n">unstriped_sequence</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">unstriped_sequence</span><span class="p">:</span>  <span class="c1"># No line</span>
+                        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;The record </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; is truncated.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_idx</span><span class="p">,</span> <span class="n">filepath</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^[A-Za-z]*$&quot;</span><span class="p">,</span> <span class="n">unstriped_sequence</span><span class="o">.</span><span class="n">strip</span><span class="p">()):</span>
+                        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;The sequence </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; contains invalid characters.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_idx</span><span class="p">,</span> <span class="n">filepath</span><span class="p">))</span>
+                    <span class="c1"># Record separator</span>
+                    <span class="n">unstriped_separator</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">unstriped_separator</span><span class="p">:</span>  <span class="c1"># No line</span>
+                        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;The record </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; is truncated.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_idx</span><span class="p">,</span> <span class="n">filepath</span><span class="p">))</span>
+                    <span class="c1"># Record quality</span>
+                    <span class="n">unstriped_quality</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                    <span class="c1"># Sequence and quality length</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unstriped_sequence</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unstriped_quality</span><span class="o">.</span><span class="n">strip</span><span class="p">()):</span>
+                        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;The record </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; contains a sequence and a quality with different length.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_idx</span><span class="p">,</span> <span class="n">filepath</span><span class="p">))</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">FH_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="FastqIO.nbSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.nbSeq">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">nbSeq</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of sequences in file.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: The number of sequences.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="nb">open</span>
+        <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
+        <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span>
+            <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+        <span class="n">nb_lines</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">with</span> <span class="n">handler</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">handler_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">nb_lines</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_lines</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FastqIO.nbSeqAndNt"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.nbSeqAndNt">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">nbSeqAndNt</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of sequences and nucleotids in file.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: The number of sequences and the number of nucleotids.</span>
+<span class="sd">        :rtype: int, int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_seq</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nb_nt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="nb">open</span>
+        <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
+        <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span>
+            <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+        <span class="k">with</span> <span class="n">handler</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">handler_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">nb_seq</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">nb_nt</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">nb_seq</span><span class="p">,</span> <span class="n">nb_nt</span></div>
+
+<div class="viewcode-block" id="FastqIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write record lines in file.</span>
+
+<span class="sd">        :param sequence_record: The record to write.</span>
+<span class="sd">        :type sequence_record: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqToFastqLine</span><span class="p">(</span><span class="n">sequence_record</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="FastqIO.seqToFastqLine"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.seqToFastqLine">[docs]</a>    <span class="k">def</span> <span class="nf">seqToFastqLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sequence in fastq format.</span>
+
+<span class="sd">        :param sequence: The sequence to process.</span>
+<span class="sd">        :type sequence: Sequence</span>
+<span class="sd">        :return: The sequence.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="s2">&quot;@&quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="o">.</span><span class="n">description</span> <span class="k">if</span> <span class="n">sequence</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">seq</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="o">.</span><span class="n">string</span>
+        <span class="n">seq</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">+&quot;</span>
+        <span class="n">seq</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="o">.</span><span class="n">quality</span>
+        <span class="k">return</span> <span class="n">seq</span></div></div>
+
+
+<div class="viewcode-block" id="FastaIO"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO">[docs]</a><span class="k">class</span> <span class="nc">FastaIO</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class to read and write in fasta file (https://en.wikipedia.org/wiki/FASTA_format).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of FastaIO.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: FastaIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">filepath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span> <span class="o">+</span> <span class="s2">&quot;t&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_of_file</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FastaIO.close"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Close file handle it is opened.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;file_handle&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">is_end</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">is_end</span><span class="p">:</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextSeq</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">yield</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">is_end</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="FastaIO.nextSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.nextSeq">[docs]</a>    <span class="k">def</span> <span class="nf">nextSeq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the next sequence.</span>
+
+<span class="sd">        :return: The next sequence.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seq_record</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_of_file</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># First line in file</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_next_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># Sequence</span>
+                <span class="n">seq_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">while</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">):</span>
+                    <span class="n">seq_str</span> <span class="o">+=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">line</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_end_of_file</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_id</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">seq_id</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">seq_desc</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">seq_record</span> <span class="o">=</span> <span class="n">Sequence</span><span class="p">(</span><span class="n">seq_id</span><span class="p">,</span> <span class="n">seq_str</span><span class="p">,</span> <span class="n">seq_desc</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_next_id</span> <span class="o">=</span> <span class="n">line</span>  <span class="c1"># next seq_id</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                    <span class="s1">&#39;The line </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be parsed by </span><span class="si">{}</span><span class="s1">.</span><span class="se">\n</span><span class="s1">content: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+                        <span class="n">line</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">seq_record</span></div>
+
+<div class="viewcode-block" id="FastaIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return true if the file is in fasta format.</span>
+
+<span class="sd">        :param filepath: The file path.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: True if the file is in fasta format.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">FH_in</span> <span class="o">=</span> <span class="n">FastaIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">seq_idx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">prev_is_header</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">end_of_file</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">while</span> <span class="n">seq_idx</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">end_of_file</span><span class="p">:</span>
+                <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">curr_line</span><span class="p">:</span>
+                    <span class="n">end_of_file</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">prev_is_header</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;The fasta file &quot;</span><span class="si">{}</span><span class="s1">&quot; cotains an header without sequence.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+                        <span class="n">prev_is_header</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">seq_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">seq_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># The fasta file do not starts with &quot;&gt;&quot;</span>
+                            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;The fasta file &quot;</span><span class="si">{}</span><span class="s1">&quot; does not start with &quot;&gt;&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+                        <span class="n">prev_is_header</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">FH_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="FastaIO.nbSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.nbSeq">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">nbSeq</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of sequences in file.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: The number of sequences.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_seq</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="nb">open</span>
+        <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
+        <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span>
+            <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+        <span class="k">with</span> <span class="n">handler</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">handler_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">):</span>
+                    <span class="n">nb_seq</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">nb_seq</span></div>
+
+<div class="viewcode-block" id="FastaIO.nbSeqAndNt"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.nbSeqAndNt">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">nbSeqAndNt</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of sequences and nucleotids in file.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: The number of sequences and the number of nucleotids.</span>
+<span class="sd">        :rtype: int, int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_seq</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nb_nt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="nb">open</span>
+        <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
+        <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span>
+            <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+        <span class="k">with</span> <span class="n">handler</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">handler_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">):</span>
+                    <span class="n">nb_seq</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">nb_nt</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">nb_seq</span><span class="p">,</span> <span class="n">nb_nt</span></div>
+
+<div class="viewcode-block" id="FastaIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write record lines in file.</span>
+
+<span class="sd">        :param sequence_record: The record to write.</span>
+<span class="sd">        :type sequence_record: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqToFastaLine</span><span class="p">(</span><span class="n">sequence_record</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="FastaIO.seqToFastaLine"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.seqToFastaLine">[docs]</a>    <span class="k">def</span> <span class="nf">seqToFastaLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sequence in fasta format.</span>
+
+<span class="sd">        :param sequence: The sequence to process.</span>
+<span class="sd">        :type sequence: Sequence</span>
+<span class="sd">        :return: The sequence.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;&gt;&quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="o">.</span><span class="n">description</span> <span class="k">if</span> <span class="n">sequence</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sequence</span><span class="o">.</span><span class="n">string</span></div></div>
+
+
+<div class="viewcode-block" id="IdxFastaIO"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.IdxFastaIO">[docs]</a><span class="k">class</span> <span class="nc">IdxFastaIO</span><span class="p">(</span><span class="n">FastaIO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to read and write a fasta file with an faidx index file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fai_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of IdxFastaIO.</span>
+
+<span class="sd">        :param filepath: Path to the file.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :param use_cache: If True the last sequence retrieved with get is kept in memory to speed-up successive call to get() for the same sequence.</span>
+<span class="sd">        :type use_cache: bool</span>
+<span class="sd">        :param fai_path: Path to the fai file.</span>
+<span class="sd">        :type fai_path: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: IdxFastaIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Write and Append mode are not currently implemented for IdxFastaIO.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fai_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">+</span> <span class="s2">&quot;.fai&quot;</span> <span class="k">if</span> <span class="n">fai_path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">fai_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_cache</span> <span class="o">=</span> <span class="n">use_cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cached</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># cached sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_setIndex</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_setIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set self.index with content of self.fai_path.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">Faidx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fai_path</span><span class="p">)</span><span class="o">.</span><span class="n">readById</span><span class="p">()</span>
+
+<div class="viewcode-block" id="IdxFastaIO.getSub"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.IdxFastaIO.getSub">[docs]</a>    <span class="k">def</span> <span class="nf">getSub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the selected sub of the sequence from file.</span>
+
+<span class="sd">        :param id: The sequence ID.</span>
+<span class="sd">        :type id: str</span>
+<span class="sd">        :param start: The start position of the selected sub-sequence (1-based).</span>
+<span class="sd">        :type start: int</span>
+<span class="sd">        :param end: The end position of the selected sub-sequence (1-based). Default: The end of the sequence.</span>
+<span class="sd">        :type end: int</span>
+<span class="sd">        :return: The sequence selected.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">endline_marker_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">line_width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">line_bases</span>
+        <span class="c1"># Start position</span>
+        <span class="n">start_line_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">line_bases</span><span class="p">)</span>
+        <span class="n">read_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">start_line_idx</span> <span class="o">*</span> <span class="n">endline_marker_len</span>
+        <span class="c1"># End position</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">end</span>
+        <span class="n">end_line_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">end</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">line_bases</span><span class="p">)</span>
+        <span class="n">read_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">end</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">end_line_idx</span> <span class="o">*</span> <span class="n">endline_marker_len</span>
+        <span class="c1"># Get sequence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">read_start</span><span class="p">)</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">read_end</span> <span class="o">-</span> <span class="n">read_start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">seq</span></div>
+
+<div class="viewcode-block" id="IdxFastaIO.get"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.IdxFastaIO.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sequence from file.</span>
+
+<span class="sd">        :param id: The sequence ID.</span>
+<span class="sd">        :type id: str</span>
+<span class="sd">        :return: The sequence selected from the file.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">id</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cached</span>
+        <span class="c1"># The sequence is not already cached</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">Sequence</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cached</span> <span class="o">=</span> <span class="n">selected</span>
+        <span class="k">return</span> <span class="n">selected</span></div></div>
+
+    <span class="c1"># def write(self, sequence_record):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Write record lines in file.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :param sequence_record: The record to write.</span>
+    <span class="c1">#     :type sequence_record: Sequence</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     self.file_handle.write(self.seqToFastaLine(sequence_record) + &quot;\n&quot;)</span>
+    <span class="c1">#     self.faidx.write(sequence_record)</span>
+    <span class="c1">#     self.current_line_nb += 1</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Frédéric Escudié
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
