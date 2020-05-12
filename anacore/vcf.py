@@ -1177,12 +1177,17 @@ class VCFIO(AbstractFile):
                         for field_idx, field_data in enumerate(spl_cell.split(':')):
                             field_id = variation.format[field_idx]
                             field_format = self.format[field_id]
-                            if field_format._number is None or field_format._number > 1:
-                                if field_data == "." and field_format.number in ["R", "A"]:
-                                    spl_data[field_id] = [None for alt in variation.alt]
-                                    if field_format.number == "R":
-                                        spl_data[field_id].append(None)
-                                else:
+                            if field_format._number is None or field_format._number > 1:  # Value is list
+                                if field_data == ".":  # Value is None in VCF
+                                    if field_format.number in ["R", "A"]:
+                                        spl_data[field_id] = [None for alt in variation.alt]
+                                        if field_format.number == "R":
+                                            spl_data[field_id].append(None)
+                                    elif field_format._number is not None:
+                                        spl_data[field_id] = [None for alt in range(field_format._number)]
+                                    else:
+                                        spl_data[field_id] = [None]
+                                else:  # Value is not None in VCF
                                     spl_data[field_id] = list()
                                     for list_elt in field_data.split(","):
                                         if list_elt == ".":
@@ -1192,7 +1197,7 @@ class VCFIO(AbstractFile):
                                             if self.format[field_id].type == "String":
                                                 value = decodeInfoValue(value)
                                             spl_data[field_id].append(value)
-                            elif field_format._number == 1:
+                            elif field_format._number == 1:  # Value is not a list
                                 if field_data == ".":
                                     spl_data[field_id] = None
                                 else:
