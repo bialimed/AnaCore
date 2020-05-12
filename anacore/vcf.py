@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.27.0'
+__version__ = '1.27.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -122,6 +122,14 @@ class HeaderAttr:
             super().delattr(name)
 
     def __setattr__(self, name, value):
+        """
+        Assign value to the attribute.
+
+        :param name: The attribute name.
+        :type name: str
+        :param value: The value to be assigned to the attribute.
+        :type value: *
+        """
         if name[0] != "_":
             self.datastore[name] = value
         else:
@@ -171,6 +179,14 @@ class HeaderDescAttr(HeaderAttr):
         self._required_attr = ["ID", "Description"]
 
     def __setattr__(self, name, value):
+        """
+        Assign value to the attribute.
+
+        :param name: The attribute name.
+        :type name: str
+        :param value: The value to be assigned to the attribute.
+        :type value: *
+        """
         super().__setattr__(name, value)
 
 
@@ -199,6 +215,14 @@ class HeaderTypedAttr(HeaderDescAttr):
         self._without_quote = {"ID", "Number", "Type"}  # List of required attributes without quote in str value.
 
     def __setattr__(self, name, value):
+        """
+        Assign value to the attribute.
+
+        :param name: The attribute name.
+        :type name: str
+        :param value: The value to be assigned to the attribute.
+        :type value: *
+        """
         if name == "type":
             type_fct = {
                 "String": str,
@@ -289,6 +313,14 @@ class VCFRecord:
         return "-"
 
     def __setattr__(self, name, value):
+        """
+        Assign value to the attribute.
+
+        :param name: The attribute name.
+        :type name: str
+        :param value: The value to be assigned to the attribute.
+        :type value: *
+        """
         if value is not None:
             if name == "ref":
                 value = (VCFRecord.getEmptyAlleleMarker() if value == "" else value)
@@ -1146,15 +1178,20 @@ class VCFIO(AbstractFile):
                             field_id = variation.format[field_idx]
                             field_format = self.format[field_id]
                             if field_format._number is None or field_format._number > 1:
-                                spl_data[field_id] = list()
-                                for list_elt in field_data.split(","):
-                                    if list_elt == ".":
+                                if field_data == "." and field_format.number in ["R", "A"]:
+                                    spl_data[field_id] = [None for alt in variation.alt]
+                                    if field_format.number == "R":
                                         spl_data[field_id].append(None)
-                                    else:
-                                        value = self.format[field_id]._type(list_elt)
-                                        if self.format[field_id].type == "String":
-                                            value = decodeInfoValue(value)
-                                        spl_data[field_id].append(value)
+                                else:
+                                    spl_data[field_id] = list()
+                                    for list_elt in field_data.split(","):
+                                        if list_elt == ".":
+                                            spl_data[field_id].append(None)
+                                        else:
+                                            value = self.format[field_id]._type(list_elt)
+                                            if self.format[field_id].type == "String":
+                                                value = decodeInfoValue(value)
+                                            spl_data[field_id].append(value)
                             elif field_format._number == 1:
                                 if field_data == ".":
                                     spl_data[field_id] = None
