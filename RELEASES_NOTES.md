@@ -1,4 +1,4 @@
-# Release 2.7.0 [DEV]
+# Release 2.7.0 [2020-05-13]
 
 ### Changes
   * The value None is no longer supported for VCFRecord.filter in `anacore.vcf`.

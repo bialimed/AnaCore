@@ -1,4 +1,4 @@
-{% set version = "2.6.0" %}
+{% set version = "2.7.0" %}
 {% set numpy_version = "=1.16.5" %}
 {% set requests_version = "=2.20.1" %}
 
