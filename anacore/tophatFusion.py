@@ -13,7 +13,7 @@ from anacore.region import Region
 
 
 class TopHatFusionIO(AbstractFile):
-    """Class to manage read and write in TopHatFusionIO file."""
+    """Class to manage read and write in TopHatFusionIO file (see: https://ccb.jhu.edu/software/tophat/fusion_manual.shtml)."""
 
     def _parseLine(self):
         """
