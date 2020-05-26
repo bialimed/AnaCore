@@ -51,7 +51,7 @@ Alt representation in VCF specification:
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.6.0'
+__version__ = '2.6.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -1064,7 +1064,7 @@ class ArribaIO(HashedSVIO):
         # ANN_titles
         vcf_io.ANN_titles = ["SYMBOL", "STRAND", "Site", "Type", "GENE_SHARD", "FRAMESHIFT", "Protein_contig"]
         # FILTERS
-        vcf_io.filters = arriba_event_level_filters
+        vcf_io.filter = arriba_event_level_filters
         # FORMAT
         vcf_io.format = {
             "PR": HeaderFormatAttr("PR", type="Integer", number="1", description="Number of RNA-Seq fragments that encompass the fusion junction such that one read of the pair aligns to a different gene than the other paired-end read of that fragment."),
