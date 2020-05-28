@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.27.1'
+__version__ = '1.27.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -1146,19 +1146,25 @@ class VCFIO(AbstractFile):
                     if "=" in tag_and_value:
                         tag, value = tag_and_value.split('=', 1)
                         if self.info[tag]._number is None:
-                            if self.info[tag].type == "String":
-                                info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
+                            if value == "":
+                                info[tag] = []
                             else:
-                                info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
+                                if self.info[tag].type == "String":
+                                    info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
+                                else:
+                                    info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
                         elif self.info[tag]._number == 1:
                             info[tag] = self.info[tag]._type(value)
                             if self.info[tag].type == "String":
                                 info[tag] = decodeInfoValue(info[tag])
                         elif self.info[tag]._number > 1:
-                            if self.info[tag].type == "String":
-                                info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
+                            if value == "":
+                                info[tag] = []
                             else:
-                                info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
+                                if self.info[tag].type == "String":
+                                    info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
+                                else:
+                                    info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
                         else:  # Number == 0
                             info[tag] = True  # Flag
                     else:
