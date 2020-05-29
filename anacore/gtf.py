@@ -167,7 +167,11 @@ def loadModel(gtf_path, feature_handle="exons", restrict_to=None):
                         gene_id = record.annot["gene_id"]
                         gene_uid = "{}:{}".format(record.reference.name, gene_id)  # Add chromosome to prevent collision on sex chromosomes
                         if gene_uid not in genes:
-                            gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
+                            gene_name = None
+                            if "gene_name" in record.annot:
+                                record.annot["gene_name"]
+                            elif "gene" in record.annot:
+                                record.annot["gene"]
                             gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
                             genes[gene_uid] = gene
                         genes[gene_uid].addChild(transcripts[transcript_uid])
@@ -191,7 +195,11 @@ def loadModel(gtf_path, feature_handle="exons", restrict_to=None):
                         gene_id = record.annot["gene_id"]
                         gene_uid = "{}:{}".format(record.reference.name, gene_id)  # Add chromosome to prevent collision on sex chromosomes
                         if gene_uid not in genes:
-                            gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
+                            gene_name = None
+                            if "gene_name" in record.annot:
+                                record.annot["gene_name"]
+                            elif "gene" in record.annot:
+                                record.annot["gene"]
                             gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
                             genes[gene_uid] = gene
                         genes[gene_uid].addChild(transcripts[transcript_uid])
@@ -212,7 +220,11 @@ def loadModel(gtf_path, feature_handle="exons", restrict_to=None):
                     gene_id = record.annot["gene_id"]
                     gene_uid = "{}:{}".format(record.reference.name, gene_id)  # Add chromosome to prevent collision on sex chromosomes
                     if gene_uid not in genes:
-                        gene_name = record.annot["gene_name"] if "gene_name" in record.annot else None
+                        gene_name = None
+                        if "gene_name" in record.annot:
+                            record.annot["gene_name"]
+                        elif "gene" in record.annot:
+                            record.annot["gene"]
                         gene = Gene(None, None, record.strand, record.reference, gene_name, {"feature": "gene", "id": gene_id})
                         genes[gene_uid] = gene
     # Sort transcripts because reverse strand are added without exons information and coordinate are initially None
