@@ -1,6 +1,8 @@
 # Release 2.8.0 [DEV]
 
 ### Bug fixes
+  * Fig bug in GTFIO from `anacore.gtf` when an attribute value contains
+  semicolon.
   * Fix bug with empty list in an INFO field from VCF (`anacore.vcf`).
   Previously, the reader returned a list containing an empty string. For example,
   for the INFO field containing "AF=0.5;DB=;DP=100" where DB is a list, the reader
