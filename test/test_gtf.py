@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
-#
-# Copyright (C) 2018 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -191,8 +175,8 @@ class TestGTFIO(unittest.TestCase):
 12	havana	CDS	25235209	25235226	.	-	0	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; exon_number \"3\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; protein_id \"ENSP00000451856\"; protein_version \"1\"; tag \"basic\"; transcript_support_level \"1\";
 12	havana	stop_codon	25235206	25235208	.	-	0	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; exon_number \"3\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic\"; transcript_support_level \"1\";
 12	havana	five_prime_utr	25250764	25250929	.	-	.	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic\"; transcript_support_level \"1\";
-12	havana	five_prime_utr	25245385	25245395	.	-	.	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic\"; transcript_support_level \"1\";
-12	havana	three_prime_utr	25233819	25235205	.	-	.	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic\"; transcript_support_level \"1\";""")
+12	havana	five_prime_utr	25245385	25245395	.	-	.	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic; other\"; transcript_support_level \"1\";
+12	havana	three_prime_utr	25233819	25235205	.	-	.	gene_id \"ENSG00000133703\"; gene_version \"11\"; transcript_id \"ENST00000556131\"; transcript_version \"1\"; gene_name \"KRAS\"; gene_source \"ensembl_havana\"; gene_biotype \"protein_coding\"; transcript_name \"KRAS-203\"; transcript_source \"havana\"; transcript_biotype \"protein_coding\"; tag \"basic;\"; transcript_support_level \"1\";""")
 
 
         # NCBI GTF

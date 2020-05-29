@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -40,11 +40,17 @@ class GTFIO(AbstractFile):
             "frame": frame
         }
         attributes = attributes.strip()
+        prev = None
         for current_attr in attributes.split(";"):
-            current_attr = current_attr.strip()
-            if current_attr != "":
-                matches = re.search("(.+)\s+\"([^\"]+)\"", current_attr)
-                record_attr[matches.groups(1)[0]] = matches.groups(1)[1]
+            if current_attr.strip() != "":
+                if prev is not None:  # Attribute value is split because it contains semicolon
+                    current_attr = prev + current_attr
+                matches = re.fullmatch("(.+)\s+\"([^\"]+)\"", current_attr.strip())
+                if matches is None:
+                    prev = current_attr + ";"
+                else:
+                    record_attr[matches.groups(1)[0]] = matches.groups(1)[1]
+                    prev = None
         record.annot = record_attr
         return record
 
