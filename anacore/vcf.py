@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.27.2'
+__version__ = '1.28.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -23,6 +23,8 @@ def decodeInfoValue(val):
     :return: Text where special characters was unescaped (%3A, %3B, %3D, %2C).
     :rtype: str
     """
+    if "%" not in val:
+        return val
     return val.replace("%3A", ":").replace("%3B", ";").replace("%3D", "=").replace("%2C", ",")
 
 
@@ -1143,38 +1145,26 @@ class VCFIO(AbstractFile):
             if fields[7] != '.':
                 info = dict()
                 for tag_and_value in fields[7].split(';'):
-                    if "=" in tag_and_value:
+                    if "=" not in tag_and_value:  # The field is a flag (self.info[tag]._number == 0)
+                        info[tag_and_value] = True
+                    else:
                         tag, value = tag_and_value.split('=', 1)
-                        if self.info[tag]._number is None:
-                            if value == "":
-                                info[tag] = []
-                            else:
-                                if self.info[tag].type == "String":
-                                    info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
-                                else:
-                                    info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
-                        elif self.info[tag]._number == 1:
+                        if self.info[tag]._number == 1:  # The field contains an unique value
                             info[tag] = self.info[tag]._type(value)
                             if self.info[tag].type == "String":
                                 info[tag] = decodeInfoValue(info[tag])
-                        elif self.info[tag]._number > 1:
+                        else:  # The field contains a list (self.info[tag]._number is None or self.info[tag]._number > 1)
                             if value == "":
                                 info[tag] = []
+                            elif self.info[tag].type == "String":
+                                info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
                             else:
-                                if self.info[tag].type == "String":
-                                    info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
-                                else:
-                                    info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
-                        else:  # Number == 0
-                            info[tag] = True  # Flag
-                    else:
-                        info[tag_and_value] = True
+                                info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
                 variation.info = info
 
             if len(fields) >= 9:
                 # Field FORMAT
                 variation.format = fields[8].split(':') if fields[8] != "." else None
-
                 # Fields samples
                 data_by_spl = dict()
                 for spl_idx, spl_cell in enumerate(fields[9:]):
@@ -1190,7 +1180,7 @@ class VCFIO(AbstractFile):
                                         if field_format.number == "R":
                                             spl_data[field_id].append(None)
                                     elif field_format._number is not None:
-                                        spl_data[field_id] = [None for alt in range(field_format._number)]
+                                        spl_data[field_id] = [None for elt in range(field_format._number)]
                                     else:
                                         spl_data[field_id] = [None]
                                 else:  # Value is not None in VCF
@@ -1211,7 +1201,7 @@ class VCFIO(AbstractFile):
                                     if self.format[field_id].type == "String":
                                         spl_data[field_id] = decodeInfoValue(spl_data[field_id])
                             else:  # Number == 0
-                                spl_data[field_id] = None
+                                spl_data[field_id] = True
                     data_by_spl[self.samples[spl_idx]] = spl_data
                 variation.samples = data_by_spl
 

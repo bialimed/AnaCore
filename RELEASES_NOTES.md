@@ -1,5 +1,8 @@
 # Release 2.8.0 [DEV]
 
+### Improvements
+  * Increase speed to read the VCF in `anacore.vcf.VCFIO`.
+
 ### Bug fixes
   * Fix bug in GTFIO from `anacore.gtf` when an attribute value contains
   semicolon.
