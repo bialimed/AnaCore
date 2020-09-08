@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.3'
+__version__ = '1.1.4'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -49,7 +49,14 @@ class GTFIO(AbstractFile):
                 if matches is None:
                     prev = current_attr + ";"
                 else:
-                    record_attr[matches.groups(1)[0]] = matches.groups(1)[1]
+                    key, val = matches.groups(1)
+                    if key != "tag":
+                        record_attr[key] = val
+                    else:  # "tag" contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)
+                        if key in record_attr:
+                            record_attr[key].add(val)
+                        else:
+                            record_attr[key] = {val}
                     prev = None
         record.annot = record_attr
         return record
@@ -78,9 +85,14 @@ class GTFIO(AbstractFile):
         :rtype: str
         """
         attributes = []
+        std_fields = {"source", "feature", "score", "frame"}
         for key, val in sorted(record.annot.items()):
-            if key not in ["source", "feature", "score", "frame"]:
-                attributes.append('{} "{}"'.format(key, val))
+            if key not in std_fields:
+                if key != "tag" or not issubclass(val.__class__, (set, list, tuple)):
+                    attributes.append('{} "{}"'.format(key, val))
+                else:  # "tag" contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)
+                    for sub_val in sorted(val):
+                        attributes.append('{} "{}"'.format(key, sub_val))
         line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
             ("" if record.reference is None else record.reference.name),
             ("." if "source" not in record.annot else record.annot["source"]),
