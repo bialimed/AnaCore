@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.2'
+__version__ = '1.1.3'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -205,7 +205,7 @@ def loadModel(gtf_path, feature_handle="exons", restrict_to=None):
                         genes[gene_uid].addChild(transcripts[transcript_uid])
                     transcript = transcripts[transcript_uid]
                     # Protein
-                    protein_id = record.annot["protein_id"] if "protein_id" in record.annot else "prot:None_tr:" + record.annot["transcript_id"]
+                    protein_id = record.annot["protein_id"] if "protein_id" in record.annot else "prot:None_tr:{}_gene:{}".format(record.annot["transcript_id"], record.annot["gene_id"])
                     protein_uid = "{}:{}".format(record.reference.name, protein_id)  # Add chromosome to prevent collision on sex chromosomes
                     protein = None
                     if protein_uid in proteins:
