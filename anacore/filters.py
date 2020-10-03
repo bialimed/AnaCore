@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -327,13 +327,13 @@ class Filter:
         elif self.operator in ["!=", "<>", "ne"]:
             self._evalFct = lambda val, ref: val != ref
         elif self.operator in ["<=", "le"]:
-            self._evalFct = lambda val, ref: val <= ref
+            self._evalFct = lambda val, ref: False if val is None else val <= ref
         elif self.operator in [">=", "ge"]:
-            self._evalFct = lambda val, ref: val >= ref
+            self._evalFct = lambda val, ref: False if val is None else val >= ref
         elif self.operator in ["<", "lt"]:
-            self._evalFct = lambda val, ref: val < ref
+            self._evalFct = lambda val, ref: False if val is None else val < ref
         elif self.operator in [">", "gt"]:
-            self._evalFct = lambda val, ref: val > ref
+            self._evalFct = lambda val, ref: False if val is None else val > ref
         elif self.operator == "in":
             self._evalFct = lambda val, ref: val in ref
         elif self.operator == "contains":

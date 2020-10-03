@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
-#
-# Copyright (C) 2017 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -195,6 +179,63 @@ class TestFilter(unittest.TestCase):
         observed = [filter_obj.eval(curr) for curr in self.data]
         self.assertEqual(expected, observed)
 
+        # Test None behavior in simple filter
+        data_age = [{"age": None}, {"age": 10}, {"age": 1}]
+        filter_obj = Filter("<", 5, "age")
+        expected = [False, False, True]
+        observed = [filter_obj.eval(curr) for curr in data_age]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter(">", 5, "age")
+        expected = [False, True, False]
+        observed = [filter_obj.eval(curr) for curr in data_age]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("==", None, "age")
+        expected = [True, False, False]
+        observed = [filter_obj.eval(curr) for curr in data_age]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("<>", None, "age")
+        expected = [False, True, True]
+        observed = [filter_obj.eval(curr) for curr in data_age]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("in", [10, 1], "age")
+        expected = [False, True, True]
+        observed = [filter_obj.eval(curr) for curr in data_age]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("not in", [10, 1], "age")
+        expected = [True, False, False]
+        observed = [filter_obj.eval(curr) for curr in data_age]
+        self.assertEqual(expected, observed)
+
+        # Test None behavior in aggregated
+        data_class = [{"class": None}, {"class": [None, "A"]}, {"class": ["B"]}]
+        filter_obj = Filter("==", "A", "class", "nb:1")
+        expected = [False, True, False]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("<>", "A", "class", "ratio:1")
+        expected = [True, False, True]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(expected, observed)
+        # filter_obj = Filter("==", None, "class", "nb:1")
+        # expected = [False, True, False]
+        # observed = [filter_obj.eval(curr) for curr in data_class]
+        # self.assertEqual(expected, observed)
+        filter_obj = Filter("not in", ["A", "B"], "class", "nb:1")
+        expected = [True, True, False]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("not in", ["A", "B"], "class", "ratio:1")
+        expected = [True, False, False]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("in", [None, "B"], "class", "ratio:1")
+        expected = [True, False, True]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(expected, observed)
+        filter_obj = Filter("in", [None, "B"], "class", "nb:1")
+        expected = [True, True, True]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(expected, observed)
 
 
 ########################################################################
