@@ -1,7 +1,7 @@
-# Release 2.8.0 [DEV]
+# Release 2.8.0 [2020-10-09]
 
 ### Improvements
-  * Add management for None value in `anacore.filter.Filter`.
+  * Add management for None value in `anacore.filters.Filter`.
   * Increase speed to read the VCF in `anacore.vcf.VCFIO`.
 
 ### Bug fixes
