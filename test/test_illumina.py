@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -18,7 +18,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.illumina import RTAComplete, RunInfo, RunParameters
+from anacore.illumina import getInfFromSeqID, RTAComplete, RunInfo, RunParameters
 
 
 ########################################################################
@@ -705,6 +705,36 @@ class TestRunParameters(unittest.TestCase):
                 "post_process": res.post_process,
                 "software": res.software
             })
+        self.assertEqual(expected, observed)
+
+
+class TestFunctions(unittest.TestCase):
+    def testGetInfFromSeqID(self):
+        # Whithout UMI
+        expected = {
+            "sequencer_id": "NDX550421_RUO",
+            "run_id": "15",
+            "flowcell_id": "HY53NBGXC",
+            "lane_id": 1,
+            "tile_id": 11101,
+            "x_pos": 9518,
+            "y_pos": 1037,
+            "umi": None
+        }
+        observed = getInfFromSeqID("NDX550421_RUO:15:HY53NBGXC:1:11101:9518:1037")
+        self.assertEqual(expected, observed)
+        # With UMI
+        expected = {
+            "sequencer_id": "NDX550421_RUO",
+            "run_id": "15",
+            "flowcell_id": "HY53NBGXC",
+            "lane_id": 1,
+            "tile_id": 11101,
+            "x_pos": 9518,
+            "y_pos": 1037,
+            "umi": "TTGCCNG+CCTCATA"
+        }
+        observed = getInfFromSeqID("NDX550421_RUO:15:HY53NBGXC:1:11101:9518:1037:TTGCCNG+CCTCATA")
         self.assertEqual(expected, observed)
 
 

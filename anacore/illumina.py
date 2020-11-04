@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.18.0'
+__version__ = '1.19.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -475,16 +475,19 @@ def getInfFromSeqID(seq_id):
     :return: The sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.
     :rtype: dict
     """
-    # Illumina's ID: EAS139:136:FC706VJ:2:2104:15343:197393
-    sequencer_id, run_id, flowcell_id, lane_id, tile_id, x_pos, y_pos = seq_id.split(":")
+    fields = seq_id.split(":")
+    if len(fields) == 7:  # Illumina's ID: EAS139:136:FC706VJ:2:2104:15343:197393
+        fields.append(None)
+    # else  Illumina's ID: EAS139:136:FC706VJ:2:2104:15343:197393:ATGCATA+CTAGC
     return {
-        "sequencer_id": sequencer_id,
-        "run_id": run_id,
-        "flowcell_id": flowcell_id,
-        "lane_id": int(lane_id),
-        "tile_id": int(tile_id),
-        "x_pos": int(x_pos),
-        "y_pos": int(y_pos),
+        "sequencer_id": fields[0],
+        "run_id": fields[1],
+        "flowcell_id": fields[2],
+        "lane_id": int(fields[3]),
+        "tile_id": int(fields[4]),
+        "x_pos": int(fields[5]),
+        "y_pos": int(fields[6]),
+        "umi": fields[7]
     }
 
 
