@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.msiannot">anacore.msiannot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.msings">anacore.msings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.node">anacore.node</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-anacore.picardIO">anacore.picardIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.region">anacore.region</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.sequenceIO">anacore.sequenceIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.sv">anacore.sv</a></li>
@@ -3738,6 +3739,77 @@ clf.set_status(test_dataset)</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-anacore.picardIO">
+<span id="anacore-picardio"></span><h2>anacore.picardIO<a class="headerlink" href="#module-anacore.picardIO" title="Permalink to this headline">¶</a></h2>
+<p>Classes and functions for reading/writing picard tools outputs.</p>
+<dl class="class">
+<dt id="anacore.picardIO.PicardReader">
+<em class="property">class </em><code class="sig-prename descclassname">anacore.picardIO.</code><code class="sig-name descname">PicardReader</code><span class="sig-paren">(</span><em class="sig-param">filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/picardIO.html#PicardReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.picardIO.PicardReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reader for picard tools outputs.</p>
+<p>Build and return an instance of PicardReader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – The filepath.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.picardIO.PicardReader" title="anacore.picardIO.PicardReader">anacore.picardIO.PicardReader</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="anacore.picardIO.castCol">
+<code class="sig-prename descclassname">anacore.picardIO.</code><code class="sig-name descname">castCol</code><span class="sig-paren">(</span><em class="sig-param">values</em>, <em class="sig-param">col_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/picardIO.html#castCol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.picardIO.castCol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cast all the values to the column type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – Values in the column.</p></li>
+<li><p><strong>col_type</strong> (<em>str</em>) – Column type among “float” or “int” or None or “str”.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="anacore.picardIO.getColType">
+<code class="sig-prename descclassname">anacore.picardIO.</code><code class="sig-name descname">getColType</code><span class="sig-paren">(</span><em class="sig-param">values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/picardIO.html#getColType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.picardIO.getColType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the column type from these values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>values</strong> – Values in the column.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Type of the value among “float” or “int” or None or “str”.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="anacore.picardIO.getValType">
+<code class="sig-prename descclassname">anacore.picardIO.</code><code class="sig-name descname">getValType</code><span class="sig-paren">(</span><em class="sig-param">val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/picardIO.html#getValType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.picardIO.getValType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return type of the value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>val</strong> – Evaluated value.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Type of the value among “float” or “int” or None or “str”.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

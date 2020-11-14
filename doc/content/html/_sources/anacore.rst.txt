@@ -137,6 +137,14 @@ anacore.node
    :undoc-members:
    :show-inheritance:
 
+anacore.picardIO
+---------------------
+
+.. automodule:: anacore.picardIO
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
 anacore.region
 ---------------------
 

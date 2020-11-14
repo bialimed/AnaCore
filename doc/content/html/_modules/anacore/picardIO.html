@@ -1,0 +1,357 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>anacore.picardIO &mdash; AnaCore  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.picardIO</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.picardIO</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing picard tools outputs.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2019 IUCT-O&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+
+<div class="viewcode-block" id="castCol"><a class="viewcode-back" href="../../anacore.html#anacore.picardIO.castCol">[docs]</a><span class="k">def</span> <span class="nf">castCol</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">col_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cast all the values to the column type.</span>
+
+<span class="sd">    :param values: Values in the column.</span>
+<span class="sd">    :type val: list</span>
+<span class="sd">    :param col_type: Column type among &quot;float&quot; or &quot;int&quot; or None or &quot;str&quot;.</span>
+<span class="sd">    :type col_type: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cast_fct</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">col_type</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">curr_idx</span><span class="p">,</span> <span class="n">curr_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">curr_val</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">curr_idx</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">curr_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast_fct</span><span class="p">(</span><span class="n">curr_val</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getColType"><a class="viewcode-back" href="../../anacore.html#anacore.picardIO.getColType">[docs]</a><span class="k">def</span> <span class="nf">getColType</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the column type from these values.</span>
+
+<span class="sd">    :param values: Values in the column.</span>
+<span class="sd">    :type val: list</span>
+<span class="sd">    :return: Type of the value among &quot;float&quot; or &quot;int&quot; or None or &quot;str&quot;.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="p">{</span><span class="n">getValType</span><span class="p">(</span><span class="n">curr_val</span><span class="p">)</span> <span class="k">for</span> <span class="n">curr_val</span> <span class="ow">in</span> <span class="n">values</span> <span class="k">if</span> <span class="n">curr_val</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">curr_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">col_type</span> <span class="o">=</span> <span class="s2">&quot;int&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">types</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s2">&quot;str&quot;</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
+        <span class="n">col_type</span> <span class="o">=</span> <span class="s2">&quot;str&quot;</span>
+    <span class="k">elif</span> <span class="s2">&quot;float&quot;</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
+        <span class="n">col_type</span> <span class="o">=</span> <span class="s2">&quot;float&quot;</span>
+    <span class="k">return</span> <span class="n">col_type</span></div>
+
+
+<div class="viewcode-block" id="getValType"><a class="viewcode-back" href="../../anacore.html#anacore.picardIO.getValType">[docs]</a><span class="k">def</span> <span class="nf">getValType</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return type of the value.</span>
+
+<span class="sd">    :param val: Evaluated value.</span>
+<span class="sd">    :type val: *</span>
+<span class="sd">    :return: Type of the value among &quot;float&quot; or &quot;int&quot; or None or &quot;str&quot;.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val_type</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">val_type</span> <span class="o">=</span> <span class="s2">&quot;str&quot;</span>
+        <span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">val_type</span> <span class="o">=</span> <span class="s2">&quot;int&quot;</span>
+        <span class="k">elif</span> <span class="n">val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">val_type</span> <span class="o">=</span> <span class="s2">&quot;float&quot;</span>
+    <span class="k">return</span> <span class="n">val_type</span></div>
+
+
+<div class="viewcode-block" id="PicardReader"><a class="viewcode-back" href="../../anacore.html#anacore.picardIO.PicardReader">[docs]</a><span class="k">class</span> <span class="nc">PicardReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reader for picard tools outputs.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of PicardReader.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: anacore.picardIO.PicardReader</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read file and store his information.</span>
+
+<span class="sd">        :param FH_in: File handle opens to the first line of the picard&#39;s file.</span>
+<span class="sd">        :type FH_in: TextIOWrapper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_in</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">curr_line</span> <span class="ow">in</span> <span class="n">FH_in</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;## METRICS CLASS&quot;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parseMetrics</span><span class="p">(</span><span class="n">FH_in</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;## HISTOGRAM&quot;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parseHistogram</span><span class="p">(</span><span class="n">FH_in</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;## &quot;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parseHeader</span><span class="p">(</span><span class="n">FH_in</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parseHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FH_in</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read header in file and store his information in self.command.</span>
+
+<span class="sd">        :param FH_in: File handle opens to the first line of the picard&#39;s file.</span>
+<span class="sd">        :type FH_in: TextIOWrapper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">curr_line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>  <span class="c1"># Same section</span>
+            <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_parseHistogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FH_in</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read histogram section in file and store his information in self.histogram.</span>
+
+<span class="sd">        :param FH_in: File handle opens to the histogram section of the picard&#39;s file: after tag &quot;## HISTOGRAM&quot;.</span>
+<span class="sd">        :type FH_in: TextIOWrapper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="c1"># Parse header</span>
+        <span class="n">header_titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)]</span>
+        <span class="n">titles_by_idx</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">curr_idx</span><span class="p">,</span> <span class="n">curr_title</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">header_titles</span><span class="p">):</span>
+            <span class="n">titles_by_idx</span><span class="p">[</span><span class="n">curr_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_title</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="p">[</span><span class="n">curr_title</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="c1"># Get values</span>
+        <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">curr_line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>  <span class="c1"># Same section</span>
+            <span class="k">for</span> <span class="n">curr_idx</span><span class="p">,</span> <span class="n">curr_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">curr_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)):</span>
+                <span class="n">col_name</span> <span class="o">=</span> <span class="n">titles_by_idx</span><span class="p">[</span><span class="n">curr_idx</span><span class="p">]</span>
+                <span class="n">col_val</span> <span class="o">=</span> <span class="n">curr_val</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col_val</span><span class="p">)</span>
+            <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="c1"># Apply types</span>
+        <span class="k">for</span> <span class="n">curr_title</span> <span class="ow">in</span> <span class="n">header_titles</span><span class="p">:</span>
+            <span class="n">col_type</span> <span class="o">=</span> <span class="n">getColType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="p">[</span><span class="n">curr_title</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">col_type</span> <span class="o">!=</span> <span class="s2">&quot;str&quot;</span> <span class="ow">and</span> <span class="n">col_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">castCol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">histogram</span><span class="p">[</span><span class="n">curr_title</span><span class="p">],</span> <span class="n">col_type</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parseMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">FH_in</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read metrics section in file and store his information in self.metrics.</span>
+
+<span class="sd">        :param FH_in: File handle opens to the metrics section of the picard&#39;s file: after tag &quot;## METRICS CLASS&quot;.</span>
+<span class="sd">        :type FH_in: TextIOWrapper</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="c1"># Parse header</span>
+        <span class="n">header_titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)]</span>
+        <span class="n">titles_by_idx</span> <span class="o">=</span> <span class="p">{</span><span class="n">curr_idx</span><span class="p">:</span> <span class="n">curr_title</span> <span class="k">for</span> <span class="n">curr_idx</span><span class="p">,</span> <span class="n">curr_title</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">header_titles</span><span class="p">)}</span>
+        <span class="c1"># Get values</span>
+        <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">curr_line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>  <span class="c1"># Same section</span>
+            <span class="n">lib_metrics</span> <span class="o">=</span> <span class="p">{</span><span class="n">curr_title</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">curr_title</span> <span class="ow">in</span> <span class="n">header_titles</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">curr_idx</span><span class="p">,</span> <span class="n">curr_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">curr_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)):</span>
+                <span class="n">col_name</span> <span class="o">=</span> <span class="n">titles_by_idx</span><span class="p">[</span><span class="n">curr_idx</span><span class="p">]</span>
+                <span class="n">col_val</span> <span class="o">=</span> <span class="n">curr_val</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">lib_metrics</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">col_val</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lib_metrics</span><span class="p">)</span>
+            <span class="n">curr_line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="c1"># Apply types</span>
+        <span class="k">for</span> <span class="n">curr_title</span> <span class="ow">in</span> <span class="n">header_titles</span><span class="p">:</span>
+            <span class="n">col_type</span> <span class="o">=</span> <span class="n">getColType</span><span class="p">([</span><span class="n">elt</span><span class="p">[</span><span class="n">curr_title</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">col_type</span> <span class="o">!=</span> <span class="s2">&quot;str&quot;</span> <span class="ow">and</span> <span class="n">col_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cast_fct</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">col_type</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">library</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">library</span><span class="p">[</span><span class="n">curr_title</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                        <span class="n">library</span><span class="p">[</span><span class="n">curr_title</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">library</span><span class="p">[</span><span class="n">curr_title</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast_fct</span><span class="p">(</span><span class="n">library</span><span class="p">[</span><span class="n">curr_title</span><span class="p">])</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Frédéric Escudié
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
