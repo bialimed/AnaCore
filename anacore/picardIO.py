@@ -15,12 +15,12 @@ def castCol(values, col_type):
 
     :param values: Values in the column.
     :type val: list
-    :param col_type: Column type: "float" or "int" or "str".
+    :param col_type: Column type among "float" or "int" or None or "str".
     :type col_type: str
     """
     cast_fct = eval(col_type)
     for curr_idx, curr_val in enumerate(values):
-        if curr_val == "" and col_type != "str":
+        if curr_val == "":
             values[curr_idx] = None
         else:
             values[curr_idx] = cast_fct(curr_val)
@@ -32,11 +32,11 @@ def getColType(values):
 
     :param values: Values in the column.
     :type val: list
-    :return: Type of the value: "float" or "int" or "str".
+    :return: Type of the value among "float" or "int" or None or "str".
     :rtype: str
     """
     types = {getValType(curr_val) for curr_val in values if curr_val != "" and curr_val is not None}
-    col_type = "int" if len(types) != 0 else "str"
+    col_type = "int" if len(types) != 0 else None
     if "str" in types:
         col_type = "str"
     elif "float" in types:
@@ -50,7 +50,7 @@ def getValType(val):
 
     :param val: Evaluated value.
     :type val: *
-    :return: Type of the value: "float" or "int" or None or "str".
+    :return: Type of the value among "float" or "int" or None or "str".
     :rtype: str
     """
     val_type = None
@@ -134,7 +134,7 @@ class PicardReader(object):
         # Apply types
         for curr_title in header_titles:
             col_type = getColType(self.histogram[curr_title])
-            if col_type != "str":
+            if col_type != "str" and col_type is not None:
                 castCol(self.histogram[curr_title], col_type)
 
     def _parseMetrics(self, FH_in):
@@ -160,12 +160,11 @@ class PicardReader(object):
             curr_line = FH_in.readline()
         # Apply types
         for curr_title in header_titles:
-            if curr_title != "LIBRARY":
-                col_type = getColType([elt[curr_title] for elt in self.metrics])
-                if col_type != "str":
-                    cast_fct = eval(col_type)
-                    for library in self.metrics:
-                        if library[curr_title] == "":
-                            library[curr_title] = None
-                        else:
-                            library[curr_title] = cast_fct(library[curr_title])
+            col_type = getColType([elt[curr_title] for elt in self.metrics])
+            if col_type != "str" and col_type is not None:
+                cast_fct = eval(col_type)
+                for library in self.metrics:
+                    if library[curr_title] == "":
+                        library[curr_title] = None
+                    else:
+                        library[curr_title] = cast_fct(library[curr_title])

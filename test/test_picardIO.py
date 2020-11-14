@@ -29,7 +29,7 @@ class TestCastCol(unittest.TestCase):
     def testCastCol(self):
         # To str
         data = ["a", "b", "c", "10", "", "15.1", "16.3"]
-        expected = ["a", "b", "c", "10", "", "15.1", "16.3"]
+        expected = ["a", "b", "c", "10", None, "15.1", "16.3"]
         castCol(data, "str")
         self.assertEqual(expected, data)
         # To int
@@ -46,18 +46,23 @@ class TestCastCol(unittest.TestCase):
 
 class TestGetColType(unittest.TestCase):
     def testGetColType(self):
+        # Is None
+        data = [None, ""]
+        expected = None
+        observed = getColType(data)
+        self.assertEqual(expected, observed)
         # Is str
-        data = ["a", "b", "c", "10", "", "15.1", "16.3"]
+        data = ["a", "b", "c", "10", None, "", "15.1", "16.3"]
         expected = "str"
         observed = getColType(data)
         self.assertEqual(expected, observed)
         # Is int
-        data = ["10", "", "15", "16"]
+        data = ["10", None, "", "15", "16"]
         expected = "int"
         observed = getColType(data)
         self.assertEqual(expected, observed)
         # Is float
-        data = ["10", "", "15.1", "16"]
+        data = ["10", None, "", "15.1", "16"]
         expected = "float"
         observed = getColType(data)
         self.assertEqual(expected, observed)
@@ -65,8 +70,8 @@ class TestGetColType(unittest.TestCase):
 
 class TestGetValType(unittest.TestCase):
     def testGetValType(self):
-        data = ["a", "b", "c", "10", "", "15.1", "16.3"]
-        expected = ["str", "str", "str", "int", "str", "float", "float"]
+        data = ["a", "b", "c", "10", None, "", "15.1", "16.3"]
+        expected = ["str", "str", "str", "int", None, "str", "float", "float"]
         observed = [getValType(elt) for elt in data]
         self.assertEqual(expected, observed)
 
