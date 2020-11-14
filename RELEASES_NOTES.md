@@ -1,6 +1,7 @@
 # Release 2.9.0 [DEV]
 
 ### Improvements
+  * Add reader for picard tools outputs in `anacore.picardIO`.
   * Manage UMI in Illumina's sequence ID with `anacore.illumina.getInfFromSeqID`.
 
 # Release 2.8.0 [2020-10-09]
