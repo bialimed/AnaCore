@@ -1,6 +1,8 @@
 # Release 2.9.0 [DEV]
 
 ### Improvements
+  * Add specific management for samples description rows in VCF header
+  (`anacore.vcf`).
   * Add reader for picard tools outputs in `anacore.picardIO`.
   * Manage UMI in Illumina's sequence ID with `anacore.illumina.getInfFromSeqID`.
 

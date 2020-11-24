@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.28.0'
+__version__ = '1.29.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -55,12 +55,15 @@ def getHeaderAttr(header_line):
     header_content = header_content[1:-1]  # <ID=AD,Version="1"> to ID=AD,Version="1"
     # Get attributes
     attributes = {}
+    attributes_cases = {}
     stack = ""
     opened_quote = False
     for curr_char in header_content:
         if curr_char == "," and not opened_quote:
             key, val = stack.split("=", 1)
             attributes[key.lower()] = val
+            if key != key.capitalize():  # Keep case different of capitalize
+                attributes_cases[key.lower()] = key
             stack = ""
             opened_quote = False
         elif curr_char == '"':
@@ -76,10 +79,14 @@ def getHeaderAttr(header_line):
     if stack != "":
         key, val = stack.split("=", 1)
         attributes[key.lower()] = val
+        if key != key.capitalize():  # Keep case different of capitalize
+            attributes_cases[key.lower()] = key
     # Return
     header_class_name = "Header{}Attr".format(header_category.capitalize())
     header_class = getattr(sys.modules[__name__], header_class_name)
-    return header_class(**attributes)
+    attr = header_class(**attributes)
+    attr.case_by_attr = attributes_cases
+    return attr
 
 
 class HeaderAttr:
@@ -98,6 +105,7 @@ class HeaderAttr:
         self.id = id
         self._required_attr = ["ID"]  # List of required attributes names.
         self._without_quote = {"ID"}  # List of required attributes without quote in str value.
+        self.case_by_attr = {}  # Store case sensitive title for extra attributes if it is different of capitalized attribute name.
 
     def keys(self):
         """
@@ -118,7 +126,7 @@ class HeaderAttr:
         return self.datastore.items()
 
     def __delattr__(self, name):
-        if name[0] != "_":
+        if name[0] != "_" and name != "case_by_attr":
             del self.datastore[name]
         else:
             super().delattr(name)
@@ -132,14 +140,14 @@ class HeaderAttr:
         :param value: The value to be assigned to the attribute.
         :type value: *
         """
-        if name[0] != "_":
+        if name[0] != "_" and name != "case_by_attr":
             self.datastore[name] = value
         else:
             super().__setattr__(name, value)
 
     def __getattr__(self, name):
         value = None
-        if name[0] != "_":
+        if name[0] != "_" and name != "case_by_attr":
             value = self.datastore[name]
         else:
             value = super().__getattr__(name)
@@ -155,7 +163,10 @@ class HeaderAttr:
         extra_keys = {elt.lower() for elt in self.keys()} - {elt.lower() for elt in self._required_attr}
         if len(extra_keys) != 0:
             for key in sorted(extra_keys):
-                pre_attr.append('{}="{}"'.format(key.capitalize(), self.datastore[key].replace('"', '\\"')))
+                title = key.capitalize()
+                if key in self.case_by_attr:
+                    title = self.case_by_attr[key]
+                pre_attr.append('{}="{}"'.format(title, self.datastore[key].replace('"', '\\"')))
         return "<{}>".format(",".join(pre_attr))
 
     def __repr__(self):
@@ -255,6 +266,12 @@ class HeaderFormatAttr(HeaderTypedAttr):
 
 class HeaderInfoAttr(HeaderTypedAttr):
     """Class to manage an INFO attribute of VCF header."""
+
+    pass
+
+
+class HeaderSampleAttr(HeaderAttr):
+    """Class to manage an SAMPLE attribute of VCF header."""
 
     pass
 
@@ -1073,6 +1090,7 @@ class VCFIO(AbstractFile):
         self.filter = dict()  # {"q10": <HeaderFilterAttr>}
         self.info = dict()  # {"IDREP": <HeaderInfoAttr>, "AD": <HeaderInfoAttr>}
         self.format = dict()  # {"GT": <HeaderFormatAttr>, "AD": <HeaderFormatAttr>}
+        self.sample_info = dict()  # {"splA": <HeaderSampleAttr>, "splB": <HeaderSampleAttr>}
         self.extra_header = list()  # ["##source=myImputationProgramV3.1", "##phasing=partial"]
         if mode == "r":
             self._parseHeader()
@@ -1117,6 +1135,9 @@ class VCFIO(AbstractFile):
         elif self.current_line.startswith("##FORMAT"):
             curr_attr = getHeaderAttr(self.current_line)
             self.format[curr_attr.id] = curr_attr
+        elif self.current_line.startswith("##SAMPLE"):
+            curr_attr = getHeaderAttr(self.current_line)
+            self.sample_info[curr_attr.id] = curr_attr
         elif self.current_line.startswith("#CHROM\tPOS"):
             self.samples = [spl.strip() for spl in self.current_line.split("\t")[9:]]
         elif not self.current_line.startswith("##fileformat="):
@@ -1296,12 +1317,13 @@ class VCFIO(AbstractFile):
         self.filter = deepcopy(model.filter)
         self.format = deepcopy(model.format)
         self.info = deepcopy(model.info)
+        self.sample_info = deepcopy(model.sample_info)
         self.samples = deepcopy(model.samples)
         self.extra_header = deepcopy(model.extra_header)
 
     def writeHeader(self):
         """Write VCF header."""
-        self.file_handle.write("##fileformat=VCFv4.1\n")
+        self.file_handle.write("##fileformat=VCFv4.3\n")
         for curr in self.extra_header:
             self.file_handle.write(curr + "\n")
         for tag in sorted(self.info):
@@ -1310,6 +1332,8 @@ class VCFIO(AbstractFile):
             self.file_handle.write('##FILTER={}\n'.format(self.filter[tag]))
         for tag in sorted(self.format):
             self.file_handle.write('##FORMAT={}\n'.format(self.format[tag]))
+        for spl in sorted(self.sample_info):
+            self.file_handle.write('##SAMPLE={}\n'.format(self.sample_info[spl]))
         last_header_line = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
         if len(self.format) != 0 or len(self.samples) != 0:
             last_header_line += "\tFORMAT\t" + "\t".join([spl for spl in self.samples])

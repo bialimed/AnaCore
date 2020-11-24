@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.8.0'
+__version__ = '1.9.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -32,10 +32,11 @@ class TestVCFIO(unittest.TestCase):
 
         # Temporary files
         self.tmp_in_variants = os.path.join(tmp_folder, unique_id + "_in.vcf")
+        self.tmp_in_variants_with_spl_info = os.path.join(tmp_folder, unique_id + "_in_detailed.vcf")
         self.tmp_out_variants = os.path.join(tmp_folder, unique_id + "_out.vcf")
 
         # Create VCF
-        spec_example = """##fileformat=VCFv4.2
+        spec_example = """##fileformat=VCFv4.3
 ##fileDate=20090805"
 ##source=myImputationProgramV3.1
 ##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
@@ -62,6 +63,15 @@ class TestVCFIO(unittest.TestCase):
         with open(self.tmp_in_variants, "w") as FH_variants:
             FH_variants.write(spec_example)
 
+        # Create VCF with spl info
+        spec_example_with_spl_info = spec_example.replace(
+            "#CHROM",
+            """##SAMPLE=<ID=NA00001,Assay=WholeGenome,Ethnicity=AFR,Disease=None,Description="Patient germline genome from unaffected">
+##SAMPLE=<ID=NA00003,Assay=Exome,Ethnicity=CEU,Description="European patient exome from breast cancer",Disease=Cancer,Tissue=Breast>
+#CHROM""")
+        with open(self.tmp_in_variants_with_spl_info, "w") as FH_variants:
+            FH_variants.write(spec_example_with_spl_info)
+
     def testIter(self):
         with VCFIO(self.tmp_in_variants) as FH_vcf:
             # Header
@@ -76,6 +86,64 @@ class TestVCFIO(unittest.TestCase):
                     "_".join([variant.chrom, str(variant.pos), variant.ref, ",".join(variant.alt)])
                 )
             self.assertEqual(expected_records, readed_records)
+
+    def testParseHeader(self):
+        with VCFIO(self.tmp_in_variants_with_spl_info) as FH_vcf:
+            # FORMAT
+            self.assertEqual(
+                {key: elt.datastore for key, elt in FH_vcf.format.items()},
+                {
+                    'GT': {'id': 'GT', 'description': 'Genotype', 'type': 'String', 'number': '1'},
+                    'GQ': {'id': 'GQ', 'description': 'Genotype Quality', 'type': 'Integer', 'number': '1'},
+                    'DP': {'id': 'DP', 'description': 'Read Depth', 'type': 'Integer', 'number': '1'},
+                    'HQ': {'id': 'HQ', 'description': 'Haplotype Quality', 'type': 'Integer', 'number': '2'}
+                }
+            )
+            # INFO
+            self.assertEqual(
+                {key: elt.datastore for key, elt in FH_vcf.info.items()},
+                {
+                    'NS': {'id': 'NS', 'description': 'Number of Samples With Data', 'type': 'Integer', 'number': '1'},
+                    'DP': {'id': 'DP', 'description': 'Total Depth', 'type': 'Integer', 'number': '1'},
+                    'AF': {'id': 'AF', 'description': 'Allele Frequency', 'type': 'Float', 'number': 'A'},
+                    'AA': {'id': 'AA', 'description': 'Ancestral Allele', 'type': 'String', 'number': '1'},
+                    'DB': {'id': 'DB', 'description': 'dbSNP membership, build 129', 'type': 'Flag', 'number': '0'},
+                    'H2': {'id': 'H2', 'description': 'HapMap2 membership', 'type': 'Flag', 'number': '0'}}
+            )
+            # Samples list
+            self.assertEqual(FH_vcf.samples, ["NA00001", "NA00002", "NA00003"])
+            # SAMPLE
+            self.assertDictEqual(
+                {key: elt.datastore for key, elt in FH_vcf.sample_info.items()},
+                {
+                    "NA00001": {
+                        "id": "NA00001",
+                        "assay": "WholeGenome",
+                        "ethnicity": "AFR",
+                        "disease": "None",
+                        "description": "Patient germline genome from unaffected"
+                    },
+                    "NA00003": {
+                        "id": "NA00003",
+                        "assay": "Exome",
+                        "ethnicity": "CEU",
+                        "disease": "Cancer",
+                        "description": "European patient exome from breast cancer",
+                        "tissue": "Breast"
+                    }
+                }
+            )
+            # EXTRA
+            self.assertEqual(
+                FH_vcf.extra_header,
+                [
+                    '##fileDate=20090805"',
+                    '##source=myImputationProgramV3.1',
+                    '##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta',
+                    '##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>',
+                    '##phasing=partial'
+                ]
+            )
 
     def testReadTypeFlag(self):
         expected = [
@@ -95,7 +163,7 @@ class TestVCFIO(unittest.TestCase):
         self.assertEqual(expected, observed)
 
     def testWrite(self):
-        expected_content = """##fileformat=VCFv4.1
+        expected_content = """##fileformat=VCFv4.3
 ##fileDate=20090805"
 ##source=myImputationProgramV3.1
 ##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
@@ -132,9 +200,49 @@ class TestVCFIO(unittest.TestCase):
             observed_content = "".join(reader.readlines()).strip()
         self.assertEqual(expected_content, observed_content)
 
+    def testWriteWithSplInfo(self):
+        expected_content = """##fileformat=VCFv4.3
+##fileDate=20090805"
+##source=myImputationProgramV3.1
+##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
+##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
+##phasing=partial
+##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##FILTER=<ID=q10,Description="Quality below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples have data">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
+##SAMPLE=<ID=NA00001,Assay="WholeGenome",Description="Patient germline genome from unaffected",Disease="None",Ethnicity="AFR">
+##SAMPLE=<ID=NA00003,Assay="Exome",Description="European patient exome from breast cancer",Disease="Cancer",Ethnicity="CEU",Tissue="Breast">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+20	14370	rs6054257	G	A	29.0	PASS	AF=0.5;DB;DP=14;H2;NS=3	GT:GQ:DP:HQ	0|0:48:1:51,51	1|0:48:8:51,51	1/1:43:5:.,.
+20	17330	.	T	A	3.0	q10	AF=0.017;DP=11;NS=3	GT:GQ:DP:HQ	0|0:49:3:58,50	0|1:3:5:65,3	0/0:41:3:.
+20	1110696	rs6040355	A	G,T	67.0	PASS	AA=T;AF=0.333,0.667;DB;DP=10;NS=2	GT:GQ:DP:HQ	1|2:21:6:23,27	2|1:2:0:18,2	2/2:35:4:.
+20	1230237	.	T	-	47.0	PASS	AA=T;DP=13;NS=3	GT:GQ:DP:HQ	0|0:54:7:56,60	0|0:48:4:51,51	0/0:61:2:.
+20	1234567	microsat1	GTC	G,GTCT	50.0	PASS	AA=G;DP=9;NS=3	GT:GQ:DP	0/1:35:4	0/2:17:2	1/1:40:3"""
+        # Read and write VCF
+        with VCFIO(self.tmp_in_variants_with_spl_info) as reader:
+            with VCFIO(self.tmp_out_variants, "w") as writer:
+                writer.copyHeader(reader)
+                writer.writeHeader()
+                for record in reader:
+                    writer.write(record)
+        # Compare input content with output
+        observed_content = None
+        with open(self.tmp_out_variants) as reader:
+            observed_content = "".join(reader.readlines()).strip()
+        self.assertEqual(expected_content, observed_content)
+
     def tearDown(self):
         # Clean temporary files
-        for curr_file in [self.tmp_in_variants, self.tmp_out_variants]:
+        for curr_file in [self.tmp_in_variants, self.tmp_in_variants_with_spl_info, self.tmp_out_variants]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 
@@ -616,8 +724,8 @@ class TestVCFHeader(unittest.TestCase):
 ##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
 ##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
 ##phasing=partial
-##SAMPLE=<ID=NA00001,Assay=WholeGenome,Ethnicity=AFR,Disease=None,Description="Patient germline genome from unaffected",DOI=url>
-##SAMPLE=<ID=NA00002,Assay=Exome,Ethnicity=CEU,Disease=Cancer,Tissue=Breast,Description="European patient exome from breast cancer">
+##SAMPLE=<ID=NA00001,Assay="WholeGenome",Description="Patient germline genome from unaffected",Disease="None",DOI="url",Ethnicity="AFR">
+##SAMPLE=<ID=NA00002,Assay="Exome",Description="European patient exome from breast cancer",Disease="Cancer",Ethnicity="CEU",Tissue="Breast">
 ##PEDIGREE=<ID=TumourSample,Original=GermlineID>
 ##PEDIGREE=<ID=SomaticNonTumour,Original=GermlineID>
 ##PEDIGREE=<ID=ChildID,Father=FatherID,Mother=MotherID>
@@ -657,7 +765,6 @@ class TestVCFHeader(unittest.TestCase):
         observed = None
         with open(self.tmp_out_variants) as FH_obs:
             observed = FH_obs.readlines()
-        observed[0] = observed[0].replace("##fileformat=VCFv4.1", "##fileformat=VCFv4.3")
         self.assertTrue(len(expected) != 0)
         self.assertEqual(sorted(expected), sorted(observed))
 

@@ -54,7 +54,7 @@ class FusionFileReaderTest(unittest.TestCase):
             },
             {
                 "expected": BreakendVCFIO,
-                "content": '''##fileformat=VCFv4.2
+                "content": '''##fileformat=VCFv4.3
 ##INFO=<ID=ANN,Number=.,Type=String,Description="Consequence annotations. Format: SYMBOL|Gene|Feature|Feature_type|STRAND|EXON|INTRON|CDS_position|Protein_position|GENE_SHARD">
 ##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS">
 ##INFO=<ID=IDSRC,Number=.,Type=String,Description="ID of breakend by source">
@@ -398,7 +398,7 @@ class BreakendVCFIOTest(unittest.TestCase):
 
     def test_read(self):
         # Create input tmp
-        content = '''##fileformat=VCFv4.2
+        content = '''##fileformat=VCFv4.3
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
 ##FILTER=<ID=HLA,Description="One breakend is located on HLA.">
@@ -429,7 +429,7 @@ class BreakendVCFIOTest(unittest.TestCase):
 
     def test_read2(self):
         # Create input tmp
-        content = '''##fileformat=VCFv4.2
+        content = '''##fileformat=VCFv4.3
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
 ##FILTER=<ID=HLA,Description="One breakend is located on HLA.">
@@ -460,7 +460,7 @@ class BreakendVCFIOTest(unittest.TestCase):
 
     def test_isValid(self):
         # Create input tmp
-        content = '''##fileformat=VCFv4.2
+        content = '''##fileformat=VCFv4.3
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
 ##FILTER=<ID=HLA,Description="One breakend is located on HLA.">
@@ -477,7 +477,7 @@ class BreakendVCFIOTest(unittest.TestCase):
             writer.write(content)
         self.assertTrue(BreakendVCFIO.isValid(self.tmp))
         # Create input tmp
-        content = '''##fileformat=VCFv4.2
+        content = '''##fileformat=VCFv4.3
 ##FILTER=<ID=HLA,Description="One breakend is located on HLA.">
 ##FILTER=<ID=IG,Description="One breakend is located on immunoglobulin.">
 ##FILTER=<ID=Inner,Description="The two breakends are located in the same gene.">
@@ -503,7 +503,7 @@ class BreakendVCFIOTest(unittest.TestCase):
             for first, second in data:
                 writer.write(first, second)
         # Expected
-        expected = '''##fileformat=VCFv4.1
+        expected = '''##fileformat=VCFv4.3
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
 ##FILTER=<ID=Inner,Description="The two breakends are located in the same gene.">
@@ -519,7 +519,7 @@ class BreakendVCFIOTest(unittest.TestCase):
 
     def test_readWithAnnot(self):
         # Create input tmp
-        content = '''##fileformat=VCFv4.2
+        content = '''##fileformat=VCFv4.3
 ##INFO=<ID=TESTANN,Number=.,Type=String,Description="Annotations. Format: SYMBOL|Gene|Feature|Feature_type|STRAND">
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
@@ -599,7 +599,7 @@ class BreakendVCFIOTest(unittest.TestCase):
             )
         ]
         # Expected
-        expected = '''##fileformat=VCFv4.1
+        expected = '''##fileformat=VCFv4.3
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
 ##INFO=<ID=TESTANN,Number=.,Type=String,Description="Annotations. Format: SYMBOL|STRAND">
