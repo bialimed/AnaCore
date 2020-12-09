@@ -153,9 +153,9 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">re</span>
 
 
 <div class="viewcode-block" id="AnnotVCFIO"><a class="viewcode-back" href="../../anacore.html#anacore.annotVcf.AnnotVCFIO">[docs]</a><span class="k">class</span> <span class="nc">AnnotVCFIO</span><span class="p">(</span><span class="n">VCFIO</span><span class="p">):</span>
@@ -167,7 +167,7 @@
 
 <span class="sd">        :param filepath: The filepath.</span>
 <span class="sd">        :type filepath: str</span>
-<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;, &#39;i&#39;). The mode &#39;i&#39; allow to open file in indexed mode to fetch by region (tabix).</span>
 <span class="sd">        :type mode: str</span>
 <span class="sd">        :param annot_field: The tag for the field used to store annotations. [Default: ANN]</span>
 <span class="sd">        :type annot_field: str</span>
@@ -288,7 +288,7 @@
 
 <span class="sd">        :param filepath: The filepath.</span>
 <span class="sd">        :type filepath: str</span>
-<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;, &#39;i&#39;). The mode &#39;i&#39; allow to open file in indexed mode to fetch by region (tabix).</span>
 <span class="sd">        :type mode: str</span>
 <span class="sd">        :return: The new instance.</span>
 <span class="sd">        :rtype: VEPVCFIO</span>

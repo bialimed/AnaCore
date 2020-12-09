@@ -149,14 +149,15 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.28.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.30.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">AbstractFile</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">pysam</span> <span class="k">import</span> <span class="n">TabixFile</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">AbstractFile</span>
 
 
 <div class="viewcode-block" id="decodeInfoValue"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.decodeInfoValue">[docs]</a><span class="k">def</span> <span class="nf">decodeInfoValue</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
@@ -200,12 +201,15 @@
     <span class="n">header_content</span> <span class="o">=</span> <span class="n">header_content</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># &lt;ID=AD,Version=&quot;1&quot;&gt; to ID=AD,Version=&quot;1&quot;</span>
     <span class="c1"># Get attributes</span>
     <span class="n">attributes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">attributes_cases</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">stack</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">opened_quote</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">for</span> <span class="n">curr_char</span> <span class="ow">in</span> <span class="n">header_content</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">curr_char</span> <span class="o">==</span> <span class="s2">&quot;,&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">opened_quote</span><span class="p">:</span>
             <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">attributes</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">key</span><span class="o">.</span><span class="n">capitalize</span><span class="p">():</span>  <span class="c1"># Keep case different of capitalize</span>
+                <span class="n">attributes_cases</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">key</span>
             <span class="n">stack</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="n">opened_quote</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="n">curr_char</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">:</span>
@@ -221,10 +225,14 @@
     <span class="k">if</span> <span class="n">stack</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
         <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">attributes</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">key</span><span class="o">.</span><span class="n">capitalize</span><span class="p">():</span>  <span class="c1"># Keep case different of capitalize</span>
+            <span class="n">attributes_cases</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">key</span>
     <span class="c1"># Return</span>
     <span class="n">header_class_name</span> <span class="o">=</span> <span class="s2">&quot;Header</span><span class="si">{}</span><span class="s2">Attr&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header_category</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
     <span class="n">header_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">header_class_name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">header_class</span><span class="p">(</span><span class="o">**</span><span class="n">attributes</span><span class="p">)</span></div>
+    <span class="n">attr</span> <span class="o">=</span> <span class="n">header_class</span><span class="p">(</span><span class="o">**</span><span class="n">attributes</span><span class="p">)</span>
+    <span class="n">attr</span><span class="o">.</span><span class="n">case_by_attr</span> <span class="o">=</span> <span class="n">attributes_cases</span>
+    <span class="k">return</span> <span class="n">attr</span></div>
 
 
 <div class="viewcode-block" id="HeaderAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderAttr</span><span class="p">:</span>
@@ -243,6 +251,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_required_attr</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span>  <span class="c1"># List of required attributes names.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_without_quote</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">}</span>  <span class="c1"># List of required attributes without quote in str value.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">case_by_attr</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Store case sensitive title for extra attributes if it is different of capitalized attribute name.</span>
 
 <div class="viewcode-block" id="HeaderAttr.keys"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderAttr.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -263,7 +272,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;case_by_attr&quot;</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -277,14 +286,14 @@
 <span class="sd">        :param value: The value to be assigned to the attribute.</span>
 <span class="sd">        :type value: *</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;case_by_attr&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;case_by_attr&quot;</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -300,7 +309,10 @@
         <span class="n">extra_keys</span> <span class="o">=</span> <span class="p">{</span><span class="n">elt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span> <span class="o">-</span> <span class="p">{</span><span class="n">elt</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_required_attr</span><span class="p">}</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">extra_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">extra_keys</span><span class="p">):</span>
-                <span class="n">pre_attr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">=&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">)))</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">case_by_attr</span><span class="p">:</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">case_by_attr</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">pre_attr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">=&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">)))</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pre_attr</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -400,6 +412,12 @@
 
 <div class="viewcode-block" id="HeaderInfoAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderInfoAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderInfoAttr</span><span class="p">(</span><span class="n">HeaderTypedAttr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to manage an INFO attribute of VCF header.&quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="HeaderSampleAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderSampleAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderSampleAttr</span><span class="p">(</span><span class="n">HeaderAttr</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class to manage an SAMPLE attribute of VCF header.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
@@ -1208,19 +1226,59 @@
 
 <span class="sd">        :param filepath: The filepath.</span>
 <span class="sd">        :type filepath: str</span>
-<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;, &#39;i&#39;). The mode &#39;i&#39; allow to open file in indexed mode to fetch by region (tabix).</span>
 <span class="sd">        :type mode: str</span>
 <span class="sd">        :return: The new instance</span>
 <span class="sd">        :rtype: anacore.vcf.VCFIO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">AbstractFile</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="n">standard_mode</span> <span class="o">=</span> <span class="n">mode</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;i&quot;</span> <span class="k">else</span> <span class="s2">&quot;r&quot;</span>
+        <span class="n">AbstractFile</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">standard_mode</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># {&quot;q10&quot;: &lt;HeaderFilterAttr&gt;}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># {&quot;IDREP&quot;: &lt;HeaderInfoAttr&gt;, &quot;AD&quot;: &lt;HeaderInfoAttr&gt;}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># {&quot;GT&quot;: &lt;HeaderFormatAttr&gt;, &quot;AD&quot;: &lt;HeaderFormatAttr&gt;}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># {&quot;splA&quot;: &lt;HeaderSampleAttr&gt;, &quot;splB&quot;: &lt;HeaderSampleAttr&gt;}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extra_header</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>  <span class="c1"># [&quot;##source=myImputationProgramV3.1&quot;, &quot;##phasing=partial&quot;]</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span><span class="p">:</span>  <span class="c1"># Load header in append mode</span>
+            <span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp_reader</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">copyHeader</span><span class="p">(</span><span class="n">tmp_reader</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;i&quot;</span><span class="p">}:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parseHeader</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;i&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">TabixFile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VCFIO.getSub"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.getSub">[docs]</a>    <span class="k">def</span> <span class="nf">getSub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">chr</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return generator on records overlapping the specified region.</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">            This method can only be used with an instance of anacore.VCFIO opened</span>
+<span class="sd">            with mode &quot;i&quot;.</span>
+
+<span class="sd">        :param chr: Chromosome name of the selected region.</span>
+<span class="sd">        :type chr: str</span>
+<span class="sd">        :param start: Start of the selected region (1-based).</span>
+<span class="sd">        :type start: int</span>
+<span class="sd">        :param end: End of the selected region (1-based).</span>
+<span class="sd">        :type end: int</span>
+<span class="sd">        :return: Records overlappind the specified region.</span>
+<span class="sd">        :rtype: generator for anacore.vcf.VCFRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The file </span><span class="si">{}</span><span class="s2"> must be open in mode &#39;i&#39; to use </span><span class="si">{}</span><span class="s2">.getSub() on it.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="p">,</span> <span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="n">iterator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">iterator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="nb">chr</span><span class="p">,</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="n">missing_region</span> <span class="o">=</span> <span class="s2">&quot;could not create iterator for region &#39;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">chr</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">missing_region</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">error</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span> <span class="o">=</span> <span class="n">row</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="VCFIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1262,6 +1320,9 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;##FORMAT&quot;</span><span class="p">):</span>
             <span class="n">curr_attr</span> <span class="o">=</span> <span class="n">getHeaderAttr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">[</span><span class="n">curr_attr</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_attr</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;##SAMPLE&quot;</span><span class="p">):</span>
+            <span class="n">curr_attr</span> <span class="o">=</span> <span class="n">getHeaderAttr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_info</span><span class="p">[</span><span class="n">curr_attr</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_attr</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#CHROM</span><span class="se">\t</span><span class="s2">POS&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="n">spl</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">9</span><span class="p">:]]</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;##fileformat=&quot;</span><span class="p">):</span>
@@ -1441,12 +1502,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">filter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sample_info</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">sample_info</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extra_header</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">extra_header</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VCFIO.writeHeader"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.writeHeader">[docs]</a>    <span class="k">def</span> <span class="nf">writeHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write VCF header.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;##fileformat=VCFv4.1</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;##fileformat=VCFv4.3</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">curr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra_header</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">curr</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">):</span>
@@ -1455,6 +1517,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;##FILTER=</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">[</span><span class="n">tag</span><span class="p">]))</span>
         <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;##FORMAT=</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">[</span><span class="n">tag</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_info</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;##SAMPLE=</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_info</span><span class="p">[</span><span class="n">spl</span><span class="p">]))</span>
         <span class="n">last_header_line</span> <span class="o">=</span> <span class="s2">&quot;#CHROM</span><span class="se">\t</span><span class="s2">POS</span><span class="se">\t</span><span class="s2">ID</span><span class="se">\t</span><span class="s2">REF</span><span class="se">\t</span><span class="s2">ALT</span><span class="se">\t</span><span class="s2">QUAL</span><span class="se">\t</span><span class="s2">FILTER</span><span class="se">\t</span><span class="s2">INFO&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">last_header_line</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">FORMAT</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">spl</span> <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">])</span>

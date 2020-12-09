@@ -200,13 +200,13 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">isGzip</span>
-<span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="k">import</span> <span class="n">HashedSVIO</span><span class="p">,</span> <span class="n">SVIO</span>
 <span class="kn">from</span> <span class="nn">anacore.annotVcf</span> <span class="k">import</span> <span class="n">AnnotVCFIO</span>
+<span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="k">import</span> <span class="n">HashedSVIO</span><span class="p">,</span> <span class="n">SVIO</span>
 <span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="k">import</span> <span class="n">decodeInfoValue</span><span class="p">,</span> <span class="n">getAlleleRecord</span><span class="p">,</span> <span class="n">VCFIO</span><span class="p">,</span> <span class="n">VCFRecord</span><span class="p">,</span> <span class="n">HeaderInfoAttr</span><span class="p">,</span> <span class="n">HeaderFilterAttr</span><span class="p">,</span> <span class="n">HeaderFormatAttr</span>
 
 
@@ -1232,14 +1232,14 @@
 
 <span class="sd">        :param filepath: The filepath.</span>
 <span class="sd">        :type filepath: str</span>
-<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;, &#39;i&#39;). The mode &#39;i&#39; allow to open file in indexed mode to fetch by region (tabix).</span>
 <span class="sd">        :type mode: str</span>
 <span class="sd">        :return: The new instance.</span>
 <span class="sd">        :rtype: anacore.fusionVcf.BreakendVCFIO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sv_rec_by_id</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># By record ID the byte position of start and end of line</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pick_reader</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="s2">&quot;i&quot;</span><span class="p">}:</span>
             <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">pick_reader</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1295,6 +1295,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">=</span> <span class="n">current</span><span class="p">[</span><span class="s2">&quot;line_nb&quot;</span><span class="p">]</span>
         <span class="c1"># Return</span>
         <span class="k">return</span> <span class="n">record</span></div>
+
+<div class="viewcode-block" id="BreakendVCFIO.getSub"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.getSub">[docs]</a>    <span class="k">def</span> <span class="nf">getSub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">chr</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return generator on records overlapping the specified region.</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">            This method can only be used with an instance of anacore.VCFIO opened</span>
+<span class="sd">            with mode &quot;i&quot;.</span>
+
+<span class="sd">        :param chr: Chromosome name of the selected region.</span>
+<span class="sd">        :type chr: str</span>
+<span class="sd">        :param start: Start of the selected region (1-based).</span>
+<span class="sd">        :type start: int</span>
+<span class="sd">        :param end: End of the selected region (1-based).</span>
+<span class="sd">        :type end: int</span>
+<span class="sd">        :return: Fusions (record and his mates) overlappind the specified region.</span>
+<span class="sd">        :rtype: generator for (anacore.vcf.VCFRecord, [anacore.vcf.VCFRecord, ...])</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_rec_by_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="nb">chr</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+            <span class="n">mates</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span> <span class="n">record</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;MATEID&quot;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">mate_id</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;MATEID&quot;</span><span class="p">]:</span>
+                <span class="n">mates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mate_id</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">mates</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BreakendVCFIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

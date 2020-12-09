@@ -55,13 +55,13 @@ __version__ = '2.6.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-import re
 import gzip
 import json
+import re
 import uuid
 from anacore.abstractFile import isGzip
-from anacore.sv import HashedSVIO, SVIO
 from anacore.annotVcf import AnnotVCFIO
+from anacore.sv import HashedSVIO, SVIO
 from anacore.vcf import decodeInfoValue, getAlleleRecord, VCFIO, VCFRecord, HeaderInfoAttr, HeaderFilterAttr, HeaderFormatAttr
 
 
@@ -1087,14 +1087,14 @@ class BreakendVCFIO(AnnotVCFIO):
 
         :param filepath: The filepath.
         :type filepath: str
-        :param mode: Mode to open the file ('r', 'w', 'a').
+        :param mode: Mode to open the file ('r', 'w', 'a', 'i'). The mode 'i' allow to open file in indexed mode to fetch by region (tabix).
         :type mode: str
         :return: The new instance.
         :rtype: anacore.fusionVcf.BreakendVCFIO
         """
         self.sv_rec_by_id = {}  # By record ID the byte position of start and end of line
         self.pick_reader = None
-        if mode == "r":
+        if mode in {"r", "i"}:
             if isGzip(filepath):
                 self.pick_reader = gzip.open(filepath, "rt")
             else:
@@ -1150,6 +1150,31 @@ class BreakendVCFIO(AnnotVCFIO):
         self.current_line_nb = current["line_nb"]
         # Return
         return record
+
+    def getSub(self, chr, start, end):
+        """
+        Return generator on records overlapping the specified region.
+
+        .. warning::
+            This method can only be used with an instance of anacore.VCFIO opened
+            with mode "i".
+
+        :param chr: Chromosome name of the selected region.
+        :type chr: str
+        :param start: Start of the selected region (1-based).
+        :type start: int
+        :param end: End of the selected region (1-based).
+        :type end: int
+        :return: Fusions (record and his mates) overlappind the specified region.
+        :rtype: generator for (anacore.vcf.VCFRecord, [anacore.vcf.VCFRecord, ...])
+        """
+        print(self.sv_rec_by_id)
+        for record in super().getSub(chr, start, end):
+            mates = []
+            print(record.getName(), record.info["MATEID"])
+            for mate_id in record.info["MATEID"]:
+                mates.append(self.get(mate_id))
+            yield (record, mates)
 
     def isRecordLine(self, line):
         """

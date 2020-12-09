@@ -8,9 +8,9 @@ __version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-import re
-from copy import deepcopy
 from anacore.vcf import *
+from copy import deepcopy
+import re
 
 
 class AnnotVCFIO(VCFIO):
@@ -22,7 +22,7 @@ class AnnotVCFIO(VCFIO):
 
         :param filepath: The filepath.
         :type filepath: str
-        :param mode: Mode to open the file ('r', 'w', 'a').
+        :param mode: Mode to open the file ('r', 'w', 'a', 'i'). The mode 'i' allow to open file in indexed mode to fetch by region (tabix).
         :type mode: str
         :param annot_field: The tag for the field used to store annotations. [Default: ANN]
         :type annot_field: str
@@ -143,7 +143,7 @@ class VEPVCFIO(AnnotVCFIO):
 
         :param filepath: The filepath.
         :type filepath: str
-        :param mode: Mode to open the file ('r', 'w', 'a').
+        :param mode: Mode to open the file ('r', 'w', 'a', 'i'). The mode 'i' allow to open file in indexed mode to fetch by region (tabix).
         :type mode: str
         :return: The new instance.
         :rtype: VEPVCFIO

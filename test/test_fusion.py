@@ -8,10 +8,11 @@ __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
+import pysam
 import sys
-import uuid
 import tempfile
 import unittest
+import uuid
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
@@ -395,6 +396,50 @@ class BreakendVCFIOTest(unittest.TestCase):
         for curr_file in [self.tmp]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
+
+    def testGetSub(self):
+        content = '''##fileformat=VCFv4.3
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
+##FILTER=<ID=HLA,Description="One breakend is located on HLA.">
+##FILTER=<ID=IG,Description="One breakend is located on immunoglobulin.">
+##FILTER=<ID=Inner,Description="The two breakends are located in the same gene.">
+##FILTER=<ID=Readthrough,Description="The fusion is readthrough (it concerns the two following genes in the same strand in an interval <= 100000).">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+2	321682	bnd_V	T	]13 : 123456]T	6	PASS	SVTYPE=BND;MATEID=bnd_U
+4	888888	.	T	G	.	PASS	.
+13	123456	bnd_U	C	C[2 : 321682[,C[17:198983[	6	PASS	SVTYPE=BND;MATEID=bnd_V,bnd_Z
+17	198983	bnd_Z	A	]13:123456]A	6	PASS	SVTYPE=BND;MATEID=bnd_U'''
+        with open(self.tmp, "w") as writer:
+            writer.write(content)
+        try:
+            pysam.tabix_compress(self.tmp, self.tmp + ".gz")
+            pysam.tabix_index(self.tmp + ".gz", preset="vcf")
+            with BreakendVCFIO(self.tmp + ".gz", "i") as reader:
+                # Missing chromosome
+                observed = [elt.getName() for elt in reader.getSub("1", 1437, 11437)]
+                self.assertEqual(observed, [])
+                # No variants
+                observed = [elt.getName() for elt in reader.getSub("2", 1234580, 1234590)]
+                self.assertEqual(observed, [])
+                # Fusion 2 mates
+                observed = [elt for elt in reader.getSub("13", 123450, 123460)]
+                for idx, curr in enumerate(observed):
+                    observed[idx] = (
+                        curr[0].getName(),
+                        [elt.getName() for elt in curr[1]]
+                    )
+                self.assertEqual(
+                    observed,
+                    [(
+                        "13:123456=C/C[2 : 321682[/C[17:198983[",
+                        ["2:321682=T/]13 : 123456]T", "17:198983=A/]13:123456]A"]
+                    )]
+                )
+        finally:
+            for curr_file in [self.tmp + ".gz", self.tmp + ".gz.tbi"]:
+                if os.path.exists(curr_file):
+                    os.remove(curr_file)
 
     def test_read(self):
         # Create input tmp

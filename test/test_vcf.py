@@ -3,15 +3,16 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.9.0'
+__version__ = '1.10.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
+import pysam
 import sys
-import uuid
 import tempfile
 import unittest
+import uuid
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
@@ -86,6 +87,34 @@ class TestVCFIO(unittest.TestCase):
                     "_".join([variant.chrom, str(variant.pos), variant.ref, ",".join(variant.alt)])
                 )
             self.assertEqual(expected_records, readed_records)
+
+    def testGetSub(self):
+        try:
+            pysam.tabix_compress(self.tmp_in_variants, self.tmp_in_variants + ".gz")
+            pysam.tabix_index(self.tmp_in_variants + ".gz", preset="vcf")
+            with VCFIO(self.tmp_in_variants + ".gz", "i") as reader:
+                # Missing chromosome
+                observed = [elt.getName() for elt in reader.getSub("1", 1437, 11437)]
+                self.assertEqual(observed, [])
+                # No variants
+                observed = [elt.getName() for elt in reader.getSub("20", 1234580, 1234590)]
+                self.assertEqual(observed, [])
+                # At substit
+                observed = [elt.getName() for elt in reader.getSub("20", 17330, 17330)]
+                self.assertEqual(observed, ["20:17330=T/A"])
+                # Contains several variants
+                observed = [elt.getName() for elt in reader.getSub("20", 14330, 17350)]
+                self.assertEqual(observed, ["20:14370=G/A", "20:17330=T/A"])
+                # Overlap deletion start
+                observed = [elt.getName() for elt in reader.getSub("20", 1234550, 1234567)]
+                self.assertEqual(observed, ["20:1234567=GTC/G/GTCT"])
+                # In deletion
+                observed = [elt.getName() for elt in reader.getSub("20", 1234569, 1234569)]
+                self.assertEqual(observed, ["20:1234567=GTC/G/GTCT"])
+        finally:
+            for curr_file in [self.tmp_in_variants + ".gz", self.tmp_in_variants + ".gz.tbi"]:
+                if os.path.exists(curr_file):
+                    os.remove(curr_file)
 
     def testParseHeader(self):
         with VCFIO(self.tmp_in_variants_with_spl_info) as FH_vcf:

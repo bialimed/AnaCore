@@ -4,14 +4,15 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.29.0'
+__version__ = '1.30.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+from anacore.abstractFile import AbstractFile
+from copy import deepcopy
+from pysam import TabixFile
 import sys
 import warnings
-from copy import deepcopy
-from anacore.abstractFile import AbstractFile
 
 
 def decodeInfoValue(val):
@@ -1080,20 +1081,59 @@ class VCFIO(AbstractFile):
 
         :param filepath: The filepath.
         :type filepath: str
-        :param mode: Mode to open the file ('r', 'w', 'a').
+        :param mode: Mode to open the file ('r', 'w', 'a', 'i'). The mode 'i' allow to open file in indexed mode to fetch by region (tabix).
         :type mode: str
         :return: The new instance
         :rtype: anacore.vcf.VCFIO
         """
-        AbstractFile.__init__(self, filepath, mode)
+        standard_mode = mode if mode != "i" else "r"
+        AbstractFile.__init__(self, filepath, standard_mode)
         self.samples = list()
         self.filter = dict()  # {"q10": <HeaderFilterAttr>}
         self.info = dict()  # {"IDREP": <HeaderInfoAttr>, "AD": <HeaderInfoAttr>}
         self.format = dict()  # {"GT": <HeaderFormatAttr>, "AD": <HeaderFormatAttr>}
         self.sample_info = dict()  # {"splA": <HeaderSampleAttr>, "splB": <HeaderSampleAttr>}
         self.extra_header = list()  # ["##source=myImputationProgramV3.1", "##phasing=partial"]
-        if mode == "r":
+        self._index = None
+        if mode == "a":  # Load header in append mode
+            with VCFIO(filepath, "r") as tmp_reader:
+                self.copyHeader(tmp_reader)
+        if mode in {"r", "i"}:
             self._parseHeader()
+            if mode == "i":
+                self._index = TabixFile(filepath)
+
+    def getSub(self, chr, start, end):
+        """
+        Return generator on records overlapping the specified region.
+
+        .. warning::
+            This method can only be used with an instance of anacore.VCFIO opened
+            with mode "i".
+
+        :param chr: Chromosome name of the selected region.
+        :type chr: str
+        :param start: Start of the selected region (1-based).
+        :type start: int
+        :param end: End of the selected region (1-based).
+        :type end: int
+        :return: Records overlappind the specified region.
+        :rtype: generator for anacore.vcf.VCFRecord
+        """
+        if self._index is None:
+            raise Exception("The file {} must be open in mode 'i' to use {}.getSub() on it.".format(self.file_handle, __class__.__name__))
+        iterator = None
+        try:
+            iterator = self._index.fetch(chr, start - 1, end)
+        except ValueError as error:
+            missing_region = "could not create iterator for region '{}:{}-{}'".format(chr, start, end)
+            if missing_region == str(error):
+                return []
+            else:
+                raise error
+        for row in iterator:
+            self.current_line = row
+            yield self._parseLine()
 
     def isRecordLine(self, line):
         """

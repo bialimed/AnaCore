@@ -1,8 +1,10 @@
 # Release 2.9.0 [DEV]
 
 ### Improvements
+  * Add `getSub` and open mode "i" in `anacore.vcf.VCFIO` to return records
+  overlapping the specified region in file with tabix index.
   * Add specific management for samples description rows in VCF header
-  (`anacore.vcf`).
+  (`anacore.vcf.VCFIO`).
   * Add reader for picard tools outputs in `anacore.picardIO`.
   * Manage UMI in Illumina's sequence ID with `anacore.illumina.getInfFromSeqID`.
 
