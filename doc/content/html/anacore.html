@@ -2136,6 +2136,86 @@ With region test:10-20(-) the pos 2 correspond to ref position 18</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="anacore.hgvs.HGVSProtChange">
+<em class="property">class </em><code class="sig-prename descclassname">anacore.hgvs.</code><code class="sig-name descname">HGVSProtChange</code><span class="sig-paren">(</span><em class="sig-param">start_aa</em>, <em class="sig-param">start_pos</em>, <em class="sig-param">end_aa</em>, <em class="sig-param">end_pos</em>, <em class="sig-param">new_aa</em>, <em class="sig-param">evt</em>, <em class="sig-param">new_elts</em>, <em class="sig-param">predicted=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/hgvs.html#HGVSProtChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.hgvs.HGVSProtChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to manipulate change part of proteic HGVS (ex: “Val600Glu”).</p>
+<p>Build and return an instance of HGVSProtChange.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_aa</strong> (<em>str</em>) – First amino acid impacted by the variant. Example: “Val” in “Val600Glu” or “Gln” in “Gln746_Lys747ins*63” or “Ile” in “Ile327Argfs*?”.</p></li>
+<li><p><strong>start_pos</strong> (<em>int</em>) – Proteic position of the first amino acid impacted by the variant. Example: 600 in “Val600Glu” or 746 in “Gln746_Lys747ins*63” or 327 in “Ile327Argfs*?”.</p></li>
+<li><p><strong>end_aa</strong> (<em>str</em>) – Last amino acid impacted by the variant. Example: None in “Val600Glu” or “Lys” in “Gln746_Lys747ins*63” or None in “Ile327Argfs*?”.</p></li>
+<li><p><strong>end_pos</strong> (<em>int</em>) – Proteic position of the last amino acid impacted by the variant. Example: None in “Val600Glu” or 747 in “Gln746_Lys747ins*63” or None in “Ile327Argfs*?”.</p></li>
+<li><p><strong>new_aa</strong> (<em>str</em>) – Amino acid changed by “fs” or “ext”. Example: None in “Val600Glu” or None in “Gln746_Lys747ins*63” or “Arg” in “Ile327Argfs*?”.</p></li>
+<li><p><strong>evt</strong> (<em>str</em>) – Type of evenment in [None, “del”, “dup”, “ext”, “fs”, “ins”, “insdel”]. Example: None in “Val600Glu” or “ins” in “Gln746_Lys747ins*63” or “fs” in “Ile327Argfs*?”.</p></li>
+<li><p><strong>new_elts</strong> (<em>list</em>) – New elements list after evenment type in HGVS change. Example [“Glu”] from “Val600Glu” or [“*”, “63”] from “Gln746_Lys747ins*63” or [“*”, “?”] from “Ile327Argfs*?”.</p></li>
+<li><p><strong>predicted</strong> (<em>bool</em>) – True if HGVS consequence is predicted, i.e. without experimental evidence (no RNA or protein sequence analysed).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.hgvs.HGVSProtChange" title="anacore.hgvs.HGVSProtChange">anacore.hgvs.HGVSProtChange</a></p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="anacore.hgvs.HGVSProtChange.end_aa">
+<em class="property">property </em><code class="sig-name descname">end_aa</code><a class="headerlink" href="#anacore.hgvs.HGVSProtChange.end_aa" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="anacore.hgvs.HGVSProtChange.fromStr">
+<em class="property">static </em><code class="sig-name descname">fromStr</code><span class="sig-paren">(</span><em class="sig-param">change</em>, <em class="sig-param">aa_nb_letter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/hgvs.html#HGVSProtChange.fromStr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.hgvs.HGVSProtChange.fromStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return HGVSProtChange from change part of HGVS string (ex: “Val600Glu”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>change</strong> (<em>str</em>) – Change part of HGVS string (ex: “Val600Glu”).</p></li>
+<li><p><strong>aa_nb_letter</strong> (<em>int</em>) – Number of letters to represent an amino acid: 1 or 3. By default, the function tries to determine this number automatically.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>HGVSProtChange from change part of HGVS string (ex: “Val600Glu”).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.hgvs.HGVSProtChange" title="anacore.hgvs.HGVSProtChange">anacore.hgvs.HGVSProtChange</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="anacore.hgvs.HGVSProtChange.isHGVS">
+<em class="property">static </em><code class="sig-name descname">isHGVS</code><span class="sig-paren">(</span><em class="sig-param">change</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/hgvs.html#HGVSProtChange.isHGVS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.hgvs.HGVSProtChange.isHGVS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the string is a valid HGVS change (ex: “Val600Glu” or “(Val582_Asn583insXXXXX)”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>change</strong> (<em>str</em>) – String to validate.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the string is a valid HGVS change (ex: “Val600Glu” or “(Val582_Asn583insXXXXX)”).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="anacore.hgvs.HGVSProtChange.new_aa">
+<em class="property">property </em><code class="sig-name descname">new_aa</code><a class="headerlink" href="#anacore.hgvs.HGVSProtChange.new_aa" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="anacore.hgvs.HGVSProtChange.start_aa">
+<em class="property">property </em><code class="sig-name descname">start_aa</code><a class="headerlink" href="#anacore.hgvs.HGVSProtChange.start_aa" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="anacore.hgvs.MutalyzerBatch">
 <em class="property">class </em><code class="sig-prename descclassname">anacore.hgvs.</code><code class="sig-name descname">MutalyzerBatch</code><span class="sig-paren">(</span><em class="sig-param">queries</em>, <em class="sig-param">url='https://mutalyzer.nl'</em>, <em class="sig-param">command='NameChecker'</em>, <em class="sig-param">proxy_url=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/hgvs.html#MutalyzerBatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#anacore.hgvs.MutalyzerBatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>

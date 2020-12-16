@@ -150,7 +150,7 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2019 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.1.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.2.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
@@ -159,6 +159,44 @@
 <span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">urllib.parse</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
+
+
+<span class="n">AA_ONE_BY_THREE</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;Ter&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Ala&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Arg&quot;</span><span class="p">:</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Asn&quot;</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Asp&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Cys&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Gln&quot;</span><span class="p">:</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Glu&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Gly&quot;</span><span class="p">:</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;His&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Ile&quot;</span><span class="p">:</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Leu&quot;</span><span class="p">:</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Lys&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Met&quot;</span><span class="p">:</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Phe&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Pro&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Ser&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Thr&quot;</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Trp&quot;</span><span class="p">:</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Tyr&quot;</span><span class="p">:</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Val&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Asx&quot;</span><span class="p">:</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Glx&quot;</span><span class="p">:</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Xle&quot;</span><span class="p">:</span> <span class="s2">&quot;J&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Sec&quot;</span><span class="p">:</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Pyl&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Xaa&quot;</span><span class="p">:</span> <span class="s2">&quot;X&quot;</span>
+<span class="p">}</span>
+
+<span class="n">AA_THREE_BY_ONE</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">AA_ONE_BY_THREE</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+<span class="n">ONE_LETTER_AA_LEXIC</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">AA_ONE_BY_THREE</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+<span class="n">THREE_LETTERS_AA_LEXIC</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">AA_ONE_BY_THREE</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="Accession"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.Accession">[docs]</a><span class="k">class</span> <span class="nc">Accession</span><span class="p">:</span>
@@ -243,13 +281,13 @@
 <span class="sd">        :rtype: HGVS</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">hgvs</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^(.+)\.(.+):(.)\.(.+)$&quot;</span><span class="p">,</span> <span class="n">hgvs_str</span><span class="p">)</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(.+)\.(.+):(.)\.(.+)$&quot;</span><span class="p">,</span> <span class="n">hgvs_str</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">acc_id</span><span class="p">,</span> <span class="n">acc_version</span><span class="p">,</span> <span class="n">hgvs_type</span><span class="p">,</span> <span class="n">hgvs_change</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
             <span class="n">acc_obj</span> <span class="o">=</span> <span class="n">Accession</span><span class="p">(</span><span class="n">acc_id</span><span class="p">,</span> <span class="n">acc_version</span><span class="p">)</span>
             <span class="n">hgvs</span> <span class="o">=</span> <span class="n">HGVS</span><span class="p">(</span><span class="n">acc_obj</span><span class="p">,</span> <span class="n">hgvs_type</span><span class="p">,</span> <span class="n">hgvs_change</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;^(.+):(.)\.(.+)$&quot;</span><span class="p">,</span> <span class="n">hgvs_str</span><span class="p">)</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(.+):(.)\.(.+)$&quot;</span><span class="p">,</span> <span class="n">hgvs_str</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">acc_id</span><span class="p">,</span> <span class="n">hgvs_type</span><span class="p">,</span> <span class="n">hgvs_change</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
                 <span class="n">acc_obj</span> <span class="o">=</span> <span class="n">Accession</span><span class="p">(</span><span class="n">acc_id</span><span class="p">)</span>
@@ -479,7 +517,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">HGVS_by_elt</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-            <span class="n">match_renamed</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;(.+)\((.+)\):(.)\.(.+)&quot;</span><span class="p">,</span> <span class="n">elt</span><span class="p">)</span>
+            <span class="n">match_renamed</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(.+)\((.+)\):(.)\.(.+)&quot;</span><span class="p">,</span> <span class="n">elt</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">match_renamed</span><span class="p">:</span>
                 <span class="n">ref_acc</span><span class="p">,</span> <span class="n">elt_name</span><span class="p">,</span> <span class="n">hgvs_type</span><span class="p">,</span> <span class="n">change</span> <span class="o">=</span> <span class="n">match_renamed</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
                 <span class="n">elt_acc</span> <span class="o">=</span> <span class="n">elt_name</span>
@@ -490,7 +528,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">HGVS_by_elt</span><span class="p">[</span><span class="n">elt_acc</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt_acc</span><span class="p">,</span> <span class="n">hgvs_type</span><span class="p">,</span> <span class="n">change</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">match_std</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;(.+):(.)\.(.+)&quot;</span><span class="p">,</span> <span class="n">elt</span><span class="p">)</span>
+                <span class="n">match_std</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(.+):(.)\.(.+)&quot;</span><span class="p">,</span> <span class="n">elt</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">match_std</span><span class="p">:</span>
                     <span class="n">elt_acc</span><span class="p">,</span> <span class="n">hgvs_type</span><span class="p">,</span> <span class="n">change</span> <span class="o">=</span> <span class="n">match_std</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">change</span> <span class="o">==</span> <span class="s2">&quot;?&quot;</span><span class="p">:</span>
@@ -500,6 +538,391 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The feature description </span><span class="si">{}</span><span class="s2"> cannot be parsed.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">HGVS_by_elt</span></div></div>
+
+
+<div class="viewcode-block" id="HGVSProtChange"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange">[docs]</a><span class="k">class</span> <span class="nc">HGVSProtChange</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class to manipulate change part of proteic HGVS (ex: &quot;Val600Glu&quot;).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts</span><span class="p">,</span> <span class="n">predicted</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of HGVSProtChange.</span>
+
+<span class="sd">        :param start_aa: First amino acid impacted by the variant. Example: &quot;Val&quot; in &quot;Val600Glu&quot; or &quot;Gln&quot; in &quot;Gln746_Lys747ins*63&quot; or &quot;Ile&quot; in &quot;Ile327Argfs*?&quot;.</span>
+<span class="sd">        :type start_aa: str</span>
+<span class="sd">        :param start_pos: Proteic position of the first amino acid impacted by the variant. Example: 600 in &quot;Val600Glu&quot; or 746 in &quot;Gln746_Lys747ins*63&quot; or 327 in &quot;Ile327Argfs*?&quot;.</span>
+<span class="sd">        :type start_pos: int</span>
+<span class="sd">        :param end_aa: Last amino acid impacted by the variant. Example: None in &quot;Val600Glu&quot; or &quot;Lys&quot; in &quot;Gln746_Lys747ins*63&quot; or None in &quot;Ile327Argfs*?&quot;.</span>
+<span class="sd">        :type end_aa: str</span>
+<span class="sd">        :param end_pos: Proteic position of the last amino acid impacted by the variant. Example: None in &quot;Val600Glu&quot; or 747 in &quot;Gln746_Lys747ins*63&quot; or None in &quot;Ile327Argfs*?&quot;.</span>
+<span class="sd">        :type end_pos: int</span>
+<span class="sd">        :param new_aa: Amino acid changed by &quot;fs&quot; or &quot;ext&quot;. Example: None in &quot;Val600Glu&quot; or None in &quot;Gln746_Lys747ins*63&quot; or &quot;Arg&quot; in &quot;Ile327Argfs*?&quot;.</span>
+<span class="sd">        :type new_aa: str</span>
+<span class="sd">        :param evt: Type of evenment in [None, &quot;del&quot;, &quot;dup&quot;, &quot;ext&quot;, &quot;fs&quot;, &quot;ins&quot;, &quot;insdel&quot;]. Example: None in &quot;Val600Glu&quot; or &quot;ins&quot; in &quot;Gln746_Lys747ins*63&quot; or &quot;fs&quot; in &quot;Ile327Argfs*?&quot;.</span>
+<span class="sd">        :type evt: str</span>
+<span class="sd">        :param new_elts: New elements list after evenment type in HGVS change. Example [&quot;Glu&quot;] from &quot;Val600Glu&quot; or [&quot;*&quot;, &quot;63&quot;] from &quot;Gln746_Lys747ins*63&quot; or [&quot;*&quot;, &quot;?&quot;] from &quot;Ile327Argfs*?&quot;.</span>
+<span class="sd">        :type new_elts: list</span>
+<span class="sd">        :param predicted: True if HGVS consequence is predicted, i.e. without experimental evidence (no RNA or protein sequence analysed).</span>
+<span class="sd">        :type predicted: bool</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: anacore.hgvs.HGVSProtChange</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_aa</span> <span class="o">=</span> <span class="n">start_aa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">=</span> <span class="n">start_pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_aa</span> <span class="o">=</span> <span class="n">end_aa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_pos</span> <span class="o">=</span> <span class="n">end_pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_aa</span> <span class="o">=</span> <span class="n">new_aa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evt</span> <span class="o">=</span> <span class="n">evt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">new_elts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">new_elts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted</span> <span class="o">=</span> <span class="n">predicted</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">new_aa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_aa</span>
+
+    <span class="nd">@new_aa</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">new_aa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_new_aa</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">new_val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_cleanedAA</span><span class="p">(</span><span class="n">new_val</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_aa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_aa</span>
+
+    <span class="nd">@start_aa</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_aa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_aa</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">new_val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_cleanedAA</span><span class="p">(</span><span class="n">new_val</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_aa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_aa</span>
+
+    <span class="nd">@end_aa</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_aa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_aa</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">new_val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_cleanedAA</span><span class="p">(</span><span class="n">new_val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return true if the object represent the same HGVS change.</span>
+
+<span class="sd">        :param other: HGVS change to compare.</span>
+<span class="sd">        :type other: anacore.hgvs.HGVSProtChange</span>
+<span class="sd">        :return: True if the object represent the same HGVS change.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">repr</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the object representation in string.</span>
+
+<span class="sd">        :return: The object representation in string.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rep_str</span> <span class="o">=</span> <span class="s1">&#39;&quot;start_aa&quot;: </span><span class="si">{}</span><span class="s1">, &quot;start_pos&quot;: </span><span class="si">{}</span><span class="s1">, &#39;</span> \
+            <span class="s1">&#39;&quot;end_aa&quot;: </span><span class="si">{}</span><span class="s1">, &quot;end_pos&quot;: </span><span class="si">{}</span><span class="s1">, &#39;</span> \
+            <span class="s1">&#39;&quot;new_aa&quot;: </span><span class="si">{}</span><span class="s1">, &quot;evt&quot;: </span><span class="si">{}</span><span class="s1">, &#39;</span> \
+            <span class="s1">&#39;&quot;new_elts&quot;: </span><span class="si">{}</span><span class="s1">, &quot;predicted&quot;: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start_aa</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start_pos</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">end_aa</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">end_pos</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_aa</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">evt</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">new_elts</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">predicted</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">rep_str</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the “informal” or nicely printable string representation of the object.</span>
+
+<span class="sd">        :return: The printable string representation of the object.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_aa</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">repr</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">repr</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">repr</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_aa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_pos</span><span class="p">:</span>
+                <span class="nb">repr</span> <span class="o">+=</span> <span class="s2">&quot;_</span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_aa</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_aa</span><span class="p">:</span>
+                <span class="nb">repr</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_aa</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evt</span><span class="p">:</span>
+                <span class="nb">repr</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evt</span>
+            <span class="nb">repr</span> <span class="o">+=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_elts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted</span><span class="p">:</span>
+            <span class="nb">repr</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">repr</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_cleanedAA</span><span class="p">(</span><span class="n">aa</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate and return an amino acid representation for HGVS.</span>
+
+<span class="sd">        :type aa: Amino acid in one or three letter representation.</span>
+<span class="sd">        :type aa: str</span>
+<span class="sd">        :return: Return three letter representation.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">aa</span> <span class="o">=</span> <span class="n">aa</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aa</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ONE_LETTER_AA_LEXIC</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not a valid one letter amino acid. Authorized: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">change</span><span class="p">(</span><span class="n">aa</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ONE_LETTER_AA_LEXIC</span><span class="p">)))</span>
+            <span class="n">aa</span> <span class="o">=</span> <span class="n">AA_THREE_BY_ONE</span><span class="p">[</span><span class="n">aa</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">aa</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">THREE_LETTERS_AA_LEXIC</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not a valid three letter amino acid. Authorized: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">change</span><span class="p">(</span><span class="n">aa</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">THREE_LETTERS_AA_LEXIC</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The amino acid &quot;</span><span class="si">{}</span><span class="s1">&quot; it is not in one or three letter representation.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">aa</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">aa</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_getAANbLetter</span><span class="p">(</span><span class="n">start_aa</span><span class="p">,</span> <span class="n">follow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the number of letters used to encode amino acids.</span>
+
+<span class="sd">        :param start_aa: First amino acid impacted by the variant.</span>
+<span class="sd">        :type start_aa: str</span>
+<span class="sd">        :param follow: Part after first impacted positions in HGVS change (ex: &quot;Glu&quot; in Val600Glu or &quot;_Lys747ins*63&quot; in Gln746_Lys747ins*63 or &quot;Argfs*?&quot; in Ile327Argfs*?).</span>
+<span class="sd">        :type follow: str</span>
+<span class="sd">        :return: Number of letters used to encode amino acids.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">start_aa</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">start_aa</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+            <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="ow">not</span> <span class="n">follow</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">follow</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span><span class="p">}:</span>
+                <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">follow</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="n">THREE_LETTERS_AA_LEXIC</span><span class="p">:</span>
+                    <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="mi">3</span>
+                <span class="k">elif</span> <span class="n">follow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">follow</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;fs&quot;</span> <span class="ow">and</span> <span class="n">follow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ONE_LETTER_AA_LEXIC</span><span class="p">:</span>
+                        <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">follow</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ext&quot;</span> <span class="ow">and</span> <span class="n">follow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ONE_LETTER_AA_LEXIC</span><span class="p">:</span>
+                        <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">aa_nb_letter</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_splittedOnEvt</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">follow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return (new_aa, evenement, new_elts_string) from part after modified positions in HGVS change (ex: &quot;Glu&quot; in Val600Glu or &quot;ins*63&quot; in Gln746_Lys747ins*63 or &quot;Argfs*?&quot; in Ile327Argfs*?).</span>
+
+<span class="sd">        :param change: Change part of HGVS string (ex: &quot;Val600Glu&quot;).</span>
+<span class="sd">        :type change: str</span>
+<span class="sd">        :param aa_nb_letter: Number of letters to represent an amino acid: 1 or 3.</span>
+<span class="sd">        :type aa_nb_letter: int</span>
+<span class="sd">        :param start_pos: First amino acid changed by variant.</span>
+<span class="sd">        :type start_pos: int</span>
+<span class="sd">        :param end_pos: Last amino acid changed by variant.</span>
+<span class="sd">        :type end_pos: int</span>
+<span class="sd">        :param follow: Part after modified positions in HGVS change (ex: &quot;Glu&quot; in Val600Glu or &quot;ins*63&quot; in Gln746_Lys747ins*63 or &quot;Argfs*?&quot; in Ile327Argfs*?).</span>
+<span class="sd">        :type follow: str</span>
+<span class="sd">        :return: The tuple (new_aa, evenement, new_elts_string) from part after modified positions in HGVS change. Examples: (None, None, &quot;Glu&quot;) from Glu or (None, &quot;ins&quot;, &quot;*63&quot;) from ins*63 or (&quot;Arg&quot;, &quot;fs&quot;, &quot;*?&quot;) from Argfs*?.</span>
+<span class="sd">        :rtype: (str, str, str)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">curr_aa_lexic</span> <span class="o">=</span> <span class="n">THREE_LETTERS_AA_LEXIC</span> <span class="k">if</span> <span class="n">aa_nb_letter</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">ONE_LETTER_AA_LEXIC</span>
+        <span class="n">re_aa</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">curr_aa_lexic</span><span class="p">])</span>
+        <span class="n">re_aa</span> <span class="o">=</span> <span class="n">re_aa</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\*&quot;</span><span class="p">)</span>
+        <span class="n">new_aa</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">lc_follow</span> <span class="o">=</span> <span class="n">follow</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lc_follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;delins&quot;</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;delins&quot;</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;delins&quot; must be followed by the amino acids inserted: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">lc_follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;del&quot;</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;del&quot;</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;del&quot; must end the change: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">lc_follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ins&quot;</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;ins&quot;</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Insertion must be followed by the number or the amino acids inserted: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">end_pos</span> <span class="o">-</span> <span class="n">start_pos</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;In insertion the end position must be the next amino acid after the start: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">lc_follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;dup&quot;</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;dup&quot;</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;dup&quot; must end the change: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">lc_follow</span> <span class="o">==</span> <span class="s2">&quot;ext&quot;</span> <span class="ow">or</span> <span class="n">lc_follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ext-&quot;</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;ext&quot;</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(&quot;</span> <span class="o">+</span> <span class="n">re_aa</span> <span class="o">+</span> <span class="s2">&quot;)ext&quot;</span><span class="p">,</span> <span class="n">lc_follow</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;ext&quot;</span>
+            <span class="n">new_aa</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[:</span><span class="n">aa_nb_letter</span><span class="p">]</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="n">aa_nb_letter</span> <span class="o">+</span> <span class="mi">3</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">lc_follow</span> <span class="o">==</span> <span class="s2">&quot;fs&quot;</span><span class="p">:</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;fs&quot;</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(&quot;</span> <span class="o">+</span> <span class="n">re_aa</span> <span class="o">+</span> <span class="s2">&quot;)fs&quot;</span><span class="p">,</span> <span class="n">lc_follow</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;fs&quot;</span>
+            <span class="n">new_aa</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[:</span><span class="n">aa_nb_letter</span><span class="p">]</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="n">aa_nb_letter</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">follow</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parsedNewElements</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elements_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return new elements list from part after evenment type in HGVS change (ex: &quot;Glu&quot; in Val600Glu or &quot;*63&quot; in Gln746_Lys747ins*63 or &quot;*?&quot; in Ile327Argfs*?).</span>
+
+<span class="sd">        :param change: Change part of HGVS string (ex: &quot;Val600Glu&quot;).</span>
+<span class="sd">        :type change: str</span>
+<span class="sd">        :param aa_nb_letter: Number of letters to represent an amino acid: 1 or 3.</span>
+<span class="sd">        :type aa_nb_letter: int</span>
+<span class="sd">        :param evt: Type of evenment in [None, &quot;del&quot;, &quot;dup&quot;, &quot;ext&quot;, &quot;fs&quot;, &quot;ins&quot;, &quot;insdel&quot;].</span>
+<span class="sd">        :type evt: str</span>
+<span class="sd">        :param new_elements_str: Part after evenment type in HGVS change (ex: &quot;Glu&quot; in Val600Glu or &quot;*63&quot; in Gln746_Lys747ins*63 or &quot;*?&quot; in Ile327Argfs*?).</span>
+<span class="sd">        :type new_elements_str: str</span>
+<span class="sd">        :return: New elements list. Example [&quot;Glu&quot;] from &quot;Glu&quot; or [&quot;*&quot;, &quot;63&quot;] from &quot;*63&quot; or [&quot;*&quot;, &quot;?&quot;] from &quot;*?&quot;.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">new_elements_str</span><span class="p">)</span>
+        <span class="n">curr_aa</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">):</span>
+            <span class="n">elt</span> <span class="o">=</span> <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;=&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">}:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;=&quot; it is not the last character in an alternative: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
+                <span class="n">elt</span> <span class="o">=</span> <span class="s2">&quot;Ter&quot;</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">}</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;*&quot; it is not the last element in change and the next element it is not in [&quot;?&quot;, &quot;/&quot;, &quot;^&quot;, digit]: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+                <span class="n">elt</span> <span class="o">=</span> <span class="s2">&quot;Xaa&quot;</span>
+                <span class="k">if</span> <span class="n">aa_nb_letter</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span> <span class="ow">and</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span><span class="p">:</span>
+                        <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+                        <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">elt</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">}:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot; cannot ends the change string: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">,</span> <span class="n">change</span><span class="p">))</span>
+                <span class="c1">############################## TODO: parse evt in remaining: Val245=/del</span>
+            <span class="k">elif</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">evt</span> <span class="o">!=</span> <span class="s2">&quot;ins&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Only insertions can contain brackets: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">elt</span> <span class="o">+=</span> <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Only numbers are authorized in brackets: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;)&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Open bracket in insertion must be closed: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="n">elt</span> <span class="o">+=</span> <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">evt</span> <span class="o">!=</span> <span class="s2">&quot;ext&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Only extensions can contain minus: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">elt</span> <span class="o">+=</span> <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Only numbers are authorized after minus: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">elt</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">elt</span> <span class="o">+=</span> <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">evt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;ins&quot;</span><span class="p">,</span> <span class="s2">&quot;fs&quot;</span><span class="p">,</span> <span class="s2">&quot;ext&quot;</span><span class="p">}:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Digits are only authorized in change of type &quot;ext&quot;, &quot;fs&quot; or &quot;ins&quot;: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">evt</span> <span class="o">!=</span> <span class="s2">&quot;ins&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;/&quot;</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Digit are only authorized at the end of the change or followed by &quot;/&quot; for &quot;fs&quot; and &quot;ext&quot;: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;?&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;?&quot; must be the last character in change: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Is amino acid</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="o">!=</span> <span class="n">aa_nb_letter</span><span class="p">:</span>
+                    <span class="n">elt</span> <span class="o">+=</span> <span class="n">remaining</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+                <span class="n">elt</span> <span class="o">=</span> <span class="n">elt</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">aa_nb_letter</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">elt</span> <span class="o">=</span> <span class="n">AA_THREE_BY_ONE</span><span class="p">[</span><span class="n">elt</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">elt</span> <span class="o">=</span> <span class="n">elt</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">elt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">THREE_LETTERS_AA_LEXIC</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The element &quot;</span><span class="si">{}</span><span class="s1">&quot; in </span><span class="si">{}</span><span class="s1"> is not an amino acid.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">,</span> <span class="n">change</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">elt</span> <span class="o">==</span> <span class="s2">&quot;Ter&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">}</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;Ter&quot; it is not the last alement in change and the next element it is not in [&quot;?&quot;, &quot;/&quot;, &quot;^&quot;, digit]: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+            <span class="n">new_elts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">curr_aa</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;One of the amino acids is incomplete: </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curr_aa</span><span class="p">,</span> <span class="n">change</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">new_elts</span>
+
+<div class="viewcode-block" id="HGVSProtChange.isHGVS"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange.isHGVS">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isHGVS</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the string is a valid HGVS change (ex: &quot;Val600Glu&quot; or &quot;(Val582_Asn583insXXXXX)&quot;).</span>
+
+<span class="sd">        :param change: String to validate.</span>
+<span class="sd">        :type change: str</span>
+<span class="sd">        :return: True if the string is a valid HGVS change (ex: &quot;Val600Glu&quot; or &quot;(Val582_Asn583insXXXXX)&quot;).</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_hgvs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">change</span><span class="p">)</span>
+            <span class="n">is_hgvs</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">is_hgvs</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">is_hgvs</span></div>
+
+<div class="viewcode-block" id="HGVSProtChange.fromStr"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange.fromStr">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromStr</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return HGVSProtChange from change part of HGVS string (ex: &quot;Val600Glu&quot;).</span>
+
+<span class="sd">        :param change: Change part of HGVS string (ex: &quot;Val600Glu&quot;).</span>
+<span class="sd">        :type change: str</span>
+<span class="sd">        :param aa_nb_letter: Number of letters to represent an amino acid: 1 or 3. By default, the function tries to determine this number automatically.</span>
+<span class="sd">        :type aa_nb_letter: int</span>
+<span class="sd">        :return: HGVSProtChange from change part of HGVS string (ex: &quot;Val600Glu&quot;).</span>
+<span class="sd">        :rtype: anacore.hgvs.HGVSProtChange</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">predicted</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;(&quot;</span> <span class="ow">and</span> <span class="n">change</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;)&quot;</span><span class="p">:</span>
+            <span class="n">change</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">predicted</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">predicted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">change</span> <span class="o">==</span> <span class="s2">&quot;?&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HGVSProtChange</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">change</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HGVSProtChange</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^([^\d]+)(\d+)(.+)$&quot;</span><span class="p">,</span> <span class="n">change</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot; has not a valid syntax for HGVS protein change.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">follow</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+            <span class="n">start_pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_pos</span><span class="p">)</span>
+            <span class="n">start_aa</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">aa_nb_letter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">aa_nb_letter</span> <span class="o">=</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_getAANbLetter</span><span class="p">(</span><span class="n">start_aa</span><span class="p">,</span> <span class="n">follow</span><span class="p">)</span>
+            <span class="n">end_aa</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">end_pos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+                <span class="n">end_aa</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">aa_nb_letter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="n">aa_nb_letter</span><span class="p">:]</span>
+                <span class="n">end_pos</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">while</span> <span class="n">follow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="n">end_pos</span> <span class="o">+=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="n">end_pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_pos</span><span class="p">)</span>
+            <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts_str</span> <span class="o">=</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_splittedOnEvt</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">follow</span><span class="p">)</span>
+            <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">new_elts_str</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_elts</span> <span class="o">=</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_parsedNewElements</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts_str</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">HGVSProtChange</span><span class="p">(</span><span class="n">start_aa</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

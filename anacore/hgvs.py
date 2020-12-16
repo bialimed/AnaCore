@@ -5,7 +5,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -14,6 +14,44 @@ import time
 import base64
 import requests
 import urllib.parse
+from collections import deque
+
+
+AA_ONE_BY_THREE = {
+    "Ter": "*",
+    "Ala": "A",
+    "Arg": "R",
+    "Asn": "N",
+    "Asp": "D",
+    "Cys": "C",
+    "Gln": "Q",
+    "Glu": "E",
+    "Gly": "G",
+    "His": "H",
+    "Ile": "I",
+    "Leu": "L",
+    "Lys": "K",
+    "Met": "M",
+    "Phe": "F",
+    "Pro": "P",
+    "Ser": "S",
+    "Thr": "T",
+    "Trp": "W",
+    "Tyr": "Y",
+    "Val": "V",
+    "Asx": "B",
+    "Glx": "Z",
+    "Xle": "J",
+    "Sec": "U",
+    "Pyl": "O",
+    "Xaa": "X"
+}
+
+AA_THREE_BY_ONE = {value: key for key, value in AA_ONE_BY_THREE.items()}
+
+ONE_LETTER_AA_LEXIC = set(AA_ONE_BY_THREE.values())
+
+THREE_LETTERS_AA_LEXIC = set(AA_ONE_BY_THREE.keys()) | {"*", "X"}
 
 
 class Accession:
@@ -98,13 +136,13 @@ class HGVS:
         :rtype: HGVS
         """
         hgvs = None
-        match = re.search("^(.+)\.(.+):(.)\.(.+)$", hgvs_str)
+        match = re.search(r"^(.+)\.(.+):(.)\.(.+)$", hgvs_str)
         if match is not None:
             acc_id, acc_version, hgvs_type, hgvs_change = match.groups()
             acc_obj = Accession(acc_id, acc_version)
             hgvs = HGVS(acc_obj, hgvs_type, hgvs_change)
         else:
-            match = re.search("^(.+):(.)\.(.+)$", hgvs_str)
+            match = re.search(r"^(.+):(.)\.(.+)$", hgvs_str)
             if match is not None:
                 acc_id, hgvs_type, hgvs_change = match.groups()
                 acc_obj = Accession(acc_id)
@@ -334,7 +372,7 @@ class RunMutalyzerDescription:
         """
         HGVS_by_elt = {}
         for elt in self.data:
-            match_renamed = re.search("(.+)\((.+)\):(.)\.(.+)", elt)
+            match_renamed = re.search(r"(.+)\((.+)\):(.)\.(.+)", elt)
             if match_renamed:
                 ref_acc, elt_name, hgvs_type, change = match_renamed.groups()
                 elt_acc = elt_name
@@ -345,7 +383,7 @@ class RunMutalyzerDescription:
                 else:
                     HGVS_by_elt[elt_acc] = "{}:{}.{}".format(elt_acc, hgvs_type, change)
             else:
-                match_std = re.search("(.+):(.)\.(.+)", elt)
+                match_std = re.search(r"(.+):(.)\.(.+)", elt)
                 if match_std:
                     elt_acc, hgvs_type, change = match_std.groups()
                     if change == "?":
@@ -355,3 +393,388 @@ class RunMutalyzerDescription:
                 else:
                     raise Exception("The feature description {} cannot be parsed.".format(elt))
         return HGVS_by_elt
+
+
+class HGVSProtChange:
+    """Class to manipulate change part of proteic HGVS (ex: "Val600Glu")."""
+
+    def __init__(self, start_aa, start_pos, end_aa, end_pos, new_aa, evt, new_elts, predicted=True):
+        """
+        Build and return an instance of HGVSProtChange.
+
+        :param start_aa: First amino acid impacted by the variant. Example: "Val" in "Val600Glu" or "Gln" in "Gln746_Lys747ins*63" or "Ile" in "Ile327Argfs*?".
+        :type start_aa: str
+        :param start_pos: Proteic position of the first amino acid impacted by the variant. Example: 600 in "Val600Glu" or 746 in "Gln746_Lys747ins*63" or 327 in "Ile327Argfs*?".
+        :type start_pos: int
+        :param end_aa: Last amino acid impacted by the variant. Example: None in "Val600Glu" or "Lys" in "Gln746_Lys747ins*63" or None in "Ile327Argfs*?".
+        :type end_aa: str
+        :param end_pos: Proteic position of the last amino acid impacted by the variant. Example: None in "Val600Glu" or 747 in "Gln746_Lys747ins*63" or None in "Ile327Argfs*?".
+        :type end_pos: int
+        :param new_aa: Amino acid changed by "fs" or "ext". Example: None in "Val600Glu" or None in "Gln746_Lys747ins*63" or "Arg" in "Ile327Argfs*?".
+        :type new_aa: str
+        :param evt: Type of evenment in [None, "del", "dup", "ext", "fs", "ins", "insdel"]. Example: None in "Val600Glu" or "ins" in "Gln746_Lys747ins*63" or "fs" in "Ile327Argfs*?".
+        :type evt: str
+        :param new_elts: New elements list after evenment type in HGVS change. Example ["Glu"] from "Val600Glu" or ["*", "63"] from "Gln746_Lys747ins*63" or ["*", "?"] from "Ile327Argfs*?".
+        :type new_elts: list
+        :param predicted: True if HGVS consequence is predicted, i.e. without experimental evidence (no RNA or protein sequence analysed).
+        :type predicted: bool
+        :return: The new instance.
+        :rtype: anacore.hgvs.HGVSProtChange
+        """
+        self.start_aa = start_aa
+        self.start_pos = start_pos
+        self.end_aa = end_aa
+        self.end_pos = end_pos
+        self.new_aa = new_aa
+        self.evt = evt
+        self.new_elts = [] if new_elts is None else new_elts
+        self.predicted = predicted
+
+    @property
+    def new_aa(self):
+        return self._new_aa
+
+    @new_aa.setter
+    def new_aa(self, new_val):
+        self._new_aa = None if new_val is None else HGVSProtChange._cleanedAA(new_val)
+
+    @property
+    def start_aa(self):
+        return self._start_aa
+
+    @start_aa.setter
+    def start_aa(self, new_val):
+        self._start_aa = None if new_val is None else HGVSProtChange._cleanedAA(new_val)
+
+    @property
+    def end_aa(self):
+        return self._end_aa
+
+    @end_aa.setter
+    def end_aa(self, new_val):
+        self._end_aa = None if new_val is None else HGVSProtChange._cleanedAA(new_val)
+
+    def __eq__(self, other):
+        """
+        Return true if the object represent the same HGVS change.
+
+        :param other: HGVS change to compare.
+        :type other: anacore.hgvs.HGVSProtChange
+        :return: True if the object represent the same HGVS change.
+        :rtype: bool
+        """
+        return repr(self) == repr(other)
+
+    def __repr__(self):
+        """
+        Return the object representation in string.
+
+        :return: The object representation in string.
+        :rtype: str
+        """
+        rep_str = '"start_aa": {}, "start_pos": {}, ' \
+            '"end_aa": {}, "end_pos": {}, ' \
+            '"new_aa": {}, "evt": {}, ' \
+            '"new_elts": {}, "predicted": {}'.format(
+                self.start_aa,
+                self.start_pos,
+                self.end_aa,
+                self.end_pos,
+                self.new_aa,
+                self.evt,
+                self.new_elts,
+                self.predicted
+            )
+        return '{' + rep_str + '}'
+
+    def __str__(self):
+        """
+        Return the “informal” or nicely printable string representation of the object.
+
+        :return: The printable string representation of the object.
+        :rtype: str
+        """
+        if self.start_aa is None:
+            if self.start_pos == 0:
+                repr = "0"
+            else:
+                repr = "?"
+        else:
+            repr = "{}{}".format(self.start_aa, self.start_pos)
+            if self.end_pos:
+                repr += "_{}{}".format(self.end_aa, self.end_pos)
+            if self.new_aa:
+                repr += self.new_aa
+            if self.evt:
+                repr += self.evt
+            repr += "".join(self.new_elts)
+        if self.predicted:
+            repr = "({})".format(repr)
+        return repr
+
+    @staticmethod
+    def _cleanedAA(aa):
+        """
+        Validate and return an amino acid representation for HGVS.
+
+        :type aa: Amino acid in one or three letter representation.
+        :type aa: str
+        :return: Return three letter representation.
+        :rtype: str
+        """
+        aa = aa.capitalize()
+        if len(aa) == 1:
+            if aa not in ONE_LETTER_AA_LEXIC:
+                raise Exception("{} is not a valid one letter amino acid. Authorized: {}.".change(aa, sorted(ONE_LETTER_AA_LEXIC)))
+            aa = AA_THREE_BY_ONE[aa]
+        elif len(aa) == 3:
+            if aa not in THREE_LETTERS_AA_LEXIC:
+                raise Exception("{} is not a valid three letter amino acid. Authorized: {}.".change(aa, sorted(THREE_LETTERS_AA_LEXIC)))
+        else:
+            raise Exception('The amino acid "{}" it is not in one or three letter representation.'.format(aa))
+        return aa
+
+    @staticmethod
+    def _getAANbLetter(start_aa, follow):
+        """
+        Return the number of letters used to encode amino acids.
+
+        :param start_aa: First amino acid impacted by the variant.
+        :type start_aa: str
+        :param follow: Part after first impacted positions in HGVS change (ex: "Glu" in Val600Glu or "_Lys747ins*63" in Gln746_Lys747ins*63 or "Argfs*?" in Ile327Argfs*?).
+        :type follow: str
+        :return: Number of letters used to encode amino acids.
+        :rtype: int
+        """
+        aa_nb_letter = len(start_aa)
+        if start_aa == "*":
+            aa_nb_letter = None
+            if follow.startswith("_"):
+                idx = 1
+                while not follow[idx].isdigit():
+                    idx += 1
+                aa_nb_letter = idx - 1
+            elif len(follow) == 1 and follow not in {"?", "="}:
+                aa_nb_letter = 1
+            elif len(follow) >= 3:
+                if follow[0:3] in THREE_LETTERS_AA_LEXIC:
+                    aa_nb_letter = 3
+                elif follow[0].isupper():
+                    if follow[1:3] == "fs" and follow[0] in ONE_LETTER_AA_LEXIC:
+                        aa_nb_letter = 1
+                    elif len(follow) >= 4 and follow[1:4] == "ext" and follow[0] in ONE_LETTER_AA_LEXIC:
+                        aa_nb_letter = 1
+        return aa_nb_letter
+
+    @staticmethod
+    def _splittedOnEvt(change, aa_nb_letter, start_pos, end_pos, follow):
+        """
+        Return (new_aa, evenement, new_elts_string) from part after modified positions in HGVS change (ex: "Glu" in Val600Glu or "ins*63" in Gln746_Lys747ins*63 or "Argfs*?" in Ile327Argfs*?).
+
+        :param change: Change part of HGVS string (ex: "Val600Glu").
+        :type change: str
+        :param aa_nb_letter: Number of letters to represent an amino acid: 1 or 3.
+        :type aa_nb_letter: int
+        :param start_pos: First amino acid changed by variant.
+        :type start_pos: int
+        :param end_pos: Last amino acid changed by variant.
+        :type end_pos: int
+        :param follow: Part after modified positions in HGVS change (ex: "Glu" in Val600Glu or "ins*63" in Gln746_Lys747ins*63 or "Argfs*?" in Ile327Argfs*?).
+        :type follow: str
+        :return: The tuple (new_aa, evenement, new_elts_string) from part after modified positions in HGVS change. Examples: (None, None, "Glu") from Glu or (None, "ins", "*63") from ins*63 or ("Arg", "fs", "*?") from Argfs*?.
+        :rtype: (str, str, str)
+        """
+        curr_aa_lexic = THREE_LETTERS_AA_LEXIC if aa_nb_letter == 3 else ONE_LETTER_AA_LEXIC
+        re_aa = "|".join(["({})".format(elt.lower()) for elt in curr_aa_lexic])
+        re_aa = re_aa.replace("*", r"\*")
+        new_aa = None
+        evt = None
+        lc_follow = follow.lower()
+        if lc_follow.startswith("delins"):
+            evt = "delins"
+            follow = follow[6:]
+            if len(follow) == 0:
+                raise Exception('"delins" must be followed by the amino acids inserted: {}'.format(change))
+        elif lc_follow.startswith("del"):
+            evt = "del"
+            follow = follow[3:]
+            if len(follow) != 0:
+                raise Exception('"del" must end the change: {}'.format(change))
+        elif lc_follow.startswith("ins"):
+            evt = "ins"
+            follow = follow[3:]
+            if len(follow) == 0:
+                raise Exception("Insertion must be followed by the number or the amino acids inserted: {}".format(change))
+            if end_pos - start_pos != 1:
+                raise Exception("In insertion the end position must be the next amino acid after the start: {}".format(change))
+        elif lc_follow.startswith("dup"):
+            evt = "dup"
+            follow = follow[3:]
+            if len(follow) != 0:
+                raise Exception('"dup" must end the change: {}'.format(change))
+        elif lc_follow == "ext" or lc_follow.startswith("ext-"):
+            evt = "ext"
+            follow = follow[3:]
+        elif re.match(r"^(" + re_aa + ")ext", lc_follow):
+            evt = "ext"
+            new_aa = follow[:aa_nb_letter]
+            follow = follow[aa_nb_letter + 3:]
+        elif lc_follow == "fs":
+            evt = "fs"
+            follow = ""
+        elif re.match(r"^(" + re_aa + ")fs", lc_follow):
+            evt = "fs"
+            new_aa = follow[:aa_nb_letter]
+            follow = follow[aa_nb_letter + 2:]
+        return new_aa, evt, follow
+
+    @staticmethod
+    def _parsedNewElements(change, aa_nb_letter, evt, new_elements_str):
+        """
+        Return new elements list from part after evenment type in HGVS change (ex: "Glu" in Val600Glu or "*63" in Gln746_Lys747ins*63 or "*?" in Ile327Argfs*?).
+
+        :param change: Change part of HGVS string (ex: "Val600Glu").
+        :type change: str
+        :param aa_nb_letter: Number of letters to represent an amino acid: 1 or 3.
+        :type aa_nb_letter: int
+        :param evt: Type of evenment in [None, "del", "dup", "ext", "fs", "ins", "insdel"].
+        :type evt: str
+        :param new_elements_str: Part after evenment type in HGVS change (ex: "Glu" in Val600Glu or "*63" in Gln746_Lys747ins*63 or "*?" in Ile327Argfs*?).
+        :type new_elements_str: str
+        :return: New elements list. Example ["Glu"] from "Glu" or ["*", "63"] from "*63" or ["*", "?"] from "*?".
+        :rtype: list
+        """
+        new_elts = []
+        remaining = deque(new_elements_str)
+        curr_aa = ""
+        while len(remaining):
+            elt = remaining.popleft()
+            if elt == "=":
+                if len(remaining) > 0 and remaining[0] not in {"/", "^"}:
+                    raise Exception('"=" it is not the last character in an alternative: {}'.format(change))
+            elif elt == "*":
+                elt = "Ter"
+                if len(remaining) != 0:
+                    if remaining[0] not in {"?", "^", "/"} and not remaining[0].isdigit():
+                        raise Exception('"*" it is not the last element in change and the next element it is not in ["?", "/", "^", digit]: {}'.format(change))
+            elif elt == "X":
+                elt = "Xaa"
+                if aa_nb_letter == 3:
+                    if len(remaining) >= 2 and remaining[0] == "a" and remaining[1] == "a":
+                        remaining.popleft()
+                        remaining.popleft()
+            elif elt in {"^", "/"}:
+                if len(remaining) == 0:
+                    raise Exception('"{}" cannot ends the change string: {}'.format(elt, change))
+                ############################## TODO: parse evt in remaining: Val245=/del
+            elif elt == "(":
+                if evt != "ins":
+                    raise Exception("Only insertions can contain brackets: {}.".format(change))
+                while len(remaining) != 0 and remaining[0].isdigit():
+                    elt += remaining.popleft()
+                if elt == "(":
+                    raise Exception("Only numbers are authorized in brackets: {}.".format(change))
+                if len(remaining) == 0 or remaining[0] != ")":
+                    raise Exception("Open bracket in insertion must be closed: {}.".format(change))
+                elt += remaining.popleft()
+            elif elt == "-":
+                if evt != "ext":
+                    raise Exception("Only extensions can contain minus: {}.".format(change))
+                while len(remaining) != 0 and remaining[0].isdigit():
+                    elt += remaining.popleft()
+                if elt == "-":
+                    raise Exception("Only numbers are authorized after minus: {}.".format(change))
+            elif elt.isdigit():
+                while len(remaining) != 0 and remaining[0].isdigit():
+                    elt += remaining.popleft()
+                if evt not in {"ins", "fs", "ext"}:
+                    raise Exception('Digits are only authorized in change of type "ext", "fs" or "ins": {}.'.format(change))
+                if evt != "ins":
+                    if len(remaining) != 0 and remaining[0] != "/":
+                        raise Exception('Digit are only authorized at the end of the change or followed by "/" for "fs" and "ext": {}'.format(change))
+            elif elt == "?":
+                if len(remaining) != 0:
+                    raise Exception('"?" must be the last character in change: {}'.format(change))
+            else:  # Is amino acid
+                while len(elt) != aa_nb_letter:
+                    elt += remaining.popleft()
+                elt = elt.capitalize()
+                if aa_nb_letter == 1:
+                    elt = AA_THREE_BY_ONE[elt]
+                else:
+                    elt = elt.capitalize()
+                    if elt not in THREE_LETTERS_AA_LEXIC:
+                        raise Exception('The element "{}" in {} is not an amino acid.'.format(elt, change))
+                if elt == "Ter":
+                    if len(remaining) != 0:
+                        if remaining[0] not in {"?", "^", "/"} and not remaining[0].isdigit():
+                            raise Exception('"Ter" it is not the last alement in change and the next element it is not in ["?", "/", "^", digit]: {}'.format(change))
+            new_elts.append(elt)
+        if curr_aa != "":
+            raise Exception("One of the amino acids is incomplete: {} in {}".format(curr_aa, change))
+        return new_elts
+
+    @staticmethod
+    def isHGVS(change):
+        """
+        Return True if the string is a valid HGVS change (ex: "Val600Glu" or "(Val582_Asn583insXXXXX)").
+
+        :param change: String to validate.
+        :type change: str
+        :return: True if the string is a valid HGVS change (ex: "Val600Glu" or "(Val582_Asn583insXXXXX)").
+        :rtype: bool
+        """
+        is_hgvs = None
+        try:
+            HGVSProtChange.fromStr(change)
+            is_hgvs = True
+        except Exception:
+            is_hgvs = False
+        return is_hgvs
+
+    @staticmethod
+    def fromStr(change, aa_nb_letter=None):
+        """
+        Return HGVSProtChange from change part of HGVS string (ex: "Val600Glu").
+
+        :param change: Change part of HGVS string (ex: "Val600Glu").
+        :type change: str
+        :param aa_nb_letter: Number of letters to represent an amino acid: 1 or 3. By default, the function tries to determine this number automatically.
+        :type aa_nb_letter: int
+        :return: HGVSProtChange from change part of HGVS string (ex: "Val600Glu").
+        :rtype: anacore.hgvs.HGVSProtChange
+        """
+        predicted = None
+        if change[0] == "(" and change[-1] == ")":
+            change = change[1:-1]
+            predicted = True
+        else:
+            predicted = False
+        if change == "?":
+            return HGVSProtChange(None, None, None, None, None, None, None, predicted)
+        if change == "0":
+            return HGVSProtChange(None, 0, None, None, None, None, None, predicted)
+        match = re.search(r"^([^\d]+)(\d+)(.+)$", change)
+        if not match:
+            raise Exception('"{}" has not a valid syntax for HGVS protein change.'.format(change))
+        else:
+            start_aa, start_pos, follow = match.groups()
+            start_pos = int(start_pos)
+            start_aa.capitalize()
+            if aa_nb_letter is None:
+                aa_nb_letter = HGVSProtChange._getAANbLetter(start_aa, follow)
+            end_aa = None
+            end_pos = None
+            if follow.startswith("_"):
+                end_aa = follow[1:aa_nb_letter + 1]
+                follow = follow[1 + aa_nb_letter:]
+                end_pos = ""
+                while follow[0].isdigit():
+                    end_pos += follow[0]
+                    follow = follow[1:]
+                end_pos = int(end_pos)
+            new_aa, evt, new_elts_str = HGVSProtChange._splittedOnEvt(change, aa_nb_letter, start_pos, end_pos, follow)
+            new_elts = [elt for elt in new_elts_str]
+            if len(follow) != 0:
+                new_elts = HGVSProtChange._parsedNewElements(change, aa_nb_letter, evt, new_elts_str)
+            return HGVSProtChange(start_aa, start_pos, end_aa, end_pos, new_aa, evt, new_elts, predicted)
