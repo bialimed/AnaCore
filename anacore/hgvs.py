@@ -626,6 +626,9 @@ class HGVSProtChange:
             evt = "fs"
             new_aa = follow[:aa_nb_letter]
             follow = follow[aa_nb_letter + 2:]
+        elif re.match(r"^fs(\*|ter)\d*$", lc_follow):
+            evt = "fs"
+            follow = follow[2:]
         return new_aa, evt, follow
 
     @staticmethod
@@ -715,7 +718,7 @@ class HGVSProtChange:
         return new_elts
 
     @staticmethod
-    def isHGVS(change):
+    def isValid(change):
         """
         Return True if the string is a valid HGVS change (ex: "Val600Glu" or "(Val582_Asn583insXXXXX)").
 
@@ -775,6 +778,14 @@ class HGVSProtChange:
                 end_pos = int(end_pos)
             new_aa, evt, new_elts_str = HGVSProtChange._splittedOnEvt(change, aa_nb_letter, start_pos, end_pos, follow)
             new_elts = [elt for elt in new_elts_str]
-            if len(follow) != 0:
-                new_elts = HGVSProtChange._parsedNewElements(change, aa_nb_letter, evt, new_elts_str)
+            if len(new_elts_str) != 0:
+                if not re.match(r"^\[\d+\]$", new_elts_str):  # The alteration is not a repeat
+                    new_elts = HGVSProtChange._parsedNewElements(change, aa_nb_letter, evt, new_elts_str)
+                else:  # The alteration is a repeat
+                    nb_repeats = new_elts_str[1:-1]
+                    if nb_repeats == "1":
+                        new_elts = []
+                        evt = "dup"
+                    else:
+                        new_elts = ["[", nb_repeats, "]"]
             return HGVSProtChange(start_aa, start_pos, end_aa, end_pos, new_aa, evt, new_elts, predicted)
