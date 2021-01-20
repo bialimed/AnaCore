@@ -1168,10 +1168,8 @@ class BreakendVCFIO(AnnotVCFIO):
         :return: Fusions (record and his mates) overlappind the specified region.
         :rtype: generator for (anacore.vcf.VCFRecord, [anacore.vcf.VCFRecord, ...])
         """
-        print(self.sv_rec_by_id)
         for record in super().getSub(chr, start, end):
             mates = []
-            print(record.getName(), record.info["MATEID"])
             for mate_id in record.info["MATEID"]:
                 mates.append(self.get(mate_id))
             yield (record, mates)
