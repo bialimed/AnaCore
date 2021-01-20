@@ -25,6 +25,68 @@ from anacore.hgvs import HGVSProtChange
 ########################################################################
 class TestHGVSProtChange(unittest.TestCase):
     def testParse(self):
+        dataset = {
+            # Special cases
+            "?": False,
+            "0": False,
+            # Substitution
+            "Val600=": False,
+            "Val600Glu": False,
+            "(G56A^S^C)": False,  # Uncertain
+            "(Gly56Ala^Ser^Cys)": False,  # Uncertain
+            "W24=/C": False,  # Mosaic
+            "Trp24=/Cys": False,  # Mosaic
+            # Deletion
+            "(Val7del)": False,
+            "Trp4del": False,
+            "Lys23_Val25del": False,
+            "(Pro458_Gly460del)": False,
+            "Gly2_Met46del": False,
+            "Trp26*": False,
+            "Pro551_Glu554delProMetTyrGlu": False,
+            "Trp557_Lys558DelTrpLys": False,
+            "Asp842_His845DelAspIleMetHis": False,
+            "Asp842DelAsp": False,
+            # DelIns
+            "Cys28delinsTrpVal": False,
+            # Duplication
+            "Ala3dup": True,
+            "Ala3_Ser5dup": True,
+            # Insertion
+            "His4_Gln5insAla": True,
+            "Lys2_Gly3insGlnSerLys": True,
+            "(Met3_His4insGlyTer)": True,
+            "Arg78_Gly79ins23": True,
+            "Gln746_Lys747ins*63": True,
+            "(Ser332_Ser333ins(1))": True,
+            "(Ser332_Ser333insX)": True,
+            "(Val582_Asn583ins(5))": True,
+            "(Val582_Asn583insXaaXaaXaaXaaXaa)": True,
+            # Frameshift
+            "Arg97ProfsTer23": False,
+            "Arg97fs": False,
+            "(Tyr4*)": False,
+            "Ile327Argfs*?": False,
+            "Gln151Thrfs*9": False,
+            "*757Leu": False,
+            "Val600Ter": False,
+            # Extension
+            "Met1ext-5": False,
+            "Ter110GlnextTer17": False,
+            "(Ter315TyrextAsnLysGlyThrTer)": False,
+            "*315TyrextAsnLysGlyThr*": False,
+            "Ter327Argext*?": False,
+            # Reapeated sequences
+            "Ala2[10]": True,
+            "Ala2[1]": True,
+            "Ala2_Pro5[10]": True,
+            "Ala2_Pro5[1]": True,
+        }
+        for hgvs, expected in dataset.items():
+            hgvs_obj = HGVSProtChange.fromStr(hgvs)
+            self.assertEqual(hgvs_obj.isInFrameIns(), expected)
+
+    def testParse(self):
         expected = HGVSProtChange("Ter", 757, None, None, None, None, ["Leu"], False)
         observed = HGVSProtChange.fromStr("*757L")
         self.assertEqual(observed, expected)

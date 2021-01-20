@@ -512,6 +512,20 @@ class HGVSProtChange:
             repr = "({})".format(repr)
         return repr
 
+    def isInFrameIns(self):
+        """
+        Return True if the HGVS is insertion, duplication or repeat. Frameshift or extension resulting from insertion return False.
+
+        :return: Return True if the HGVS is insertion, duplication or repeat.
+        :rtype: bool
+        """
+        is_ins = False
+        if self.evt in {"ins", "dup"}:
+            is_ins = True
+        elif self.evt is None and len(self.new_elts) != 0 and self.new_elts[0] == "[":  # Reapeat
+            is_ins = True
+        return is_ins
+
     @staticmethod
     def _cleanedAA(aa):
         """
