@@ -635,7 +635,17 @@ class HGVSProtChange:
             evt = "dup"
             follow = follow[3:]
             if len(follow) != 0:
-                raise Exception('"dup" must end the change: {}'.format(change))
+                # Follow must be the deleted aa
+                if len(follow) % aa_nb_letter != 0:
+                    raise Exception('Duplication must be ended by "dup" or the amino acids duplicated: {}'.format(change))
+                del_len = (start_pos if end_pos is None else end_pos) - start_pos + 1
+                if len(follow) / aa_nb_letter != del_len:
+                    raise Exception('Duplication must be ended by "dup" or the amino acids duplicated: {}'.format(change))
+                del_aa = [follow[idx:idx+aa_nb_letter].capitalize() for idx in range(0, len(follow), aa_nb_letter)]
+                for curr_del_aa in del_aa:
+                    if curr_del_aa not in curr_aa_lexic:
+                        raise Exception('Duplication must be ended by "dup" or the amino acids duplicated: {}'.format(change))
+                follow = ""
         elif lc_follow == "ext" or lc_follow.startswith("ext-"):
             evt = "ext"
             follow = follow[3:]

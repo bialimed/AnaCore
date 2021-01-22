@@ -52,6 +52,7 @@ class TestHGVSProtChange(unittest.TestCase):
             # Duplication
             "Ala3dup": True,
             "Ala3_Ser5dup": True,
+            "A767_V769dupASV": True,
             # Insertion
             "His4_Gln5insAla": True,
             "Lys2_Gly3insGlnSerLys": True,
@@ -232,6 +233,9 @@ class TestHGVSProtChange(unittest.TestCase):
         self.assertEqual(observed, expected)
         # observed = HGVSProtChange.fromStr("Val7=/del")
         # Duplication
+        expected = HGVSProtChange("Ala", 767, "Val", 769, None, "dup", [], False)
+        observed = HGVSProtChange.fromStr("A767_V769dupASV")
+        self.assertEqual(observed, expected)
         expected = HGVSProtChange("Ala", 3, None, None, None, "dup", [], False)
         observed = HGVSProtChange.fromStr("Ala3dup")
         self.assertEqual(observed, expected)
