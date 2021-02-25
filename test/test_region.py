@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
-#
-# Copyright (C) 2018 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -473,6 +457,11 @@ class TestRegion(unittest.TestCase):
             expec_overlapped.append([elt for elt in curr_info["overlapped"] if elt != sbjct_4])
         obs_overlapped = [overlapped_subjects for query, overlapped_subjects in iterOverlapped(queries, poped_subjects)]
         self.assertEqual(obs_overlapped, expec_overlapped)
+
+    def testFromStr(self):
+        observed = Region.fromStr("12:1534187-1534287")
+        expected = Region(1534187, 1534287, None, "12")
+        self.assertEqual(str(observed), str(expected))
 
 
 class TestRegionTree(unittest.TestCase):
