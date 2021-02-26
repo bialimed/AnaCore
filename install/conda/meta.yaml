@@ -1,5 +1,6 @@
 {% set version = "2.8.0" %}
 {% set numpy_version = "=1.16.5" %}
+{% set pysam_version = "=0.15.3" %}
 {% set requests_version = "=2.20.1" %}
 
 package:
@@ -21,11 +22,13 @@ requirements:
   run:
     - python
     - numpy {{ numpy_version }}
+    - pysam {{ pysam_version }}
     - requests {{ requests_version }}
 
 test:
   imports:
     - numpy
+    - pysam
     - requests
     - anacore
 
