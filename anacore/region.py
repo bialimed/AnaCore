@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.7.1'
+__version__ = '1.8.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -215,6 +215,20 @@ class Region:
         else:  # Eval region is located after region
             min_dist = eval_region.start - self.end
         return min_dist
+
+    @staticmethod
+    def fromStr(interval_str):
+        """
+        Return region instance from interval string (example: 5:15746211-5746311).
+
+        :param interval_str: interval string in format <ref_name>:<start_pos>-<end_pos>. Positions are 1-based.
+        :type interval_str: str
+        :return: Region instance from interval string.
+        :rtype: anacore.region.Region
+        """
+        reference, start_end = interval_str.split(":")
+        start, end = start_end.split("-")
+        return Region(start, end, None, reference)
 
 
 class RegionTree(Region):
