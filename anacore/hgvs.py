@@ -823,3 +823,33 @@ class HGVSProtChange:
                     else:
                         new_elts = ["[", nb_repeats, "]"]
             return HGVSProtChange(start_aa, start_pos, end_aa, end_pos, new_aa, evt, new_elts, predicted)
+
+    @staticmethod
+    def insCouldBeIdentical(hgvs_ins, hgvs_repeat):
+        """
+        Return True if the insertion could be identical to the repeat (example: L16_I17insGTTL vs G13_L16dup). In this case, the difference bewtenn the two HGVS comes only from a difference of notation.
+
+        :param hgvs_ins: HGVSp change for an insertion (example: L16_I17insGTTL).
+        :type hgvs_ins: anacore.hgvs.HGVSProtChange
+        :param hgvs_repeat: HGVSp change for a repeat (example: G13_L16dup or G13_L16[1]).
+        :type hgvs_repeat: anacore.hgvs.HGVSProtChange
+        :return: True if the insertion could be identical to the repeat.
+        :rtype: bool
+        """
+        could_be_identical = False
+        if hgvs_ins.isInFrameIns() and hgvs_repeat.isInFrameIns():
+            len_dup = hgvs_repeat.end_pos - hgvs_repeat.start_pos + 1
+            nb_repeat = 1
+            if hgvs_repeat.evt is None:  # Repeat
+                nb_repeat = int(hgvs_repeat.new_elts[1])
+            len_ins_in_repeat = len_dup * nb_repeat
+            if len(hgvs_ins.new_elts) == len_ins_in_repeat:  # same length
+                if hgvs_repeat.end_aa + str(hgvs_repeat.end_pos) == hgvs_ins.start_aa + str(hgvs_ins.start_pos):  # Same positions
+                    if hgvs_repeat.start_aa == hgvs_ins.new_elts[0] and hgvs_repeat.end_aa == hgvs_ins.new_elts[-1]:  # Same start and end amino acids
+                        if nb_repeat == 1:
+                            could_be_identical = True
+                        else:
+                            insertions = ["".join(hgvs_ins.new_elts[start:start + len_dup]) for start in range(0, len_ins_in_repeat, len_dup)]
+                            if len(set(insertions)) == 1:  # Insertion is a valid repeat
+                                could_be_identical = True
+        return could_be_identical

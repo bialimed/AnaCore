@@ -24,7 +24,44 @@ from anacore.hgvs import HGVSProtChange
 #
 ########################################################################
 class TestHGVSProtChange(unittest.TestCase):
-    def testParse(self):
+    def testInsCouldBeIdentical(self):
+        dataset = {
+            "T16_I17insGTTT": {
+                "L16V": False,
+                "G13_T16dup": True,
+                "G13_L16dup": False,
+                "G13_L16[1]": False,
+                "G13_L16[2]": False
+            },
+            "L16_I17insGTTL": {
+                "L16V": False,
+                "G13_T16dup": False,
+                "G13_L16dup": True,
+                "G13_L16[1]": True,
+                "G13_L16[2]": False
+            },
+            "L16_I17insGTTLGTTL": {
+                "L16V": False,
+                "G13_T16dup": False,
+                "G13_L16dup": False,
+                "G13_L16[1]": False,
+                "G13_L16[2]": True
+            },
+            "L16_I17insGTTLGTLL": {
+                "L16V": False,
+                "G13_T16dup": False,
+                "G13_L16dup": False,
+                "G13_L16[1]": False,
+                "G13_L16[2]": False
+            }
+        }
+        for hgvs_ins, expected_by_cmp in dataset.items():
+            hgvs_ins_obj = HGVSProtChange.fromStr(hgvs_ins)
+            for hgvs_repeat, expected in expected_by_cmp.items():
+                hgvs_repeat_obj = HGVSProtChange.fromStr(hgvs_repeat)
+                self.assertEqual(HGVSProtChange.insCouldBeIdentical(hgvs_ins_obj, hgvs_repeat_obj), expected)
+
+    def testIsInFrameIns(self):
         dataset = {
             # Special cases
             "?": False,
