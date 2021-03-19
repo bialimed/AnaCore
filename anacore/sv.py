@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.2'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -14,7 +14,7 @@ from anacore.abstractFile import isEmpty, AbstractFile
 class SVIO(AbstractFile):
     """Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a list."""
 
-    def __init__(self, filepath, mode="r", separator="\t", title_starter=None, has_title=True):
+    def __init__(self, filepath, mode="r", separator="\t", title_starter=None, has_title=True, metadata_starter="##"):
         """
         Build and return an instance of SVIO.
 
@@ -28,38 +28,59 @@ class SVIO(AbstractFile):
         :type title_starter: str.
         :param has_title: If the first line contains the titles of columns.
         :type has_title: bool.
+        :param title_metadata: The string used to introduce a metadata line.
+        :type title_metadata: str.
         :return: The new instance.
         :rtype: SVIO
         """
         # Convert mode for append in empty file
         if mode == "a" and isEmpty(filepath):
             mode = "w"
-        # Get existing titles if the file is in append mode
+        # Get existing titles and metadata if the file is in append mode
+        pre_nb_line = 0
         pre_titles = None
-        if mode == "a" and has_title:  # Get titles from existing file
-            with SVIO(filepath, "r", separator, title_starter) as FH_read:
-                pre_titles = FH_read.titles
+        pre_metadata = []
+        if mode == "a":  # Get titles from existing file
+            with SVIO(filepath, "r", separator, title_starter, has_title) as reader:
+                pre_titles = reader.titles
+                pre_metadata = reader.metadata
+                pre_nb_line = reader.current_line_nb + sum([1 for line in reader.file_handle])
         # Initialise instance
         AbstractFile.__init__(self, filepath, mode)
         self.separator = separator
+        self.metadata = pre_metadata
+        self.metadata_starter = metadata_starter
+        self._has_title = has_title
         self.titles = pre_titles
         self.title_starter = title_starter
-        if mode == "r" and has_title:
+        if mode == "r":
             self._parseHeader()
         elif mode == "a":
-            self.current_line_nb = 1
+            self.current_line_nb = pre_nb_line
 
     def _parseHeader(self):
-        """Parse SV header to set the attribute titles."""
-        if self.current_line_nb == 0:
+        """Parse SV header to set the attributes titles and metadata."""
+        if self.current_line_nb == 0 and not isEmpty(self.filepath):
+            # Metadata
+            curr_line_pointer = self.file_handle.tell()
             self.current_line = self.file_handle.readline().rstrip()
             self.current_line_nb += 1
-        clean_line = self.current_line
-        if self.title_starter is not None and self.title_starter != "":
-            if not clean_line.startswith(self.title_starter):
-                raise Exception('The title line does not starts with "{}".'.format(self.title_starter))
-            clean_line = clean_line.replace(self.title_starter, "", 1)
-        self.titles = [elt.strip() for elt in clean_line.split(self.separator)]
+            while self.current_line.startswith(self.metadata_starter):
+                self.metadata.append(self.current_line[len(self.metadata_starter):])
+                curr_line_pointer = self.file_handle.tell()
+                self.current_line = self.file_handle.readline().rstrip()
+                self.current_line_nb += 1
+            # Titles
+            if self._has_title:
+                cleaned_line = self.current_line
+                if self.title_starter is not None and self.title_starter != "":
+                    if not self.current_line.startswith(self.title_starter):
+                        raise Exception('The title line does not starts with "{}".'.format(self.title_starter))
+                    cleaned_line = self.current_line[len(self.title_starter):]
+                self.titles = [elt.strip() for elt in cleaned_line.split(self.separator)]
+            else:
+                self.file_handle.seek(curr_line_pointer)
+                self.current_line_nb -= 1
 
     def isRecordLine(self, line):
         """
@@ -86,7 +107,7 @@ class SVIO(AbstractFile):
         return fields
 
     @staticmethod
-    def isValid(filepath, separator="\t"):
+    def isValid(filepath, separator="\t", metadata_starter="##"):
         """
         Return True is the file can be a SV file.
 
@@ -94,27 +115,49 @@ class SVIO(AbstractFile):
         :rtype: bool
         """
         is_valid = False
+        pointer_after_metadata = False
         nb_fields = list()  # The number of fields for each row
-        FH_in = SVIO(filepath, separator=separator, title_starter="")
+        reader = SVIO(filepath, separator=separator, title_starter="", has_title=False, metadata_starter="##")
         try:
             # Read the 10 first lines
             line_idx = 1
-            line = FH_in.file_handle.readline()
+            line = reader.file_handle.readline()
             if line is None:  # File is empty
                 is_valid = True
             else:  # File has content
-                nb_fields.append(line.count(separator))
-                while line_idx < 10 and line:
-                    line = FH_in.file_handle.readline()
+                if not line.startswith(metadata_starter):
+                    pointer_after_metadata = True
                     nb_fields.append(line.count(separator))
-                    line_idx += 1
+                while line_idx < 10 and line:
+                    line = reader.file_handle.readline()
+                    if line:
+                        if pointer_after_metadata or not line.startswith(metadata_starter):
+                            pointer_after_metadata = True
+                            nb_fields.append(line.count(separator))
+                            line_idx += 1
                 if len(set(nb_fields)) == 1 and nb_fields[0] > 1:  # All lines have the same number of columns
                     is_valid = True
         except Exception:
             pass
         finally:
-            FH_in.close()
+            reader.close()
         return is_valid
+
+    def writeHeader(self):
+        """Write header lines in file."""
+        # Metadata
+        for curr_metadata in self.metadata:
+            self.file_handle.write(
+                self.metadata_starter + curr_metadata + "\n"
+            )
+            self.current_line_nb += 1
+        # Titles
+        if self.titles is not None:
+            line_starter = "" if self.title_starter is None else self.title_starter
+            self.file_handle.write(
+                line_starter + self.separator.join(self.titles) + "\n"
+            )
+            self.current_line_nb += 1
 
     def write(self, record):
         """
@@ -123,12 +166,10 @@ class SVIO(AbstractFile):
         :param record: The record.
         :type record: list.
         """
-        if self.current_line_nb == 0 and self.titles is not None:
-            line_starter = "" if self.title_starter is None else self.title_starter
-            self.file_handle.write(
-                line_starter + self.separator.join(self.titles) + "\n"
-            )
-            self.current_line_nb += 1
+        # Write header if the file is empty
+        if self.current_line_nb == 0:
+            self.writeHeader()
+        # Write record
         self.file_handle.write(self.recordToLine(record) + "\n")
         self.current_line_nb += 1
 
@@ -148,7 +189,7 @@ class SVIO(AbstractFile):
 class HashedSVIO(SVIO):
     """Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a dict indexed by columns titles."""
 
-    def __init__(self, filepath, mode="r", separator="\t", title_starter=None):
+    def __init__(self, filepath, mode="r", separator="\t", title_starter=None, metadata_starter="##"):
         """
         Build and return an instance of HashedSVIO.
 
@@ -160,10 +201,12 @@ class HashedSVIO(SVIO):
         :type separator: str.
         :param title_starter: The string used to introduce the title line.
         :type title_starter: str.
+        :param title_metadata: The string used to introduce a metadata line.
+        :type title_metadata: str.
         :return: The new instance.
         :rtype: HashedSVIO
         """
-        super().__init__(filepath, mode, separator, title_starter, True)
+        super().__init__(filepath, mode, separator, title_starter, True, metadata_starter)
 
     def _parseLine(self):
         """

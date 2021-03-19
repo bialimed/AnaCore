@@ -1,35 +1,19 @@
 #!/usr/bin/env python3
-#
-# Copyright (C) 2017 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+from copy import deepcopy
+import gzip
 import os
 import sys
-import gzip
-import uuid
 import tempfile
 import unittest
-from copy import deepcopy
+import uuid
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
@@ -50,12 +34,15 @@ class TestSVIO(unittest.TestCase):
 
         # Temporary files
         self.tmp_in_tsv = os.path.join(tmp_folder, unique_id + "_in.tsv")
+        self.tmp_in_metadata_tsv = os.path.join(tmp_folder, unique_id + "_in_withMeta.tsv")
         self.tmp_in_csv = os.path.join(tmp_folder, unique_id + "_in.csv")
+        self.tmp_out_tsv = os.path.join(tmp_folder, unique_id + "_out.tsv")
         self.tmp_out_dsv = os.path.join(tmp_folder, unique_id + "_out.dsv")
         self.tmp_out_dsv_gz = os.path.join(tmp_folder, unique_id + "_out.dsv.gz")
 
         # Data
         self.data = {
+            "metadata": ["release: 17 ; date: 2021-03-01", "author: anapath"],
             "titles": ["CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER"],
             "rows": [
                 ["20", "14370", "rs6054257", "G", "A", "29", "PASS"],
@@ -77,6 +64,12 @@ class TestSVIO(unittest.TestCase):
 \t\t\t\t\t\t"""
         with open(self.tmp_in_tsv, "w") as FH_tsv:
             FH_tsv.write(tsv_content)
+
+        # Create metadata TSV
+        metadata_tsv_content = """##release: 17 ; date: 2021-03-01
+##author: anapath"""
+        with open(self.tmp_in_metadata_tsv, "w") as FH_tsv:
+            FH_tsv.write(metadata_tsv_content)
 
         # Create CSV
         csv_content = tsv_content[1:].replace("\t", ";")
@@ -107,6 +100,41 @@ class TestSVIO(unittest.TestCase):
             for row_idx, readed_row in enumerate(FH_in):
                 expected_row = ".".join(rows[row_idx]) + "\n"
                 self.assertEqual(expected_row, readed_row)
+
+    def testIsValidWithMetadata(self):
+        # Create one valid DSV file
+        content = """@title: test
+#CHROM.POS.ID.REF.ALT.QUAL.FILTER
+20.14370.rs6054257.G.A.29.PASS
+20.17330.   ..A.3.q10 low
+
+20.1110696.rs6040355.A.G,T.67.PASS
+.1230237..T..47.
+20.1234567.microsat1.GTC.G,GTCT.50.
+......"""
+        with open(self.tmp_out_dsv, "w") as FH_out:
+            FH_out.write(content)
+        # Check isValid
+        self.assertTrue(not SVIO.isValid(self.tmp_out_dsv, ".", "@"))
+        # Create one valid DSV file
+        content = """@title: test
+#CHROM.POS.ID.REF.ALT.QUAL.FILTER
+20.14370.rs6054257.G.A.29.PASS
+20.17330.   ..A.3.q10 low
+20.1110696.rs6040355.A.G,T.67.PASS
+.1230237..T..47.
+20.1234567.microsat1.GTC.G,GTCT.50.
+......"""
+        with open(self.tmp_out_dsv, "w") as FH_out:
+            FH_out.write(content)
+        # Check isValid
+        self.assertTrue(SVIO.isValid(self.tmp_out_dsv, ".", "@"))
+        # Check if file pointer is ok in reopen
+        observed_rows = []
+        with open(self.tmp_out_dsv) as FH_in:
+            for row_idx, readed_row in enumerate(FH_in):
+                observed_rows.append(readed_row)
+        self.assertEqual(content, "".join(observed_rows))
 
     def testIsValidFalse(self):
         # Create one invalid TSV file
@@ -187,6 +215,7 @@ class TestSVIO(unittest.TestCase):
         # 2nd write step
         with SVIO(self.tmp_out_dsv, "a", separator=".", title_starter="#") as FH_out:
             self.assertEqual(self.data["titles"], FH_out.titles)  # Assert titles retrieval
+            self.assertEqual(split_limit + 1, FH_out.current_line_nb)
             for row in self.data["rows"][split_limit:]:
                 FH_out.write(row)
         # Assert result
@@ -202,9 +231,76 @@ class TestSVIO(unittest.TestCase):
                 self.assertEqual(expected_row, readed_row)
             self.assertEqual(len(self.data["rows"]), nb_rows)
 
+    def testWriteHeader(self):
+        # With titles and metadata
+        with SVIO(self.tmp_out_tsv, "w") as writer:
+            writer.titles = self.data["titles"]
+            writer.metadata = self.data["metadata"]
+            writer.writeHeader()
+            writer.write(self.data["rows"][0])
+        with SVIO(self.tmp_out_tsv, "r") as reader:
+            self.assertEqual(reader.titles, self.data["titles"])
+            self.assertEqual(reader.metadata, self.data["metadata"])
+            self.assertEqual(reader.read(), [self.data["rows"][0]])
+        # Without metadata
+        with SVIO(self.tmp_out_tsv, "w") as writer:
+            writer.titles = self.data["titles"]
+            writer.writeHeader()
+            writer.write(self.data["rows"][0])
+        with SVIO(self.tmp_out_tsv, "r") as reader:
+            self.assertEqual(reader.titles, self.data["titles"])
+            self.assertEqual(reader.metadata, [])
+            self.assertEqual(reader.read(), [self.data["rows"][0]])
+        # Without titles
+        with SVIO(self.tmp_out_tsv, "w", has_title=False) as writer:
+            writer.metadata = self.data["metadata"]
+            writer.writeHeader()
+            writer.write(self.data["rows"][0])
+        with SVIO(self.tmp_out_tsv, "r", has_title=False) as reader:
+            self.assertEqual(reader.titles, None)
+            self.assertEqual(reader.metadata, self.data["metadata"])
+            self.assertEqual(reader.read(), [self.data["rows"][0]])
+        # Without titles and metadata
+        with SVIO(self.tmp_out_tsv, "w", has_title=False) as writer:
+            writer.writeHeader()
+            writer.write(self.data["rows"][0])
+        with SVIO(self.tmp_out_tsv, "r", has_title=False) as reader:
+            self.assertEqual(reader.titles, None)
+            self.assertEqual(reader.metadata, [])
+            self.assertEqual(reader.read(), [self.data["rows"][0]])
+        # Only header with titles and metadata
+        with SVIO(self.tmp_out_tsv, "w") as writer:
+            writer.titles = self.data["titles"]
+            writer.metadata = self.data["metadata"]
+            writer.writeHeader()
+        with SVIO(self.tmp_out_tsv, "r") as reader:
+            self.assertEqual(reader.titles, self.data["titles"])
+            self.assertEqual(reader.metadata, self.data["metadata"])
+        # Only header without metadata
+        with SVIO(self.tmp_out_tsv, "w") as writer:
+            writer.titles = self.data["titles"]
+            writer.writeHeader()
+        with SVIO(self.tmp_out_tsv, "r") as reader:
+            self.assertEqual(reader.titles, self.data["titles"])
+            self.assertEqual(reader.metadata, [])
+        # Only header without titles
+        with SVIO(self.tmp_out_tsv, "w", has_title=False) as writer:
+            writer.metadata = self.data["metadata"]
+            writer.writeHeader()
+        with SVIO(self.tmp_out_tsv, "r", has_title=False) as reader:
+            self.assertEqual(reader.titles, None)
+            self.assertEqual(reader.metadata, self.data["metadata"])
+        # Empty without titles and metadata
+        with SVIO(self.tmp_out_tsv, "w", has_title=False) as writer:
+            writer.writeHeader()
+        with SVIO(self.tmp_out_tsv, "r", has_title=False) as reader:
+            self.assertEqual(reader.titles, None)
+            self.assertEqual(reader.metadata, [])
+
     def testAppendEmptyDSV(self):
         # Write file
         with SVIO(self.tmp_out_dsv, "a", separator=".", title_starter="#") as FH_out:
+            self.assertEqual(0, FH_out.current_line_nb)
             FH_out.titles = self.data["titles"]
             for row in self.data["rows"]:
                 FH_out.write(row)
@@ -279,7 +375,7 @@ class TestSVIO(unittest.TestCase):
 
     def tearDown(self):
         # Clean temporary files
-        for curr_file in [self.tmp_in_tsv, self.tmp_in_csv, self.tmp_out_dsv, self.tmp_out_dsv_gz]:
+        for curr_file in [self.tmp_in_tsv, self.tmp_in_metadata_tsv, self.tmp_in_csv, self.tmp_out_tsv, self.tmp_out_dsv, self.tmp_out_dsv_gz]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 

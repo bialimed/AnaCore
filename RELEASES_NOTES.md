@@ -1,6 +1,9 @@
 # Release 2.9.0 [DEV]
 
 ### Improvements
+  * Add management of metadata in SV files (`anacore.sv`). Metadata must be
+  present before title and/or data. They starts with a particular string: "##"
+  by default.
   * Add `anacore.hgvs.HGVSProtChange` to manage change part of proteic HGVS (ex:
   "Val600Glu").
   * Add `getSub` and open mode "i" in `anacore.vcf.VCFIO` to return records
