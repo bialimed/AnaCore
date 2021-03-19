@@ -1,6 +1,8 @@
 # Release 2.9.0 [DEV]
 
 ### Improvements
+  * Add `anacore.vcf.VCFRecord.fastDownstreamed` to get quickly the most downstream
+  version of the variant.
   * Add management of metadata in SV files (`anacore.sv`). Metadata must be
   present before title and/or data. They starts with a particular string: "##"
   by default.

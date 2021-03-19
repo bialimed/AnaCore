@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.30.0'
+__version__ = '1.31.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -526,6 +526,43 @@ class VCFRecord:
         elif len(self.ref) > 1:
             record_type = "variation"
         return record_type
+
+    def fastDownstreamed(self, seq_handler, padding=500):
+        """
+        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param padding: Number of nucleotids to inspect after variant. Upstream movement is limited to this number of nucleotids.
+        :type padding: int
+        :return: The simplified record moved to the most downstream postition.
+        :rtype: anacore.vcf.VCFRecord
+        """
+        if len(self.alt) > 1:
+            raise Exception('The function "fastDownstreamed" cannot be used on multi-allelic variant {}.'.format(self.getName()))
+        downstream_rec = VCFRecord(self.chrom, self.pos, None, self.ref, [elt for elt in self.alt])
+        if self._normalized is not None:
+            downstream_rec._normalized = deepcopy(self._normalized)
+        ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
+        alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
+        if len(ref) != 1 or len(alt) != 1:
+            # Move to downstream
+            sub_region = seq_handler.getSub(self.chrom, self.pos, self.pos + len(self.ref) + padding)
+            downstream_rec.pos = 1  # Switch position from chromosome to position from subregion
+            downstream_rec = downstream_rec.getMostDownstream(sub_region)
+            downstream_rec.pos = self.pos + downstream_rec.pos - 1  # Switch position from subregion to position from chromosome
+            if len(ref) != len(alt):
+                # Add previous nt
+                prev_nt = seq_handler.getSub(downstream_rec.chrom, downstream_rec.pos - 1, downstream_rec.pos - 1)
+                if downstream_rec.ref == downstream_rec.getEmptyAlleleMarker():  # Insertion
+                    downstream_rec.ref = prev_nt
+                    downstream_rec.alt[0] = prev_nt + downstream_rec.alt[0]
+                    downstream_rec.pos -= 1
+                elif downstream_rec.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Deletion
+                    downstream_rec.ref = prev_nt + downstream_rec.ref
+                    downstream_rec.alt[0] = prev_nt
+                    downstream_rec.pos -= 1
+        return downstream_rec
 
     def fastStandardize(self, seq_handler, padding=500):
         """

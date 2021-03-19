@@ -3,10 +3,11 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.10.0'
+__version__ = '1.11.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+from anacore.sequenceIO import IdxFastaIO
 import os
 import pysam
 import sys
@@ -282,6 +283,8 @@ class TestVCFRecord(unittest.TestCase):
         unique_id = str(uuid.uuid1())
 
         # Temporary files
+        self.tmp_fa = os.path.join(tmp_folder, unique_id + ".fa")
+        self.tmp_fai = os.path.join(tmp_folder, unique_id + ".fa.fai")
         self.tmp_variants = os.path.join(tmp_folder, unique_id + ".vcf")
 
         # AD, AF and DP evaluation
@@ -429,7 +432,7 @@ class TestVCFRecord(unittest.TestCase):
 
     def tearDown(self):
         # Clean temporary files
-        for curr_file in [self.tmp_variants]:
+        for curr_file in [self.tmp_fa, self.tmp_fai, self.tmp_variants]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
 
@@ -693,6 +696,54 @@ class TestVCFRecord(unittest.TestCase):
         insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
         downstream = insertion.getMostDownstream(ref)
         self.assertTrue(downstream.pos == 34 and downstream.ref == "-" and downstream.alt[0] == "G")
+
+    def testFastDownstreamed(self):
+        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #      | | | | | | | | | | | | | | | | |
+        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                  13  17  21  25  29  33
+        with open(self.tmp_fa, "w") as writer:
+            writer.write(">artificial_1\n")
+            writer.write("nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT")
+        with open(self.tmp_fai, "w") as writer:
+            writer.write("artificial_1\t33\t14\t33\t34")
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test fix deletion
+            deletion = VCFRecord("artificial_1", 18, None, "TTTaAGC", ["T"], 230)
+            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 18 and downstream.ref == "TTTAAGC" and downstream.alt[0] == "T")
+            # Test homopolymer deletion
+            deletion = VCFRecord("artificial_1", 16, None, "GTT", ["G"], 230)
+            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 18 and downstream.ref == "TTT" and downstream.alt[0] == "T")
+            # Test complex deletion
+            deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
+            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 27 and downstream.ref == "AGCCGA" and downstream.alt[0] == "A")
+            # Test deletion on start
+            deletion = VCFRecord("artificial_1", 1, None, ref[0], ["-"], 230)
+            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 3 and downstream.ref == "NN" and downstream.alt[0] == "N")
+            # Test deletion on end
+            deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
+            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 32 and downstream.ref == "AT" and downstream.alt[0] == "A")
+            # Test fix insertion
+            insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
+            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == "NGGTT")
+            # Test homopolymer insertion
+            insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
+            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 20 and downstream.ref == "T" and downstream.alt[0] == "TT")
+            # Test complex insertion
+            insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
+            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 32 and downstream.ref == "A" and downstream.alt[0] == "AGCCGA")
+            # Test insertion on end
+            insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
+            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            self.assertTrue(downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == "TG")
 
     def testRefStart(self):
         data = [
