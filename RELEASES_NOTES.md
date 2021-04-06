@@ -4,6 +4,8 @@
   * Move `anacore.sequenceIO.Sequence` to `anacore.sequence.Sequence`.
 
 ### Improvements
+  * Add functions to get information about codon in `anacore.genomicRegion.Protein`:
+  `getCodonRefPos()`, `getCodonSeqFromProtPos()` and `getCodonInfo()`.
   * Add `AA3LettersAlphabet`, `CodonAlphabet`, `DNAAlphabet` and `RNAAlphabet` in
   `anacore.sequence` to validate sequences and provide translation and reverse
   complement utilities.

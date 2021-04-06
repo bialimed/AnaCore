@@ -4,11 +4,12 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 from anacore.region import RegionTree, RegionList
+from anacore.sequenceIO import getStrandedSeqFromPos
 
 
 class Gene(RegionTree):
@@ -275,7 +276,7 @@ class Protein(RegionTree):
         :rtype: int
         """
         length = 0
-        for curr_cds in self.children:
+        for curr_cds in self._getCDS():
             length += curr_cds.length()
         return length
 
@@ -350,7 +351,7 @@ class Protein(RegionTree):
                 self
             ))
         chained_cds_pos = None
-        cds = self.children
+        cds = self._getCDS()
         cds_idx = 0
         if cds[cds_idx].strand == "+":
             if chr_pos <= cds[-1].end and chr_pos >= cds[0].start:
@@ -383,13 +384,14 @@ class Protein(RegionTree):
         :rtype: genomicRegion.CDS, int
         """
         chained_cds_pos = self.getNtPosFromRegionPos(protein_pos, codon_pos)
+        cds = self._getCDS()
         walk_pos = 0
         region_idx = 0
         child = None
         while child is None:
-            curr_child_length = self.children[region_idx].length()
+            curr_child_length = cds[region_idx].length()
             if walk_pos <= chained_cds_pos and (walk_pos + curr_child_length) >= chained_cds_pos:
-                child = self.children[region_idx]
+                child = cds[region_idx]
             else:
                 walk_pos += curr_child_length
                 region_idx += 1
@@ -440,8 +442,21 @@ class Protein(RegionTree):
         :return: True if the region contains the evaluated region.
         :rtype: bool
         """
-        cds = self.children if len(self.children) > 0 else self.getCDSFromTranscript()
+        cds = self._getCDS()
         return len(cds.getContainers(eval_region)) > 0
+
+    def _getCDS(self):
+        """
+        Init self.children if necessary and return the list of CDS.
+
+        :param eval_region: The evaluated region.
+        :type eval_region: Region
+        :return: The list of CDS of the protein in protein strand order.
+        :rtype: anacore.region.Regionlist
+        """
+        if len(self.children) == 0:
+            self.children = self.getCDSFromTranscript()
+        return self.children
 
     def hasOverlap(self, eval_region):
         """
@@ -454,8 +469,69 @@ class Protein(RegionTree):
         """
         has_overlap = False
         if self.reference.name == eval_region.reference.name:
-            cds = self.children if len(self.children) > 0 else self.getCDSFromTranscript()
+            cds = self._getCDS()
             for curr_cds in cds:
                 if not curr_cds.start > eval_region.end and not curr_cds.end < eval_region.start:
                     has_overlap = True
         return has_overlap
+
+    def getCodonRefPos(self, aa_pos):
+        """
+        Return stranded positions on reference for the nt corresponding to the amino acid at provided position on protein.
+
+        :param aa_pos: Position of the amino acid in the protein.
+        :type aa_pos: int
+        :return: Stranded positions on reference for the nt corresponding to the amino acid at provided position on protein.
+        :rtype: list
+        """
+        codon_pos_on_ref = []
+        for curr_pos in range(1, 4):
+            codon_pos_on_ref.append(self.getPosOnRef(aa_pos, curr_pos))
+        return codon_pos_on_ref
+
+    def getCodonSeqFromProtPos(self, aa_pos, sequence_reader):
+        """
+        Return the codon nucleotids corresponding to the amino acid at the provided position on protein.
+
+        :param aa_pos: Position of the amino acid in the protein.
+        :type aa_pos: int
+        :param sequence_reader: File handle to the reference sequences file.
+        :type sequence_reader: anacore.sequenceIO.IdxFastaIO
+        :return: Codon nucleotids corresponding to the amino acid at the provided position on protein.
+        :rtype: str
+        """
+        codon_pos_on_ref = self.getCodonRefPos(aa_pos)
+        return getStrandedSeqFromPos(
+            self.reference.name,
+            codon_pos_on_ref,
+            self.strand,
+            sequence_reader
+        )
+
+    def getCodonInfo(self, ref_pos, sequence_reader):
+        """
+        Return the amino acid position, position in codon and codon sequence for the position on reference.
+
+        :param ref_pos: Position on the reference.
+        :type ref_pos: int
+        :param sequence_reader: File handle to the reference sequences file.
+        :type sequence_reader: anacore.sequenceIO.IdxFastaIO
+        :return: Amino acid position, position in codon and codon sequence for the position on reference.
+        :rtype: (int, int, str)
+        """
+        # Get codon pos
+        aa_pos, pos_in_codon = self.getPosOnRegion(ref_pos)
+        codon_pos_on_ref = []
+        for curr_pos in range(1, 4):
+            if curr_pos == pos_in_codon:
+                codon_pos_on_ref.append(ref_pos)
+            else:
+                codon_pos_on_ref.append(self.getPosOnRef(aa_pos, curr_pos))
+        # Get codon seq
+        codon_seq = getStrandedSeqFromPos(
+            self.reference.name,
+            codon_pos_on_ref,
+            self.strand,
+            sequence_reader
+        )
+        return aa_pos, pos_in_codon, codon_seq

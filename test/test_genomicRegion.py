@@ -1,38 +1,25 @@
 #!/usr/bin/env python3
-#
-# Copyright (C) 2018 IUCT-O
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import os
 import sys
+import tempfile
 import unittest
+import uuid
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.region import Region
 from anacore.genomicRegion import Gene, Transcript, Exon, Intron, Protein, CDS
+from anacore.region import Region
+from anacore.sequenceIO import IdxFastaIO
 
 
 ########################################################################
@@ -585,6 +572,132 @@ class TestProtein(unittest.TestCase):
                 ", ".join([curr_cds.getCoordinatesStr() for curr_cds in eval_pair["expected"]]),
                 ", ".join([curr_cds.getCoordinatesStr() for curr_cds in eval_pair["observed"]]),
             )
+
+    def testGetCodonRefPos(self):
+        tr_1 = Transcript(None, None, "+", "chr1", children=[
+            Exon(10, 20, "+", "chr1"),
+            Exon(30, 40, "+", "chr1"),
+            Exon(45, 50, "+", "chr1")
+        ])
+        prot_1 = Protein(16, 36, "+", "chr1", transcript=tr_1)
+        tr_2 = Transcript(None, None, "-", "chr1", children=[
+            Exon(10, 20, "-", "chr1"),
+            Exon(30, 40, "-", "chr1"),
+            Exon(45, 50, "-", "chr1")
+        ])
+        prot_2 = Protein(16, 36, "-", "chr1", transcript=tr_2)
+        data = [
+            {"prot": prot_1, "aa_pos": 1, "expected": [16, 17, 18]},
+            {"prot": prot_1, "aa_pos": 2, "expected": [19, 20, 30]},
+            {"prot": prot_1, "aa_pos": 3, "expected": [31, 32, 33]},
+            {"prot": prot_1, "aa_pos": 4, "expected": [34, 35, 36]},
+            {"prot": prot_2, "aa_pos": 1, "expected": [36, 35, 34]},
+            {"prot": prot_2, "aa_pos": 2, "expected": [33, 32, 31]},
+            {"prot": prot_2, "aa_pos": 3, "expected": [30, 20, 19]},
+            {"prot": prot_2, "aa_pos": 4, "expected": [18, 17, 16]},
+        ]
+        for curr in data:
+            self.assertEqual(
+                curr["prot"].getCodonRefPos(curr["aa_pos"]),
+                curr["expected"]
+            )
+            with self.assertRaises(Exception):
+                self.prot_1.getCodonRefPos(8)  # Not in protein
+
+
+class TestProteinSeq(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+
+        # Temporary files
+        self.tmp_fasta_idx = os.path.join(tmp_folder, unique_id + ".fasta.fai")
+        self.tmp_fasta = os.path.join(tmp_folder, unique_id + ".fasta")
+
+        # Create sequence file
+        content_fasta = """>one
+ATGCATGCATGCATGCATGCATGCATGCAT
+GCATGCATGCATGCATGCATGCATGCATGC
+ATGCAT
+>two another chromosome
+ATGCATGCATGCAT
+GCATGCATGCATGC"""
+        with open(self.tmp_fasta, "w") as FH_out:
+            FH_out.write(content_fasta)
+
+        # Proteins
+        # 1 3 5 7 9  11 14 16 19 21        30 33 36 39 41  44 47 50
+        # ATGCATGCAT GCATG CATGC ATGCATGCA TGCATGCATGC ATGCATGCATGCATGCATGC
+        #            ..... *****           *******....      ......
+        # prot_1           12345           6789 11
+        tr_1 = Transcript(None, None, "+", "one", children=[
+            Exon(10, 20, "+", "one"),
+            Exon(30, 40, "+", "one"),
+            Exon(45, 50, "+", "one")
+        ])
+        self.prot_1 = Protein(16, 36, "+", "one", transcript=tr_1)
+        tr_2 = Transcript(None, None, "-", "one", children=[
+            Exon(10, 20, "-", "one"),
+            Exon(30, 40, "-", "one"),
+            Exon(45, 50, "-", "one")
+        ])
+        self.prot_2 = Protein(16, 36, "-", "one", transcript=tr_2)
+
+        # Create index
+        content_fasta_idx = """one	66	5	30	31
+two	28	98	14	15"""
+        with open(self.tmp_fasta_idx, "w") as FH_out:
+            FH_out.write(content_fasta_idx)
+
+    def tearDown(self):
+        # Clean temporary files
+        for curr_file in [self.tmp_fasta, self.tmp_fasta_idx]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testGetCodonSeqFromProtPos(self):
+        data = [
+            {"prot": self.prot_1, "aa_pos": 1, "expected": "CAT"},
+            {"prot": self.prot_1, "aa_pos": 2, "expected": "GCT"},
+            {"prot": self.prot_1, "aa_pos": 4, "expected": "TGC"},
+            {"prot": self.prot_2, "aa_pos": 1, "expected": "GCA"},
+            {"prot": self.prot_2, "aa_pos": 3, "expected": "AGC"},
+            {"prot": self.prot_2, "aa_pos": 4, "expected": "ATG"},
+        ]
+        with IdxFastaIO(self.tmp_fasta) as reader:
+            for curr in data:
+                self.assertEqual(
+                    curr["prot"].getCodonSeqFromProtPos(curr["aa_pos"], reader),
+                    curr["expected"]
+                )
+            with self.assertRaises(Exception):
+                self.prot_1.getCodonSeqFromProtPos(8, reader)  # Not in protein
+
+    def testGetCodonInfo(self):
+        data = [
+            {"prot": self.prot_1, "ref_pos": 16, "expected": (1, 1, "CAT")},
+            {"prot": self.prot_1, "ref_pos": 18, "expected": (1, 3, "CAT")},
+            {"prot": self.prot_1, "ref_pos": 19, "expected": (2, 1, "GCT")},
+            {"prot": self.prot_1, "ref_pos": 20, "expected": (2, 2, "GCT")},
+            {"prot": self.prot_1, "ref_pos": 34, "expected": (4, 1, "TGC")},
+            {"prot": self.prot_1, "ref_pos": 35, "expected": (4, 2, "TGC")},
+            {"prot": self.prot_1, "ref_pos": 36, "expected": (4, 3, "TGC")},
+            {"prot": self.prot_2, "ref_pos": 36, "expected": (1, 1, "GCA")},
+            {"prot": self.prot_2, "ref_pos": 34, "expected": (1, 3, "GCA")},
+            {"prot": self.prot_2, "ref_pos": 30, "expected": (3, 1, "AGC")},
+            {"prot": self.prot_2, "ref_pos": 20, "expected": (3, 2, "AGC")},
+            {"prot": self.prot_2, "ref_pos": 19, "expected": (3, 3, "AGC")},
+            {"prot": self.prot_2, "ref_pos": 18, "expected": (4, 1, "ATG")},
+            {"prot": self.prot_2, "ref_pos": 16, "expected": (4, 3, "ATG")}
+        ]
+        with IdxFastaIO(self.tmp_fasta) as reader:
+            for curr in data:
+                self.assertEqual(
+                    curr["prot"].getCodonInfo(curr["ref_pos"], reader),
+                    curr["expected"]
+                )
+            with self.assertRaises(Exception):
+                self.prot_1.getCodonInfo(14, reader)  # In exon but not in CDS
 
 
 ########################################################################
