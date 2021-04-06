@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -19,7 +19,8 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.sequenceIO import IdxFastaIO, FastaIO, FastqIO, Sequence
+from anacore.sequence import RNAAlphabet, Sequence
+from anacore.sequenceIO import IdxFastaIO, FastaIO, FastqIO, getStrandedSeqFromPos
 
 
 ########################################################################
@@ -27,28 +28,6 @@ from anacore.sequenceIO import IdxFastaIO, FastaIO, FastqIO, Sequence
 # FUNCTIONS
 #
 ########################################################################
-class TestSequence(unittest.TestCase):
-    def testDnaRevCom(self):
-        # Without quality
-        test_record = Sequence("id1", "AtMGCUN").dnaRevCom()
-        expected_revcom = Sequence("id1", "NAGCKaT")
-        self.assertTrue(cmpSequences(test_record, expected_revcom))
-        # With quality
-        test_record = Sequence("id1", "AtMGCUN", "", "18AAEGH").dnaRevCom()
-        expected_revcom = Sequence("id1", "NAGCKaT", "", "HGEAA81")
-        self.assertTrue(cmpSequences(test_record, expected_revcom))
-
-    def testRnaRevCom(self):
-        # Without quality
-        test_record = Sequence("id1", "AuMGCUN").rnaRevCom()
-        expected_revcom = Sequence("id1", "NAGCKaU")
-        self.assertTrue(cmpSequences(test_record, expected_revcom))
-        # With quality
-        test_record = Sequence("id1", "AuMGCUN", "", "18AAEGH").rnaRevCom()
-        expected_revcom = Sequence("id1", "NAGCKaU", "", "HGEAA81")
-        self.assertTrue(cmpSequences(test_record, expected_revcom))
-
-
 class TestFastaIO(unittest.TestCase):
     def setUp(self):
         tmp_folder = tempfile.gettempdir()
@@ -514,6 +493,55 @@ two	28	98	14	15"""
                 self.expected_rec["one"].string[29:63],
                 FH.getSub("one", 30, 63)
             )
+
+
+class TestUtils(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+
+        # Temporary files
+        self.tmp_fasta_idx = os.path.join(tmp_folder, unique_id + ".fasta.fai")
+        self.tmp_fasta = os.path.join(tmp_folder, unique_id + ".fasta")
+
+        # Create sequence file
+        content_fasta = """>one
+ATGCATGCATGCATGCATGCATGCATGCAT
+GCATGCATGCATGCATGCATGCATGCATGC
+ATGCAT
+>two another chromosome
+ATGCATGCATGCAT
+GCATGCATGCATGC"""
+        with open(self.tmp_fasta, "w") as FH_out:
+            FH_out.write(content_fasta)
+
+        # Create index
+        content_fasta_idx = """one	66	5	30	31
+two	28	98	14	15"""
+        with open(self.tmp_fasta_idx, "w") as FH_out:
+            FH_out.write(content_fasta_idx)
+
+    def tearDown(self):
+        # Clean temporary files
+        for curr_file in [self.tmp_fasta, self.tmp_fasta_idx]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testGetStrandedSeqFromPos(self):
+        with IdxFastaIO(self.tmp_fasta) as reader:
+            self.assertEqual(
+                "ATGCCAT",
+                getStrandedSeqFromPos("one", [5,6,7,8,20,21,34], "+", reader)
+            )
+            self.assertEqual(
+                "ATGGCAT",
+                getStrandedSeqFromPos("one", [5,6,7,8,20,21,34], "-", reader)
+            )
+            self.assertEqual(
+                "AUGGCAU",
+                getStrandedSeqFromPos("one", [5,6,7,8,20,21,34], "-", reader, RNAAlphabet)
+            )
+
 
 ########################################################################
 #

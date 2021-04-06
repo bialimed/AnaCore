@@ -1,81 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for manipulating sequences and reading/writing sequence files and their indices."""
+"""Classes and functions for reading/writing sequence files and their indices."""
 
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '2.4.0'
+__version__ = '2.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-import re
-import gzip
-from anacore.sv import SVIO
 from anacore.abstractFile import isGzip
-
-
-class Sequence:
-    dna_complement = {
-        'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G', 'U': 'A', 'N': 'N',
-        'a': 't', 't': 'a', 'g': 'c', 'c': 'g', 'u': 'a', 'n': 'n',
-        'W': 'W', 'S': 'S', 'M': 'K', 'K': 'M', 'R': 'Y', 'Y': 'R', 'B': 'V', 'V': 'B', 'D': 'H', 'H': 'D',
-        'w': 'w', 's': 's', 'm': 'k', 'k': 'm', 'r': 'y', 'y': 'r', 'b': 'v', 'v': 'b', 'd': 'h', 'h': 'd'
-    }
-
-    rna_complement = {
-        'A': 'U', 'T': 'A', 'G': 'C', 'C': 'G', 'U': 'A', 'N': 'N',
-        'a': 'u', 't': 'a', 'g': 'c', 'c': 'g', 'u': 'a', 'n': 'n',
-        'W': 'W', 'S': 'S', 'M': 'K', 'K': 'M', 'R': 'Y', 'Y': 'R', 'B': 'V', 'V': 'B', 'D': 'H', 'H': 'D',
-        'w': 'w', 's': 's', 'm': 'k', 'k': 'm', 'r': 'y', 'y': 'r', 'b': 'v', 'v': 'b', 'd': 'h', 'h': 'd'
-    }
-
-    def __init__(self, id, string, description=None, quality=None):
-        """
-        Build and return an instance of Sequence.
-
-        :param id: Id of the sequence.
-        :type id: str
-        :param string: Sequence of the sequence.
-        :type string: str
-        :param description: The sequence description.
-        :type description: str
-        :param quality: The quality of the sequence (same length as string).
-        :type quality: str
-        :return: The new instance.
-        :rtype: Sequence
-        """
-        self.id = id
-        self.description = description
-        self.string = string
-        self.quality = quality
-
-    def dnaRevCom(self):
-        """
-        Return the sequence corresponding to the DNA reverse complement.
-
-        :return: The reverse complement.
-        :rtype: Sequence
-        """
-        return Sequence(
-            self.id,
-            "".join([self.dna_complement[base] for base in self.string[::-1]]),
-            self.description,
-            (None if self.quality is None else self.quality[::-1])
-        )
-
-    def rnaRevCom(self):
-        """
-        Return the sequence corresponding to the RNA reverse complement.
-
-        :return: The reverse complement.
-        :rtype: Sequence
-        """
-        return Sequence(
-            self.id,
-            "".join([self.rna_complement[base] for base in self.string[::-1]]),
-            self.description,
-            (None if self.quality is None else self.quality[::-1])
-        )
+from anacore.sequence import Sequence, DNAAlphabet
+from anacore.sv import SVIO
+import gzip
+import re
 
 
 class FaidxRecord:
@@ -212,7 +149,7 @@ class FastqIO:
         Return the next sequence.
 
         :return: The next sequence or None if it is the end of file.
-        :rtype: Sequence
+        :rtype: anacore.sequence.Sequence
         """
         seq_record = None
         try:
@@ -381,7 +318,7 @@ class FastqIO:
         Write record lines in file.
 
         :param sequence_record: The record to write.
-        :type sequence_record: Sequence
+        :type sequence_record: anacore.sequence.Sequence
         """
         self.file_handle.write(self.seqToFastqLine(sequence_record) + "\n")
         self.current_line_nb += 1
@@ -391,7 +328,7 @@ class FastqIO:
         Return the sequence in fastq format.
 
         :param sequence: The sequence to process.
-        :type sequence: Sequence
+        :type sequence: anacore.sequence.Sequence
         :return: The sequence.
         :rtype: str
         """
@@ -456,7 +393,7 @@ class FastaIO:
         Return the next sequence.
 
         :return: The next sequence.
-        :rtype: Sequence
+        :rtype: anacore.sequence.Sequence
         """
         seq_record = None
         if not self._end_of_file:
@@ -581,7 +518,7 @@ class FastaIO:
         Write record lines in file.
 
         :param sequence_record: The record to write.
-        :type sequence_record: Sequence
+        :type sequence_record: anacore.sequence.Sequence
         """
         self.file_handle.write(self.seqToFastaLine(sequence_record) + "\n")
         self.current_line_nb += 1
@@ -591,7 +528,7 @@ class FastaIO:
         Return the sequence in fasta format.
 
         :param sequence: The sequence to process.
-        :type sequence: Sequence
+        :type sequence: anacore.sequence.Sequence
         :return: The sequence.
         :rtype: str
         """
@@ -662,7 +599,7 @@ class IdxFastaIO(FastaIO):
         :param id: The sequence ID.
         :type id: str
         :return: The sequence selected from the file.
-        :rtype: Sequence
+        :rtype: anacore.sequence.Sequence
         """
         if self.cached is not None:
             if self.cached.id == id:
@@ -679,8 +616,43 @@ class IdxFastaIO(FastaIO):
     #     Write record lines in file.
     #
     #     :param sequence_record: The record to write.
-    #     :type sequence_record: Sequence
+    #     :type sequence_record: anacore.sequence.Sequence
     #     """
     #     self.file_handle.write(self.seqToFastaLine(sequence_record) + "\n")
     #     self.faidx.write(sequence_record)
     #     self.current_line_nb += 1
+
+
+def getStrandedSeqFromPos(reference, pos_on_ref, strand, sequence_reader, complement_alphabet=None):
+    """
+    Return the stranded sequence for the positions (continuous or not).
+
+    :param sequence_reader: File handle to the sequences file.
+    :type sequence_reader: anacore.sequenceIO.IdxFastaIO
+    :param pos_list: List of reference positions. These positions can be sorted/unsorted and continuous/discontinuous.
+    :type pos_list: list
+    :param complement_alphabet: The alphabet used to complement the sequence (default: DNA alphabet).
+    :type complement_alphabet: anacore.sequence.Alphabet
+    :return: Stranded sequence for the positions.
+    :rtype: str
+    """
+    if complement_alphabet is None:
+        complement_alphabet = DNAAlphabet
+    seq = ""
+    # Get sequence
+    pos_on_ref = sorted(pos_on_ref)
+    stack_start = pos_on_ref[0]
+    stack_end = pos_on_ref[0]
+    for curr_pos in pos_on_ref[1:]:
+        if curr_pos == stack_end + 1:  # Continuous
+            stack_end = curr_pos
+        else:  # Dicontinuous
+            seq += sequence_reader.getSub(reference, stack_start, stack_end)
+            stack_start = curr_pos
+            stack_end = curr_pos
+    if stack_start is not None:
+        seq += sequence_reader.getSub(reference, stack_start, stack_end)
+    # Reverse sequence to be stranded +
+    if strand == "-":
+        seq = complement_alphabet.revCom(seq)
+    return seq
