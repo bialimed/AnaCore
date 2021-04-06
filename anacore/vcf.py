@@ -395,7 +395,7 @@ class VCFRecord:
                 chr1  10  AAAT  TG => returns 10
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The function 'refStart' cannot be used on multi-allelic variant {}.".format(self.getName()))
         if self._normalized is None:
             self._normalized = deepcopy(self)
             self._normalized.normalizeSingleAllele()
@@ -432,7 +432,7 @@ class VCFRecord:
                 chr1  10  AAAT  TG => returns 13
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The function 'refEnd' cannot be used on multi-allelic variant {}.".format(self.getName()))
         if self._normalized is None:
             self._normalized = deepcopy(self)
             self._normalized.normalizeSingleAllele()
@@ -475,6 +475,33 @@ class VCFRecord:
         if len(alt) < len(ref):
             is_deletion = True
         return is_deletion
+
+    def isInsAndDel(self):
+        """
+        Return True if the variant is an insertion and also a deletion.
+
+        :return: True if the variant is an insertion and also a deletion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isInsAndDel' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        is_ins_and_del = False
+        if self._normalized is None:
+            self._normalized = deepcopy(self)
+            self._normalized.normalizeSingleAllele()
+        ref = self._normalized.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
+        alt = self._normalized.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
+        if len(ref) > len(alt):  # Deletion exists and is more longer (eg: AT/ or AT/G)
+            if len(alt) != 0:  # Insertion exists (eg: AT/G)
+                is_ins_and_del = True
+        elif len(ref) < len(alt):  # Insertion exists and is more longer (eg: /AT or G/AT)
+            if len(ref) != 0:  # Deletion exists (eg: G/AT)
+                is_ins_and_del = True
+        else:  # Same length: SNV or MNV
+            if len(ref) != 1:  # MNV: AT/GC
+                is_ins_and_del = True
+        return is_ins_and_del
 
     def isIndel(self):
         """

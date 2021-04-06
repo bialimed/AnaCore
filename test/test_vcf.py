@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.11.0'
+__version__ = '1.12.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -788,6 +788,42 @@ class TestVCFRecord(unittest.TestCase):
         for curr_data in data:
             record = VCFRecord(*curr_data)
             self.assertTrue(record.refEnd() == record.info["expected_end"])
+
+    def testIsDeletion(self):
+        data = [
+            {"variant": VCFRecord("chr1", 2, None, "A", ["T"]), "expected": False},
+            {"variant": VCFRecord("chr1", 2, None, "A", ["AT"]), "expected": False},
+            {"variant": VCFRecord("chr1", 1, None, "CA", ["C"]), "expected": True},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GT"]), "expected": False},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GTT"]), "expected": False},
+            {"variant": VCFRecord("chr1", 15, None, "CAC", ["GT"]), "expected": True}
+        ]
+        for curr in data:
+            self.assertEqual(curr["variant"].isDeletion(), curr["expected"])
+
+    def testIsInsAndDel(self):
+        data = [
+            {"variant": VCFRecord("chr1", 2, None, "A", ["T"]), "expected": False},
+            {"variant": VCFRecord("chr1", 2, None, "A", ["AT"]), "expected": False},
+            {"variant": VCFRecord("chr1", 1, None, "CA", ["C"]), "expected": False},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GT"]), "expected": True},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GTT"]), "expected": True},
+            {"variant": VCFRecord("chr1", 15, None, "CAC", ["GT"]), "expected": True}
+        ]
+        for curr in data:
+            self.assertEqual(curr["variant"].isInsAndDel(), curr["expected"])
+
+    def testIsInsertion(self):
+        data = [
+            {"variant": VCFRecord("chr1", 2, None, "A", ["T"]), "expected": False},
+            {"variant": VCFRecord("chr1", 2, None, "A", ["AT"]), "expected": True},
+            {"variant": VCFRecord("chr1", 1, None, "CA", ["C"]), "expected": False},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GT"]), "expected": False},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GTT"]), "expected": True},
+            {"variant": VCFRecord("chr1", 15, None, "CAC", ["GT"]), "expected": False}
+        ]
+        for curr in data:
+            self.assertEqual(curr["variant"].isInsertion(), curr["expected"])
 
 
 class TestVCFHeader(unittest.TestCase):
