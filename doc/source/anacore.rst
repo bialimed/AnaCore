@@ -153,6 +153,14 @@ anacore.region
    :undoc-members:
    :show-inheritance:
 
+anacore.sequence
+-------------------------
+
+.. automodule:: anacore.sequence
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 anacore.sequenceIO
 -------------------------
 

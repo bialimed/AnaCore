@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>anacore.hgvs &mdash; AnaCore  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,6 +89,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -119,11 +124,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -150,59 +157,36 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2019 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.2.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.3.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="kn">import</span> <span class="n">Region</span>
+<span class="kn">from</span> <span class="nn">anacore.sequence</span> <span class="kn">import</span> <span class="n">AA3LettersAlphabet</span><span class="p">,</span> <span class="n">DNAAlphabet</span><span class="p">,</span> <span class="n">CodonAlphabet</span>
+<span class="kn">from</span> <span class="nn">anacore.sequenceIO</span> <span class="kn">import</span> <span class="n">getStrandedSeqFromPos</span>
+<span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFRecord</span>
 <span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">wrap</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">urllib.parse</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">deque</span>
 
 
-<span class="n">AA_ONE_BY_THREE</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;Ter&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Ala&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Arg&quot;</span><span class="p">:</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Asn&quot;</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Asp&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Cys&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Gln&quot;</span><span class="p">:</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Glu&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Gly&quot;</span><span class="p">:</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;His&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Ile&quot;</span><span class="p">:</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Leu&quot;</span><span class="p">:</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Lys&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Met&quot;</span><span class="p">:</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Phe&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Pro&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Ser&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Thr&quot;</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Trp&quot;</span><span class="p">:</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Tyr&quot;</span><span class="p">:</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Val&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Asx&quot;</span><span class="p">:</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Glx&quot;</span><span class="p">:</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Xle&quot;</span><span class="p">:</span> <span class="s2">&quot;J&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Sec&quot;</span><span class="p">:</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Pyl&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Xaa&quot;</span><span class="p">:</span> <span class="s2">&quot;X&quot;</span>
-<span class="p">}</span>
+<span class="n">AA_ONE_BY_THREE</span> <span class="o">=</span> <span class="n">AA3LettersAlphabet</span><span class="o">.</span><span class="n">one_by_three</span>
 
 <span class="n">AA_THREE_BY_ONE</span> <span class="o">=</span> <span class="p">{</span><span class="n">value</span><span class="p">:</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">AA_ONE_BY_THREE</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
 <span class="n">ONE_LETTER_AA_LEXIC</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">AA_ONE_BY_THREE</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-<span class="n">THREE_LETTERS_AA_LEXIC</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">AA_ONE_BY_THREE</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">}</span>
+<span class="n">THREE_LETTERS_AA_LEXIC</span> <span class="o">=</span> <span class="n">AA3LettersAlphabet</span><span class="o">.</span><span class="n">words</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="Accession"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.Accession">[docs]</a><span class="k">class</span> <span class="nc">Accession</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class to manipulate accession number.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of Accession.</span>
 
@@ -219,7 +203,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version</span><span class="p">)</span> <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the “informal” or nicely printable string representation of the object.</span>
 
@@ -235,7 +219,7 @@
 <div class="viewcode-block" id="HGVS"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVS">[docs]</a><span class="k">class</span> <span class="nc">HGVS</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class to manipulate HGVS information.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accession</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accession</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HGVS.</span>
 
@@ -261,7 +245,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;(&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">change</span> <span class="ow">or</span> <span class="s2">&quot;)&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">change</span></div>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the “informal” or nicely printable string representation of the object.</span>
 
@@ -312,7 +296,7 @@
 <span class="sd">                print(res)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://mutalyzer.nl&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="s2">&quot;NameChecker&quot;</span><span class="p">,</span> <span class="n">proxy_url</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://mutalyzer.nl&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="s2">&quot;NameChecker&quot;</span><span class="p">,</span> <span class="n">proxy_url</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of MutalyzerBatch.</span>
 
@@ -451,7 +435,7 @@
 <div class="viewcode-block" id="RunMutalyzerLegend"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.RunMutalyzerLegend">[docs]</a><span class="k">class</span> <span class="nc">RunMutalyzerLegend</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class to manipulate field legend from runMutalyzer[Light].&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">legend_data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">legend_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of RunMutalyzerLegend.</span>
 
@@ -495,7 +479,7 @@
 <div class="viewcode-block" id="RunMutalyzerDescription"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.RunMutalyzerDescription">[docs]</a><span class="k">class</span> <span class="nc">RunMutalyzerDescription</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class to manipulate field proteinDescriptions or transcriptDescriptions from runMutalyzer[Light].&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description_data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of RunMutalyzerLegend.</span>
 
@@ -543,7 +527,7 @@
 <div class="viewcode-block" id="HGVSProtChange"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange">[docs]</a><span class="k">class</span> <span class="nc">HGVSProtChange</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class to manipulate change part of proteic HGVS (ex: &quot;Val600Glu&quot;).&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts</span><span class="p">,</span> <span class="n">predicted</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts</span><span class="p">,</span> <span class="n">predicted</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HGVSProtChange.</span>
 
@@ -599,7 +583,7 @@
     <span class="k">def</span> <span class="nf">end_aa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_val</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_end_aa</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">new_val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_cleanedAA</span><span class="p">(</span><span class="n">new_val</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if the object represent the same HGVS change.</span>
 
@@ -610,7 +594,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="nb">repr</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the object representation in string.</span>
 
@@ -632,7 +616,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="n">rep_str</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the “informal” or nicely printable string representation of the object.</span>
 
@@ -656,6 +640,20 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted</span><span class="p">:</span>
             <span class="nb">repr</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">repr</span>
+
+<div class="viewcode-block" id="HGVSProtChange.isInFrameIns"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange.isInFrameIns">[docs]</a>    <span class="k">def</span> <span class="nf">isInFrameIns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the HGVS is insertion, duplication or repeat. Frameshift or extension resulting from insertion return False.</span>
+
+<span class="sd">        :return: Return True if the HGVS is insertion, duplication or repeat.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_ins</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evt</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;ins&quot;</span><span class="p">,</span> <span class="s2">&quot;dup&quot;</span><span class="p">}:</span>
+            <span class="n">is_ins</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">evt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_elts</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_elts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span><span class="p">:</span>  <span class="c1"># Reapeat</span>
+            <span class="n">is_ins</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">is_ins</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_cleanedAA</span><span class="p">(</span><span class="n">aa</span><span class="p">):</span>
@@ -744,7 +742,17 @@
             <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;del&quot;</span>
             <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;del&quot; must end the change: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="c1"># Follow must be the deleted aa</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">%</span> <span class="n">aa_nb_letter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Deletion must be ended by &quot;del&quot; or the amino acids deleted: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="n">del_len</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_pos</span> <span class="k">if</span> <span class="n">end_pos</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">end_pos</span><span class="p">)</span> <span class="o">-</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">/</span> <span class="n">aa_nb_letter</span> <span class="o">!=</span> <span class="n">del_len</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Deletion must be ended by &quot;del&quot; or the amino acids deleted: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="n">del_aa</span> <span class="o">=</span> <span class="p">[</span><span class="n">follow</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">aa_nb_letter</span><span class="p">]</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">),</span> <span class="n">aa_nb_letter</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">curr_del_aa</span> <span class="ow">in</span> <span class="n">del_aa</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">curr_del_aa</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">curr_aa_lexic</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Deletion must be ended by &quot;del&quot; or the amino acids deleted: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="n">follow</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">elif</span> <span class="n">lc_follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ins&quot;</span><span class="p">):</span>
             <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;ins&quot;</span>
             <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
@@ -756,7 +764,17 @@
             <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;dup&quot;</span>
             <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;dup&quot; must end the change: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="c1"># Follow must be the deleted aa</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">%</span> <span class="n">aa_nb_letter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Duplication must be ended by &quot;dup&quot; or the amino acids duplicated: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="n">del_len</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_pos</span> <span class="k">if</span> <span class="n">end_pos</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">end_pos</span><span class="p">)</span> <span class="o">-</span> <span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">/</span> <span class="n">aa_nb_letter</span> <span class="o">!=</span> <span class="n">del_len</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Duplication must be ended by &quot;dup&quot; or the amino acids duplicated: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="n">del_aa</span> <span class="o">=</span> <span class="p">[</span><span class="n">follow</span><span class="p">[</span><span class="n">idx</span><span class="p">:</span><span class="n">idx</span><span class="o">+</span><span class="n">aa_nb_letter</span><span class="p">]</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">),</span> <span class="n">aa_nb_letter</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">curr_del_aa</span> <span class="ow">in</span> <span class="n">del_aa</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">curr_del_aa</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">curr_aa_lexic</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Duplication must be ended by &quot;dup&quot; or the amino acids duplicated: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">change</span><span class="p">))</span>
+                <span class="n">follow</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">elif</span> <span class="n">lc_follow</span> <span class="o">==</span> <span class="s2">&quot;ext&quot;</span> <span class="ow">or</span> <span class="n">lc_follow</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ext-&quot;</span><span class="p">):</span>
             <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;ext&quot;</span>
             <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
@@ -771,6 +789,9 @@
             <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;fs&quot;</span>
             <span class="n">new_aa</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[:</span><span class="n">aa_nb_letter</span><span class="p">]</span>
             <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="n">aa_nb_letter</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^fs(\*|ter)\d*$&quot;</span><span class="p">,</span> <span class="n">lc_follow</span><span class="p">):</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;fs&quot;</span>
+            <span class="n">follow</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
         <span class="k">return</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">follow</span>
 
     <span class="nd">@staticmethod</span>
@@ -859,8 +880,8 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;One of the amino acids is incomplete: </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curr_aa</span><span class="p">,</span> <span class="n">change</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">new_elts</span>
 
-<div class="viewcode-block" id="HGVSProtChange.isHGVS"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange.isHGVS">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">isHGVS</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+<div class="viewcode-block" id="HGVSProtChange.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the string is a valid HGVS change (ex: &quot;Val600Glu&quot; or &quot;(Val582_Asn583insXXXXX)&quot;).</span>
 
@@ -920,29 +941,370 @@
                 <span class="n">end_pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">end_pos</span><span class="p">)</span>
             <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts_str</span> <span class="o">=</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_splittedOnEvt</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">follow</span><span class="p">)</span>
             <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">new_elts_str</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">follow</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">new_elts</span> <span class="o">=</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_parsedNewElements</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts_str</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">HGVSProtChange</span><span class="p">(</span><span class="n">start_aa</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span></div></div>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts_str</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^\[\d+\]$&quot;</span><span class="p">,</span> <span class="n">new_elts_str</span><span class="p">):</span>  <span class="c1"># The alteration is not a repeat</span>
+                    <span class="n">new_elts</span> <span class="o">=</span> <span class="n">HGVSProtChange</span><span class="o">.</span><span class="n">_parsedNewElements</span><span class="p">(</span><span class="n">change</span><span class="p">,</span> <span class="n">aa_nb_letter</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts_str</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># The alteration is a repeat</span>
+                    <span class="n">nb_repeats</span> <span class="o">=</span> <span class="n">new_elts_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">nb_repeats</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+                        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;dup&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="n">nb_repeats</span><span class="p">,</span> <span class="s2">&quot;]&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">HGVSProtChange</span><span class="p">(</span><span class="n">start_aa</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_pos</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HGVSProtChange.insCouldBeIdentical"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSProtChange.insCouldBeIdentical">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">insCouldBeIdentical</span><span class="p">(</span><span class="n">hgvs_ins</span><span class="p">,</span> <span class="n">hgvs_repeat</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the insertion could be identical to the repeat (example: L16_I17insGTTL vs G13_L16dup). In this case, the difference bewtenn the two HGVS comes only from a difference of notation.</span>
+
+<span class="sd">        :param hgvs_ins: HGVSp change for an insertion (example: L16_I17insGTTL).</span>
+<span class="sd">        :type hgvs_ins: anacore.hgvs.HGVSProtChange</span>
+<span class="sd">        :param hgvs_repeat: HGVSp change for a repeat (example: G13_L16dup or G13_L16[1]).</span>
+<span class="sd">        :type hgvs_repeat: anacore.hgvs.HGVSProtChange</span>
+<span class="sd">        :return: True if the insertion could be identical to the repeat.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">could_be_identical</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">hgvs_ins</span><span class="o">.</span><span class="n">isInFrameIns</span><span class="p">()</span> <span class="ow">and</span> <span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">isInFrameIns</span><span class="p">():</span>
+            <span class="n">len_dup</span> <span class="o">=</span> <span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">end_pos</span> <span class="o">-</span> <span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">nb_repeat</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">evt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Repeat</span>
+                <span class="n">nb_repeat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">new_elts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">len_ins_in_repeat</span> <span class="o">=</span> <span class="n">len_dup</span> <span class="o">*</span> <span class="n">nb_repeat</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hgvs_ins</span><span class="o">.</span><span class="n">new_elts</span><span class="p">)</span> <span class="o">==</span> <span class="n">len_ins_in_repeat</span><span class="p">:</span>  <span class="c1"># same length</span>
+                <span class="k">if</span> <span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">end_aa</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">end_pos</span><span class="p">)</span> <span class="o">==</span> <span class="n">hgvs_ins</span><span class="o">.</span><span class="n">start_aa</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">hgvs_ins</span><span class="o">.</span><span class="n">start_pos</span><span class="p">):</span>  <span class="c1"># Same positions</span>
+                    <span class="k">if</span> <span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">start_aa</span> <span class="o">==</span> <span class="n">hgvs_ins</span><span class="o">.</span><span class="n">new_elts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">hgvs_repeat</span><span class="o">.</span><span class="n">end_aa</span> <span class="o">==</span> <span class="n">hgvs_ins</span><span class="o">.</span><span class="n">new_elts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>  <span class="c1"># Same start and end amino acids</span>
+                        <span class="k">if</span> <span class="n">nb_repeat</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">could_be_identical</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">insertions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hgvs_ins</span><span class="o">.</span><span class="n">new_elts</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">len_dup</span><span class="p">])</span> <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">len_ins_in_repeat</span><span class="p">,</span> <span class="n">len_dup</span><span class="p">)]</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">insertions</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Insertion is a valid repeat</span>
+                                <span class="n">could_be_identical</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">could_be_identical</span></div></div>
+
+
+<div class="viewcode-block" id="HGVSpConverter"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSpConverter">[docs]</a><span class="k">class</span> <span class="nc">HGVSpConverter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_reader</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span> <span class="o">=</span> <span class="n">sequence_reader</span>
+
+    <span class="k">def</span> <span class="nf">_parseInDelInFrameNtConseq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curr_prot</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">):</span>
+        <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">new_aa</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">trimmed_alt</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">trimmed_ref</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trimmed_alt</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed_ref</span><span class="p">))</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The variant </span><span class="si">{}</span><span class="s2"> is a frameshift in HGVSp.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variant</span><span class="p">))</span>
+        <span class="n">nt</span> <span class="o">=</span> <span class="n">trimmed_alt</span> <span class="k">if</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span> <span class="k">else</span> <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">revCom</span><span class="p">(</span><span class="n">trimmed_alt</span><span class="p">)</span>
+        <span class="c1"># Complete start codon with ref</span>
+        <span class="k">for</span> <span class="n">curr_codon_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_pos_in_codon</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">prev_nt_pos</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">curr_codon_pos</span><span class="p">)</span>
+            <span class="n">prev_nt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span>
+                <span class="n">curr_prot</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">prev_nt_pos</span><span class="p">,</span>
+                <span class="n">prev_nt_pos</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                <span class="n">prev_nt</span> <span class="o">=</span> <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">complement</span><span class="p">[</span><span class="n">prev_nt</span><span class="p">]</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">nt</span>
+        <span class="c1"># Complete end codon with ref</span>
+        <span class="k">for</span> <span class="n">curr_codon_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">end_pos_in_codon</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">post_nt_pos</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">curr_codon_pos</span><span class="p">)</span>
+            <span class="n">post_nt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span>
+                <span class="n">curr_prot</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">post_nt_pos</span><span class="p">,</span>
+                <span class="n">post_nt_pos</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                <span class="n">post_nt</span> <span class="o">=</span> <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">complement</span><span class="p">[</span><span class="n">post_nt</span><span class="p">]</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="n">nt</span> <span class="o">+</span> <span class="n">post_nt</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">codon</span><span class="p">]</span> <span class="k">for</span> <span class="n">codon</span> <span class="ow">in</span> <span class="n">wrap</span><span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+        <span class="c1"># Truncate insertion to Ter</span>
+        <span class="k">if</span> <span class="s2">&quot;Ter&quot;</span> <span class="ow">in</span> <span class="n">new_elts</span><span class="p">:</span>
+            <span class="n">new_elts</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[:</span><span class="n">new_elts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;Ter&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1">#################### trunc ?</span>
+        <span class="c1"># Remove same aa at start</span>
+        <span class="n">new_start_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">new_start_idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="ow">and</span> <span class="n">new_elts</span><span class="p">[</span><span class="n">new_start_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">start_aa</span><span class="p">:</span>
+            <span class="n">start_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonSeqFromProtPos</span><span class="p">(</span><span class="n">start_aa_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)]</span>
+            <span class="n">start_aa_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">new_start_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[</span><span class="n">new_start_idx</span><span class="p">:]</span>
+        <span class="c1"># Remove same aa at end</span>
+        <span class="n">new_end_idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">new_end_idx</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">new_elts</span><span class="p">[</span><span class="n">new_end_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">end_aa</span><span class="p">:</span>
+            <span class="n">end_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonSeqFromProtPos</span><span class="p">(</span><span class="n">end_aa_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)]</span>
+            <span class="n">end_aa_pos</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">new_end_idx</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[:</span><span class="n">new_end_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Change evt</span>
+        <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;delins&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">end_aa_pos</span> <span class="o">&lt;</span> <span class="n">start_aa_pos</span><span class="p">:</span>  <span class="c1"># Deletion and insertion become synonym on protein</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">start_aa_pos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">start_aa</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">end_aa_pos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">end_aa</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="n">end_aa_pos</span> <span class="o">&lt;</span> <span class="n">start_aa_pos</span><span class="p">:</span>  <span class="c1"># Deletion becomes synonym but not the entire insertion</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;ins&quot;</span>
+            <span class="n">end_aa_pos</span> <span class="o">=</span> <span class="n">start_aa_pos</span>
+            <span class="n">end_aa</span> <span class="o">=</span> <span class="n">start_aa</span>
+            <span class="n">start_aa_pos</span> <span class="o">=</span> <span class="n">start_aa_pos</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">start_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonSeqFromProtPos</span><span class="p">(</span><span class="n">start_aa_pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)]</span>
+            <span class="c1"># Check if it is duplication</span>
+            <span class="n">is_dup</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ins_aa</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_elts</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">ref_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonSeqFromProtPos</span><span class="p">(</span><span class="n">start_aa_pos</span> <span class="o">-</span> <span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="n">ref_aa</span> <span class="o">!=</span> <span class="n">ins_aa</span><span class="p">:</span>
+                    <span class="n">is_dup</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">is_dup</span><span class="p">:</span>
+                <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;dup&quot;</span>
+                <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Check if it is repeat</span>
+                <span class="n">has_inner_repeat</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">init</span> <span class="ow">in</span> <span class="n">new_elts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="n">repeat_seq</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">repeats_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">elt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="k">if</span> <span class="n">elt</span> <span class="o">==</span> <span class="n">init</span><span class="p">]</span>
+                    <span class="k">while</span> <span class="ow">not</span> <span class="n">has_inner_repeat</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">repeats_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">expected</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[</span><span class="n">repeats_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                        <span class="n">repeat_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+                        <span class="c1"># Remove extension with different aa</span>
+                        <span class="n">repeats_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">repeats_idx</span> <span class="k">if</span> <span class="n">new_elts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">expected</span><span class="p">]</span>
+                        <span class="c1"># Remove overlapped by first fragment growth</span>
+                        <span class="n">repeats_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">repeats_idx</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">-</span> <span class="n">repeats_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">repeats_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                        <span class="c1"># Is repeat or next iteration</span>
+                        <span class="k">if</span> <span class="n">repeats_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">repeats_idx</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">):</span>
+                            <span class="n">has_inner_repeat</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Next iteration</span>
+                            <span class="n">repeats_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">repeats_idx</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="n">has_inner_repeat</span><span class="p">:</span>
+                        <span class="n">is_repeat</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ins_aa</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">repeat_seq</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                            <span class="n">ref_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonSeqFromProtPos</span><span class="p">(</span><span class="n">start_aa_pos</span> <span class="o">-</span> <span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)]</span>
+                            <span class="k">if</span> <span class="n">ref_aa</span> <span class="o">!=</span> <span class="n">ins_aa</span><span class="p">:</span>
+                                <span class="n">is_repeat</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">is_repeat</span><span class="p">:</span>
+                            <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">repeats_idx</span><span class="p">),</span> <span class="s2">&quot;]&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Insertion becomes synonym but not the entire deletion</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;del&quot;</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Remained delins</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="n">end_aa_pos</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">start_aa_pos</span> <span class="o">==</span> <span class="n">end_aa_pos</span><span class="p">):</span>  <span class="c1"># DelIns of one amino acid</span>
+                <span class="c1"># by definition, when one amino acid is replaced with one other amino acid, the change is a substitution, not a deletion-insertion.</span>
+                <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">end_aa</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">end_aa_pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">evt</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">new_elts</span>
+
+    <span class="k">def</span> <span class="nf">_parseInDelFrameshiftNtConseq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curr_prot</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">):</span>
+        <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">new_aa</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">trimmed_alt</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">trimmed_ref</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trimmed_alt</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed_ref</span><span class="p">))</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The variant </span><span class="si">{}</span><span class="s2"> isn&#39;t a frameshift in HGVSp.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variant</span><span class="p">))</span>
+        <span class="n">nt</span> <span class="o">=</span> <span class="n">trimmed_alt</span> <span class="k">if</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span> <span class="k">else</span> <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">revCom</span><span class="p">(</span><span class="n">trimmed_alt</span><span class="p">)</span>
+        <span class="c1"># Complete start codon with ref</span>
+        <span class="k">for</span> <span class="n">curr_codon_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_pos_in_codon</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">prev_nt_pos</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">curr_codon_pos</span><span class="p">)</span>
+            <span class="n">prev_nt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span>
+                <span class="n">curr_prot</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">prev_nt_pos</span><span class="p">,</span>
+                <span class="n">prev_nt_pos</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                <span class="n">prev_nt</span> <span class="o">=</span> <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">complement</span><span class="p">[</span><span class="n">prev_nt</span><span class="p">]</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">nt</span>
+        <span class="n">phased_nt</span> <span class="o">=</span> <span class="n">nt</span><span class="p">[:</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">)]</span>
+        <span class="n">unphased_nt</span> <span class="o">=</span> <span class="n">nt</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nt</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">):]</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">codon</span><span class="p">]</span> <span class="k">for</span> <span class="n">codon</span> <span class="ow">in</span> <span class="n">wrap</span><span class="p">(</span><span class="n">phased_nt</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+        <span class="n">contains_ter</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;Ter&quot;</span> <span class="ow">in</span> <span class="n">new_elts</span><span class="p">:</span>
+            <span class="n">new_elts</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[:</span><span class="n">new_elts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;Ter&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">contains_ter</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wt_prot_len</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+            <span class="c1"># Complete end variant</span>
+            <span class="n">sub_aa_pos</span> <span class="o">=</span> <span class="n">end_aa_pos</span>
+            <span class="n">sub_codon_pos</span> <span class="o">=</span> <span class="n">end_pos_in_codon</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">sub_codon_pos</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">sub_aa_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">sub_codon_pos</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">codon_seq</span> <span class="o">=</span> <span class="n">unphased_nt</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">codon_seq</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">sub_aa_pos</span> <span class="o">&lt;</span> <span class="n">wt_prot_len</span><span class="p">:</span>
+                <span class="n">ref_pos</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">sub_aa_pos</span><span class="p">,</span> <span class="n">sub_codon_pos</span><span class="p">)</span>
+                <span class="n">ref_nt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ref_pos</span><span class="p">,</span> <span class="n">ref_pos</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                    <span class="n">ref_nt</span> <span class="o">=</span> <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">revCom</span><span class="p">(</span><span class="n">ref_nt</span><span class="p">)</span>
+                <span class="n">codon_seq</span> <span class="o">+=</span> <span class="n">ref_nt</span>
+                <span class="c1"># Next nt on ref</span>
+                <span class="n">sub_codon_pos</span> <span class="o">=</span> <span class="n">end_pos_in_codon</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">sub_codon_pos</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">sub_aa_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">sub_codon_pos</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">codon_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">codon_seq</span><span class="p">]</span>
+            <span class="n">new_elts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">codon_aa</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">codon_aa</span> <span class="o">==</span> <span class="s2">&quot;Ter&quot;</span><span class="p">:</span>
+                <span class="n">contains_ter</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># Sequence on ref with new frame</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">contains_ter</span> <span class="ow">and</span> <span class="n">sub_aa_pos</span> <span class="o">&lt;</span> <span class="n">wt_prot_len</span><span class="p">:</span>
+                <span class="c1"># Get codon pos</span>
+                <span class="n">codon_prot_aa_pos</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">codon_prot_codon_pos</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">sub_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+                    <span class="n">sub_codon_pos</span> <span class="o">=</span> <span class="n">sub_codon_pos</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">sub_codon_pos</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="n">sub_aa_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">sub_codon_pos</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">codon_prot_aa_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_aa_pos</span><span class="p">)</span>
+                    <span class="n">codon_prot_codon_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub_codon_pos</span><span class="p">)</span>
+                <span class="n">codon_pos_on_ref</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">curr_prot</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">codon_prot_aa_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">codon_prot_codon_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">curr_prot</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">codon_prot_aa_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">codon_prot_codon_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="p">]</span>
+                <span class="k">if</span> <span class="n">codon_pos_on_ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">==</span> <span class="n">codon_pos_on_ref</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>  <span class="c1"># Codon positions are continuous on genome</span>
+                    <span class="n">codon_pos_on_ref</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">codon_pos_on_ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># Codon positions are discontinuous on genome</span>
+                    <span class="n">codon_pos_on_ref</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">getPosOnRef</span><span class="p">(</span><span class="n">codon_prot_aa_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">codon_prot_codon_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="c1"># Get codon seq</span>
+                <span class="n">codon_seq</span> <span class="o">=</span> <span class="n">getStrandedSeqFromPos</span><span class="p">(</span>
+                    <span class="n">curr_prot</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">codon_pos_on_ref</span><span class="p">,</span>
+                    <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">,</span>
+                    <span class="n">DNAAlphabet</span>
+                <span class="p">)</span>
+                <span class="n">codon_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">codon_seq</span><span class="p">]</span>
+                <span class="n">new_elts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">codon_aa</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">codon_aa</span> <span class="o">==</span> <span class="s2">&quot;Ter&quot;</span><span class="p">:</span>
+                    <span class="n">contains_ter</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Remove same aa at start</span>
+        <span class="n">new_start_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">new_start_idx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="ow">and</span> <span class="n">new_elts</span><span class="p">[</span><span class="n">new_start_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">start_aa</span><span class="p">:</span>
+            <span class="n">start_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonSeqFromProtPos</span><span class="p">(</span><span class="n">start_aa_pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)]</span>
+            <span class="n">start_aa_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">new_start_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">new_elts</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[</span><span class="n">new_start_idx</span><span class="p">:]</span>
+        <span class="c1"># Update evenment</span>
+        <span class="k">if</span> <span class="n">contains_ter</span><span class="p">:</span>
+            <span class="n">end_aa</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">end_aa_pos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># The shortest frame shift variant possible contains “fsTer2”. The frameshift “fsTer1” is by definition a substitution.</span>
+                <span class="c1"># The variant is described as substitution</span>
+                <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ter&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># The variant is described as frameshift</span>
+                <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;fs&quot;</span>
+                <span class="n">new_aa</span> <span class="o">=</span> <span class="n">new_elts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ter&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_elts</span><span class="p">))]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Insertions extending the amino acid sequence at the C-terminal end with one or more amino acids are described as Extension</span>
+            <span class="c1"># The variant is described as extension</span>
+            <span class="n">evt</span> <span class="o">=</span> <span class="s2">&quot;ext&quot;</span> <span class="c1">########################################################## Ter551GlyextTer20</span>
+        <span class="k">return</span> <span class="n">evt</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">new_elts</span>
+
+    <span class="k">def</span> <span class="nf">_parseInDelNtConseq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">curr_prot</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">):</span>
+        <span class="n">trimmed_alt</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">trimmed_ref</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trimmed_alt</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed_ref</span><span class="p">))</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># InFrame</span>
+            <span class="n">evt</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">new_elts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseInDelInFrameNtConseq</span><span class="p">(</span>
+                <span class="n">curr_prot</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span>
+                <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Frameshift</span>
+            <span class="n">evt</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">new_elts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseInDelFrameshiftNtConseq</span><span class="p">(</span>
+                <span class="n">curr_prot</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span>
+                <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">evt</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">new_elts</span>
+
+<div class="viewcode-block" id="HGVSpConverter.varToHGVSInPlace"><a class="viewcode-back" href="../../anacore.html#anacore.hgvs.HGVSpConverter.varToHGVSInPlace">[docs]</a>    <span class="k">def</span> <span class="nf">varToHGVSInPlace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">transcript_model</span><span class="p">,</span> <span class="n">predicted</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">possible_hgvs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Get pos on reference</span>
+        <span class="n">start_ref_pos</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">refStart</span><span class="p">()</span>
+        <span class="n">end_ref_pos</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">refEnd</span><span class="p">()</span>
+        <span class="n">variant_region</span> <span class="o">=</span> <span class="n">Region</span><span class="p">(</span><span class="n">start_ref_pos</span><span class="p">,</span> <span class="n">end_ref_pos</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">transcript_model</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># Evaluate proteins</span>
+        <span class="k">for</span> <span class="n">curr_prot</span> <span class="ow">in</span> <span class="n">transcript_model</span><span class="o">.</span><span class="n">proteins</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">start_ref_pos</span> <span class="o">&gt;</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">end</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">end_ref_pos</span> <span class="o">&lt;</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">start</span> <span class="ow">and</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">variant_region</span><span class="p">):</span>  <span class="c1"># Variant overlaps the protein</span>
+                <span class="c1"># Get pos on reference</span>
+                <span class="n">stranded_start_ref_pos</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start_ref_pos</span><span class="p">,</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">start</span><span class="p">)</span><span class="c1">############################## trim ref std et norm</span>
+                <span class="n">stranded_end_ref_pos</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end_ref_pos</span><span class="p">,</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">end</span><span class="p">)</span><span class="c1">################################### trim ref</span>
+                <span class="k">if</span> <span class="n">transcript_model</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                    <span class="n">stranded_start_ref_pos</span> <span class="o">=</span> <span class="n">end_ref_pos</span>
+                    <span class="n">stranded_end_ref_pos</span> <span class="o">=</span> <span class="n">start_ref_pos</span>
+                <span class="c1"># Get pos on protein and amino acids</span>
+                <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">start_codon_seq</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonInfo</span><span class="p">(</span><span class="n">stranded_start_ref_pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">is_truncated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is truncated&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]))</span><span class="c1">##################### warn</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_truncated</span><span class="p">:</span>
+                    <span class="n">start_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">start_codon_seq</span><span class="p">]</span>
+                    <span class="n">end_aa_pos</span> <span class="o">=</span> <span class="n">start_aa_pos</span>
+                    <span class="n">end_aa</span> <span class="o">=</span> <span class="n">start_aa</span>
+                    <span class="n">end_pos_in_codon</span> <span class="o">=</span> <span class="n">start_pos_in_codon</span>
+                    <span class="k">if</span> <span class="n">start_ref_pos</span> <span class="o">!=</span> <span class="n">end_ref_pos</span><span class="p">:</span>
+                        <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">,</span> <span class="n">end_codon_seq</span> <span class="o">=</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">getCodonInfo</span><span class="p">(</span><span class="n">stranded_end_ref_pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence_reader</span><span class="p">)</span>
+                        <span class="n">end_aa</span> <span class="o">=</span> <span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">end_codon_seq</span><span class="p">]</span>
+                    <span class="c1"># Evenement and new_elts</span>
+                    <span class="n">evt</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">new_aa</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">variant</span><span class="o">.</span><span class="n">isInsAndDel</span><span class="p">()</span> <span class="ow">or</span> <span class="n">variant</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">()</span> <span class="ow">or</span> <span class="n">variant</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">():</span>
+                        <span class="n">evt</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">new_elts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseInDelNtConseq</span><span class="p">(</span>
+                            <span class="n">curr_prot</span><span class="p">,</span> <span class="n">variant</span><span class="p">,</span> <span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">start_pos_in_codon</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">end_pos_in_codon</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># SNV</span>
+                        <span class="n">end_aa_pos</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">end_aa</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">change_codon_seq</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">start_codon_seq</span><span class="p">]</span>
+                        <span class="n">change_codon_seq</span><span class="p">[</span><span class="n">start_pos_in_codon</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">curr_prot</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span> <span class="k">else</span> <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">revCom</span><span class="p">(</span><span class="n">variant</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">new_elts</span> <span class="o">=</span> <span class="p">[</span><span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">change_codon_seq</span><span class="p">)]]</span>
+                    <span class="c1"># Add HGVS</span>
+                    <span class="c1">#### met1: ext</span>
+                    <span class="n">hgvs</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">evt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">start_aa</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">start_aa</span> <span class="o">==</span> <span class="n">new_elts</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                        <span class="n">hgvs</span> <span class="o">=</span> <span class="s2">&quot;(=)&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">hgvs</span> <span class="o">=</span> <span class="n">HGVSProtChange</span><span class="p">(</span><span class="n">start_aa</span><span class="p">,</span> <span class="n">start_aa_pos</span><span class="p">,</span> <span class="n">end_aa</span><span class="p">,</span> <span class="n">end_aa_pos</span><span class="p">,</span> <span class="n">new_aa</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">new_elts</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s2">&quot;=&gt;&quot;</span><span class="p">,</span> <span class="n">HGVS</span><span class="p">(</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">hgvs</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">possible_hgvs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">HGVS</span><span class="p">(</span><span class="n">curr_prot</span><span class="o">.</span><span class="n">annot</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="n">hgvs</span><span class="p">)</span>
+                    <span class="p">)</span>
+        <span class="k">return</span> <span class="n">possible_hgvs</span></div></div>
 </pre></div>
 
            </div>
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Frédéric Escudié
+        &#169; Copyright 2019, Frédéric Escudié.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -950,7 +1312,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

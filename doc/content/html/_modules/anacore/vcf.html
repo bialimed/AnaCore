@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>anacore.vcf &mdash; AnaCore  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,6 +89,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -119,11 +124,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -149,13 +156,13 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.30.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.31.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
-<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">AbstractFile</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">pysam</span> <span class="k">import</span> <span class="n">TabixFile</span>
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="kn">import</span> <span class="n">AbstractFile</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">pysam</span> <span class="kn">import</span> <span class="n">TabixFile</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
@@ -238,7 +245,7 @@
 <div class="viewcode-block" id="HeaderAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderAttr</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class to manage a dict attribute of the VCF header: one tag FORMAT, one tag INFO, one tag FILTER ...&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HeaderAttr.</span>
 
@@ -271,13 +278,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="o">.</span><span class="n">items</span><span class="p">()</span></div>
 
-    <span class="k">def</span> <span class="nf">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;case_by_attr&quot;</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
@@ -291,7 +298,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;case_by_attr&quot;</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -299,7 +306,7 @@
             <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">value</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pre_attr</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_required_attr</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_without_quote</span><span class="p">:</span>
@@ -315,14 +322,14 @@
                 <span class="n">pre_attr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">=&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&quot;&#39;</span><span class="p">)))</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pre_attr</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="HeaderDescAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderDescAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderDescAttr</span><span class="p">(</span><span class="n">HeaderAttr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to manage VCF header attribute where ID and Description are required.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HeaderDescAttr.</span>
 
@@ -337,7 +344,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_required_attr</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Description&quot;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
@@ -352,7 +359,7 @@
 <div class="viewcode-block" id="HeaderTypedAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderTypedAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderTypedAttr</span><span class="p">(</span><span class="n">HeaderDescAttr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to manage VCF header attribute where ID, Description, Type and Number are required.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;String&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;String&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HeaderTypedAttr.</span>
 
@@ -373,7 +380,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_required_attr</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Number&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Description&quot;</span><span class="p">]</span>  <span class="c1"># List of required attributes names.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_without_quote</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Number&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">}</span>  <span class="c1"># List of required attributes without quote in str value.</span>
 
-    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
@@ -425,7 +432,7 @@
 <div class="viewcode-block" id="VCFRecord"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord">[docs]</a><span class="k">class</span> <span class="nc">VCFRecord</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class to manage a variant record.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
           <span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">knownSNPId</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refAllele</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
           <span class="n">altAlleles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qual</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pFilter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pFormat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
           <span class="n">samples</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -477,7 +484,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;-&quot;</span></div>
 
-    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
@@ -540,7 +547,7 @@
 <span class="sd">                chr1  10  AAAT  TG =&gt; returns 10</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isDeletion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;refStart&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">normalizeSingleAllele</span><span class="p">()</span>
@@ -577,7 +584,7 @@
 <span class="sd">                chr1  10  AAAT  TG =&gt; returns 13</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isDeletion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;refEnd&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">normalizeSingleAllele</span><span class="p">()</span>
@@ -620,6 +627,33 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">):</span>
             <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">is_deletion</span></div>
+
+<div class="viewcode-block" id="VCFRecord.isInsAndDel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.isInsAndDel">[docs]</a>    <span class="k">def</span> <span class="nf">isInsAndDel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the variant is an insertion and also a deletion.</span>
+
+<span class="sd">        :return: True if the variant is an insertion and also a deletion.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isInsAndDel&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="n">is_ins_and_del</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">normalizeSingleAllele</span><span class="p">()</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">):</span>  <span class="c1"># Deletion exists and is more longer (eg: AT/ or AT/G)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Insertion exists (eg: AT/G)</span>
+                <span class="n">is_ins_and_del</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">):</span>  <span class="c1"># Insertion exists and is more longer (eg: /AT or G/AT)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Deletion exists (eg: G/AT)</span>
+                <span class="n">is_ins_and_del</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Same length: SNV or MNV</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># MNV: AT/GC</span>
+                <span class="n">is_ins_and_del</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">is_ins_and_del</span></div>
 
 <div class="viewcode-block" id="VCFRecord.isIndel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.isIndel">[docs]</a>    <span class="k">def</span> <span class="nf">isIndel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -671,6 +705,43 @@
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">record_type</span> <span class="o">=</span> <span class="s2">&quot;variation&quot;</span>
         <span class="k">return</span> <span class="n">record_type</span></div>
+
+<div class="viewcode-block" id="VCFRecord.fastDownstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastDownstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">fastDownstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param padding: Number of nucleotids to inspect after variant. Upstream movement is limited to this number of nucleotids.</span>
+<span class="sd">        :type padding: int</span>
+<span class="sd">        :return: The simplified record moved to the most downstream postition.</span>
+<span class="sd">        :rtype: anacore.vcf.VCFRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The function &quot;fastDownstreamed&quot; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="n">downstream_rec</span> <span class="o">=</span> <span class="n">VCFRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">downstream_rec</span><span class="o">.</span><span class="n">_normalized</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="p">)</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Move to downstream</span>
+            <span class="n">sub_region</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">)</span> <span class="o">+</span> <span class="n">padding</span><span class="p">)</span>
+            <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Switch position from chromosome to position from subregion</span>
+            <span class="n">downstream_rec</span> <span class="o">=</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">getMostDownstream</span><span class="p">(</span><span class="n">sub_region</span><span class="p">)</span>
+            <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># Switch position from subregion to position from chromosome</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">):</span>
+                <span class="c1"># Add previous nt</span>
+                <span class="n">prev_nt</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">downstream_rec</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">==</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Insertion</span>
+                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span>
+                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Deletion</span>
+                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span>
+                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span>
+                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">downstream_rec</span></div>
 
 <div class="viewcode-block" id="VCFRecord.fastStandardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastStandardize">[docs]</a>    <span class="k">def</span> <span class="nf">fastStandardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1220,7 +1291,7 @@
 <div class="viewcode-block" id="VCFIO"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO">[docs]</a><span class="k">class</span> <span class="nc">VCFIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manage VCF file.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return instance of VCFIO.</span>
 
@@ -1610,20 +1681,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Frédéric Escudié
+        &#169; Copyright 2019, Frédéric Escudié.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -1631,7 +1707,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

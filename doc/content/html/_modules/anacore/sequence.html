@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>anacore.sequence &mdash; AnaCore  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.sequence</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.sequence</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for manipulating/processing sequences.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2021 IUCT-O&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">wrap</span>
+
+
+<div class="viewcode-block" id="Alphabet"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.Alphabet">[docs]</a><span class="k">class</span> <span class="nc">Alphabet</span><span class="p">:</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="AA3LettersAlphabet"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.AA3LettersAlphabet">[docs]</a><span class="k">class</span> <span class="nc">AA3LettersAlphabet</span><span class="p">(</span><span class="n">Alphabet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Static methods and attributes to manage amino acid alphabet in three letters.&quot;&quot;&quot;</span>
+    <span class="n">codons_by_aa</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Ter&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TAA&quot;</span><span class="p">,</span> <span class="s2">&quot;TGA&quot;</span><span class="p">,</span> <span class="s2">&quot;TAG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Ala&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GCT&quot;</span><span class="p">,</span> <span class="s2">&quot;GCC&quot;</span><span class="p">,</span> <span class="s2">&quot;GCA&quot;</span><span class="p">,</span> <span class="s2">&quot;GCG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Arg&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CGT&quot;</span><span class="p">,</span> <span class="s2">&quot;CGC&quot;</span><span class="p">,</span> <span class="s2">&quot;CGA&quot;</span><span class="p">,</span> <span class="s2">&quot;CGG&quot;</span><span class="p">,</span> <span class="s2">&quot;AGA&quot;</span><span class="p">,</span> <span class="s2">&quot;AGG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Asn&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AAT&quot;</span><span class="p">,</span> <span class="s2">&quot;AAC&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Asp&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GAT&quot;</span><span class="p">,</span> <span class="s2">&quot;GAC&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Cys&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TGT&quot;</span><span class="p">,</span> <span class="s2">&quot;TGC&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Gln&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CAA&quot;</span><span class="p">,</span> <span class="s2">&quot;CAG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Glu&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GAA&quot;</span><span class="p">,</span> <span class="s2">&quot;GAG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Gly&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GGT&quot;</span><span class="p">,</span> <span class="s2">&quot;GGC&quot;</span><span class="p">,</span> <span class="s2">&quot;GGA&quot;</span><span class="p">,</span> <span class="s2">&quot;GGG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;His&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CAT&quot;</span><span class="p">,</span> <span class="s2">&quot;CAC&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Ile&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ATT&quot;</span><span class="p">,</span> <span class="s2">&quot;ATC&quot;</span><span class="p">,</span> <span class="s2">&quot;ATA&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Leu&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CTT&quot;</span><span class="p">,</span> <span class="s2">&quot;CTC&quot;</span><span class="p">,</span> <span class="s2">&quot;CTA&quot;</span><span class="p">,</span> <span class="s2">&quot;CTG&quot;</span><span class="p">,</span> <span class="s2">&quot;TTA&quot;</span><span class="p">,</span> <span class="s2">&quot;TTG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Lys&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AAA&quot;</span><span class="p">,</span> <span class="s2">&quot;AAG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Met&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ATG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Phe&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TTT&quot;</span><span class="p">,</span> <span class="s2">&quot;TTC&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Pro&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CCT&quot;</span><span class="p">,</span> <span class="s2">&quot;CCC&quot;</span><span class="p">,</span> <span class="s2">&quot;CCA&quot;</span><span class="p">,</span> <span class="s2">&quot;CCG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Ser&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TCT&quot;</span><span class="p">,</span> <span class="s2">&quot;TCC&quot;</span><span class="p">,</span> <span class="s2">&quot;TCA&quot;</span><span class="p">,</span> <span class="s2">&quot;TCG&quot;</span><span class="p">,</span> <span class="s2">&quot;AGT&quot;</span><span class="p">,</span> <span class="s2">&quot;AGC&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Thr&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ACT&quot;</span><span class="p">,</span> <span class="s2">&quot;ACC&quot;</span><span class="p">,</span> <span class="s2">&quot;ACA&quot;</span><span class="p">,</span> <span class="s2">&quot;ACG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Trp&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TGG&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Tyr&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;TAT&quot;</span><span class="p">,</span> <span class="s2">&quot;TAC&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Val&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;GTT&quot;</span><span class="p">,</span> <span class="s2">&quot;GTC&quot;</span><span class="p">,</span> <span class="s2">&quot;GTA&quot;</span><span class="p">,</span> <span class="s2">&quot;GTG&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+
+    <span class="n">one_by_three</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Ter&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ala&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Arg&quot;</span><span class="p">:</span> <span class="s2">&quot;R&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Asn&quot;</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Asp&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Cys&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Gln&quot;</span><span class="p">:</span> <span class="s2">&quot;Q&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Glu&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Gly&quot;</span><span class="p">:</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;His&quot;</span><span class="p">:</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ile&quot;</span><span class="p">:</span> <span class="s2">&quot;I&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Leu&quot;</span><span class="p">:</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Lys&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Met&quot;</span><span class="p">:</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Phe&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pro&quot;</span><span class="p">:</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ser&quot;</span><span class="p">:</span> <span class="s2">&quot;S&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Thr&quot;</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Trp&quot;</span><span class="p">:</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Tyr&quot;</span><span class="p">:</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Val&quot;</span><span class="p">:</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Asx&quot;</span><span class="p">:</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Glx&quot;</span><span class="p">:</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Xle&quot;</span><span class="p">:</span> <span class="s2">&quot;J&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Sec&quot;</span><span class="p">:</span> <span class="s2">&quot;U&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Pyl&quot;</span><span class="p">:</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Xaa&quot;</span><span class="p">:</span> <span class="s2">&quot;X&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">codons_by_aa</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<div class="viewcode-block" id="AA3LettersAlphabet.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.AA3LettersAlphabet.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the sequence contains only elements of the amino acid alphabet.</span>
+
+<span class="sd">        :param seq: Sequence to validate.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: True if the sequence contains only elements of the amino acid alphabet.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">wrap</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">aa</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="vm">__class__</span><span class="o">.</span><span class="n">words</span><span class="p">:</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="AA3LettersAlphabet.toOneLetter"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.AA3LettersAlphabet.toOneLetter">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">toOneLetter</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return sequence of amino acids in on letter alphabet.</span>
+
+<span class="sd">        :param seq: Sequence to convert.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: Sequence of amino acids in on letter alphabet.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_seq</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">wrap</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">new_seq</span> <span class="o">+=</span> <span class="vm">__class__</span><span class="o">.</span><span class="n">one_by_three</span><span class="p">[</span><span class="n">aa</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">new_seq</span></div></div>
+
+
+<div class="viewcode-block" id="CodonAlphabet"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.CodonAlphabet">[docs]</a><span class="k">class</span> <span class="nc">CodonAlphabet</span><span class="p">(</span><span class="n">Alphabet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Static methods and attributes to manage codon alphabet.&quot;&quot;&quot;</span>
+    <span class="n">aa_by_codon</span> <span class="o">=</span> <span class="p">{</span><span class="n">curr_codon</span><span class="p">:</span> <span class="n">aa</span> <span class="k">for</span> <span class="n">aa</span><span class="p">,</span> <span class="n">codons</span> <span class="ow">in</span> <span class="n">AA3LettersAlphabet</span><span class="o">.</span><span class="n">codons_by_aa</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">curr_codon</span> <span class="ow">in</span> <span class="n">codons</span><span class="p">}</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">aa_by_codon</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<div class="viewcode-block" id="CodonAlphabet.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.CodonAlphabet.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the sequence contains only elements of the codon alphabet.</span>
+
+<span class="sd">        :param seq: Sequence to validate.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: True if the sequence contains only elements of the codon alphabet.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">codon</span> <span class="ow">in</span> <span class="n">wrap</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">codon</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="vm">__class__</span><span class="o">.</span><span class="n">words</span><span class="p">:</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="CodonAlphabet.translate"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.CodonAlphabet.translate">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return amino acids sequence from codon sequence.</span>
+
+<span class="sd">        :param seq: Sequence to translate.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: Translated sequence.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">CodonAlphabet</span><span class="o">.</span><span class="n">aa_by_codon</span><span class="p">[</span><span class="n">codon</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="k">for</span> <span class="n">codon</span> <span class="ow">in</span> <span class="n">wrap</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="mi">3</span><span class="p">)])</span></div></div>
+
+
+<div class="viewcode-block" id="DNAAlphabet"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.DNAAlphabet">[docs]</a><span class="k">class</span> <span class="nc">DNAAlphabet</span><span class="p">(</span><span class="n">Alphabet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Static methods and attributes to manage DNA alphabet.&quot;&quot;&quot;</span>
+    <span class="n">complement</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;w&#39;</span><span class="p">:</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span>
+    <span class="p">}</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">complement</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<div class="viewcode-block" id="DNAAlphabet.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.DNAAlphabet.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the sequence contains only elements of the DNA alphabet.</span>
+
+<span class="sd">        :param seq: Sequence to validate.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: True if the sequence contains only elements of the DNA alphabet.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">nt</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="vm">__class__</span><span class="o">.</span><span class="n">words</span><span class="p">:</span>
+                <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="DNAAlphabet.revCom"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.DNAAlphabet.revCom">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">revCom</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the reverse complement.</span>
+
+<span class="sd">        :param seq: Sequence to reverse complement.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: The reverse complement.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="vm">__class__</span><span class="o">.</span><span class="n">complement</span><span class="p">[</span><span class="n">base</span><span class="p">]</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span></div></div>
+
+
+<div class="viewcode-block" id="RNAAlphabet"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.RNAAlphabet">[docs]</a><span class="k">class</span> <span class="nc">RNAAlphabet</span><span class="p">(</span><span class="n">Alphabet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Static methods and attributes to manage RNA alphabet.&quot;&quot;&quot;</span>
+    <span class="n">complement</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span><span class="p">:</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;u&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span><span class="p">:</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="s1">&#39;D&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;w&#39;</span><span class="p">:</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="s1">&#39;d&#39;</span>
+    <span class="p">}</span>
+
+    <span class="n">words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">complement</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<div class="viewcode-block" id="RNAAlphabet.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.RNAAlphabet.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the sequence contains only elements of the RNA alphabet.</span>
+
+<span class="sd">        :param seq: Sequence to validate.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: True if the sequence contains only elements of the RNA alphabet.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">nt</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="vm">__class__</span><span class="o">.</span><span class="n">words</span><span class="p">:</span>
+                <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="RNAAlphabet.revCom"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.RNAAlphabet.revCom">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">revCom</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the reverse complement.</span>
+
+<span class="sd">        :param seq: Sequence to reverse complement.</span>
+<span class="sd">        :type seq: str</span>
+<span class="sd">        :return: The reverse complement.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="vm">__class__</span><span class="o">.</span><span class="n">complement</span><span class="p">[</span><span class="n">base</span><span class="p">]</span> <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">seq</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span></div></div>
+
+
+<div class="viewcode-block" id="Sequence"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.Sequence">[docs]</a><span class="k">class</span> <span class="nc">Sequence</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quality</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Sequence.</span>
+
+<span class="sd">        :param id: Id of the sequence.</span>
+<span class="sd">        :type id: str</span>
+<span class="sd">        :param string: Sequence of the sequence.</span>
+<span class="sd">        :type string: str</span>
+<span class="sd">        :param description: The sequence description.</span>
+<span class="sd">        :type description: str</span>
+<span class="sd">        :param quality: The quality of the sequence (same length as string).</span>
+<span class="sd">        :type quality: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">string</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quality</span> <span class="o">=</span> <span class="n">quality</span>
+
+<div class="viewcode-block" id="Sequence.dnaRevCom"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.Sequence.dnaRevCom">[docs]</a>    <span class="k">def</span> <span class="nf">dnaRevCom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sequence corresponding to the DNA reverse complement.</span>
+
+<span class="sd">        :return: The reverse complement.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Sequence</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">DNAAlphabet</span><span class="o">.</span><span class="n">revCom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Sequence.rnaRevCom"><a class="viewcode-back" href="../../anacore.html#anacore.sequence.Sequence.rnaRevCom">[docs]</a>    <span class="k">def</span> <span class="nf">rnaRevCom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the sequence corresponding to the RNA reverse complement.</span>
+
+<span class="sd">        :return: The reverse complement.</span>
+<span class="sd">        :rtype: Sequence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Sequence</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">RNAAlphabet</span><span class="o">.</span><span class="n">revCom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">quality</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Frédéric Escudié.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

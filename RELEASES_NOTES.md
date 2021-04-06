@@ -1,6 +1,12 @@
 # Release 2.9.0 [DEV]
 
+### Changes
+  * Move `anacore.sequenceIO.Sequence` to `anacore.sequence.Sequence`.
+
 ### Improvements
+  * Add `AA3LettersAlphabet`, `CodonAlphabet`, `DNAAlphabet` and `RNAAlphabet` in
+  `anacore.sequence` to validate sequences and provide translation and reverse
+  complement utilities.
   * Add `anacore.vcf.VCFRecord.fastDownstreamed` to get quickly the most downstream
   version of the variant.
   * Add management of metadata in SV files (`anacore.sv`). Metadata must be
@@ -35,11 +41,11 @@
 ### Changes
   * The value None is no longer supported for VCFRecord.filter in `anacore.vcf`.
   The field takes a list in three possible states:
-    * If no filter was applied, the field contains an empty list ("." in VCF file)
-    * If filters were applied but the record passes filters, the field should
-    contain ["PASS"]
-    * If filters were applied and the record does not pass filters, the field
-    should contain ["filter_name", ...]
+  * If no filter was applied, the field contains an empty list ("." in VCF file)
+  * If filters were applied but the record passes filters, the field should
+  contain ["PASS"]
+  * If filters were applied and the record does not pass filters, the field
+  should contain ["filter_name", ...]
 
 ### Improvements
   * Add a classes to manage fusions detected by Arriba and STAR-Fusion in `anacore.fusion`.

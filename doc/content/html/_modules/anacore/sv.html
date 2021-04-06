@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>anacore.sv &mdash; AnaCore  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,6 +89,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -119,11 +124,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -149,17 +156,17 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.2&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.1.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
-<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">isEmpty</span><span class="p">,</span> <span class="n">AbstractFile</span>
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="kn">import</span> <span class="n">isEmpty</span><span class="p">,</span> <span class="n">AbstractFile</span>
 
 
 <div class="viewcode-block" id="SVIO"><a class="viewcode-back" href="../../anacore.html#anacore.sv.SVIO">[docs]</a><span class="k">class</span> <span class="nc">SVIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a list.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">has_title</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">has_title</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">metadata_starter</span><span class="o">=</span><span class="s2">&quot;##&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of SVIO.</span>
 
@@ -173,38 +180,59 @@
 <span class="sd">        :type title_starter: str.</span>
 <span class="sd">        :param has_title: If the first line contains the titles of columns.</span>
 <span class="sd">        :type has_title: bool.</span>
+<span class="sd">        :param title_metadata: The string used to introduce a metadata line.</span>
+<span class="sd">        :type title_metadata: str.</span>
 <span class="sd">        :return: The new instance.</span>
 <span class="sd">        :rtype: SVIO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Convert mode for append in empty file</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span> <span class="ow">and</span> <span class="n">isEmpty</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
             <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span>
-        <span class="c1"># Get existing titles if the file is in append mode</span>
+        <span class="c1"># Get existing titles and metadata if the file is in append mode</span>
+        <span class="n">pre_nb_line</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">pre_titles</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span> <span class="ow">and</span> <span class="n">has_title</span><span class="p">:</span>  <span class="c1"># Get titles from existing file</span>
-            <span class="k">with</span> <span class="n">SVIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">title_starter</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_read</span><span class="p">:</span>
-                <span class="n">pre_titles</span> <span class="o">=</span> <span class="n">FH_read</span><span class="o">.</span><span class="n">titles</span>
+        <span class="n">pre_metadata</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span><span class="p">:</span>  <span class="c1"># Get titles from existing file</span>
+            <span class="k">with</span> <span class="n">SVIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">title_starter</span><span class="p">,</span> <span class="n">has_title</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">pre_titles</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">titles</span>
+                <span class="n">pre_metadata</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">metadata</span>
+                <span class="n">pre_nb_line</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">file_handle</span><span class="p">])</span>
         <span class="c1"># Initialise instance</span>
         <span class="n">AbstractFile</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">separator</span> <span class="o">=</span> <span class="n">separator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">pre_metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata_starter</span> <span class="o">=</span> <span class="n">metadata_starter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_has_title</span> <span class="o">=</span> <span class="n">has_title</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="n">pre_titles</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span> <span class="o">=</span> <span class="n">title_starter</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span> <span class="ow">and</span> <span class="n">has_title</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_parseHeader</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;a&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">=</span> <span class="n">pre_nb_line</span>
 
     <span class="k">def</span> <span class="nf">_parseHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Parse SV header to set the attribute titles.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Parse SV header to set the attributes titles and metadata.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isEmpty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="c1"># Metadata</span>
+            <span class="n">curr_line_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">clean_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">clean_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The title line does not starts with &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span><span class="p">))</span>
-            <span class="n">clean_line</span> <span class="o">=</span> <span class="n">clean_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">clean_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator</span><span class="p">)]</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_starter</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_starter</span><span class="p">):])</span>
+                <span class="n">curr_line_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># Titles</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_title</span><span class="p">:</span>
+                <span class="n">cleaned_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The title line does not starts with &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span><span class="p">))</span>
+                    <span class="n">cleaned_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span><span class="p">):]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">cleaned_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">separator</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">curr_line_pointer</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">-=</span> <span class="mi">1</span>
 
 <div class="viewcode-block" id="SVIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.sv.SVIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -231,7 +259,7 @@
         <span class="k">return</span> <span class="n">fields</span>
 
 <div class="viewcode-block" id="SVIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sv.SVIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">metadata_starter</span><span class="o">=</span><span class="s2">&quot;##&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True is the file can be a SV file.</span>
 
@@ -239,27 +267,49 @@
 <span class="sd">        :rtype: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">pointer_after_metadata</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">nb_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>  <span class="c1"># The number of fields for each row</span>
-        <span class="n">FH_in</span> <span class="o">=</span> <span class="n">SVIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">SVIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">has_title</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">metadata_starter</span><span class="o">=</span><span class="s2">&quot;##&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Read the 10 first lines</span>
             <span class="n">line_idx</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># File is empty</span>
                 <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># File has content</span>
-                <span class="n">nb_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">separator</span><span class="p">))</span>
-                <span class="k">while</span> <span class="n">line_idx</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">line</span><span class="p">:</span>
-                    <span class="n">line</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">metadata_starter</span><span class="p">):</span>
+                    <span class="n">pointer_after_metadata</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">nb_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">separator</span><span class="p">))</span>
-                    <span class="n">line_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="n">line_idx</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">pointer_after_metadata</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">metadata_starter</span><span class="p">):</span>
+                            <span class="n">pointer_after_metadata</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">nb_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">separator</span><span class="p">))</span>
+                            <span class="n">line_idx</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nb_fields</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">nb_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># All lines have the same number of columns</span>
                     <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
         <span class="k">finally</span><span class="p">:</span>
-            <span class="n">FH_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">reader</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="SVIO.writeHeader"><a class="viewcode-back" href="../../anacore.html#anacore.sv.SVIO.writeHeader">[docs]</a>    <span class="k">def</span> <span class="nf">writeHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write header lines in file.&quot;&quot;&quot;</span>
+        <span class="c1"># Metadata</span>
+        <span class="k">for</span> <span class="n">curr_metadata</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata_starter</span> <span class="o">+</span> <span class="n">curr_metadata</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Titles</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">line_starter</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="n">line_starter</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">titles</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="SVIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.sv.SVIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -268,12 +318,10 @@
 <span class="sd">        :param record: The record.</span>
 <span class="sd">        :type record: list.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">line_starter</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">title_starter</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-                <span class="n">line_starter</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">titles</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Write header if the file is empty</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeHeader</span><span class="p">()</span>
+        <span class="c1"># Write record</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
@@ -293,7 +341,7 @@
 <div class="viewcode-block" id="HashedSVIO"><a class="viewcode-back" href="../../anacore.html#anacore.sv.HashedSVIO">[docs]</a><span class="k">class</span> <span class="nc">HashedSVIO</span><span class="p">(</span><span class="n">SVIO</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to read and write in separated value files like TSV, CSV, etc. Each rows is view as a dict indexed by columns titles.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata_starter</span><span class="o">=</span><span class="s2">&quot;##&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HashedSVIO.</span>
 
@@ -305,10 +353,12 @@
 <span class="sd">        :type separator: str.</span>
 <span class="sd">        :param title_starter: The string used to introduce the title line.</span>
 <span class="sd">        :type title_starter: str.</span>
+<span class="sd">        :param title_metadata: The string used to introduce a metadata line.</span>
+<span class="sd">        :type title_metadata: str.</span>
 <span class="sd">        :return: The new instance.</span>
 <span class="sd">        :rtype: HashedSVIO</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">title_starter</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">title_starter</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">metadata_starter</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -339,20 +389,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Frédéric Escudié
+        &#169; Copyright 2019, Frédéric Escudié.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -360,7 +415,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
