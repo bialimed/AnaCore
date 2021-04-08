@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -92,7 +92,7 @@ class Transcript(RegionTree):
         :param proteins: The new linked proteins.
         :type proteins: list
         """
-        # Remove previous not in new proteins
+        # Remove previous proteins
         for idx_prot, prot in enumerate(self.proteins):
             prot.transcript = None
         self.proteins = RegionList()
@@ -142,7 +142,38 @@ class Transcript(RegionTree):
         :return: Coordinate on region (1-based).
         :rtype: int
         """
-        raise NotImplementedError
+        if chr_pos < self.start or chr_pos > self.end:
+            raise ValueError("The position {} is out of transcript {}.".format(chr_pos, self))
+        if self.strand is None:
+            raise Exception("Cannot return region position from reference position because the strand is None ({}).".format(
+                self
+            ))
+        transcript_pos = 0
+        idx = 0
+        found = False
+        if self.strand == "+":
+            while not found:
+                curr_exon = self.children[idx]
+                if chr_pos > curr_exon.end:  # Next exon
+                    transcript_pos += curr_exon.length()
+                    idx += 1
+                elif chr_pos >= curr_exon.start:  # In exon
+                    transcript_pos += chr_pos - curr_exon.start + 1
+                    found = True
+                else:  # In previous intron
+                    raise Exception("Position {}:{} is in intron of {}.".format(self.reference.name, chr_pos, self))
+        else:  # Strand -
+            while not found:
+                curr_exon = self.children[idx]
+                if chr_pos < curr_exon.start:  # Next exon
+                    transcript_pos += curr_exon.length()
+                    idx += 1
+                elif chr_pos <= curr_exon.end:  # In exon
+                    transcript_pos += curr_exon.end - chr_pos + 1
+                    found = True
+                else:  # In previous intron
+                    raise Exception("Position {}:{} is in intron of {}.".format(self.reference.name, chr_pos, self))
+        return transcript_pos
 
     def getSubFromRegionPos(self, transcript_pos):
         """

@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -111,6 +111,30 @@ class TestTranscript(unittest.TestCase):
             self.rvs["transcript"].getSubFromRegionPos(73),
             (self.rvs["exon_1"], 21)
         )
+
+    def testGetPosOnRegion(self):
+        # Forward
+        self.assertEqual(self.fwd["transcript"].getPosOnRegion(10), 1)
+        self.assertEqual(self.fwd["transcript"].getPosOnRegion(20), 11)
+        self.assertEqual(self.fwd["transcript"].getPosOnRegion(30), 21)
+        self.assertEqual(self.fwd["transcript"].getPosOnRegion(40), 22)
+        self.assertEqual(self.fwd["transcript"].getPosOnRegion(80), 53)
+        # Reverse
+        self.assertEqual(self.rvs["transcript"].getPosOnRegion(100), 1)
+        self.assertEqual(self.rvs["transcript"].getPosOnRegion(90), 11)
+        self.assertEqual(self.rvs["transcript"].getPosOnRegion(80), 21)
+        self.assertEqual(self.rvs["transcript"].getPosOnRegion(70), 22)
+        self.assertEqual(self.rvs["transcript"].getPosOnRegion(30), 53)
+        # Exception out of transcript
+        with self.assertRaises(Exception):
+            self.fwd["transcript"].getPosOnRegion(8)
+        # Exception in intron
+        with self.assertRaises(Exception):
+            self.fwd["transcript"].getPosOnRegion(31)
+        # Exception strand
+        unstranded_tr = Transcript(10, 30, None, "chr1")
+        with self.assertRaises(Exception):
+            unstranded_tr.getPosOnRegion(20)
 
     def testGetPosOnRef(self):
         # Forward

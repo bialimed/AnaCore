@@ -4,6 +4,7 @@
   * Move `anacore.sequenceIO.Sequence` to `anacore.sequence.Sequence`.
 
 ### Improvements
+  * Implement `getPosOnRegion()` in `anacore.genomicRegion.Transcript`.
   * Add functions to get information about codon in `anacore.genomicRegion.Protein`:
   `getCodonRefPos()`, `getCodonSeqFromProtPos()` and `getCodonInfo()`.
   * Add `AA3LettersAlphabet`, `CodonAlphabet`, `DNAAlphabet` and `RNAAlphabet` in
