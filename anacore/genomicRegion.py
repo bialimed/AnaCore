@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.0'
+__version__ = '1.7.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -81,11 +81,15 @@ class Transcript(RegionTree):
         :rtype: genomicRegion.Transcript
         """
         RegionTree.__init__(self, start, end, strand, reference, name, annot, parent, children)
-        self.proteins = RegionList()
-        if proteins is not None:
-            self.setProteins(proteins)
+        self._proteins = RegionList()
+        self.proteins = proteins
 
-    def setProteins(self, proteins):
+    @property
+    def proteins(self):
+        return self._proteins
+
+    @proteins.setter
+    def proteins(self, proteins):
         """
         Change proteins linked with transcript. Before the add of the new proteins the old are unlinked (prot.transcript is set to None).
 
@@ -94,11 +98,12 @@ class Transcript(RegionTree):
         """
         # Remove previous proteins
         for idx_prot, prot in enumerate(self.proteins):
-            prot.transcript = None
-        self.proteins = RegionList()
+            prot.transcript = None  # Remove link in protein
+        self._proteins = RegionList()  # Remove link in transcript
         # Add new proteins
-        for curr_prot in proteins:
-            curr_prot.setTranscript(self)
+        if proteins is not None:
+            for curr_prot in proteins:
+                curr_prot.transcript = self
 
     def addProtein(self, protein):
         """
@@ -107,7 +112,16 @@ class Transcript(RegionTree):
         :param protein: The protein to add.
         :type protein: genomicRegion.Protein
         """
-        protein.setTranscript(self)
+        protein.transcript = self
+
+    def delProtein(self, protein):
+        """
+        Remove link with a protein.
+
+        :param protein: The protein to remove.
+        :type protein: genomicRegion.Protein
+        """
+        protein.transcript = None
 
     def length(self):
         """
@@ -277,20 +291,29 @@ class Protein(RegionTree):
         :rtype: genomicRegion.Protein
         """
         RegionTree.__init__(self, start, end, strand, reference, name, annot, parent, children)
-        self.setTranscript(transcript)
+        self._transcript = None
+        self.transcript = transcript
 
-    def setTranscript(self, transcript):
+    @property
+    def transcript(self):
+        return self._transcript
+
+    @transcript.setter
+    def transcript(self, transcript):
         """
         Add link between self and his transcript.
 
         :param transcript: The transcript to link.
         :type transcript: genomicRegion.Transcript
         """
-        self.transcript = transcript
+        self._transcript = transcript
+        # Manage link in transcript
         if transcript is not None:
+            # Add link in transcript
             if self not in transcript.proteins:
                 transcript.proteins.append(self)
-        else:
+        else:  # New transcript is None
+            # Remove link in previous transcript
             prot_idx = None
             try:
                 prot_idx = transcript.proteins.index(self)

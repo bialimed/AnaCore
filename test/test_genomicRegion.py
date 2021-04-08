@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -57,6 +57,86 @@ class TestTranscript(unittest.TestCase):
             ]
         )
 
+    def addProtein(self):
+        protein_1 = Protein(10, 30, "+", "chr1", "p1")
+        protein_2 = Protein(32, 50, "+", "chr1", "p2")
+        transcript_1 = Transcript(name="tr1")
+        # Empty
+        self.assertEqual(
+            [elt.name for elt in transcript_1.proteins],
+            []
+        )
+        # Add protein_1
+        transcript_1.addProtein(protein_1)
+        self.assertEqual(
+            [elt.name for elt in transcript_1.proteins],
+            ["p1"]
+        )  # Check from tr
+        self.assertEqual(
+            protein_1.transcript,
+            transcript_1
+        )  # Check from prot
+        # Add protein_2
+        transcript_1.addProtein(protein_2)
+        self.assertEqual(
+            [elt.name for elt in transcript_1.proteins],
+            ["p1", "p2"]
+        )  # Check from tr
+        self.assertEqual(
+            protein_1.transcript,
+            transcript_1
+        )  # Check from prot
+        self.assertEqual(
+            protein_2.transcript,
+            transcript_1
+        )  # Check from prot
+
+    def delProtein(self):
+        protein_1 = Protein(10, 30, "+", "chr1", "p1")
+        protein_2 = Protein(32, 50, "+", "chr1", "p2")
+        transcript_1 = Transcript(name="tr1", proteins=[protein_1, protein_2])
+        # Init
+        self.assertEqual(
+            [elt.name for elt in transcript_1.proteins],
+            ["p1", "p2"]
+        )  # Check from tr
+        self.assertEqual(
+            protein_1.transcript,
+            transcript_1
+        )  # Check from prot
+        self.assertEqual(
+            protein_2.transcript,
+            transcript_1
+        )  # Check from prot
+        # Delete protein 2
+        transcript_1.delProtein(protein_2)
+        self.assertEqual(
+            [elt.name for elt in transcript_1.proteins],
+            ["p1"]
+        )  # Check from tr
+        self.assertEqual(
+            protein_1.transcript,
+            transcript_1
+        )  # Check from prot
+        self.assertEqual(
+            protein_2.transcript,
+            None
+        )  # Check from prot
+        # Delete protein 1
+        transcript_1.addProtein(protein_1)
+        self.assertEqual(
+            [elt.name for elt in transcript_1.proteins],
+            []
+        )  # Check from tr
+        self.assertEqual(
+            protein_1.transcript,
+            None
+        )  # Check from prot
+        self.assertEqual(
+            protein_2.transcript,
+            None
+        )  # Check from prot
+
     def testSetProteins(self):
         # By init
         protein_1 = Protein(10, 30, "+", "chr1", "p1")
@@ -74,7 +154,7 @@ class TestTranscript(unittest.TestCase):
         protein_1 = Protein(10, 30, "+", "chr1", "p1")
         protein_2 = Protein(32, 50, "+", "chr1", "p2")
         transcript_1 = Transcript(name="tr1")
-        transcript_1.setProteins([protein_1, protein_2])
+        transcript_1.proteins = [protein_1, protein_2]
         self.assertEqual(
             [prot.name for prot in transcript_1.proteins],
             [protein_1.name, protein_2.name]
@@ -88,7 +168,7 @@ class TestTranscript(unittest.TestCase):
         protein_2 = Protein(32, 50, "+", "chr1", "p2")
         protein_3 = Protein(54, 70, "+", "chr1", "p3")
         transcript_1 = Transcript(name="tr1", proteins=[protein_1, protein_3])
-        transcript_1.setProteins([protein_2, protein_3])
+        transcript_1.proteins = [protein_2, protein_3]
         self.assertIsNone(protein_1.transcript)
         self.assertNotIn(protein_1, transcript_1.proteins)
         self.assertEqual(protein_2.transcript, transcript_1)
