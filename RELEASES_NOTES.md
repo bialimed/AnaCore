@@ -2,7 +2,7 @@
 
 ### Changes
   * `anacore.genomicRegion.Protein.setTranscript` and `anacore.genomicRegion.Transcript.setProteins`
-  are replace by setter declaration.
+  replaced by setter declaration.
   * Move `anacore.sequenceIO.Sequence` to `anacore.sequence.Sequence`.
 
 ### Improvements

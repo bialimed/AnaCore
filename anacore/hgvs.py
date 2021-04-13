@@ -5,53 +5,26 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-import re
-import time
+from anacore.sequence import AA3LettersAlphabet
 import base64
-import requests
-import urllib.parse
 from collections import deque
+import re
+import requests
+import time
+import urllib.parse
 
 
-AA_ONE_BY_THREE = {
-    "Ter": "*",
-    "Ala": "A",
-    "Arg": "R",
-    "Asn": "N",
-    "Asp": "D",
-    "Cys": "C",
-    "Gln": "Q",
-    "Glu": "E",
-    "Gly": "G",
-    "His": "H",
-    "Ile": "I",
-    "Leu": "L",
-    "Lys": "K",
-    "Met": "M",
-    "Phe": "F",
-    "Pro": "P",
-    "Ser": "S",
-    "Thr": "T",
-    "Trp": "W",
-    "Tyr": "Y",
-    "Val": "V",
-    "Asx": "B",
-    "Glx": "Z",
-    "Xle": "J",
-    "Sec": "U",
-    "Pyl": "O",
-    "Xaa": "X"
-}
+AA_ONE_BY_THREE = AA3LettersAlphabet.one_by_three
 
 AA_THREE_BY_ONE = {value: key for key, value in AA_ONE_BY_THREE.items()}
 
 ONE_LETTER_AA_LEXIC = set(AA_ONE_BY_THREE.values())
 
-THREE_LETTERS_AA_LEXIC = set(AA_ONE_BY_THREE.keys()) | {"*", "X"}
+THREE_LETTERS_AA_LEXIC = AA3LettersAlphabet.words | {"*", "X"}
 
 
 class Accession:
@@ -838,14 +811,16 @@ class HGVSProtChange:
         """
         could_be_identical = False
         if hgvs_ins.isInFrameIns() and hgvs_repeat.isInFrameIns():
-            len_dup = hgvs_repeat.end_pos - hgvs_repeat.start_pos + 1
+            repeat_end_pos = hgvs_repeat.end_pos if hgvs_repeat.end_pos is not None else hgvs_repeat.start_pos
+            repeat_end_aa = hgvs_repeat.end_aa if hgvs_repeat.end_aa is not None else hgvs_repeat.start_aa
+            len_dup = repeat_end_pos - hgvs_repeat.start_pos + 1
             nb_repeat = 1
             if hgvs_repeat.evt is None:  # Repeat
                 nb_repeat = int(hgvs_repeat.new_elts[1])
             len_ins_in_repeat = len_dup * nb_repeat
             if len(hgvs_ins.new_elts) == len_ins_in_repeat:  # same length
-                if hgvs_repeat.end_aa + str(hgvs_repeat.end_pos) == hgvs_ins.start_aa + str(hgvs_ins.start_pos):  # Same positions
-                    if hgvs_repeat.start_aa == hgvs_ins.new_elts[0] and hgvs_repeat.end_aa == hgvs_ins.new_elts[-1]:  # Same start and end amino acids
+                if repeat_end_aa + str(repeat_end_pos) == hgvs_ins.start_aa + str(hgvs_ins.start_pos):  # Same positions
+                    if hgvs_repeat.start_aa == hgvs_ins.new_elts[0] and repeat_end_aa == hgvs_ins.new_elts[-1]:  # Same start and end amino acids
                         if nb_repeat == 1:
                             could_be_identical = True
                         else:

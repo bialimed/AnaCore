@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2020 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -26,6 +26,9 @@ from anacore.hgvs import HGVSProtChange
 class TestHGVSProtChange(unittest.TestCase):
     def testInsCouldBeIdentical(self):
         dataset = {
+            "Ala3_Tyr4insAla": {
+                "Ala3Dup": True
+            },
             "T16_I17insGTTT": {
                 "L16V": False,
                 "G13_T16dup": True,
