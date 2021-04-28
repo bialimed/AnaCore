@@ -1,4 +1,4 @@
-# Release 2.9.0 [DEV]
+# Release 2.9.0 [2020-04-28]
 
 ### Changes
   * `anacore.genomicRegion.Protein.setTranscript` and `anacore.genomicRegion.Transcript.setProteins`

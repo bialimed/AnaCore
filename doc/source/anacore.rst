@@ -1,14 +1,6 @@
 AnaCore package
 ===============
 
-anacore.STARLog
-----------------------
-
-.. automodule:: anacore.STARLog
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 anacore.abstractFile
 ---------------------------
 
@@ -165,6 +157,14 @@ anacore.sequenceIO
 -------------------------
 
 .. automodule:: anacore.sequenceIO
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+anacore.STARLog
+----------------------
+
+.. automodule:: anacore.STARLog
    :members:
    :undoc-members:
    :show-inheritance:
