@@ -25,6 +25,24 @@ anacore.bed
    :undoc-members:
    :show-inheritance:
 
+anacore.db
+------------------
+
+.. automodule:: anacore.db
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+   .. automodule:: anacore.db.homo_sapiens
+      :members:
+      :undoc-members:
+      :show-inheritance:
+
+      .. automodule:: anacore.db.homo_sapiens.accession
+         :members:
+         :undoc-members:
+         :show-inheritance:
+
 anacore.filters
 ----------------------
 

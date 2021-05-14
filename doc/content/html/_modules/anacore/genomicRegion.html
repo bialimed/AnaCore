@@ -343,12 +343,10 @@
 
 <div class="viewcode-block" id="Transcript.getSubFromRegionPos"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Transcript.getSubFromRegionPos">[docs]</a>    <span class="k">def</span> <span class="nf">getSubFromRegionPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transcript_pos</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return exon and coordinate on his from the coordinate on transcript.</span>
+<span class="sd">        Return exon and coordinate on its from coordinate on transcript. Coordinate on exon is stranded:</span>
 
-<span class="sd">        Coordinate on exon is stranded:</span>
-
-<span class="sd">        - pos 2 in region test:10-20(+) correspond to ref position 12</span>
-<span class="sd">        - pos 2 in region test:10-20(-) correspond to ref position 18</span>
+<span class="sd">            * pos 2 in region test:10-20(+) correspond to ref position 12</span>
+<span class="sd">            * pos 2 in region test:10-20(-) correspond to ref position 18</span>
 
 <span class="sd">        :param transcript_pos: The coordinate on transcript (1-based).</span>
 <span class="sd">        :type transcript_pos: int</span>
@@ -577,10 +575,10 @@
 
 <div class="viewcode-block" id="Protein.getSubFromRegionPos"><a class="viewcode-back" href="../../anacore.html#anacore.genomicRegion.Protein.getSubFromRegionPos">[docs]</a>    <span class="k">def</span> <span class="nf">getSubFromRegionPos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protein_pos</span><span class="p">,</span> <span class="n">codon_pos</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return CDS and coordinate on his from the coordinate on protein.</span>
-<span class="sd">        The coordinate on CDS is stranded:</span>
-<span class="sd">            With region test:10-20(+) the pos 2 correspond to ref position 12</span>
-<span class="sd">            With region test:10-20(-) the pos 2 correspond to ref position 18</span>
+<span class="sd">        Return CDS and coordinate on its from coordinate on protein. The coordinate on CDS is stranded:</span>
+
+<span class="sd">            * With region test:10-20(+) the pos 2 correspond to ref position 12</span>
+<span class="sd">            * With region test:10-20(-) the pos 2 correspond to ref position 18</span>
 
 <span class="sd">        :param protein_pos: Coordinate of the amino acid on protein (1-based).</span>
 <span class="sd">        :type protein_pos: int.</span>

@@ -88,6 +88,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.abstractFile">anacore.abstractFile</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.annotVcf">anacore.annotVcf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.bed">anacore.bed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-anacore.db">anacore.db</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.filters">anacore.filters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.fusion">anacore.fusion</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.genomicRegion">anacore.genomicRegion</a></li>
@@ -574,6 +575,83 @@
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-anacore.db">
+<span id="anacore-db"></span><h2>anacore.db<a class="headerlink" href="#module-anacore.db" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-anacore.db.homo_sapiens"></span><span class="target" id="module-anacore.db.homo_sapiens.accession"></span><p>Utils to works with human genome accessions.</p>
+<dl class="py class">
+<dt id="anacore.db.homo_sapiens.accession.ChrAccession">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.db.homo_sapiens.accession.</span></code><code class="sig-name descname"><span class="pre">ChrAccession</span></code><a class="reference internal" href="_modules/anacore/db/homo_sapiens/accession.html#ChrAccession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Manage Human chromosome accessions and names.</p>
+<dl class="field-list">
+<dt class="field-odd">Code example</dt>
+<dd class="field-odd"><p>Compare two positions from different sources</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.db.homo_sapiens.accession</span> <span class="kn">import</span> <span class="n">ChrAccession</span>
+
+<span class="n">first_GRCh38_pos</span> <span class="o">=</span> <span class="s2">&quot;NC_000001.11:154545-154545&quot;</span>  <span class="c1"># from RefSeq</span>
+<span class="n">first_chr</span><span class="p">,</span> <span class="n">first_pos</span> <span class="o">=</span> <span class="n">first_GRCh38_pos</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="n">first_chr_std</span> <span class="o">=</span> <span class="n">ChrAccession</span><span class="o">.</span><span class="n">toHumanName</span><span class="p">(</span><span class="n">first_chr</span><span class="p">)</span>  <span class="c1"># &quot;1&quot;</span>
+
+<span class="n">second_GRCh38_pos</span> <span class="o">=</span> <span class="s2">&quot;1:154545-154545&quot;</span>  <span class="c1"># from Ensembl</span>
+<span class="n">second_chr</span><span class="p">,</span> <span class="n">second_pos</span> <span class="o">=</span> <span class="n">first_GRCh38_pos</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+<span class="n">second_chr_std</span> <span class="o">=</span> <span class="n">ChrAccession</span><span class="o">.</span><span class="n">toHumanName</span><span class="p">(</span><span class="n">second_chr</span><span class="p">)</span>  <span class="c1"># &quot;1&quot;</span>
+
+<span class="k">if</span> <span class="n">first_chr_std</span> <span class="o">==</span> <span class="n">second_chr_std</span> <span class="ow">and</span> <span class="n">first_pos</span> <span class="o">==</span> <span class="n">second_pos</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Same position&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Different position&quot;</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Same position</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_ACC">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_ACC</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'1':</span> <span class="pre">'1',</span> <span class="pre">'10':</span> <span class="pre">'10',</span> <span class="pre">'11':</span> <span class="pre">'11',</span> <span class="pre">'12':</span> <span class="pre">'12',</span> <span class="pre">'13':</span> <span class="pre">'13',</span> <span class="pre">'14':</span> <span class="pre">'14',</span> <span class="pre">'15':</span> <span class="pre">'15',</span> <span class="pre">'16':</span> <span class="pre">'16',</span> <span class="pre">'17':</span> <span class="pre">'17',</span> <span class="pre">'18':</span> <span class="pre">'18',</span> <span class="pre">'19':</span> <span class="pre">'19',</span> <span class="pre">'2':</span> <span class="pre">'2',</span> <span class="pre">'20':</span> <span class="pre">'20',</span> <span class="pre">'21':</span> <span class="pre">'21',</span> <span class="pre">'22':</span> <span class="pre">'22',</span> <span class="pre">'3':</span> <span class="pre">'3',</span> <span class="pre">'4':</span> <span class="pre">'4',</span> <span class="pre">'5':</span> <span class="pre">'5',</span> <span class="pre">'6':</span> <span class="pre">'6',</span> <span class="pre">'7':</span> <span class="pre">'7',</span> <span class="pre">'8':</span> <span class="pre">'8',</span> <span class="pre">'9':</span> <span class="pre">'9',</span> <span class="pre">'CM000663':</span> <span class="pre">'1',</span> <span class="pre">'CM000664':</span> <span class="pre">'2',</span> <span class="pre">'CM000665':</span> <span class="pre">'3',</span> <span class="pre">'CM000666':</span> <span class="pre">'4',</span> <span class="pre">'CM000667':</span> <span class="pre">'5',</span> <span class="pre">'CM000668':</span> <span class="pre">'6',</span> <span class="pre">'CM000669':</span> <span class="pre">'7',</span> <span class="pre">'CM000670':</span> <span class="pre">'8',</span> <span class="pre">'CM000671':</span> <span class="pre">'9',</span> <span class="pre">'CM000672':</span> <span class="pre">'10',</span> <span class="pre">'CM000673':</span> <span class="pre">'11',</span> <span class="pre">'CM000674':</span> <span class="pre">'12',</span> <span class="pre">'CM000675':</span> <span class="pre">'13',</span> <span class="pre">'CM000676':</span> <span class="pre">'14',</span> <span class="pre">'CM000677':</span> <span class="pre">'15',</span> <span class="pre">'CM000678':</span> <span class="pre">'16',</span> <span class="pre">'CM000679':</span> <span class="pre">'17',</span> <span class="pre">'CM000680':</span> <span class="pre">'18',</span> <span class="pre">'CM000681':</span> <span class="pre">'19',</span> <span class="pre">'CM000682':</span> <span class="pre">'20',</span> <span class="pre">'CM000683':</span> <span class="pre">'21',</span> <span class="pre">'CM000684':</span> <span class="pre">'22',</span> <span class="pre">'CM000685':</span> <span class="pre">'X',</span> <span class="pre">'CM000686':</span> <span class="pre">'Y',</span> <span class="pre">'J01415':</span> <span class="pre">'MT',</span> <span class="pre">'M':</span> <span class="pre">'MT',</span> <span class="pre">'MT':</span> <span class="pre">'MT',</span> <span class="pre">'NC_000001':</span> <span class="pre">'1',</span> <span class="pre">'NC_000002':</span> <span class="pre">'2',</span> <span class="pre">'NC_000003':</span> <span class="pre">'3',</span> <span class="pre">'NC_000004':</span> <span class="pre">'4',</span> <span class="pre">'NC_000005':</span> <span class="pre">'5',</span> <span class="pre">'NC_000006':</span> <span class="pre">'6',</span> <span class="pre">'NC_000007':</span> <span class="pre">'7',</span> <span class="pre">'NC_000008':</span> <span class="pre">'8',</span> <span class="pre">'NC_000009':</span> <span class="pre">'9',</span> <span class="pre">'NC_000010':</span> <span class="pre">'10',</span> <span class="pre">'NC_000011':</span> <span class="pre">'11',</span> <span class="pre">'NC_000012':</span> <span class="pre">'12',</span> <span class="pre">'NC_000013':</span> <span class="pre">'13',</span> <span class="pre">'NC_000014':</span> <span class="pre">'14',</span> <span class="pre">'NC_000015':</span> <span class="pre">'15',</span> <span class="pre">'NC_000016':</span> <span class="pre">'16',</span> <span class="pre">'NC_000017':</span> <span class="pre">'17',</span> <span class="pre">'NC_000018':</span> <span class="pre">'18',</span> <span class="pre">'NC_000019':</span> <span class="pre">'19',</span> <span class="pre">'NC_000020':</span> <span class="pre">'20',</span> <span class="pre">'NC_000021':</span> <span class="pre">'21',</span> <span class="pre">'NC_000022':</span> <span class="pre">'22',</span> <span class="pre">'NC_000023':</span> <span class="pre">'X',</span> <span class="pre">'NC_000024':</span> <span class="pre">'Y',</span> <span class="pre">'NC_0018007':</span> <span class="pre">'MT',</span> <span class="pre">'NC_012920':</span> <span class="pre">'MT',</span> <span class="pre">'X':</span> <span class="pre">'X',</span> <span class="pre">'Y':</span> <span class="pre">'Y',</span> <span class="pre">'chr1':</span> <span class="pre">'1',</span> <span class="pre">'chr10':</span> <span class="pre">'10',</span> <span class="pre">'chr11':</span> <span class="pre">'11',</span> <span class="pre">'chr12':</span> <span class="pre">'12',</span> <span class="pre">'chr13':</span> <span class="pre">'13',</span> <span class="pre">'chr14':</span> <span class="pre">'14',</span> <span class="pre">'chr15':</span> <span class="pre">'15',</span> <span class="pre">'chr16':</span> <span class="pre">'16',</span> <span class="pre">'chr17':</span> <span class="pre">'17',</span> <span class="pre">'chr18':</span> <span class="pre">'18',</span> <span class="pre">'chr19':</span> <span class="pre">'19',</span> <span class="pre">'chr2':</span> <span class="pre">'2',</span> <span class="pre">'chr20':</span> <span class="pre">'20',</span> <span class="pre">'chr21':</span> <span class="pre">'21',</span> <span class="pre">'chr22':</span> <span class="pre">'22',</span> <span class="pre">'chr3':</span> <span class="pre">'3',</span> <span class="pre">'chr4':</span> <span class="pre">'4',</span> <span class="pre">'chr5':</span> <span class="pre">'5',</span> <span class="pre">'chr6':</span> <span class="pre">'6',</span> <span class="pre">'chr7':</span> <span class="pre">'7',</span> <span class="pre">'chr8':</span> <span class="pre">'8',</span> <span class="pre">'chr9':</span> <span class="pre">'9',</span> <span class="pre">'chrM':</span> <span class="pre">'MT',</span> <span class="pre">'chrMT':</span> <span class="pre">'MT',</span> <span class="pre">'chrX':</span> <span class="pre">'X',</span> <span class="pre">'chrY':</span> <span class="pre">'Y'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_ACC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_GENBANK">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_GENBANK</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'CM000663':</span> <span class="pre">'1',</span> <span class="pre">'CM000664':</span> <span class="pre">'2',</span> <span class="pre">'CM000665':</span> <span class="pre">'3',</span> <span class="pre">'CM000666':</span> <span class="pre">'4',</span> <span class="pre">'CM000667':</span> <span class="pre">'5',</span> <span class="pre">'CM000668':</span> <span class="pre">'6',</span> <span class="pre">'CM000669':</span> <span class="pre">'7',</span> <span class="pre">'CM000670':</span> <span class="pre">'8',</span> <span class="pre">'CM000671':</span> <span class="pre">'9',</span> <span class="pre">'CM000672':</span> <span class="pre">'10',</span> <span class="pre">'CM000673':</span> <span class="pre">'11',</span> <span class="pre">'CM000674':</span> <span class="pre">'12',</span> <span class="pre">'CM000675':</span> <span class="pre">'13',</span> <span class="pre">'CM000676':</span> <span class="pre">'14',</span> <span class="pre">'CM000677':</span> <span class="pre">'15',</span> <span class="pre">'CM000678':</span> <span class="pre">'16',</span> <span class="pre">'CM000679':</span> <span class="pre">'17',</span> <span class="pre">'CM000680':</span> <span class="pre">'18',</span> <span class="pre">'CM000681':</span> <span class="pre">'19',</span> <span class="pre">'CM000682':</span> <span class="pre">'20',</span> <span class="pre">'CM000683':</span> <span class="pre">'21',</span> <span class="pre">'CM000684':</span> <span class="pre">'22',</span> <span class="pre">'CM000685':</span> <span class="pre">'X',</span> <span class="pre">'CM000686':</span> <span class="pre">'Y',</span> <span class="pre">'J01415':</span> <span class="pre">'MT'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_GENBANK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_HUMAN_CHR">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_HUMAN_CHR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'chr1':</span> <span class="pre">'1',</span> <span class="pre">'chr10':</span> <span class="pre">'10',</span> <span class="pre">'chr11':</span> <span class="pre">'11',</span> <span class="pre">'chr12':</span> <span class="pre">'12',</span> <span class="pre">'chr13':</span> <span class="pre">'13',</span> <span class="pre">'chr14':</span> <span class="pre">'14',</span> <span class="pre">'chr15':</span> <span class="pre">'15',</span> <span class="pre">'chr16':</span> <span class="pre">'16',</span> <span class="pre">'chr17':</span> <span class="pre">'17',</span> <span class="pre">'chr18':</span> <span class="pre">'18',</span> <span class="pre">'chr19':</span> <span class="pre">'19',</span> <span class="pre">'chr2':</span> <span class="pre">'2',</span> <span class="pre">'chr20':</span> <span class="pre">'20',</span> <span class="pre">'chr21':</span> <span class="pre">'21',</span> <span class="pre">'chr22':</span> <span class="pre">'22',</span> <span class="pre">'chr3':</span> <span class="pre">'3',</span> <span class="pre">'chr4':</span> <span class="pre">'4',</span> <span class="pre">'chr5':</span> <span class="pre">'5',</span> <span class="pre">'chr6':</span> <span class="pre">'6',</span> <span class="pre">'chr7':</span> <span class="pre">'7',</span> <span class="pre">'chr8':</span> <span class="pre">'8',</span> <span class="pre">'chr9':</span> <span class="pre">'9',</span> <span class="pre">'chrM':</span> <span class="pre">'MT',</span> <span class="pre">'chrMT':</span> <span class="pre">'MT',</span> <span class="pre">'chrX':</span> <span class="pre">'X',</span> <span class="pre">'chrY':</span> <span class="pre">'Y'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_HUMAN_CHR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_HUMAN_WO_CHR">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_HUMAN_WO_CHR</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'1':</span> <span class="pre">'1',</span> <span class="pre">'10':</span> <span class="pre">'10',</span> <span class="pre">'11':</span> <span class="pre">'11',</span> <span class="pre">'12':</span> <span class="pre">'12',</span> <span class="pre">'13':</span> <span class="pre">'13',</span> <span class="pre">'14':</span> <span class="pre">'14',</span> <span class="pre">'15':</span> <span class="pre">'15',</span> <span class="pre">'16':</span> <span class="pre">'16',</span> <span class="pre">'17':</span> <span class="pre">'17',</span> <span class="pre">'18':</span> <span class="pre">'18',</span> <span class="pre">'19':</span> <span class="pre">'19',</span> <span class="pre">'2':</span> <span class="pre">'2',</span> <span class="pre">'20':</span> <span class="pre">'20',</span> <span class="pre">'21':</span> <span class="pre">'21',</span> <span class="pre">'22':</span> <span class="pre">'22',</span> <span class="pre">'3':</span> <span class="pre">'3',</span> <span class="pre">'4':</span> <span class="pre">'4',</span> <span class="pre">'5':</span> <span class="pre">'5',</span> <span class="pre">'6':</span> <span class="pre">'6',</span> <span class="pre">'7':</span> <span class="pre">'7',</span> <span class="pre">'8':</span> <span class="pre">'8',</span> <span class="pre">'9':</span> <span class="pre">'9',</span> <span class="pre">'M':</span> <span class="pre">'MT',</span> <span class="pre">'MT':</span> <span class="pre">'MT',</span> <span class="pre">'X':</span> <span class="pre">'X',</span> <span class="pre">'Y':</span> <span class="pre">'Y'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_HUMAN_WO_CHR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_REFSEQ">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_REFSEQ</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'NC_000001':</span> <span class="pre">'1',</span> <span class="pre">'NC_000002':</span> <span class="pre">'2',</span> <span class="pre">'NC_000003':</span> <span class="pre">'3',</span> <span class="pre">'NC_000004':</span> <span class="pre">'4',</span> <span class="pre">'NC_000005':</span> <span class="pre">'5',</span> <span class="pre">'NC_000006':</span> <span class="pre">'6',</span> <span class="pre">'NC_000007':</span> <span class="pre">'7',</span> <span class="pre">'NC_000008':</span> <span class="pre">'8',</span> <span class="pre">'NC_000009':</span> <span class="pre">'9',</span> <span class="pre">'NC_000010':</span> <span class="pre">'10',</span> <span class="pre">'NC_000011':</span> <span class="pre">'11',</span> <span class="pre">'NC_000012':</span> <span class="pre">'12',</span> <span class="pre">'NC_000013':</span> <span class="pre">'13',</span> <span class="pre">'NC_000014':</span> <span class="pre">'14',</span> <span class="pre">'NC_000015':</span> <span class="pre">'15',</span> <span class="pre">'NC_000016':</span> <span class="pre">'16',</span> <span class="pre">'NC_000017':</span> <span class="pre">'17',</span> <span class="pre">'NC_000018':</span> <span class="pre">'18',</span> <span class="pre">'NC_000019':</span> <span class="pre">'19',</span> <span class="pre">'NC_000020':</span> <span class="pre">'20',</span> <span class="pre">'NC_000021':</span> <span class="pre">'21',</span> <span class="pre">'NC_000022':</span> <span class="pre">'22',</span> <span class="pre">'NC_000023':</span> <span class="pre">'X',</span> <span class="pre">'NC_000024':</span> <span class="pre">'Y',</span> <span class="pre">'NC_0018007':</span> <span class="pre">'MT',</span> <span class="pre">'NC_012920':</span> <span class="pre">'MT'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession.HUMAN_BY_REFSEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="anacore.db.homo_sapiens.accession.ChrAccession.toHumanName">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">toHumanName</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chr_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/db/homo_sapiens/accession.html#ChrAccession.toHumanName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession.toHumanName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return standardized chromosome name from chromosome accession or name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>chr_name</strong> (<em>str</em>) – Chromosome name or accession.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Standardized chromosome name from chromosome accession.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -1605,11 +1683,12 @@ with mode “i”.</p>
 <dl class="py method">
 <dt id="anacore.genomicRegion.Protein.getSubFromRegionPos">
 <code class="sig-name descname"><span class="pre">getSubFromRegionPos</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protein_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codon_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/genomicRegion.html#Protein.getSubFromRegionPos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.genomicRegion.Protein.getSubFromRegionPos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return CDS and coordinate on his from the coordinate on protein.
-The coordinate on CDS is stranded:</p>
+<dd><p>Return CDS and coordinate on its from coordinate on protein. The coordinate on CDS is stranded:</p>
 <blockquote>
-<div><p>With region test:10-20(+) the pos 2 correspond to ref position 12
-With region test:10-20(-) the pos 2 correspond to ref position 18</p>
+<div><ul class="simple">
+<li><p>With region test:10-20(+) the pos 2 correspond to ref position 12</p></li>
+<li><p>With region test:10-20(-) the pos 2 correspond to ref position 18</p></li>
+</ul>
 </div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1768,12 +1847,13 @@ With region test:10-20(-) the pos 2 correspond to ref position 18</p>
 <dl class="py method">
 <dt id="anacore.genomicRegion.Transcript.getSubFromRegionPos">
 <code class="sig-name descname"><span class="pre">getSubFromRegionPos</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transcript_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/genomicRegion.html#Transcript.getSubFromRegionPos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.genomicRegion.Transcript.getSubFromRegionPos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return exon and coordinate on his from the coordinate on transcript.</p>
-<p>Coordinate on exon is stranded:</p>
-<ul class="simple">
+<dd><p>Return exon and coordinate on its from coordinate on transcript. Coordinate on exon is stranded:</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>pos 2 in region test:10-20(+) correspond to ref position 12</p></li>
 <li><p>pos 2 in region test:10-20(-) correspond to ref position 18</p></li>
 </ul>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>transcript_pos</strong> (<em>int</em>) – The coordinate on transcript (1-based).</p>
@@ -5480,6 +5560,72 @@ clf.set_status(test_dataset)</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.vcf.</span></code><code class="sig-name descname"><span class="pre">VCFIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFIO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#anacore.abstractFile.AbstractFile" title="anacore.abstractFile.AbstractFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.abstractFile.AbstractFile</span></code></a></p>
 <p>Manage VCF file.</p>
+<dl class="field-list">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>Read VCF by line</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
+
+<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Variant&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">samples</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="n">alt_freq</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getAF</span><span class="p">(</span><span class="n">curr_spl</span><span class="p">))</span> <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">samples</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">alt_freq</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Variant   N01     N02     N03</span>
+<span class="c1"># chr1:35-35=A/T    0.3     0.4     0.1</span>
+<span class="c1"># chr1:128-128=G/A  0.1     0.6     0.05</span>
+</pre></div>
+</div>
+<p>Read VCF by coordinate</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
+
+<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;i&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">())</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># chr1:35-35=A/T</span>
+</pre></div>
+</div>
+<p>Write VCF</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
+
+<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="c1"># Header</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;my_sample&quot;</span><span class="p">]</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;q10&quot;</span><span class="p">:</span> <span class="n">HeaderFilterAttr</span><span class="p">(</span><span class="s2">&quot;q10&quot;</span><span class="p">,</span> <span class="s2">&quot;Quality below 10&quot;</span><span class="p">)}</span>
+    <span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;DB&quot;</span><span class="p">:</span> <span class="n">HeaderInfoAttr</span><span class="p">(</span><span class="s2">&quot;DB&quot;</span><span class="p">,</span> <span class="s2">&quot;dbSNP membership, build 129&quot;</span><span class="p">,</span> <span class="s2">&quot;Flag&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;AF&quot;</span><span class="p">:</span> <span class="n">HeaderFormatAttr</span><span class="p">(</span><span class="s2">&quot;AF&quot;</span><span class="p">,</span> <span class="s2">&quot;Allele Frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;Float&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">extra_header</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;##source=myImputationProgramV3.1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;##phasing=partial&quot;</span>
+    <span class="p">]</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writeHeader</span><span class="p">()</span>
+    <span class="c1"># Record</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">vcf_record_list</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># ##fileformat=VCFv4.3</span>
+<span class="c1"># ##source=myImputationProgramV3.1</span>
+<span class="c1"># ##phasing=partial</span>
+<span class="c1"># ##INFO=&lt;ID=DB,Number=0,Type=Flag,Description=&quot;dbSNP membership, build 129&quot;&gt;</span>
+<span class="c1"># ##FILTER=&lt;ID=q10,Description=&quot;Quality below 10&quot;&gt;</span>
+<span class="c1"># ##FORMAT=&lt;ID=AF,Number=A,Type=Float,Description=&quot;Allele Frequency&quot;&gt;</span>
+<span class="c1"># #CHROM    POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  my_sample</span>
+<span class="c1"># chr1      35      .       A       T.      PASS    DB      AF      0.1</span>
+<span class="c1"># ...</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <p>Return instance of VCFIO.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

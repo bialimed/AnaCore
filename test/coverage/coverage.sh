@@ -8,6 +8,6 @@ cd ${test_dir}
 if [ -e .coverage ]; then
     coverage erase
 fi
-coverage run --source=anacore -m unittest discover . > /dev/null 2> /dev/null && \
+coverage run --source=anacore -m unittest discover > /dev/null 2> /dev/null && \
 coverage report && \
 coverage erase

@@ -1,3 +1,8 @@
+# Release 2.10.0 [DEV]
+
+### Improvements
+  * Add utilities to manage Homo sapiens genome accessions in `anacore.db.homo_sapiens.accession`.
+
 # Release 2.9.0 [2020-04-28]
 
 ### Changes
