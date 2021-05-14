@@ -191,12 +191,10 @@ class Transcript(RegionTree):
 
     def getSubFromRegionPos(self, transcript_pos):
         """
-        Return exon and coordinate on his from the coordinate on transcript.
+        Return exon and coordinate on its from coordinate on transcript. Coordinate on exon is stranded:
 
-        Coordinate on exon is stranded:
-
-        - pos 2 in region test:10-20(+) correspond to ref position 12
-        - pos 2 in region test:10-20(-) correspond to ref position 18
+            * pos 2 in region test:10-20(+) correspond to ref position 12
+            * pos 2 in region test:10-20(-) correspond to ref position 18
 
         :param transcript_pos: The coordinate on transcript (1-based).
         :type transcript_pos: int
@@ -425,10 +423,10 @@ class Protein(RegionTree):
 
     def getSubFromRegionPos(self, protein_pos, codon_pos):
         """
-        Return CDS and coordinate on his from the coordinate on protein.
-        The coordinate on CDS is stranded:
-            With region test:10-20(+) the pos 2 correspond to ref position 12
-            With region test:10-20(-) the pos 2 correspond to ref position 18
+        Return CDS and coordinate on its from coordinate on protein. The coordinate on CDS is stranded:
+
+            * With region test:10-20(+) the pos 2 correspond to ref position 12
+            * With region test:10-20(-) the pos 2 correspond to ref position 18
 
         :param protein_pos: Coordinate of the amino acid on protein (1-based).
         :type protein_pos: int.
