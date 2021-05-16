@@ -1,10 +1,103 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing/processing BED files."""
+"""
+Classes and functions for reading/writing/processing BED files.
+
+:Code example:
+
+    Test if a file is a BED file
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.bed import BEDIO
+
+        if BEDIO.isValid("test.txt.gz"):
+            print("The file is a BED file")
+
+        # Result>
+        # The file is a BED file
+
+    Read BED file by line
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.bed import BEDIO
+
+        with BEDIO("test.bed.gz") as reader:
+            print("Region", "Name", sep="\\t")
+            for record in reader:
+                print(
+                    "{}:{}-{}({})".format(
+                        record.reference.name,
+                        record.start,
+                        record.end
+                        record.strand
+                    ),
+                    record.name,
+                    sep="\\t"
+                )
+
+        # Result>
+        # Region\tName
+        # chr1:158-367(-)\ttarget_01
+        # chr1:54899-54999(+)\ttarget_02
+
+    Read whole BED file and store by region
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.bed import getSortedAreasByChr
+
+        areas_by_chr = getSortedAreasByChr("test.bed.gz")
+        print("Region", "Name", sep="\\t")
+        for chrom, areas_on_curr_chr in areas_by_chr.items():
+            for curr_area in areas_on_curr_chr:
+                print(
+                    "{}:{}-{}({})".format(
+                        curr_area.reference.name,
+                        curr_area.start,
+                        curr_area.end
+                        curr_area.strand
+                    ),
+                    curr_area.name,
+                    sep="\\t"
+                )
+
+        # Result>
+        # Region\tName
+        # chr1:158-367(-)\ttarget_01
+        # chr1:54899-54999(+)\ttarget_02
+
+    Write BED file from regions
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.bed import BEDIO, BEDRecord
+        from anacore.region import Region
+
+        regions = [
+            Region(158, 367, "-", "chr1", "target_01"),
+            Region(54899, 54999, "+", "chr1", "target_02"),
+        ]
+
+        with BEDIO("test.bed.gz", "w", 6) as writer:  # Write BED file with 6 columns
+            for curr_region in regions:
+                writer.write(
+                    BEDRecord.recFromRegion(curr_region)
+                )
+
+        # Result>
+        # chr1\t157\t367\ttarget_01\t.\t-
+        # chr1\t54898\t54999\ttarget_02\t.\t+
+"""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -127,7 +220,7 @@ class BEDIO(AbstractFile):
             ("." if record.strand is None else record.strand),
             ("." if record.thickStart is None else str(record.thickStart - 1)),
             ("." if record.thickEnd is None else str(record.thickEnd)),
-            ("." if record.itemRgb is None else ",".join(record.itemRgb)),
+            ("." if record.itemRgb is None else ",".join(map(str, record.itemRgb))),
             ("." if record.blockCount is None else str(record.blockCount)),
             ("." if record.blockSizes is None else ",".join(map(str, record.blockSizes))),
             ("." if record.blockStarts is None else ",".join(map(str, record.blockStarts)))
@@ -158,23 +251,25 @@ class BEDIO(AbstractFile):
         """
         is_valid = False
         try:
-            with BEDIO(filepath) as FH_in:
+            with BEDIO(filepath) as reader:
                 record_idx = 0
-                for record in FH_in:
+                for record in reader:
                     if record_idx >= 10:
                         break
-                    if record.strand is not None and record.strand not in ["+", "-", "."]:  # Check strand
+                    # Check strand
+                    if record.strand is not None and record.strand not in {"+", "-", "."}:
                         raise IOError(
-                            "The line {} in \"{}\" cannot be parsed by {}.\nLine content: {}".format(
-                                FH_in.current_line_nb, FH_in.filepath, FH_in.__class__.__name__, FH_in.current_line
+                            "Invalid strand value in {} from file {}.".format(
+                                reader.current_line_nb, reader.filepath
                             )
                         )
-                    # if record.itemRgb is not None and len(record.itemRgb.split(",")) != 3:
-                    #     raise IOError(
-                    #         "The line {} in \"{}\" cannot be parsed by {}.\nLine content: {}".format(
-                    #             FH_in.current_line_nb, FH_in.filepath, FH_in.__class__.__name__, FH_in.current_line
-                    #         )
-                    #     )
+                    # Check RGB
+                    if record.itemRgb is not None and len(record.itemRgb) != 3:
+                        raise IOError(
+                            "Invalid RGB code in {} from file {}.".format(
+                                reader.current_line_nb, reader.filepath
+                            )
+                        )
                     record_idx += 1
                 is_valid = True
         except Exception:
@@ -192,18 +287,24 @@ class BEDIO(AbstractFile):
         fields[1] = int(fields[1]) + 1  # Start in BED is 0-based
         fields[2] = int(fields[2])
         nb_col = len(fields)
-        if nb_col >= 5:
-            fields[4] = None if fields[4] == "." else int(fields[4])  # A score between 0 and 1000. If the track line useScore attribute is set to 1 for this annotation data set, the score value will determine the level of gray in which this feature is displayed (higher numbers = darker gray).
-            if nb_col >= 7:
-                fields[6] = int(fields[6]) + 1  # The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.
-                if nb_col >= 8:
-                    fields[7] = int(fields[7])  # The ending position at which the feature is drawn thickly (for example the stop codon in gene displays).
-                    if nb_col >= 10:
-                        fields[9] = int(fields[9])  # The number of blocks (exons) in the BED line.
-                        if nb_col >= 11:
-                            fields[10] = [int(block) for block in fields[10].split(",")]  # A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.
-                            if nb_col >= 12:
-                                fields[11] = [int(block) for block in fields[11].split(",")]  # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
+        if nb_col > 3:
+            fields[3] = None if fields[3] == "." else fields[3]
+            if nb_col > 4:
+                fields[4] = None if fields[4] == "." else int(fields[4])  # A score between 0 and 1000. If the track line useScore attribute is set to 1 for this annotation data set, the score value will determine the level of gray in which this feature is displayed (higher numbers = darker gray).
+                if nb_col > 5:
+                    fields[5] = None if fields[5] == "." else fields[5]
+                    if nb_col > 6:
+                        fields[6] = None if fields[6] == "." else int(fields[6]) + 1  # The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.
+                        if nb_col > 7:
+                            fields[7] = None if fields[7] == "." else int(fields[7])  # The ending position at which the feature is drawn thickly (for example the stop codon in gene displays).
+                            if nb_col > 8:
+                                fields[8] = None if fields[8] in {".", "0"} else [int(color) for color in fields[8].split(",")]  # An RGB value of the form R,G,B (e.g. 255,0,0).
+                                if nb_col > 9:
+                                    fields[9] = None if fields[9] == "." else int(fields[9])  # The number of blocks (exons) in the BED line.
+                                    if nb_col > 10:
+                                        fields[10] = None if fields[10] == "." else [int(block) for block in fields[10].split(",")]  # A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.
+                                        if nb_col > 11:
+                                            fields[11] = None if fields[11] == "." else [int(block) for block in fields[11].split(",")]  # A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.
         return BEDRecord(*fields)
 
     def write(self, record):
