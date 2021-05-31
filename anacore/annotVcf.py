@@ -1,5 +1,84 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing/processing annotated VCF."""
+"""
+Classes and functions for reading/writing/processing annotated VCF.
+
+:Example:
+
+    Read annotated VCF by line
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.annotVcf import AnnotVCFIO
+
+        # File content>
+        # ##fileformat=VCFv4.3
+        # ##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|HGVSp">
+        # ##FORMAT=<ID=AD,Number=A,Type=Integer,Description="Allele Depth">
+        # ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+        # #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample_test
+        # 17\t3675200\t.\tC\tG\t4845.9\tPASS\t\tDP:AD\t4560:1500
+        # 17\t7675200\t.\tC\tG\t31799.6\tPASS\tCSQ=G|missense_variant|MODERATE|TP53|NP_000537.3%3Ap.(Ala138Pro),G|missense_variant|MODERATE|TP53|NP_001119584.1%3Ap.(Ala138Pro)\tDP:AD\t4560:1500
+
+        print("Alteration", "Symbol", "HGVSp", sep="\\t")
+        with AnnotVCFIO("test.vcf.gz", annot_field="CSQ") as reader:
+            for record in reader:
+                if "CSQ" not in record.info:
+                    print(record.getName(), "", "", sep="\\t")
+                else:
+                    for annot in record.info["CSQ"]:
+                        print(
+                            record.getName(),
+                            annot["Symbol"],
+                            annot["HGVSp"],
+                            sep="\\t"
+                        )
+
+        # Result>
+        # Alteration\tSymbol\tHGVSp
+        # 17:3675200=C/G\t\t
+        # 17:7675200=C/G\tTP53\tNP_000537.3%3Ap.(Ala138Pro)
+        # 17:7675200=C/G\tTP53\tNP_001119584.1:p.(Ala138Pro)
+
+    Write annotated VCF
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.annotVcf import AnnotVCFIO
+
+        annot_field = "ANN"
+        with AnnotVCFIO("test.vcf.gz", "w", annot_field=annot_field) as writer:
+            # Header
+            writer.samples = ["my_sample"]
+            self.info = {
+                annot_field: HeaderInfoAttr(
+                    annot_field,
+                    "Consequence annotations. Format: SYMBOL|HGVSp",
+                    "String",
+                    "."
+                )
+            }
+            self.format = {
+                "AF": HeaderFormatAttr("AF", "Allele Frequency", "Float", "A")
+            }
+            writer.writeHeader()
+            # Record
+            for record in vcf_record_list:
+                record.info[annot_field] = [
+                    {"SYMBOL": "TP53", "HGVSp": "NP_000537.3:p.(Ala138Pro)"},
+                    {"SYMBOL": "TP53", "HGVSp": "NP_001119584.1%3Ap.(Ala138Pro)"},
+                ]
+                writer.write(record)
+
+        # Result>
+        # ##fileformat=VCFv4.3
+        # ##INFO=<ID=ANN,Number=.,Type=String,Description="Allele Frequency">
+        # ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+        # #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tmy_sample
+        # 17\t7675200\t.\tC\tG\t.\tPASS\tANN=TP53|NP_000537.3%3Ap.(Ala138Pro),TP53|NP_001119584.1%3Ap.(Ala138Pro)\tAF\t0.33
+        # ...
+"""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'

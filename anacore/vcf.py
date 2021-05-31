@@ -1,5 +1,80 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing/processing VCF."""
+"""
+Classes and functions for reading/writing/processing VCF.
+
+:Example:
+
+    Read VCF by line
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.vcf import VCFIO
+
+        with VCFIO("test.vcf.gz") as reader:
+            print("Variant", "\\t".join(reader.samples), sep="\\t")
+            for record in reader:
+                alt_freq = [str(record.getAF(curr_spl)) for curr_spl in reader.samples]
+                print(record.getName(), "\\t".join(alt_freq), sep="\\t")
+
+        # Result>
+        # Variant\tN01\tN02\tN03
+        # chr1:35-35=A/T\t0.3\t0.4\t0.1
+        # chr1:128-128=G/A\t0.1\t0.6\t0.05
+
+    Read VCF by coordinate
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.vcf import VCFIO
+
+        with VCFIO("test.vcf.gz", "i") as reader:
+            for record in reader.getSub("chr1", 10, 100):
+                print(record.getName())
+
+        # Result>
+        # chr1:35-35=A/T
+
+    Write VCF
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.vcf import VCFIO
+
+        with VCFIO("test.vcf.gz", "w") as writer:
+            # Header
+            writer.samples = ["my_sample"]
+            writer.filter = [
+                {"q10": HeaderFilterAttr("q10", "Quality below 10")}
+            ]
+            self.info = {
+                "DB": HeaderInfoAttr("DB", "dbSNP membership, build 129", "Flag", 0)
+            }
+            self.format = {
+                "AF": HeaderFormatAttr("AF", "Allele Frequency", "Float", "A")
+            }
+            writer.extra_header = [
+                "##source=myImputationProgramV3.1",
+                "##phasing=partial"
+            ]
+            writer.writeHeader()
+            # Record
+            for record in vcf_record_list:
+                writer.write(record)
+
+        # Result>
+        # ##fileformat=VCFv4.3
+        # ##source=myImputationProgramV3.1
+        # ##phasing=partial
+        # ##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+        # ##FILTER=<ID=q10,Description="Quality below 10">
+        # ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+        # #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tmy_sample
+        # chr1\t35\t.\tA\tT.\tPASS\tDB\tAF\t0.1
+        # ...
+"""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
@@ -1137,82 +1212,7 @@ class VCFRecord:
 
 
 class VCFIO(AbstractFile):
-    """
-    Manage VCF file.
-
-    :Example:
-
-        Read VCF by line
-
-        .. highlight:: python
-        .. code-block:: python
-
-            from anacore.vcf import VCFIO
-
-            with VCFIO("test.vcf.gz") as reader:
-                print("Variant", "\\t".join(reader.samples), sep="\\t")
-                for record in reader:
-                    alt_freq = [str(record.getAF(curr_spl)) for curr_spl in reader.samples]
-                    print(record.getName(), "\\t".join(alt_freq), sep="\\t")
-
-            # Result>
-            # Variant\tN01\tN02\tN03
-            # chr1:35-35=A/T\t0.3\t0.4\t0.1
-            # chr1:128-128=G/A\t0.1\t0.6\t0.05
-
-        Read VCF by coordinate
-
-        .. highlight:: python
-        .. code-block:: python
-
-            from anacore.vcf import VCFIO
-
-            with VCFIO("test.vcf.gz", "i") as reader:
-                for record in reader.getSub("chr1", 10, 100):
-                    print(record.getName())
-
-            # Result>
-            # chr1:35-35=A/T
-
-        Write VCF
-
-        .. highlight:: python
-        .. code-block:: python
-
-            from anacore.vcf import VCFIO
-
-            with VCFIO("test.vcf.gz", "w") as writer:
-                # Header
-                writer.samples = ["my_sample"]
-                writer.filter = [
-                    {"q10": HeaderFilterAttr("q10", "Quality below 10")}
-                ]
-                self.info = {
-                    "DB": HeaderInfoAttr("DB", "dbSNP membership, build 129", "Flag", 0)
-                }
-                self.format = {
-                    "AF": HeaderFormatAttr("AF", "Allele Frequency", "Float", "A")
-                }
-                writer.extra_header = [
-                    "##source=myImputationProgramV3.1",
-                    "##phasing=partial"
-                ]
-                writer.writeHeader()
-                # Record
-                for record in vcf_record_list:
-                    writer.write(record)
-
-            # Result>
-            # ##fileformat=VCFv4.3
-            # ##source=myImputationProgramV3.1
-            # ##phasing=partial
-            # ##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
-            # ##FILTER=<ID=q10,Description="Quality below 10">
-            # ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
-            # #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tmy_sample
-            # chr1\t35\t.\tA\tT.\tPASS\tDB\tAF\t0.1
-            # ...
-    """
+    """Manage VCF file."""
 
     def __init__(self, filepath, mode="r"):
         """

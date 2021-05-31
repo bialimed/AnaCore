@@ -1,5 +1,71 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing fusions callers's output and VCF containing fusions. Each record is converted to VCFRecord."""
+"""
+Classes and functions for reading/writing fusions callers's output and VCF containing fusions. Each record is converted to VCFRecord.
+
+:Example:
+
+    Read results form STAR-Fusion
+
+    .. highlight:: python
+    .. code-block:: python
+
+        # File content>
+        # #FusionName	JunctionReadCount	SpanningFragCount	SpliceType	LeftGene	LeftBreakpoint	RightGene	RightBreakpoint	LargeAnchorSupport	FFPM	LeftBreakDinuc	LeftBreakEntropy	RightBreakDinuc	RightBreakEntropy	annots
+        # MN1--BEND2	90	39	ONLY_REF_SPLICE	MN1^ENSG00000169184.6	chr22:27796763:-	BEND2^ENSG00000177324.14	chrX:18195442:-	YES_LDAS	38.9246	GT	1.9656	AG	1.7232	["INTERCHROMOSOMAL[chr22--chr9]"]
+
+        from anacore.fusion import FusionFileReader
+
+        spl_name = "spl1"
+        print("Breakpoint_1\\tGene_brkpt_1\\tBreakpoint_2\\tGene_brkpt_2\\tSpanning_pair\\tSplit_read")
+        with FusionFileReader.factory("test.tsv", sample_name=spl_name) as reader:
+            for first, second in reader:
+                print(
+                    "{}:{}".format(first.chrom, frist.pos),
+                    ",".join([elt["SYMBOL"] for elt in first.info["ANN"]]),
+                    "{}:{}".format(second.chrom, second.pos),
+                    ",".join([elt["SYMBOL"] for elt in second.info["ANN"]]),
+                    first.sample["spl_name"]["PR"],
+                    first.sample["spl_name"]["SR"],
+                    sep="\\t"
+                )
+
+        # Result>
+        # Breakpoint_1\tGene_brkpt_1\tBreakpoint_2\tGene_brkpt_2\tSpanning_pair\tSplit_read
+        # chr22:27796763\tMN1\tchrX:18195442\tBEND2\t39\t99
+
+    Read VCF
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.fusion import FusionFileReader
+
+        # File content>
+        # ##fileformat=VCFv4.3
+        # ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend.">
+        # ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant.">
+        # #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+        # 2	321682	bnd_V	T	]13:123456]T	6	PASS	SVTYPE=BND;MATEID=bnd_U
+        # 4	888888	.	T	G	.	PASS	.
+        # 13	123456	bnd_U	C	C[2:321682[,C[17:198983[	6	PASS	SVTYPE=BND;MATEID=bnd_V,bnd_Z
+        # 17	198983	bnd_Z	A	]13:123456]A	6	PASS	SVTYPE=BND;MATEID=bnd_U
+
+        print("Breakpoint_1\\tBreakpoint_1_name\\tBreakpoint_2\\tBreakpoint_2_name")
+        with FusionFileReader.factory("test.vcf") as reader:
+            for first, second in reader:
+                print(
+                    "{}:{}".format(first.chrom, frist.pos),
+                    first.id
+                    "{}:{}".format(second.chrom, second.pos),
+                    second.id
+                    sep="\\t"
+                )
+
+        # Result>
+        # Breakpoint_1\tBreakpoint_1_name\tBreakpoint_2\tBreakpoint_2_name
+        # 2:321682\tbnd_V\t13:123456\tbnd_U_0
+        # 13:123456\tbnd_U_1\t17:198983\tbnd_Z
+"""
 """
 Alt representation in VCF specification:
 
