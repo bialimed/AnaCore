@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>anacore.annotVcf &mdash; AnaCore  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,6 +89,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -119,11 +124,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -144,7 +151,86 @@
             
   <h1>Source code for anacore.annotVcf</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing/processing annotated VCF.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes and functions for reading/writing/processing annotated VCF.</span>
+
+<span class="sd">:Example:</span>
+
+<span class="sd">    Read annotated VCF by line</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.annotVcf import AnnotVCFIO</span>
+
+<span class="sd">        # File content&gt;</span>
+<span class="sd">        # ##fileformat=VCFv4.3</span>
+<span class="sd">        # ##INFO=&lt;ID=CSQ,Number=.,Type=String,Description=&quot;Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|HGVSp&quot;&gt;</span>
+<span class="sd">        # ##FORMAT=&lt;ID=AD,Number=A,Type=Integer,Description=&quot;Allele Depth&quot;&gt;</span>
+<span class="sd">        # ##FORMAT=&lt;ID=DP,Number=1,Type=Integer,Description=&quot;Total Depth&quot;&gt;</span>
+<span class="sd">        # #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample_test</span>
+<span class="sd">        # 17\t3675200\t.\tC\tG\t4845.9\tPASS\t\tDP:AD\t4560:1500</span>
+<span class="sd">        # 17\t7675200\t.\tC\tG\t31799.6\tPASS\tCSQ=G|missense_variant|MODERATE|TP53|NP_000537.3%3Ap.(Ala138Pro),G|missense_variant|MODERATE|TP53|NP_001119584.1%3Ap.(Ala138Pro)\tDP:AD\t4560:1500</span>
+
+<span class="sd">        print(&quot;Alteration&quot;, &quot;Symbol&quot;, &quot;HGVSp&quot;, sep=&quot;\\t&quot;)</span>
+<span class="sd">        with AnnotVCFIO(&quot;test.vcf.gz&quot;, annot_field=&quot;CSQ&quot;) as reader:</span>
+<span class="sd">            for record in reader:</span>
+<span class="sd">                if &quot;CSQ&quot; not in record.info:</span>
+<span class="sd">                    print(record.getName(), &quot;&quot;, &quot;&quot;, sep=&quot;\\t&quot;)</span>
+<span class="sd">                else:</span>
+<span class="sd">                    for annot in record.info[&quot;CSQ&quot;]:</span>
+<span class="sd">                        print(</span>
+<span class="sd">                            record.getName(),</span>
+<span class="sd">                            annot[&quot;Symbol&quot;],</span>
+<span class="sd">                            annot[&quot;HGVSp&quot;],</span>
+<span class="sd">                            sep=&quot;\\t&quot;</span>
+<span class="sd">                        )</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # Alteration\tSymbol\tHGVSp</span>
+<span class="sd">        # 17:3675200=C/G\t\t</span>
+<span class="sd">        # 17:7675200=C/G\tTP53\tNP_000537.3%3Ap.(Ala138Pro)</span>
+<span class="sd">        # 17:7675200=C/G\tTP53\tNP_001119584.1:p.(Ala138Pro)</span>
+
+<span class="sd">    Write annotated VCF</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.annotVcf import AnnotVCFIO</span>
+
+<span class="sd">        annot_field = &quot;ANN&quot;</span>
+<span class="sd">        with AnnotVCFIO(&quot;test.vcf.gz&quot;, &quot;w&quot;, annot_field=annot_field) as writer:</span>
+<span class="sd">            # Header</span>
+<span class="sd">            writer.samples = [&quot;my_sample&quot;]</span>
+<span class="sd">            self.info = {</span>
+<span class="sd">                annot_field: HeaderInfoAttr(</span>
+<span class="sd">                    annot_field,</span>
+<span class="sd">                    &quot;Consequence annotations. Format: SYMBOL|HGVSp&quot;,</span>
+<span class="sd">                    &quot;String&quot;,</span>
+<span class="sd">                    &quot;.&quot;</span>
+<span class="sd">                )</span>
+<span class="sd">            }</span>
+<span class="sd">            self.format = {</span>
+<span class="sd">                &quot;AF&quot;: HeaderFormatAttr(&quot;AF&quot;, &quot;Allele Frequency&quot;, &quot;Float&quot;, &quot;A&quot;)</span>
+<span class="sd">            }</span>
+<span class="sd">            writer.writeHeader()</span>
+<span class="sd">            # Record</span>
+<span class="sd">            for record in vcf_record_list:</span>
+<span class="sd">                record.info[annot_field] = [</span>
+<span class="sd">                    {&quot;SYMBOL&quot;: &quot;TP53&quot;, &quot;HGVSp&quot;: &quot;NP_000537.3:p.(Ala138Pro)&quot;},</span>
+<span class="sd">                    {&quot;SYMBOL&quot;: &quot;TP53&quot;, &quot;HGVSp&quot;: &quot;NP_001119584.1%3Ap.(Ala138Pro)&quot;},</span>
+<span class="sd">                ]</span>
+<span class="sd">                writer.write(record)</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # ##fileformat=VCFv4.3</span>
+<span class="sd">        # ##INFO=&lt;ID=ANN,Number=.,Type=String,Description=&quot;Allele Frequency&quot;&gt;</span>
+<span class="sd">        # ##FORMAT=&lt;ID=AF,Number=A,Type=Float,Description=&quot;Allele Frequency&quot;&gt;</span>
+<span class="sd">        # #CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tmy_sample</span>
+<span class="sd">        # 17\t7675200\t.\tC\tG\t.\tPASS\tANN=TP53|NP_000537.3%3Ap.(Ala138Pro),TP53|NP_001119584.1%3Ap.(Ala138Pro)\tAF\t0.33</span>
+<span class="sd">        # ...</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 IUCT-O&#39;</span>
@@ -153,15 +239,15 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
-<span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
 
 <div class="viewcode-block" id="AnnotVCFIO"><a class="viewcode-back" href="../../anacore.html#anacore.annotVcf.AnnotVCFIO">[docs]</a><span class="k">class</span> <span class="nc">AnnotVCFIO</span><span class="p">(</span><span class="n">VCFIO</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manage VCF file containing variants annotations.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="s2">&quot;ANN&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="s2">&quot;ANN&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return instance of AnnotVCFIO.</span>
 
@@ -282,7 +368,7 @@
 <div class="viewcode-block" id="VEPVCFIO"><a class="viewcode-back" href="../../anacore.html#anacore.annotVcf.VEPVCFIO">[docs]</a><span class="k">class</span> <span class="nc">VEPVCFIO</span><span class="p">(</span><span class="n">AnnotVCFIO</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manage VCF file containing variants annotations produced by VEP and stored in CSQ field.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return instance of VEPVCFIO.</span>
 
@@ -300,20 +386,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Frédéric Escudié
+        &#169; Copyright 2019, Frédéric Escudié.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -321,7 +412,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

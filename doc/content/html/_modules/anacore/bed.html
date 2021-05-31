@@ -1,38 +1,41 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>anacore.bed &mdash; AnaCore  documentation</title>
   
 
   
-  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
@@ -71,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -85,6 +89,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -119,11 +124,13 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
@@ -144,23 +151,116 @@
             
   <h1>Source code for anacore.bed</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing/processing BED files.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes and functions for reading/writing/processing BED files.</span>
+
+<span class="sd">:Code example:</span>
+
+<span class="sd">    Test if a file is a BED file</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.bed import BEDIO</span>
+
+<span class="sd">        if BEDIO.isValid(&quot;test.txt.gz&quot;):</span>
+<span class="sd">            print(&quot;The file is a BED file&quot;)</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # The file is a BED file</span>
+
+<span class="sd">    Read BED file by line</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.bed import BEDIO</span>
+
+<span class="sd">        with BEDIO(&quot;test.bed.gz&quot;) as reader:</span>
+<span class="sd">            print(&quot;Region&quot;, &quot;Name&quot;, sep=&quot;\\t&quot;)</span>
+<span class="sd">            for record in reader:</span>
+<span class="sd">                print(</span>
+<span class="sd">                    &quot;{}:{}-{}({})&quot;.format(</span>
+<span class="sd">                        record.reference.name,</span>
+<span class="sd">                        record.start,</span>
+<span class="sd">                        record.end</span>
+<span class="sd">                        record.strand</span>
+<span class="sd">                    ),</span>
+<span class="sd">                    record.name,</span>
+<span class="sd">                    sep=&quot;\\t&quot;</span>
+<span class="sd">                )</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # Region\tName</span>
+<span class="sd">        # chr1:158-367(-)\ttarget_01</span>
+<span class="sd">        # chr1:54899-54999(+)\ttarget_02</span>
+
+<span class="sd">    Read whole BED file and store by region</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.bed import getSortedAreasByChr</span>
+
+<span class="sd">        areas_by_chr = getSortedAreasByChr(&quot;test.bed.gz&quot;)</span>
+<span class="sd">        print(&quot;Region&quot;, &quot;Name&quot;, sep=&quot;\\t&quot;)</span>
+<span class="sd">        for chrom, areas_on_curr_chr in areas_by_chr.items():</span>
+<span class="sd">            for curr_area in areas_on_curr_chr:</span>
+<span class="sd">                print(</span>
+<span class="sd">                    &quot;{}:{}-{}({})&quot;.format(</span>
+<span class="sd">                        curr_area.reference.name,</span>
+<span class="sd">                        curr_area.start,</span>
+<span class="sd">                        curr_area.end</span>
+<span class="sd">                        curr_area.strand</span>
+<span class="sd">                    ),</span>
+<span class="sd">                    curr_area.name,</span>
+<span class="sd">                    sep=&quot;\\t&quot;</span>
+<span class="sd">                )</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # Region\tName</span>
+<span class="sd">        # chr1:158-367(-)\ttarget_01</span>
+<span class="sd">        # chr1:54899-54999(+)\ttarget_02</span>
+
+<span class="sd">    Write BED file from regions</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.bed import BEDIO, BEDRecord</span>
+<span class="sd">        from anacore.region import Region</span>
+
+<span class="sd">        regions = [</span>
+<span class="sd">            Region(158, 367, &quot;-&quot;, &quot;chr1&quot;, &quot;target_01&quot;),</span>
+<span class="sd">            Region(54899, 54999, &quot;+&quot;, &quot;chr1&quot;, &quot;target_02&quot;),</span>
+<span class="sd">        ]</span>
+
+<span class="sd">        with BEDIO(&quot;test.bed.gz&quot;, &quot;w&quot;, 6) as writer:  # Write BED file with 6 columns</span>
+<span class="sd">            for curr_region in regions:</span>
+<span class="sd">                writer.write(</span>
+<span class="sd">                    BEDRecord.recFromRegion(curr_region)</span>
+<span class="sd">                )</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # chr1\t157\t367\ttarget_01\t.\t-</span>
+<span class="sd">        # chr1\t54898\t54999\ttarget_02\t.\t+</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.5.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.5.1&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
-<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="k">import</span> <span class="n">Region</span><span class="p">,</span> <span class="n">RegionList</span>
-<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="k">import</span> <span class="n">AbstractFile</span>
+<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="kn">import</span> <span class="n">Region</span><span class="p">,</span> <span class="n">RegionList</span>
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="kn">import</span> <span class="n">AbstractFile</span>
 
 
 <div class="viewcode-block" id="BEDRecord"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDRecord">[docs]</a><span class="k">class</span> <span class="nc">BEDRecord</span><span class="p">(</span><span class="n">Region</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to manage a BED record.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickStart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickEnd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">itemRgb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockCount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockSizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockStarts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickStart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickEnd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">itemRgb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockCount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockSizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockStarts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of BEDRecord.</span>
 
@@ -200,7 +300,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">blockSizes</span> <span class="o">=</span> <span class="n">blockSizes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">blockStarts</span> <span class="o">=</span> <span class="n">blockStarts</span>
 
-    <span class="k">def</span> <span class="nf">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">):</span>
         <span class="n">attr_value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">attr_name</span> <span class="o">==</span> <span class="s2">&quot;chrom&quot;</span><span class="p">:</span>
             <span class="n">attr_value</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;reference&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
@@ -208,7 +308,7 @@
             <span class="n">attr_value</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">attr_value</span>
 
-    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">attr_name</span> <span class="o">==</span> <span class="s2">&quot;chrom&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">setReference</span><span class="p">(</span><span class="n">attr_value</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -237,7 +337,7 @@
 <div class="viewcode-block" id="BEDIO"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO">[docs]</a><span class="k">class</span> <span class="nc">BEDIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to read and write in BED file (https://genome.ucsc.edu/FAQ/FAQformat.html#format1).&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">write_nb_col</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">write_nb_col</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of BEDIO.</span>
 
@@ -272,7 +372,7 @@
             <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">thickStart</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">thickStart</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span>
             <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">thickEnd</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">thickEnd</span><span class="p">)),</span>
-            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">itemRgb</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">itemRgb</span><span class="p">)),</span>
+            <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">itemRgb</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">itemRgb</span><span class="p">))),</span>
             <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">blockCount</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">blockCount</span><span class="p">)),</span>
             <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">blockSizes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">blockSizes</span><span class="p">))),</span>
             <span class="p">(</span><span class="s2">&quot;.&quot;</span> <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">blockStarts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">blockStarts</span><span class="p">)))</span>
@@ -303,23 +403,25 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">BEDIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_in</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">BEDIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
                 <span class="n">record_idx</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">FH_in</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">record_idx</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
                         <span class="k">break</span>
-                    <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">]:</span>  <span class="c1"># Check strand</span>
+                    <span class="c1"># Check strand</span>
+                    <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">record</span><span class="o">.</span><span class="n">strand</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">}:</span>
                         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
-                            <span class="s2">&quot;The line </span><span class="si">{}</span><span class="s2"> in </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2"> cannot be parsed by </span><span class="si">{}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">Line content: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                                <span class="n">FH_in</span><span class="o">.</span><span class="n">current_line_nb</span><span class="p">,</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span> <span class="n">FH_in</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">current_line</span>
+                            <span class="s2">&quot;Invalid strand value in </span><span class="si">{}</span><span class="s2"> from file </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">reader</span><span class="o">.</span><span class="n">current_line_nb</span><span class="p">,</span> <span class="n">reader</span><span class="o">.</span><span class="n">filepath</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
-                    <span class="c1"># if record.itemRgb is not None and len(record.itemRgb.split(&quot;,&quot;)) != 3:</span>
-                    <span class="c1">#     raise IOError(</span>
-                    <span class="c1">#         &quot;The line {} in \&quot;{}\&quot; cannot be parsed by {}.\nLine content: {}&quot;.format(</span>
-                    <span class="c1">#             FH_in.current_line_nb, FH_in.filepath, FH_in.__class__.__name__, FH_in.current_line</span>
-                    <span class="c1">#         )</span>
-                    <span class="c1">#     )</span>
+                    <span class="c1"># Check RGB</span>
+                    <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">itemRgb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">itemRgb</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                            <span class="s2">&quot;Invalid RGB code in </span><span class="si">{}</span><span class="s2"> from file </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">reader</span><span class="o">.</span><span class="n">current_line_nb</span><span class="p">,</span> <span class="n">reader</span><span class="o">.</span><span class="n">filepath</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
                     <span class="n">record_idx</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -337,18 +439,24 @@
         <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># Start in BED is 0-based</span>
         <span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="n">nb_col</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
-            <span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>  <span class="c1"># A score between 0 and 1000. If the track line useScore attribute is set to 1 for this annotation data set, the score value will determine the level of gray in which this feature is displayed (higher numbers = darker gray).</span>
-            <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">:</span>
-                <span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.</span>
-                <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">:</span>
-                    <span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>  <span class="c1"># The ending position at which the feature is drawn thickly (for example the stop codon in gene displays).</span>
-                    <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
-                        <span class="n">fields</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>  <span class="c1"># The number of blocks (exons) in the BED line.</span>
-                        <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;=</span> <span class="mi">11</span><span class="p">:</span>
-                            <span class="n">fields</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>  <span class="c1"># A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.</span>
-                            <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;=</span> <span class="mi">12</span><span class="p">:</span>
-                                <span class="n">fields</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>  <span class="c1"># A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.</span>
+        <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>  <span class="c1"># A score between 0 and 1000. If the track line useScore attribute is set to 1 for this annotation data set, the score value will determine the level of gray in which this feature is displayed (higher numbers = darker gray).</span>
+                <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="n">fields</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+                        <span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># The starting position at which the feature is drawn thickly (for example, the start codon in gene displays). When there is no thick part, thickStart and thickEnd are usually set to the chromStart position.</span>
+                        <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">7</span><span class="p">:</span>
+                            <span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>  <span class="c1"># The ending position at which the feature is drawn thickly (for example the stop codon in gene displays).</span>
+                            <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+                                <span class="n">fields</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">}</span> <span class="k">else</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>  <span class="c1"># An RGB value of the form R,G,B (e.g. 255,0,0).</span>
+                                <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">9</span><span class="p">:</span>
+                                    <span class="n">fields</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>  <span class="c1"># The number of blocks (exons) in the BED line.</span>
+                                    <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                                        <span class="n">fields</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>  <span class="c1"># A comma-separated list of the block sizes. The number of items in this list should correspond to blockCount.</span>
+                                        <span class="k">if</span> <span class="n">nb_col</span> <span class="o">&gt;</span> <span class="mi">11</span><span class="p">:</span>
+                                            <span class="n">fields</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;.&quot;</span> <span class="k">else</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>  <span class="c1"># A comma-separated list of block starts. All of the blockStart positions should be calculated relative to chromStart. The number of items in this list should correspond to blockCount.</span>
         <span class="k">return</span> <span class="n">BEDRecord</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BEDIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
@@ -434,20 +542,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Frédéric Escudié
+        &#169; Copyright 2019, Frédéric Escudié.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -455,7 +568,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

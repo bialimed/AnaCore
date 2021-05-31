@@ -295,6 +295,79 @@
 <div class="section" id="module-anacore.annotVcf">
 <span id="anacore-annotvcf"></span><h2>anacore.annotVcf<a class="headerlink" href="#module-anacore.annotVcf" title="Permalink to this headline">¶</a></h2>
 <p>Classes and functions for reading/writing/processing annotated VCF.</p>
+<dl class="field-list">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>Read annotated VCF by line</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.annotVcf</span> <span class="kn">import</span> <span class="n">AnnotVCFIO</span>
+
+<span class="c1"># File content&gt;</span>
+<span class="c1"># ##fileformat=VCFv4.3</span>
+<span class="c1"># ##INFO=&lt;ID=CSQ,Number=.,Type=String,Description=&quot;Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|HGVSp&quot;&gt;</span>
+<span class="c1"># ##FORMAT=&lt;ID=AD,Number=A,Type=Integer,Description=&quot;Allele Depth&quot;&gt;</span>
+<span class="c1"># ##FORMAT=&lt;ID=DP,Number=1,Type=Integer,Description=&quot;Total Depth&quot;&gt;</span>
+<span class="c1"># #CHROM        POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  sample_test</span>
+<span class="c1"># 17    3675200 .       C       G       4845.9  PASS            DP:AD   4560:1500</span>
+<span class="c1"># 17    7675200 .       C       G       31799.6 PASS    CSQ=G|missense_variant|MODERATE|TP53|NP_000537.3%3Ap.(Ala138Pro),G|missense_variant|MODERATE|TP53|NP_001119584.1%3Ap.(Ala138Pro)        DP:AD   4560:1500</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Alteration&quot;</span><span class="p">,</span> <span class="s2">&quot;Symbol&quot;</span><span class="p">,</span> <span class="s2">&quot;HGVSp&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">AnnotVCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="s2">&quot;CSQ&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;CSQ&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;CSQ&quot;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span>
+                    <span class="n">annot</span><span class="p">[</span><span class="s2">&quot;Symbol&quot;</span><span class="p">],</span>
+                    <span class="n">annot</span><span class="p">[</span><span class="s2">&quot;HGVSp&quot;</span><span class="p">],</span>
+                    <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Alteration    Symbol  HGVSp</span>
+<span class="c1"># 17:3675200=C/G                </span>
+<span class="c1"># 17:7675200=C/G        TP53    NP_000537.3%3Ap.(Ala138Pro)</span>
+<span class="c1"># 17:7675200=C/G        TP53    NP_001119584.1:p.(Ala138Pro)</span>
+</pre></div>
+</div>
+<p>Write annotated VCF</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.annotVcf</span> <span class="kn">import</span> <span class="n">AnnotVCFIO</span>
+
+<span class="n">annot_field</span> <span class="o">=</span> <span class="s2">&quot;ANN&quot;</span>
+<span class="k">with</span> <span class="n">AnnotVCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="n">annot_field</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="c1"># Header</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;my_sample&quot;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">annot_field</span><span class="p">:</span> <span class="n">HeaderInfoAttr</span><span class="p">(</span>
+            <span class="n">annot_field</span><span class="p">,</span>
+            <span class="s2">&quot;Consequence annotations. Format: SYMBOL|HGVSp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;String&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;.&quot;</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;AF&quot;</span><span class="p">:</span> <span class="n">HeaderFormatAttr</span><span class="p">(</span><span class="s2">&quot;AF&quot;</span><span class="p">,</span> <span class="s2">&quot;Allele Frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;Float&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writeHeader</span><span class="p">()</span>
+    <span class="c1"># Record</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">vcf_record_list</span><span class="p">:</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="n">annot_field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;SYMBOL&quot;</span><span class="p">:</span> <span class="s2">&quot;TP53&quot;</span><span class="p">,</span> <span class="s2">&quot;HGVSp&quot;</span><span class="p">:</span> <span class="s2">&quot;NP_000537.3:p.(Ala138Pro)&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;SYMBOL&quot;</span><span class="p">:</span> <span class="s2">&quot;TP53&quot;</span><span class="p">,</span> <span class="s2">&quot;HGVSp&quot;</span><span class="p">:</span> <span class="s2">&quot;NP_001119584.1%3Ap.(Ala138Pro)&quot;</span><span class="p">},</span>
+        <span class="p">]</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># ##fileformat=VCFv4.3</span>
+<span class="c1"># ##INFO=&lt;ID=ANN,Number=.,Type=String,Description=&quot;Allele Frequency&quot;&gt;</span>
+<span class="c1"># ##FORMAT=&lt;ID=AF,Number=A,Type=Float,Description=&quot;Allele Frequency&quot;&gt;</span>
+<span class="c1"># #CHROM        POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  my_sample</span>
+<span class="c1"># 17    7675200 .       C       G       .       PASS    ANN=TP53|NP_000537.3%3Ap.(Ala138Pro),TP53|NP_001119584.1%3Ap.(Ala138Pro)        AF      0.33</span>
+<span class="c1"># ...</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <dl class="py class">
 <dt id="anacore.annotVcf.AnnotVCFIO">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.annotVcf.</span></code><code class="sig-name descname"><span class="pre">AnnotVCFIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ANN'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/annotVcf.html#AnnotVCFIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.annotVcf.AnnotVCFIO" title="Permalink to this definition">¶</a></dt>
@@ -378,6 +451,87 @@
 <div class="section" id="module-anacore.bed">
 <span id="anacore-bed"></span><h2>anacore.bed<a class="headerlink" href="#module-anacore.bed" title="Permalink to this headline">¶</a></h2>
 <p>Classes and functions for reading/writing/processing BED files.</p>
+<dl class="field-list">
+<dt class="field-odd">Code example</dt>
+<dd class="field-odd"><p>Test if a file is a BED file</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.bed</span> <span class="kn">import</span> <span class="n">BEDIO</span>
+
+<span class="k">if</span> <span class="n">BEDIO</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="s2">&quot;test.txt.gz&quot;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The file is a BED file&quot;</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># The file is a BED file</span>
+</pre></div>
+</div>
+<p>Read BED file by line</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.bed</span> <span class="kn">import</span> <span class="n">BEDIO</span>
+
+<span class="k">with</span> <span class="n">BEDIO</span><span class="p">(</span><span class="s2">&quot;test.bed.gz&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Region&quot;</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">end</span>
+                <span class="n">record</span><span class="o">.</span><span class="n">strand</span>
+            <span class="p">),</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Region        Name</span>
+<span class="c1"># chr1:158-367(-)       target_01</span>
+<span class="c1"># chr1:54899-54999(+)   target_02</span>
+</pre></div>
+</div>
+<p>Read whole BED file and store by region</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.bed</span> <span class="kn">import</span> <span class="n">getSortedAreasByChr</span>
+
+<span class="n">areas_by_chr</span> <span class="o">=</span> <span class="n">getSortedAreasByChr</span><span class="p">(</span><span class="s2">&quot;test.bed.gz&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Region&quot;</span><span class="p">,</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">areas_on_curr_chr</span> <span class="ow">in</span> <span class="n">areas_by_chr</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">curr_area</span> <span class="ow">in</span> <span class="n">areas_on_curr_chr</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">curr_area</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">curr_area</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">curr_area</span><span class="o">.</span><span class="n">end</span>
+                <span class="n">curr_area</span><span class="o">.</span><span class="n">strand</span>
+            <span class="p">),</span>
+            <span class="n">curr_area</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Region        Name</span>
+<span class="c1"># chr1:158-367(-)       target_01</span>
+<span class="c1"># chr1:54899-54999(+)   target_02</span>
+</pre></div>
+</div>
+<p>Write BED file from regions</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.bed</span> <span class="kn">import</span> <span class="n">BEDIO</span><span class="p">,</span> <span class="n">BEDRecord</span>
+<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="kn">import</span> <span class="n">Region</span>
+
+<span class="n">regions</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Region</span><span class="p">(</span><span class="mi">158</span><span class="p">,</span> <span class="mi">367</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="s2">&quot;target_01&quot;</span><span class="p">),</span>
+    <span class="n">Region</span><span class="p">(</span><span class="mi">54899</span><span class="p">,</span> <span class="mi">54999</span><span class="p">,</span> <span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="s2">&quot;target_02&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="k">with</span> <span class="n">BEDIO</span><span class="p">(</span><span class="s2">&quot;test.bed.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>  <span class="c1"># Write BED file with 6 columns</span>
+    <span class="k">for</span> <span class="n">curr_region</span> <span class="ow">in</span> <span class="n">regions</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="n">BEDRecord</span><span class="o">.</span><span class="n">recFromRegion</span><span class="p">(</span><span class="n">curr_region</span><span class="p">)</span>
+        <span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># chr1  157     367     target_01       .       -</span>
+<span class="c1"># chr1  54898   54999   target_02       .       +</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <dl class="py class">
 <dt id="anacore.bed.BEDIO">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.bed.</span></code><code class="sig-name descname"><span class="pre">BEDIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_nb_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/bed.html#BEDIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.bed.BEDIO" title="Permalink to this definition">¶</a></dt>
@@ -905,6 +1059,66 @@
 <div class="section" id="module-anacore.fusion">
 <span id="anacore-fusion"></span><h2>anacore.fusion<a class="headerlink" href="#module-anacore.fusion" title="Permalink to this headline">¶</a></h2>
 <p>Classes and functions for reading/writing fusions callers’s output and VCF containing fusions. Each record is converted to VCFRecord.</p>
+<dl class="field-list">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>Read results form STAR-Fusion</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># File content&gt;</span>
+<span class="c1"># #FusionName   JunctionReadCount       SpanningFragCount       SpliceType      LeftGene        LeftBreakpoint  RightGene       RightBreakpoint LargeAnchorSupport      FFPM    LeftBreakDinuc  LeftBreakEntropy        RightBreakDinuc RightBreakEntropy       annots</span>
+<span class="c1"># MN1--BEND2    90      39      ONLY_REF_SPLICE MN1^ENSG00000169184.6   chr22:27796763:-        BEND2^ENSG00000177324.14        chrX:18195442:- YES_LDAS        38.9246 GT      1.9656  AG      1.7232  [&quot;INTERCHROMOSOMAL[chr22--chr9]&quot;]</span>
+
+<span class="kn">from</span> <span class="nn">anacore.fusion</span> <span class="kn">import</span> <span class="n">FusionFileReader</span>
+
+<span class="n">spl_name</span> <span class="o">=</span> <span class="s2">&quot;spl1&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Breakpoint_1</span><span class="se">\t</span><span class="s2">Gene_brkpt_1</span><span class="se">\t</span><span class="s2">Breakpoint_2</span><span class="se">\t</span><span class="s2">Gene_brkpt_2</span><span class="se">\t</span><span class="s2">Spanning_pair</span><span class="se">\t</span><span class="s2">Split_read&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">FusionFileReader</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;test.tsv&quot;</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="n">spl_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">frist</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
+            <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;SYMBOL&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">first</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;ANN&quot;</span><span class="p">]]),</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
+            <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;SYMBOL&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">second</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;ANN&quot;</span><span class="p">]]),</span>
+            <span class="n">first</span><span class="o">.</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;spl_name&quot;</span><span class="p">][</span><span class="s2">&quot;PR&quot;</span><span class="p">],</span>
+            <span class="n">first</span><span class="o">.</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;spl_name&quot;</span><span class="p">][</span><span class="s2">&quot;SR&quot;</span><span class="p">],</span>
+            <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Breakpoint_1  Gene_brkpt_1    Breakpoint_2    Gene_brkpt_2    Spanning_pair   Split_read</span>
+<span class="c1"># chr22:27796763        MN1     chrX:18195442   BEND2   39      99</span>
+</pre></div>
+</div>
+<p>Read VCF</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.fusion</span> <span class="kn">import</span> <span class="n">FusionFileReader</span>
+
+<span class="c1"># File content&gt;</span>
+<span class="c1"># ##fileformat=VCFv4.3</span>
+<span class="c1"># ##INFO=&lt;ID=MATEID,Number=A,Type=String,Description=&quot;ID of mate breakend.&quot;&gt;</span>
+<span class="c1"># ##INFO=&lt;ID=SVTYPE,Number=1,Type=String,Description=&quot;Type of structural variant.&quot;&gt;</span>
+<span class="c1"># #CHROM        POS     ID      REF     ALT     QUAL    FILTER  INFO</span>
+<span class="c1"># 2     321682  bnd_V   T       ]13:123456]T    6       PASS    SVTYPE=BND;MATEID=bnd_U</span>
+<span class="c1"># 4     888888  .       T       G       .       PASS    .</span>
+<span class="c1"># 13    123456  bnd_U   C       C[2:321682[,C[17:198983[        6       PASS    SVTYPE=BND;MATEID=bnd_V,bnd_Z</span>
+<span class="c1"># 17    198983  bnd_Z   A       ]13:123456]A    6       PASS    SVTYPE=BND;MATEID=bnd_U</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Breakpoint_1</span><span class="se">\t</span><span class="s2">Breakpoint_1_name</span><span class="se">\t</span><span class="s2">Breakpoint_2</span><span class="se">\t</span><span class="s2">Breakpoint_2_name&quot;</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">FusionFileReader</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;test.tsv&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">frist</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
+            <span class="n">first</span><span class="o">.</span><span class="n">id</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
+            <span class="n">second</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Breakpoint_1  Breakpoint_1_name       Breakpoint_2    Breakpoint_2_name</span>
+<span class="c1"># 2:321682      bnd_V   13:123456       bnd_U_0</span>
+<span class="c1"># 13:123456     bnd_U_1 17:198983       bnd_Z</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <dl class="py class">
 <dt id="anacore.fusion.ArribaIO">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.fusion.</span></code><code class="sig-name descname"><span class="pre">ArribaIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_field</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'FCANN'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sample'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/fusion.html#ArribaIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.fusion.ArribaIO" title="Permalink to this definition">¶</a></dt>
@@ -5373,6 +5587,72 @@ clf.set_status(test_dataset)</p>
 <div class="section" id="module-anacore.vcf">
 <span id="anacore-vcf"></span><h2>anacore.vcf<a class="headerlink" href="#module-anacore.vcf" title="Permalink to this headline">¶</a></h2>
 <p>Classes and functions for reading/writing/processing VCF.</p>
+<dl class="field-list">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>Read VCF by line</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
+
+<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Variant&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">samples</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="n">alt_freq</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getAF</span><span class="p">(</span><span class="n">curr_spl</span><span class="p">))</span> <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">samples</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">alt_freq</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Variant       N01     N02     N03</span>
+<span class="c1"># chr1:35-35=A/T        0.3     0.4     0.1</span>
+<span class="c1"># chr1:128-128=G/A      0.1     0.6     0.05</span>
+</pre></div>
+</div>
+<p>Read VCF by coordinate</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
+
+<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;i&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">())</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># chr1:35-35=A/T</span>
+</pre></div>
+</div>
+<p>Write VCF</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
+
+<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="c1"># Header</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;my_sample&quot;</span><span class="p">]</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;q10&quot;</span><span class="p">:</span> <span class="n">HeaderFilterAttr</span><span class="p">(</span><span class="s2">&quot;q10&quot;</span><span class="p">,</span> <span class="s2">&quot;Quality below 10&quot;</span><span class="p">)}</span>
+    <span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;DB&quot;</span><span class="p">:</span> <span class="n">HeaderInfoAttr</span><span class="p">(</span><span class="s2">&quot;DB&quot;</span><span class="p">,</span> <span class="s2">&quot;dbSNP membership, build 129&quot;</span><span class="p">,</span> <span class="s2">&quot;Flag&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;AF&quot;</span><span class="p">:</span> <span class="n">HeaderFormatAttr</span><span class="p">(</span><span class="s2">&quot;AF&quot;</span><span class="p">,</span> <span class="s2">&quot;Allele Frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;Float&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">extra_header</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;##source=myImputationProgramV3.1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;##phasing=partial&quot;</span>
+    <span class="p">]</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writeHeader</span><span class="p">()</span>
+    <span class="c1"># Record</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">vcf_record_list</span><span class="p">:</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># ##fileformat=VCFv4.3</span>
+<span class="c1"># ##source=myImputationProgramV3.1</span>
+<span class="c1"># ##phasing=partial</span>
+<span class="c1"># ##INFO=&lt;ID=DB,Number=0,Type=Flag,Description=&quot;dbSNP membership, build 129&quot;&gt;</span>
+<span class="c1"># ##FILTER=&lt;ID=q10,Description=&quot;Quality below 10&quot;&gt;</span>
+<span class="c1"># ##FORMAT=&lt;ID=AF,Number=A,Type=Float,Description=&quot;Allele Frequency&quot;&gt;</span>
+<span class="c1"># #CHROM        POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  my_sample</span>
+<span class="c1"># chr1  35      .       A       T.      PASS    DB      AF      0.1</span>
+<span class="c1"># ...</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <dl class="py class">
 <dt id="anacore.vcf.HeaderAttr">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.vcf.</span></code><code class="sig-name descname"><span class="pre">HeaderAttr</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#HeaderAttr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.HeaderAttr" title="Permalink to this definition">¶</a></dt>
@@ -5560,72 +5840,6 @@ clf.set_status(test_dataset)</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.vcf.</span></code><code class="sig-name descname"><span class="pre">VCFIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFIO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#anacore.abstractFile.AbstractFile" title="anacore.abstractFile.AbstractFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.abstractFile.AbstractFile</span></code></a></p>
 <p>Manage VCF file.</p>
-<dl class="field-list">
-<dt class="field-odd">Example</dt>
-<dd class="field-odd"><p>Read VCF by line</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
-
-<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Variant&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">samples</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
-        <span class="n">alt_freq</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getAF</span><span class="p">(</span><span class="n">curr_spl</span><span class="p">))</span> <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">samples</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">(),</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">alt_freq</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># Result&gt;</span>
-<span class="c1"># Variant   N01     N02     N03</span>
-<span class="c1"># chr1:35-35=A/T    0.3     0.4     0.1</span>
-<span class="c1"># chr1:128-128=G/A  0.1     0.6     0.05</span>
-</pre></div>
-</div>
-<p>Read VCF by coordinate</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
-
-<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;i&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">getName</span><span class="p">())</span>
-
-<span class="c1"># Result&gt;</span>
-<span class="c1"># chr1:35-35=A/T</span>
-</pre></div>
-</div>
-<p>Write VCF</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.vcf</span> <span class="kn">import</span> <span class="n">VCFIO</span>
-
-<span class="k">with</span> <span class="n">VCFIO</span><span class="p">(</span><span class="s2">&quot;test.vcf.gz&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
-    <span class="c1"># Header</span>
-    <span class="n">writer</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;my_sample&quot;</span><span class="p">]</span>
-    <span class="n">writer</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;q10&quot;</span><span class="p">:</span> <span class="n">HeaderFilterAttr</span><span class="p">(</span><span class="s2">&quot;q10&quot;</span><span class="p">,</span> <span class="s2">&quot;Quality below 10&quot;</span><span class="p">)}</span>
-    <span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;DB&quot;</span><span class="p">:</span> <span class="n">HeaderInfoAttr</span><span class="p">(</span><span class="s2">&quot;DB&quot;</span><span class="p">,</span> <span class="s2">&quot;dbSNP membership, build 129&quot;</span><span class="p">,</span> <span class="s2">&quot;Flag&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;AF&quot;</span><span class="p">:</span> <span class="n">HeaderFormatAttr</span><span class="p">(</span><span class="s2">&quot;AF&quot;</span><span class="p">,</span> <span class="s2">&quot;Allele Frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;Float&quot;</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="n">writer</span><span class="o">.</span><span class="n">extra_header</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;##source=myImputationProgramV3.1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;##phasing=partial&quot;</span>
-    <span class="p">]</span>
-    <span class="n">writer</span><span class="o">.</span><span class="n">writeHeader</span><span class="p">()</span>
-    <span class="c1"># Record</span>
-    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">vcf_record_list</span><span class="p">:</span>
-        <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
-
-<span class="c1"># Result&gt;</span>
-<span class="c1"># ##fileformat=VCFv4.3</span>
-<span class="c1"># ##source=myImputationProgramV3.1</span>
-<span class="c1"># ##phasing=partial</span>
-<span class="c1"># ##INFO=&lt;ID=DB,Number=0,Type=Flag,Description=&quot;dbSNP membership, build 129&quot;&gt;</span>
-<span class="c1"># ##FILTER=&lt;ID=q10,Description=&quot;Quality below 10&quot;&gt;</span>
-<span class="c1"># ##FORMAT=&lt;ID=AF,Number=A,Type=Float,Description=&quot;Allele Frequency&quot;&gt;</span>
-<span class="c1"># #CHROM    POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  my_sample</span>
-<span class="c1"># chr1      35      .       A       T.      PASS    DB      AF      0.1</span>
-<span class="c1"># ...</span>
-</pre></div>
-</div>
-</dd>
-</dl>
 <p>Return instance of VCFIO.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
