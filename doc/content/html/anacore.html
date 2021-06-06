@@ -1101,7 +1101,7 @@
 <span class="c1"># 17    198983  bnd_Z   A       ]13:123456]A    6       PASS    SVTYPE=BND;MATEID=bnd_U</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Breakpoint_1</span><span class="se">\t</span><span class="s2">Breakpoint_1_name</span><span class="se">\t</span><span class="s2">Breakpoint_2</span><span class="se">\t</span><span class="s2">Breakpoint_2_name&quot;</span><span class="p">)</span>
-<span class="k">with</span> <span class="n">FusionFileReader</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;test.tsv&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">FusionFileReader</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;test.vcf&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">frist</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
@@ -2813,6 +2813,13 @@ with mode “i”.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt id="anacore.illumina.Bcl2fastqLog">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.illumina.</span></code><code class="sig-name descname"><span class="pre">Bcl2fastqLog</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#Bcl2fastqLog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.Bcl2fastqLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reader for bcl2fastq log.</p>
 </dd></dl>
 
 <dl class="py class">
