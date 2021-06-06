@@ -1,10 +1,14 @@
 # Release 2.10.0 [DEV]
 
 ### Improvements
+  * Add alias "Description" for "Sample_Description" in `samplesheet.samples`
+  (`anacore.illumina.SampleSheetIO`).
+  * Add empty value for `samplesheet.header["Description"]` when "Description"
+  is not present in SampleSheet (`anacore.illumina.SampleSheetIO`).
   * Add utilities to manage Homo sapiens genome accessions in `anacore.db.homo_sapiens.accession`.
 
-  ### Bug fixes
-    * Fix no casting itemRGB as list in `anacore.bed.BEDIO`.
+### Bug fixes
+  * Fix no casting itemRGB as list in `anacore.bed.BEDIO`.
 
 # Release 2.9.0 [2020-04-28]
 

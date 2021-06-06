@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.19.0'
+__version__ = '1.20.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -49,6 +49,9 @@ class SampleSheetIO(object):
         self.header = self._getInfoFromSection(sections_by_title["Header"])
         self.manifests = self._getInfoFromSection(sections_by_title["Manifests"]) if "Manifests" in sections_by_title else dict()
         self.run = self._getRunFromHeaderAndReads(sections_by_title["Header"], sections_by_title["Reads"])
+        # Post process
+        if "Description" not in self.header:
+            self.header["Description"] = ""
 
     def _getSamplesFromData(self, data_section):
         samples = list()
@@ -57,6 +60,8 @@ class SampleSheetIO(object):
             spl = {data_titles[idx]: field.strip() for idx, field in enumerate(line.split(","))}
             spl["Sample_Basename"] = getIlluminaName(spl["Sample_ID"])
             spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
+            if "Sample_Description" in spl:
+                spl["Description"] = spl["Sample_Description"]
             samples.append(spl)
         return samples
 
