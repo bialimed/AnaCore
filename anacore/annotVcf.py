@@ -83,7 +83,7 @@ Classes and functions for reading/writing/processing annotated VCF.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
+__version__ = '1.5.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -151,13 +151,16 @@ class AnnotVCFIO(VCFIO):
         super()._parseHeader()
         if self.annot_field in self.info:
             # Get ANN fields
-            match = re.search("Format: ([^ ]+)", self.info[self.annot_field].description)
+            ann_description = self.info[self.annot_field].description
+            match = re.search("Format: ([^ ]+)", ann_description)  # VEP
             if match is None:
-                raise Exception("The {} description cannot be parsed in file {}.".format(self.annot_field, self.filepath))
+                match = re.search("Functional annotations: ?'([^']+)'", ann_description)  # SnpEff and jannovar
+                if match is None:
+                    raise Exception("The {} description cannot be parsed in file {}.".format(self.annot_field, self.filepath))
             titles_str = match.group(1)
             if titles_str.endswith("."):
                 titles_str = titles_str[:-1]
-            self.ANN_titles = titles_str.split("|")
+            self.ANN_titles = [elt.strip() for elt in titles_str.split("|")]
 
     def _parseLine(self):
         """

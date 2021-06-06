@@ -9,6 +9,8 @@
   * Add utilities to manage Homo sapiens genome accessions in `anacore.db.homo_sapiens.accession`.
 
 ### Bug fixes
+  * Fix bug in `anacore.annotVcf.AnnotVCFIO` when parsing ANN declaration from
+  SnpEff.
   * Fix no casting itemRGB as list in `anacore.bed.BEDIO`.
 
 # Release 2.9.0 [2020-04-28]
