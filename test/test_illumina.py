@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -18,7 +18,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.illumina import getInfFromSeqID, RTAComplete, RunInfo, RunParameters
+from anacore.illumina import Bcl2fastqLog, getInfFromSeqID, RTAComplete, RunInfo, RunParameters
 
 
 ########################################################################
@@ -26,6 +26,64 @@ from anacore.illumina import getInfFromSeqID, RTAComplete, RunInfo, RunParameter
 # FUNCTIONS
 #
 ########################################################################
+class TestBcl2fastqLog(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_file = os.path.join(tmp_folder, unique_id + "_bcl2fastq_log.txt")
+        self.test_cases = [
+            {  # Complete
+                "content": """BCL to FASTQ file converter
+bcl2fastq v2.20.0.422
+Copyright (c) 2007-2017 Illumina, Inc.
+
+2021-06-03 17:18:10 [2afc55848400] Command-line invocation: bcl2fastq --no-lane-splitting --loading-threads 1 --writing-threads 1 --processing-threads 16 --runfolder-dir /NextSeq3/210602_NDX550500_RUO_0063_AHVW3TAFX2
+2021-06-03 17:18:10 [2afc55848400] INFO: Minimum log level: INFO
+2021-06-03 23:22:13 [2afc55848400] Processing completed with 0 errors and 1 warnings.""",
+                "expected": {
+                    "command": "bcl2fastq --no-lane-splitting --loading-threads 1 --writing-threads 1 --processing-threads 16 --runfolder-dir /NextSeq3/210602_NDX550500_RUO_0063_AHVW3TAFX2",
+                    "complete": {
+                        "nb_errors": 0,
+                        "nb_warnings": 1
+                    },
+                    "version": "v2.20.0.422",
+                    "start_time": datetime(2021, 6, 3, 17, 18, 10),
+                    "end_time": datetime(2021, 6, 3, 23, 22, 13)
+                }
+            }, {  # Incomplete
+                "content": """BCL to FASTQ file converter
+bcl2fastq v2.20.0.422
+Copyright (c) 2007-2017 Illumina, Inc.
+
+2021-06-03 17:18:10 [2afc55848400] Command-line invocation: bcl2fastq --no-lane-splitting --loading-threads 1 --writing-threads 1 --processing-threads 16 --runfolder-dir /NextSeq3/210602_NDX550500_RUO_0063_AHVW3TAFX2
+2021-06-03 17:18:10 [2afc55848400] INFO: Minimum log level: INFO""",
+                "expected": {
+                    "command": "bcl2fastq --no-lane-splitting --loading-threads 1 --writing-threads 1 --processing-threads 16 --runfolder-dir /NextSeq3/210602_NDX550500_RUO_0063_AHVW3TAFX2",
+                    "complete": None,
+                    "version": "v2.20.0.422",
+                    "start_time": datetime(2021, 6, 3, 17, 18, 10),
+                    "end_time": None
+                }
+            }
+        ]
+
+    def testParse(self):
+        expected = [curr_test["expected"] for curr_test in self.test_cases]
+        observed = []
+        for curr_test in self.test_cases:
+            with open(self.tmp_file, "w") as handle:
+                handle.write(curr_test["content"] + "\n")
+            res = Bcl2fastqLog(self.tmp_file)
+            observed.append({
+                "command": res.command,
+                "complete": res.complete,
+                "version": res.version,
+                "start_time": res.start_time,
+                "end_time": res.end_time
+            })
+        self.assertEqual(expected, observed)
+
+
 class TestRTAComplete(unittest.TestCase):
     def setUp(self):
         tmp_folder = tempfile.gettempdir()
@@ -43,7 +101,6 @@ class TestRTAComplete(unittest.TestCase):
                 "expected": {"RTA_version": "2.4.11", "end_date": datetime(2019, 11, 14, 16, 56, 45)}  # datetime.fromtimestamp(1573750605)
             }
         ]
-
 
     def testParse(self):
         expected = [curr_test["expected"] for curr_test in self.test_cases]

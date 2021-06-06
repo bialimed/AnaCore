@@ -1,6 +1,7 @@
 # Release 2.10.0 [DEV]
 
 ### Improvements
+  * Add `anacore.illumina.Bcl2fastqLog` to read bcl2fastq log file.
   * Add alias "Description" for "Sample_Description" in `samplesheet.samples`
   (`anacore.illumina.SampleSheetIO`).
   * Add empty value for `samplesheet.header["Description"]` when "Description"

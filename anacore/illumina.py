@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.20.0'
+__version__ = '1.21.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -173,6 +173,54 @@ class ADSSampleSheetIO(SampleSheetIO):
         files_by_spl = self.findSplFiles(directory, end_pattern, subject)
         for spl in self.samples:
             spl[tag] = files_by_spl[spl[subject_tag]]
+
+
+class Bcl2fastqLog(object):
+    """Reader for bcl2fastq log."""
+
+    def __init__(self, path):
+        self.command = None
+        self.complete = None
+        self.end_time = None
+        self.filepath = path
+        self.start_time = None
+        self.version = None
+        self._parse()
+
+    def _parse(self):
+        self.command = None
+        self.complete = None
+        self.end_time = None
+        self.start_time = None
+        self.version = None
+        last_info = ""
+        with open(self.filepath) as reader:
+            for line in reader:
+                line = line.strip()
+                if self.version is None and line.startswith("bcl2fastq v"):
+                    self.version = line.split(" ")[1]
+                elif self.command is None and "Command-line invocation:" in line:
+                    trace_time, command = line.split(" Command-line invocation: ")
+                    self.command = command
+                    self.start_time = datetime.datetime.strptime(
+                        trace_time.rsplit(" ", 1)[0],
+                        '%Y-%m-%d %H:%M:%S'
+                    )
+                elif line != "":
+                    last_info = line
+        if "Processing completed" in last_info:
+            self.end_time = datetime.datetime.strptime(
+                " ".join(last_info.split(" ", 3)[:2]),
+                '%Y-%m-%d %H:%M:%S'
+            )
+            self.complete = {
+                "nb_errors": int(
+                    re.search(r"(\d+) errors", last_info).group(1)
+                ),
+                "nb_warnings": int(
+                    re.search(r"(\d+) warnings", last_info).group(1)
+                )
+            }
 
 
 class RTAComplete(object):
