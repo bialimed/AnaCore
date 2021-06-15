@@ -144,7 +144,7 @@ class ADSSampleSheetIO(SampleSheetIO):
         :type end_pattern: str
         :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
         :type subject: str
-        :return: By subject the pathes of the corresponding files.
+        :return: By subject the paths of the corresponding files.
         :rtype: dict
         """
         subject_start_tag = subject.capitalize()
@@ -160,7 +160,7 @@ class ADSSampleSheetIO(SampleSheetIO):
         """
         Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.
 
-        :param tag: The attribute used in self.sample to store the files pathes.
+        :param tag: The attribute used in self.sample to store the files paths.
         :type tag: str
         :param directory: The path to the directory where the files names are evaluated.
         :type directory: str
