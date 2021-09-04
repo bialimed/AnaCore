@@ -736,6 +736,67 @@
 <span id="anacore-db"></span><h2>anacore.db<a class="headerlink" href="#module-anacore.db" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-anacore.db.homo_sapiens"></span><span class="target" id="module-anacore.db.homo_sapiens.accession"></span><p>Utils to works with human genome accessions.</p>
 <dl class="py class">
+<dt id="anacore.db.homo_sapiens.accession.AssemblyAccession">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.db.homo_sapiens.accession.</span></code><code class="sig-name descname"><span class="pre">AssemblyAccession</span></code><a class="reference internal" href="_modules/anacore/db/homo_sapiens/accession.html#AssemblyAccession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.db.homo_sapiens.accession.AssemblyAccession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Manage Human assembly accessions and names.</p>
+<dl class="field-list">
+<dt class="field-odd">Code example</dt>
+<dd class="field-odd"><p>Compare two assembly from different sources</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.db.homo_sapiens.accession</span> <span class="kn">import</span> <span class="n">AssemblyAccession</span>
+
+<span class="n">first_assembly</span> <span class="o">=</span> <span class="s2">&quot;GCF_000001405&quot;</span>  <span class="c1"># from RefSeq</span>
+<span class="n">first_assembly_std</span> <span class="o">=</span> <span class="n">AssemblyAccession</span><span class="o">.</span><span class="n">toHumanName</span><span class="p">(</span><span class="n">first_assembly</span><span class="p">)</span>  <span class="c1"># &quot;GRCh37&quot;</span>
+
+<span class="n">second_assembly</span> <span class="o">=</span> <span class="s2">&quot;Hg19&quot;</span>
+<span class="n">second_assembly_std</span> <span class="o">=</span> <span class="n">AssemblyAccession</span><span class="o">.</span><span class="n">toHumanName</span><span class="p">(</span><span class="n">second_chr</span><span class="p">)</span>  <span class="c1"># &quot;GRCh37&quot;</span>
+
+<span class="k">if</span> <span class="n">first_assembly_std</span> <span class="o">==</span> <span class="n">second_assembly_std</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Same assembly&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Different assembly&quot;</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># Same assembly</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.AssemblyAccession.HUMAN_BY_ACC">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_ACC</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'gca_000001405.1':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.10':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.11':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.12':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.13':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.14':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.15':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.16':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.17':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.18':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.19':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.2':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.20':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.21':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.22':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.23':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.24':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.25':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.26':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.27':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.28':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.3':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.4':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.5':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.6':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.7':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.8':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.9':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.12':</span> <span class="pre">'GRCh36',</span> <span class="pre">'gcf_000001405.13':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.14':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.15':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.16':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.17':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.18':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.19':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.20':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.21':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.22':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.23':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.24':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.25':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.26':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.27':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.28':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.29':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.30':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.31':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.32':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.33':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.34':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.35':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.36':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.37':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.38':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.39':</span> <span class="pre">'GRCh38',</span> <span class="pre">'grcb36':</span> <span class="pre">'GRCh36',</span> <span class="pre">'grcb37':</span> <span class="pre">'GRCh37',</span> <span class="pre">'grch36':</span> <span class="pre">'GRCh36',</span> <span class="pre">'grch37':</span> <span class="pre">'GRCh37',</span> <span class="pre">'grch38':</span> <span class="pre">'GRCh38',</span> <span class="pre">'hg18':</span> <span class="pre">'GRCh36',</span> <span class="pre">'hg19':</span> <span class="pre">'GRCh37',</span> <span class="pre">'hg38':</span> <span class="pre">'GRCh38',</span> <span class="pre">'ncbi36':</span> <span class="pre">'GRCh36'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.AssemblyAccession.HUMAN_BY_ACC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.AssemblyAccession.HUMAN_BY_GENBANK">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_GENBANK</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'gca_000001405.1':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.10':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.11':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.12':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.13':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.14':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.15':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.16':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.17':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.18':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.19':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.2':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.20':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.21':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.22':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.23':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.24':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.25':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.26':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.27':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.28':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gca_000001405.3':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.4':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.5':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.6':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.7':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.8':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gca_000001405.9':</span> <span class="pre">'GRCh37'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.AssemblyAccession.HUMAN_BY_GENBANK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="anacore.db.homo_sapiens.accession.AssemblyAccession.HUMAN_BY_REFSEQ">
+<code class="sig-name descname"><span class="pre">HUMAN_BY_REFSEQ</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'gcf_000001405.12':</span> <span class="pre">'GRCh36',</span> <span class="pre">'gcf_000001405.13':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.14':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.15':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.16':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.17':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.18':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.19':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.20':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.21':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.22':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.23':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.24':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.25':</span> <span class="pre">'GRCh37',</span> <span class="pre">'gcf_000001405.26':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.27':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.28':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.29':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.30':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.31':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.32':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.33':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.34':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.35':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.36':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.37':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.38':</span> <span class="pre">'GRCh38',</span> <span class="pre">'gcf_000001405.39':</span> <span class="pre">'GRCh38'}</span></em><a class="headerlink" href="#anacore.db.homo_sapiens.accession.AssemblyAccession.HUMAN_BY_REFSEQ" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="anacore.db.homo_sapiens.accession.AssemblyAccession.toHumanName">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">toHumanName</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assembly_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/db/homo_sapiens/accession.html#AssemblyAccession.toHumanName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.db.homo_sapiens.accession.AssemblyAccession.toHumanName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return standardized assembly name from assembly name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>assembly_name</strong> (<em>str</em>) – Assembly name or accession.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Standardized assembly name.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="anacore.db.homo_sapiens.accession.ChrAccession">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.db.homo_sapiens.accession.</span></code><code class="sig-name descname"><span class="pre">ChrAccession</span></code><a class="reference internal" href="_modules/anacore/db/homo_sapiens/accession.html#ChrAccession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.db.homo_sapiens.accession.ChrAccession" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -6487,7 +6548,8 @@ chr1  10  AAAT  TG =&gt; returns 10</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>record</strong> (<a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord"><em>VCFRecord</em></a>) – The variant record.</p></li>
+<li><p><strong>FH_vcf</strong> (<a class="reference internal" href="#anacore.vcf.VCFIO" title="anacore.vcf.VCFIO"><em>anacore.vcf.VCFIO</em></a>) – Handler on record source file.</p></li>
+<li><p><strong>record</strong> (<a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord"><em>anacore.vcf.VCFRecord</em></a>) – The variant record.</p></li>
 <li><p><strong>idx_alt</strong> (<em>int</em>) – The index of the allele in alt attribute.</p></li>
 </ul>
 </dd>
@@ -6495,7 +6557,7 @@ chr1  10  AAAT  TG =&gt; returns 10</p>
 <dd class="field-even"><p>The record corresponding to the specified allele in variant.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord">VCFRecord</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord">anacore.vcf.VCFRecord</a></p>
 </dd>
 </dl>
 </dd></dl>

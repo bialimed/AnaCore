@@ -1675,12 +1675,14 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the record corresponding to the specified allele in variant.</span>
 
+<span class="sd">    :param FH_vcf: Handler on record source file.</span>
+<span class="sd">    :type FH_vcf: anacore.vcf.VCFIO</span>
 <span class="sd">    :param record: The variant record.</span>
-<span class="sd">    :type record: VCFRecord</span>
+<span class="sd">    :type record: anacore.vcf.VCFRecord</span>
 <span class="sd">    :param idx_alt: The index of the allele in alt attribute.</span>
 <span class="sd">    :type idx_alt: int</span>
 <span class="sd">    :return: The record corresponding to the specified allele in variant.</span>
-<span class="sd">    :rtype: VCFRecord</span>
+<span class="sd">    :rtype: anacore.vcf.VCFRecord</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">new_record</span> <span class="o">=</span> <span class="n">VCFRecord</span><span class="p">(</span>
         <span class="n">region</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>

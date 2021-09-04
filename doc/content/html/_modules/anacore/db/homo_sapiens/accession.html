@@ -156,9 +156,134 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2021 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.1.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+
+<div class="viewcode-block" id="AssemblyAccession"><a class="viewcode-back" href="../../../../anacore.html#anacore.db.homo_sapiens.accession.AssemblyAccession">[docs]</a><span class="k">class</span> <span class="nc">AssemblyAccession</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Manage Human assembly accessions and names.</span>
+
+<span class="sd">    :Code example: Compare two assembly from different sources</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            from anacore.db.homo_sapiens.accession import AssemblyAccession</span>
+
+<span class="sd">            first_assembly = &quot;GCF_000001405&quot;  # from RefSeq</span>
+<span class="sd">            first_assembly_std = AssemblyAccession.toHumanName(first_assembly)  # &quot;GRCh37&quot;</span>
+
+<span class="sd">            second_assembly = &quot;Hg19&quot;</span>
+<span class="sd">            second_assembly_std = AssemblyAccession.toHumanName(second_chr)  # &quot;GRCh37&quot;</span>
+
+<span class="sd">            if first_assembly_std == second_assembly_std:</span>
+<span class="sd">                print(&quot;Same assembly&quot;)</span>
+<span class="sd">            else:</span>
+<span class="sd">                print(&quot;Different assembly&quot;)</span>
+
+<span class="sd">            # Result&gt;</span>
+<span class="sd">            # Same assembly</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">HUMAN_BY_GENBANK</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># GRCh37 GenBank 1 -&gt; 14</span>
+        <span class="s2">&quot;gca_000001405.1&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.2&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.3&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.4&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.5&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.6&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.7&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.8&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.9&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.10&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.11&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.12&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.13&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.14&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="c1"># GRCh37 GenBank 15 -&gt; 28</span>
+        <span class="s2">&quot;gca_000001405.15&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.16&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.17&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.18&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.19&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.20&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.21&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.22&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.23&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.24&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.25&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.26&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.27&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gca_000001405.28&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">HUMAN_BY_REFSEQ</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># GRCh36 RefSeq 12</span>
+        <span class="s2">&quot;gcf_000001405.12&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh36&quot;</span><span class="p">,</span>
+        <span class="c1"># GRCh37 RefSeq 13 -&gt; 25</span>
+        <span class="s2">&quot;gcf_000001405.13&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.14&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.15&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.16&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.17&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.18&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.19&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.20&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.21&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.22&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.23&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.24&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.25&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="c1"># GRCh38 RefSeq 26 -&gt; 39</span>
+        <span class="s2">&quot;gcf_000001405.26&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.27&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.28&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.29&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.30&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.31&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.32&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.33&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.34&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.35&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.36&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.37&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.38&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gcf_000001405.39&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">HUMAN_BY_ACC</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># GRCh36</span>
+        <span class="s2">&quot;grcb36&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh36&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grch36&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh36&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hg18&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh36&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ncbi36&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh36&quot;</span><span class="p">,</span>
+        <span class="c1"># GRCh37</span>
+        <span class="s2">&quot;grcb37&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;grch37&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hg19&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh37&quot;</span><span class="p">,</span>
+        <span class="c1"># GRCh38</span>
+        <span class="s2">&quot;grch38&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;hg38&quot;</span><span class="p">:</span> <span class="s2">&quot;GRCh38&quot;</span><span class="p">,</span>
+        <span class="c1"># GenBank</span>
+        <span class="o">**</span><span class="n">HUMAN_BY_GENBANK</span><span class="p">,</span>
+        <span class="c1"># RefSeq</span>
+        <span class="o">**</span><span class="n">HUMAN_BY_REFSEQ</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="AssemblyAccession.toHumanName"><a class="viewcode-back" href="../../../../anacore.html#anacore.db.homo_sapiens.accession.AssemblyAccession.toHumanName">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">toHumanName</span><span class="p">(</span><span class="n">assembly_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return standardized assembly name from assembly name.</span>
+
+<span class="sd">        :param assembly_name: Assembly name or accession.</span>
+<span class="sd">        :type assembly_name: str</span>
+<span class="sd">        :return: Standardized assembly name.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">assembly_name</span> <span class="o">=</span> <span class="n">assembly_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.p&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">AssemblyAccession</span><span class="o">.</span><span class="n">HUMAN_BY_ACC</span><span class="p">[</span><span class="n">assembly_name</span><span class="p">]</span></div></div>
 
 
 <div class="viewcode-block" id="ChrAccession"><a class="viewcode-back" href="../../../../anacore.html#anacore.db.homo_sapiens.accession.ChrAccession">[docs]</a><span class="k">class</span> <span class="nc">ChrAccession</span><span class="p">:</span>

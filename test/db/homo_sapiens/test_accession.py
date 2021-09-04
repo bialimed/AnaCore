@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2021 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -15,7 +15,7 @@ TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.db.homo_sapiens.accession import ChrAccession
+from anacore.db.homo_sapiens.accession import AssemblyAccession, ChrAccession
 
 
 ########################################################################
@@ -23,6 +23,30 @@ from anacore.db.homo_sapiens.accession import ChrAccession
 # FUNCTIONS
 #
 ########################################################################
+class TestAssemblyAccession(unittest.TestCase):
+    def testFromDict(self):
+        data = [
+            {"in": "GRCb36", "expected": "GRCh36"},
+            {"in": "Hg18", "expected": "GRCh36"},
+            {"in": "GRCb37", "expected": "GRCh37"},
+            {"in": "GRCh37", "expected": "GRCh37"},
+            {"in": "Hg19", "expected": "GRCh37"},
+            {"in": "GRCh38", "expected": "GRCh38"},
+            {"in": "hg38", "expected": "GRCh38"},
+            {"in": "GCF_000001405.12", "expected": "GRCh36"},
+            {"in": "GCF_000001405.13", "expected": "GRCh37"},
+            {"in": "GCF_000001405.25", "expected": "GRCh37"},
+            {"in": "GCF_000001405.26", "expected": "GRCh38"},
+            {"in": "GCF_000001405.39", "expected": "GRCh38"},
+            {"in": "GCA_000001405.1", "expected": "GRCh37"},
+            {"in": "GCA_000001405.14", "expected": "GRCh37"},
+            {"in": "GCA_000001405.15", "expected": "GRCh38"},
+            {"in": "GCA_000001405.28", "expected": "GRCh38"}
+        ]
+        for curr in data:
+            self.assertEqual(AssemblyAccession.toHumanName(curr["in"]), curr["expected"])
+
+
 class TestChrAccession(unittest.TestCase):
     def testFromDict(self):
         data = [

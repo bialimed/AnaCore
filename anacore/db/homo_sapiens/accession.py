@@ -4,9 +4,134 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2021 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
+
+
+class AssemblyAccession:
+    """
+    Manage Human assembly accessions and names.
+
+    :Code example: Compare two assembly from different sources
+
+        .. highlight:: python
+        .. code-block:: python
+
+            from anacore.db.homo_sapiens.accession import AssemblyAccession
+
+            first_assembly = "GCF_000001405"  # from RefSeq
+            first_assembly_std = AssemblyAccession.toHumanName(first_assembly)  # "GRCh37"
+
+            second_assembly = "Hg19"
+            second_assembly_std = AssemblyAccession.toHumanName(second_chr)  # "GRCh37"
+
+            if first_assembly_std == second_assembly_std:
+                print("Same assembly")
+            else:
+                print("Different assembly")
+
+            # Result>
+            # Same assembly
+    """
+    HUMAN_BY_GENBANK = {
+        # GRCh37 GenBank 1 -> 14
+        "gca_000001405.1": "GRCh37",
+        "gca_000001405.2": "GRCh37",
+        "gca_000001405.3": "GRCh37",
+        "gca_000001405.4": "GRCh37",
+        "gca_000001405.5": "GRCh37",
+        "gca_000001405.6": "GRCh37",
+        "gca_000001405.7": "GRCh37",
+        "gca_000001405.8": "GRCh37",
+        "gca_000001405.9": "GRCh37",
+        "gca_000001405.10": "GRCh37",
+        "gca_000001405.11": "GRCh37",
+        "gca_000001405.12": "GRCh37",
+        "gca_000001405.13": "GRCh37",
+        "gca_000001405.14": "GRCh37",
+        # GRCh37 GenBank 15 -> 28
+        "gca_000001405.15": "GRCh38",
+        "gca_000001405.16": "GRCh38",
+        "gca_000001405.17": "GRCh38",
+        "gca_000001405.18": "GRCh38",
+        "gca_000001405.19": "GRCh38",
+        "gca_000001405.20": "GRCh38",
+        "gca_000001405.21": "GRCh38",
+        "gca_000001405.22": "GRCh38",
+        "gca_000001405.23": "GRCh38",
+        "gca_000001405.24": "GRCh38",
+        "gca_000001405.25": "GRCh38",
+        "gca_000001405.26": "GRCh38",
+        "gca_000001405.27": "GRCh38",
+        "gca_000001405.28": "GRCh38"
+    }
+
+    HUMAN_BY_REFSEQ = {
+        # GRCh36 RefSeq 12
+        "gcf_000001405.12": "GRCh36",
+        # GRCh37 RefSeq 13 -> 25
+        "gcf_000001405.13": "GRCh37",
+        "gcf_000001405.14": "GRCh37",
+        "gcf_000001405.15": "GRCh37",
+        "gcf_000001405.16": "GRCh37",
+        "gcf_000001405.17": "GRCh37",
+        "gcf_000001405.18": "GRCh37",
+        "gcf_000001405.19": "GRCh37",
+        "gcf_000001405.20": "GRCh37",
+        "gcf_000001405.21": "GRCh37",
+        "gcf_000001405.22": "GRCh37",
+        "gcf_000001405.23": "GRCh37",
+        "gcf_000001405.24": "GRCh37",
+        "gcf_000001405.25": "GRCh37",
+        # GRCh38 RefSeq 26 -> 39
+        "gcf_000001405.26": "GRCh38",
+        "gcf_000001405.27": "GRCh38",
+        "gcf_000001405.28": "GRCh38",
+        "gcf_000001405.29": "GRCh38",
+        "gcf_000001405.30": "GRCh38",
+        "gcf_000001405.31": "GRCh38",
+        "gcf_000001405.32": "GRCh38",
+        "gcf_000001405.33": "GRCh38",
+        "gcf_000001405.34": "GRCh38",
+        "gcf_000001405.35": "GRCh38",
+        "gcf_000001405.36": "GRCh38",
+        "gcf_000001405.37": "GRCh38",
+        "gcf_000001405.38": "GRCh38",
+        "gcf_000001405.39": "GRCh38"
+    }
+
+    HUMAN_BY_ACC = {
+        # GRCh36
+        "grcb36": "GRCh36",
+        "grch36": "GRCh36",
+        "hg18": "GRCh36",
+        "ncbi36": "GRCh36",
+        # GRCh37
+        "grcb37": "GRCh37",
+        "grch37": "GRCh37",
+        "hg19": "GRCh37",
+        # GRCh38
+        "grch38": "GRCh38",
+        "hg38": "GRCh38",
+        # GenBank
+        **HUMAN_BY_GENBANK,
+        # RefSeq
+        **HUMAN_BY_REFSEQ
+    }
+
+    @staticmethod
+    def toHumanName(assembly_name):
+        """
+        Return standardized assembly name from assembly name.
+
+        :param assembly_name: Assembly name or accession.
+        :type assembly_name: str
+        :return: Standardized assembly name.
+        :rtype: str
+        """
+        assembly_name = assembly_name.lower().split(".p")[0]
+        return AssemblyAccession.HUMAN_BY_ACC[assembly_name]
 
 
 class ChrAccession:
