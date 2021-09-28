@@ -1,4 +1,4 @@
-# Release 2.10.0 [DEV]
+# Release 2.10.0 [2021-09-28]
 
 ### Improvements
   * Add `anacore.illumina.Bcl2fastqLog` to read bcl2fastq log file.

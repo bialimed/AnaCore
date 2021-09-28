@@ -1,4 +1,4 @@
-{% set version = "2.9.0" %}
+{% set version = "2.10.0" %}
 {% set numpy_version = "=1.16.5" %}
 {% set pysam_version = "=0.15.3" %}
 {% set requests_version = "=2.20.1" %}
