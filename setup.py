@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import re
-from distutils.core import setup
+from setuptools import find_packages, setup
 
 
 def get_long_description():
@@ -35,7 +35,7 @@ setup(
     author='Frederic Escudie',
     author_email='escudie.frederic@iuct-oncopole.fr',
     license='GNU GPL v3',
-    packages=["anacore"],
+    packages=find_packages(),
     install_requires=load_requirements("requirements.txt"),
     url='https://github.com/bialimed/anacore',
     python_requires='>=3.5',
