@@ -1523,12 +1523,14 @@ def getAlleleRecord(FH_vcf, record, idx_alt):
     """
     Return the record corresponding to the specified allele in variant.
 
+    :param FH_vcf: Handler on record source file.
+    :type FH_vcf: anacore.vcf.VCFIO
     :param record: The variant record.
-    :type record: VCFRecord
+    :type record: anacore.vcf.VCFRecord
     :param idx_alt: The index of the allele in alt attribute.
     :type idx_alt: int
     :return: The record corresponding to the specified allele in variant.
-    :rtype: VCFRecord
+    :rtype: anacore.vcf.VCFRecord
     """
     new_record = VCFRecord(
         region=record.chrom,
