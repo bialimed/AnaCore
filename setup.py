@@ -17,7 +17,7 @@ def get_version():
     if os.path.exists(notes_filepath):
         with open(notes_filepath) as FH:
             first_line = FH.readline()
-            version = re.search("^\#\s+.+\s+(.+)\s+\[", first_line).groups()[0]  # Example: "# v2.5.0 [DEV]"
+            version = re.search(r"^\#\s+.+\s+(.+)\s+\[", first_line).groups()[0]  # Example: "# v2.5.0 [DEV]"
     return version
 
 
