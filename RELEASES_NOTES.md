@@ -1,3 +1,9 @@
+# Release 2.11.0 [2022-03-10]
+
+### Improvements
+  * Update pysam from `0.15.3` to `0.18.0`.
+  * Update numpy from `1.6.0` (pypi) or `1.16.5` (conda) to `1.20.1`.
+
 # Release 2.10.0 [2021-09-28]
 
 ### Improvements
