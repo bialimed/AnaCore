@@ -1,4 +1,5 @@
-# AnaCore
+# AnaCore <img src="doc/img/logo/anacore_logo_40deg.png" alt="logo" width=60 rotate="60"/>
+
 
 ![license](https://img.shields.io/badge/license-GPLv3-blue)
 ![coverage](https://img.shields.io/badge/coverage-67%25-yellow)
