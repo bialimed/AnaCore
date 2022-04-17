@@ -1,40 +1,43 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>anacore.msi &mdash; AnaCore  documentation</title>
+  <title>anacore.msi.base &mdash; AnaCore  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
   
 
   
   
-  
+
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
     
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -48,9 +51,12 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> AnaCore
+            <a href="../../../index.html" class="icon icon-home"> AnaCore
           
 
+          
+            
+            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -61,7 +67,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -71,6 +77,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -79,12 +86,13 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../anacore.html">AnaCore package</a></li>
 </ul>
 
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -94,7 +102,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">AnaCore</a>
+          <a href="../../../index.html">AnaCore</a>
         
       </nav>
 
@@ -119,15 +127,17 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="../index.html">Module code</a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>anacore.msi</li>
+      <li>anacore.msi.base</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -142,7 +152,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for anacore.msi</h1><div class="highlight"><pre>
+  <h1>Source code for anacore.msi.base</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Classes and functions for manipulating/processing MSI information (status, data, locus, ...).&quot;&quot;&quot;</span>
 
@@ -156,10 +166,10 @@
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
 
-<div class="viewcode-block" id="toDict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.toDict">[docs]</a><span class="k">def</span> <span class="nf">toDict</span><span class="p">(</span><span class="n">msi_object</span><span class="p">):</span>
+<div class="viewcode-block" id="toDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.toDict">[docs]</a><span class="k">def</span> <span class="nf">toDict</span><span class="p">(</span><span class="n">msi_object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retuns a dictionary representing the object. This method is used in json.dump in argument named &quot;default&quot; for recursively convert an object to json.</span>
 
@@ -171,7 +181,7 @@
     <span class="k">return</span> <span class="n">msi_object</span><span class="o">.</span><span class="vm">__dict__</span></div>
 
 
-<div class="viewcode-block" id="Status"><a class="viewcode-back" href="../../anacore.html#anacore.msi.Status">[docs]</a><span class="k">class</span> <span class="nc">Status</span><span class="p">:</span>
+<div class="viewcode-block" id="Status"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.Status">[docs]</a><span class="k">class</span> <span class="nc">Status</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Status for samples (MSISplRes) and loci (LocusRes) in anacore.msi library.&quot;&quot;&quot;</span>
 
     <span class="n">stable</span> <span class="o">=</span> <span class="s2">&quot;MSS&quot;</span>
@@ -179,16 +189,16 @@
     <span class="n">undetermined</span> <span class="o">=</span> <span class="s2">&quot;Undetermined&quot;</span>  <span class="c1"># Cannot be determined</span>
     <span class="n">none</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Not evaluated</span>
 
-<div class="viewcode-block" id="Status.authorizedValues"><a class="viewcode-back" href="../../anacore.html#anacore.msi.Status.authorizedValues">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Status.authorizedValues"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.Status.authorizedValues">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">authorizedValues</span><span class="p">():</span>
         <span class="sd">&quot;&quot;&quot;Return the values authorized for stability status.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">attr_value</span> <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span> <span class="ow">in</span> <span class="n">Status</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">attr_name</span> <span class="o">!=</span> <span class="s2">&quot;authorizedValues&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)]</span></div></div>
 
 
-<div class="viewcode-block" id="MSILocus"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSILocus">[docs]</a><span class="k">class</span> <span class="nc">MSILocus</span><span class="p">:</span>
+<div class="viewcode-block" id="MSILocus"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSILocus">[docs]</a><span class="k">class</span> <span class="nc">MSILocus</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Manage a locus of a microsatellite (name, position and stability status).&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of MSILocus.</span>
 
@@ -205,7 +215,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
-<div class="viewcode-block" id="MSILocus.delResult"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSILocus.delResult">[docs]</a>    <span class="k">def</span> <span class="nf">delResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_id</span><span class="p">):</span>
+<div class="viewcode-block" id="MSILocus.delResult"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSILocus.delResult">[docs]</a>    <span class="k">def</span> <span class="nf">delResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete result from locus.</span>
 
@@ -214,7 +224,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">result_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MSILocus.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSILocus.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MSILocus.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSILocus.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of MSILocus from a dict. This method is used for load instance from JSON.</span>
@@ -236,10 +246,10 @@
         <span class="k">return</span> <span class="n">MSILocus</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_data</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="LocusRes"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusRes">[docs]</a><span class="k">class</span> <span class="nc">LocusRes</span><span class="p">:</span>
+<div class="viewcode-block" id="LocusRes"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusRes">[docs]</a><span class="k">class</span> <span class="nc">LocusRes</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Manage the stability status for an anlysis of a locus.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusRes.</span>
 
@@ -257,7 +267,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">score</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">data</span>
 
-<div class="viewcode-block" id="LocusRes.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusRes.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LocusRes.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusRes.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusRes from a dict. This method is used for load instance from JSON.</span>
@@ -273,10 +283,10 @@
         <span class="k">return</span> <span class="n">LocusRes</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_data</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="LocusResDistrib"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResDistrib">[docs]</a><span class="k">class</span> <span class="nc">LocusResDistrib</span><span class="p">(</span><span class="n">LocusRes</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResDistrib"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResDistrib">[docs]</a><span class="k">class</span> <span class="nc">LocusResDistrib</span><span class="p">(</span><span class="n">LocusRes</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manage the stability status for an anlysis of a locus containing the count by length.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusResDistrib.</span>
 
@@ -292,7 +302,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_class</span> <span class="o">=</span> <span class="s2">&quot;LocusResDistrib&quot;</span>
 
-<div class="viewcode-block" id="LocusResDistrib.getCount"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResDistrib.getCount">[docs]</a>    <span class="k">def</span> <span class="nf">getCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResDistrib.getCount"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResDistrib.getCount">[docs]</a>    <span class="k">def</span> <span class="nf">getCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of elements in size distribution.</span>
 
@@ -301,7 +311,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nb_by_length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span></div>
 
-<div class="viewcode-block" id="LocusResDistrib.getMinLength"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResDistrib.getMinLength">[docs]</a>    <span class="k">def</span> <span class="nf">getMinLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResDistrib.getMinLength"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResDistrib.getMinLength">[docs]</a>    <span class="k">def</span> <span class="nf">getMinLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the minimum length of the locus.</span>
 
@@ -310,7 +320,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">min</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nb_by_length&quot;</span><span class="p">]])</span></div>
 
-<div class="viewcode-block" id="LocusResDistrib.getMaxLength"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResDistrib.getMaxLength">[docs]</a>    <span class="k">def</span> <span class="nf">getMaxLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResDistrib.getMaxLength"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResDistrib.getMaxLength">[docs]</a>    <span class="k">def</span> <span class="nf">getMaxLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the maximum length of the locus.</span>
 
@@ -319,7 +329,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nb_by_length&quot;</span><span class="p">]])</span></div>
 
-<div class="viewcode-block" id="LocusResDistrib.getDensePrct"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResDistrib.getDensePrct">[docs]</a>    <span class="k">def</span> <span class="nf">getDensePrct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResDistrib.getDensePrct"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResDistrib.getDensePrct">[docs]</a>    <span class="k">def</span> <span class="nf">getDensePrct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the percentage of elements by locus length for absolutely all lengths betwen start and end. The lengths with 0 are also indicated. The percentage is based on all the distribution not reduced at start and end.</span>
 
@@ -339,7 +349,7 @@
             <span class="n">dense_prct</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prct</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dense_prct</span></div>
 
-<div class="viewcode-block" id="LocusResDistrib.getDenseCount"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResDistrib.getDenseCount">[docs]</a>    <span class="k">def</span> <span class="nf">getDenseCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResDistrib.getDenseCount"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResDistrib.getDenseCount">[docs]</a>    <span class="k">def</span> <span class="nf">getDenseCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of elements by locus length for absolutely all lengths betwen start and end. The length with 0 are also indicated.</span>
 
@@ -362,7 +372,7 @@
             <span class="n">dense_count</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dense_count</span></div>
 
-<div class="viewcode-block" id="LocusResDistrib.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResDistrib.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LocusResDistrib.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResDistrib.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusResDistrib from a dict. This method is used for load instance from JSON.</span>
@@ -378,10 +388,10 @@
         <span class="k">return</span> <span class="n">LocusResDistrib</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_data</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="LocusResPairsCombi"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResPairsCombi">[docs]</a><span class="k">class</span> <span class="nc">LocusResPairsCombi</span><span class="p">(</span><span class="n">LocusResDistrib</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResPairsCombi"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResPairsCombi">[docs]</a><span class="k">class</span> <span class="nc">LocusResPairsCombi</span><span class="p">(</span><span class="n">LocusResDistrib</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manage the stability status for an anlysis after reads pair combination of a locus.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusResPairsCombi.</span>
 
@@ -397,7 +407,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_class</span> <span class="o">=</span> <span class="s2">&quot;LocusResPairsCombi&quot;</span>
 
-<div class="viewcode-block" id="LocusResPairsCombi.getNbFrag"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResPairsCombi.getNbFrag">[docs]</a>    <span class="k">def</span> <span class="nf">getNbFrag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusResPairsCombi.getNbFrag"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResPairsCombi.getNbFrag">[docs]</a>    <span class="k">def</span> <span class="nf">getNbFrag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of fragments in size distribution.</span>
 
@@ -406,7 +416,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCount</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="LocusResPairsCombi.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusResPairsCombi.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LocusResPairsCombi.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusResPairsCombi.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusResPairsCombi from a dict. This method is used for load instance from JSON.</span>
@@ -422,10 +432,10 @@
         <span class="k">return</span> <span class="n">LocusResPairsCombi</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_data</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="MSISplRes"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISplRes">[docs]</a><span class="k">class</span> <span class="nc">MSISplRes</span><span class="p">:</span>
+<div class="viewcode-block" id="MSISplRes"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISplRes">[docs]</a><span class="k">class</span> <span class="nc">MSISplRes</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Manage the stability status for an anlysis of a sample.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of MSISplRes.</span>
 
@@ -448,7 +458,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">param</span> <span class="o">=</span> <span class="n">param</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
 
-<div class="viewcode-block" id="MSISplRes.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISplRes.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MSISplRes.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISplRes.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of MSISplRes from a dict. This method is used for load instance from JSON.</span>
@@ -462,10 +472,10 @@
         <span class="k">return</span> <span class="n">MSISplRes</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_data</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="MSISample"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample">[docs]</a><span class="k">class</span> <span class="nc">MSISample</span><span class="p">:</span>
+<div class="viewcode-block" id="MSISample"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample">[docs]</a><span class="k">class</span> <span class="nc">MSISample</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Manage a sample in context of microsatellite instability analysis. This object contains information on loci and on analyses (at sample and loci levels).&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">loci</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">loci</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of MSISample.</span>
 
@@ -482,7 +492,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">loci</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">loci</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">loci</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
-<div class="viewcode-block" id="MSISample.getLociMethods"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.getLociMethods">[docs]</a>    <span class="k">def</span> <span class="nf">getLociMethods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.getLociMethods"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.getLociMethods">[docs]</a>    <span class="k">def</span> <span class="nf">getLociMethods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the different methods used in loci status analysis.</span>
 
@@ -495,7 +505,7 @@
                 <span class="n">methods</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">curr_method</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">methods</span></div>
 
-<div class="viewcode-block" id="MSISample.addLocus"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.addLocus">[docs]</a>    <span class="k">def</span> <span class="nf">addLocus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.addLocus"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.addLocus">[docs]</a>    <span class="k">def</span> <span class="nf">addLocus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add one locus to the sample.</span>
 
@@ -506,7 +516,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The class &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be used as locus for MSISample.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">locus</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">locus</span><span class="o">.</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">locus</span></div>
 
-<div class="viewcode-block" id="MSISample.delLoci"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.delLoci">[docs]</a>    <span class="k">def</span> <span class="nf">delLoci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus_ids</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.delLoci"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.delLoci">[docs]</a>    <span class="k">def</span> <span class="nf">delLoci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus_ids</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete loci from the sample.</span>
 
@@ -516,7 +526,7 @@
         <span class="k">for</span> <span class="n">locus_id</span> <span class="ow">in</span> <span class="n">locus_ids</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">delLocus</span><span class="p">(</span><span class="n">locus_id</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MSISample.delLocus"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.delLocus">[docs]</a>    <span class="k">def</span> <span class="nf">delLocus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus_id</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.delLocus"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.delLocus">[docs]</a>    <span class="k">def</span> <span class="nf">delLocus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus_id</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete one locus from the sample.</span>
 
@@ -540,7 +550,7 @@
                 <span class="n">status</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">status</span>
 
-<div class="viewcode-block" id="MSISample.getNbUnstable"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.getNbUnstable">[docs]</a>    <span class="k">def</span> <span class="nf">getNbUnstable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.getNbUnstable"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.getNbUnstable">[docs]</a>    <span class="k">def</span> <span class="nf">getNbUnstable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of loci predicted as unstable with the selected method.</span>
 
@@ -556,7 +566,7 @@
                 <span class="n">nb_unstable</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">nb_unstable</span></div>
 
-<div class="viewcode-block" id="MSISample.getNbStable"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.getNbStable">[docs]</a>    <span class="k">def</span> <span class="nf">getNbStable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.getNbStable"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.getNbStable">[docs]</a>    <span class="k">def</span> <span class="nf">getNbStable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of loci predicted as stable with the selected method.</span>
 
@@ -572,7 +582,7 @@
                 <span class="n">nb_stable</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">nb_stable</span></div>
 
-<div class="viewcode-block" id="MSISample.getNbUndetermined"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.getNbUndetermined">[docs]</a>    <span class="k">def</span> <span class="nf">getNbUndetermined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.getNbUndetermined"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.getNbUndetermined">[docs]</a>    <span class="k">def</span> <span class="nf">getNbUndetermined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of loci where the status is undetermined after prediction with the selected method.</span>
 
@@ -588,7 +598,7 @@
                 <span class="n">nb_undetermined</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">nb_undetermined</span></div>
 
-<div class="viewcode-block" id="MSISample.getNbDetermined"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.getNbDetermined">[docs]</a>    <span class="k">def</span> <span class="nf">getNbDetermined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.getNbDetermined"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.getNbDetermined">[docs]</a>    <span class="k">def</span> <span class="nf">getNbDetermined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of loci with a prediction of status with the selected method.</span>
 
@@ -604,7 +614,7 @@
                 <span class="n">nb_determined</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">nb_determined</span></div>
 
-<div class="viewcode-block" id="MSISample.getNbProcessed"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.getNbProcessed">[docs]</a>    <span class="k">def</span> <span class="nf">getNbProcessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.getNbProcessed"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.getNbProcessed">[docs]</a>    <span class="k">def</span> <span class="nf">getNbProcessed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of loci where the status has been evaluated for the sample with the selected method.</span>
 
@@ -620,7 +630,7 @@
                 <span class="n">nb_processed</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">nb_processed</span></div>
 
-<div class="viewcode-block" id="MSISample.getNbLoci"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.getNbLoci">[docs]</a>    <span class="k">def</span> <span class="nf">getNbLoci</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.getNbLoci"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.getNbLoci">[docs]</a>    <span class="k">def</span> <span class="nf">getNbLoci</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of loci in the sample.</span>
 
@@ -631,7 +641,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loci</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MSISample.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MSISample.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of MSISample from a dict. This method is used for load instance from JSON.</span>
@@ -692,7 +702,7 @@
             <span class="n">score</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span> <span class="o">+</span> <span class="n">nb_loci_undetermined</span> <span class="o">*</span> <span class="n">undetermined_weight</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MSISample.setScore"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.setScore">[docs]</a>    <span class="k">def</span> <span class="nf">setScore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">undetermined_weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">locus_weight_is_score</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.setScore"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.setScore">[docs]</a>    <span class="k">def</span> <span class="nf">setScore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">undetermined_weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">locus_weight_is_score</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate and set a confidence score for the sample status prediction. This score is calculation take into account each locus and his score with the following formula: sum(scores) / (len(scores) + nb_loci_undetermined * undetermined_weight).</span>
 
@@ -709,7 +719,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spl_res</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getScoreCalculation</span><span class="p">(</span><span class="n">spl_res</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">undetermined_weight</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MSISample.setStatusByInstabilityCount"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.setStatusByInstabilityCount">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByInstabilityCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">instability_threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.setStatusByInstabilityCount"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.setStatusByInstabilityCount">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByInstabilityCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">instability_threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add status and score for the sample by number of unstable loci for the selected method.</span>
 
@@ -738,7 +748,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setScore</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MSISample.setStatusByInstabilityRatio"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.setStatusByInstabilityRatio">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByInstabilityRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">instability_threshold</span><span class="o">=</span><span class="mf">0.4</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.setStatusByInstabilityRatio"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.setStatusByInstabilityRatio">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByInstabilityRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">instability_threshold</span><span class="o">=</span><span class="mf">0.4</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add status and score for the sample by ratio of unstable loci for the selected method.</span>
 
@@ -767,7 +777,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setScore</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MSISample.setStatusByMajority"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSISample.setStatusByMajority">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByMajority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.setStatusByMajority"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSISample.setStatusByMajority">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByMajority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add status and score for the sample by consensus on loci results for the selected method.</span>
 
@@ -795,7 +805,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">setScore</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="LocusClassifier"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusClassifier">[docs]</a><span class="k">class</span> <span class="nc">LocusClassifier</span><span class="p">:</span>
+<div class="viewcode-block" id="LocusClassifier"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusClassifier">[docs]</a><span class="k">class</span> <span class="nc">LocusClassifier</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Classifier for locus using MSISample objects.</span>
 
@@ -811,7 +821,7 @@
 <span class="sd">        clf.set_status(test_dataset)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus_id</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">classifier</span><span class="p">,</span> <span class="n">model_method_name</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">data_method_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locus_id</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">classifier</span><span class="p">,</span> <span class="n">model_method_name</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">data_method_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusClassifier.</span>
 
@@ -917,7 +927,7 @@
             <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">locus_res</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LocusClassifier.fit"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusClassifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusClassifier.fit"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusClassifier.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit the model using train_dataset as training data and their status as target values.</span>
 
@@ -928,7 +938,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_usable_train_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="n">spl</span> <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">train_dataset</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_method_name</span> <span class="ow">in</span> <span class="n">spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">locus_id</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_train_data</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_train_labels</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="LocusClassifier.predict"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusClassifier.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusClassifier.predict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusClassifier.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_dataset</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict the status of the locus in the list of samples.</span>
 
@@ -943,7 +953,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_train_dataset</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_test_data</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="LocusClassifier.predict_proba"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusClassifier.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusClassifier.predict_proba"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusClassifier.predict_proba">[docs]</a>    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_dataset</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return estimated probabilities for the test_dataset.</span>
 
@@ -973,7 +983,7 @@
             <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_dataset</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">scores</span>
 
-<div class="viewcode-block" id="LocusClassifier.set_status"><a class="viewcode-back" href="../../anacore.html#anacore.msi.LocusClassifier.set_status">[docs]</a>    <span class="k">def</span> <span class="nf">set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_dataset</span><span class="p">):</span>
+<div class="viewcode-block" id="LocusClassifier.set_status"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.LocusClassifier.set_status">[docs]</a>    <span class="k">def</span> <span class="nf">set_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_dataset</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set status and score for the selected locus in the list of samples.</span>
 
@@ -993,10 +1003,10 @@
             <span class="n">locus_res</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">score</span></div></div>
 
 
-<div class="viewcode-block" id="MSIReport"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSIReport">[docs]</a><span class="k">class</span> <span class="nc">MSIReport</span><span class="p">:</span>
+<div class="viewcode-block" id="MSIReport"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSIReport">[docs]</a><span class="k">class</span> <span class="nc">MSIReport</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read/write the JSON file used to store a list of MSISample.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MSIReport.parse"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSIReport.parse">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MSIReport.parse"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSIReport.parse">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">in_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of MSISample stored in a MSIReport file.</span>
@@ -1011,7 +1021,7 @@
             <span class="n">spl_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">FH_in</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">MSISample</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">curr_spl</span><span class="p">)</span> <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">spl_data</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="MSIReport.write"><a class="viewcode-back" href="../../anacore.html#anacore.msi.MSIReport.write">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MSIReport.write"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.MSIReport.write">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">msi_samples</span><span class="p">,</span> <span class="n">out_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the list of MSISample in a MSIReport file.</span>
@@ -1025,7 +1035,7 @@
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">msi_samples</span><span class="p">,</span> <span class="n">FH_out</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">toDict</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="getNbSupporting"><a class="viewcode-back" href="../../anacore.html#anacore.msi.getNbSupporting">[docs]</a><span class="k">def</span> <span class="nf">getNbSupporting</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">loci</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="getNbSupporting"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.getNbSupporting">[docs]</a><span class="k">def</span> <span class="nf">getNbSupporting</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">loci</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the number of samples by locus class.</span>
 
@@ -1070,7 +1080,7 @@
     <span class="k">return</span> <span class="n">counts</span></div>
 
 
-<div class="viewcode-block" id="getIncompleteModels"><a class="viewcode-back" href="../../anacore.html#anacore.msi.getIncompleteModels">[docs]</a><span class="k">def</span> <span class="nf">getIncompleteModels</span><span class="p">(</span><span class="n">in_report</span><span class="p">,</span> <span class="n">min_support_model</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+<div class="viewcode-block" id="getIncompleteModels"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.base.getIncompleteModels">[docs]</a><span class="k">def</span> <span class="nf">getIncompleteModels</span><span class="p">(</span><span class="n">in_report</span><span class="p">,</span> <span class="n">min_support_model</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the list of locus class model with an unsufficient number of supporting samples.</span>
 
@@ -1093,20 +1103,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2019, Frédéric Escudié
+        &#169; Copyright 2019, Frédéric Escudié.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -1114,7 +1129,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

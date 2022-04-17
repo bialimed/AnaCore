@@ -11,7 +11,7 @@ __status__ = 'prod'
 import gzip
 from anacore.abstractFile import isGzip
 from anacore.sv import HashedSVIO
-from anacore.msi import MSILocus, LocusRes, MSISample, MSISplRes, Status
+from anacore.msi.base import MSILocus, LocusRes, MSISample, MSISplRes, Status
 
 
 class MSINGSAnalysis(HashedSVIO):

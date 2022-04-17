@@ -1,0 +1,5 @@
+@import 'theme.css';
+
+img.logo {
+    height: 150px !important;
+}

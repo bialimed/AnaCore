@@ -10,7 +10,7 @@ __status__ = 'prod'
 
 import json
 from anacore.sv import HashedSVIO
-from anacore.msi import Status, LocusRes, MSILocus
+from anacore.msi.base import Status, LocusRes, MSILocus
 
 
 class MSIAnnot(HashedSVIO):

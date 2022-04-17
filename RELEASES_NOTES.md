@@ -1,8 +1,10 @@
 # Release 2.12.0 [DEV]
 
 ### Changes
-  * Move `anacore.msi` to `anacore.msi.base` and `anacore.msings` to
-  `anacore.msi.msings`.
+  * Move MSI libraries in the new subpackage `msi`:
+    * `anacore.msi` to `anacore.msi.base`
+    * `anacore.msiannot` to `anacore.msi.msiannot`
+    * `anacore.msings` to `anacore.msi.msings`
 
 ### Improvements
   * Add `anacore.msi.hubble` to manage results from Hubble software.

@@ -33,10 +33,16 @@ anacore.db
    :undoc-members:
    :show-inheritance:
 
+   anacore.db.homo_sapiens
+   -----------------------
+
    .. automodule:: anacore.db.homo_sapiens
       :members:
       :undoc-members:
       :show-inheritance:
+
+      anacore.db.homo_sapiens.accession
+      ---------------------------------
 
       .. automodule:: anacore.db.homo_sapiens.accession
          :members:
@@ -119,25 +125,41 @@ anacore.msi
 ------------------
 
 .. automodule:: anacore.msi
-   :members:
-   :undoc-members:
-   :show-inheritance:
+  :members:
+  :undoc-members:
+  :show-inheritance:
 
-anacore.msiannot
------------------------
+  anacore.msi.base
+  ----------------
 
-.. automodule:: anacore.msiannot
-   :members:
-   :undoc-members:
-   :show-inheritance:
+  .. automodule:: anacore.msi.base
+     :members:
+     :undoc-members:
+     :show-inheritance:
 
-anacore.msings
----------------------
+  anacore.msi.hubble
+  ------------------
 
-.. automodule:: anacore.msings
-   :members:
-   :undoc-members:
-   :show-inheritance:
+  .. automodule:: anacore.msi.hubble
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+  anacore.msi.msiannot
+  --------------------
+
+  .. automodule:: anacore.msi.msiannot
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+  anacore.msi.msings
+  ------------------
+
+  .. automodule:: anacore.msi.msings
+     :members:
+     :undoc-members:
+     :show-inheritance:
 
 anacore.node
 -------------------
