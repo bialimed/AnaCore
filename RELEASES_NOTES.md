@@ -1,3 +1,12 @@
+# Release 2.12.0 [DEV]
+
+### Changes
+  * Move `anacore.msi` to `anacore.msi.base` and `anacore.msings` to
+  `anacore.msi.msings`.
+
+### Improvements
+  * Add `anacore.msi.hubble` to manage results from Hubble software.
+
 # Release 2.11.0 [2022-03-10]
 
 ### Improvements
