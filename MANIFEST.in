@@ -3,6 +3,7 @@ include RELEASES_NOTES.md
 include anacore/*.py
 include anacore/db/*.py
 include anacore/db/*/*.py
+include anacore/msi/*.py
 include requirements.txt
 include setup.cfg
 include setup.py
