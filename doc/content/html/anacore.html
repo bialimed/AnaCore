@@ -108,9 +108,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.maf">anacore.maf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.matrix">anacore.matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.msi">anacore.msi</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.annot">anacore.msi.annot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.base">anacore.msi.base</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.hubble">anacore.msi.hubble</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.msiannot">anacore.msi.msiannot</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.msings">anacore.msi.msings</a></li>
 </ul>
 </li>
@@ -3151,6 +3151,70 @@ with mode “i”.</p>
 </div>
 <div class="section" id="module-anacore.msi">
 <span id="anacore-msi"></span><h2>anacore.msi<a class="headerlink" href="#module-anacore.msi" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-anacore.msi.annot">
+<span id="anacore-msi-annot"></span><h3>anacore.msi.annot<a class="headerlink" href="#module-anacore.msi.annot" title="Permalink to this headline">¶</a></h3>
+<p>Classes and functions for reading/writing MSI annotations files.</p>
+<dl class="py class">
+<dt id="anacore.msi.annot.MSIAnnot">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.annot.</span></code><code class="sig-name descname"><span class="pre">MSIAnnot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/annot.html#MSIAnnot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.annot.MSIAnnot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.sv.HashedSVIO</span></code></a></p>
+<p>Build and return an instance of HashedSVIO.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str.</em>) – The filepath.</p></li>
+<li><p><strong>mode</strong> (<em>str.</em>) – Mode to open the file (‘r’, ‘w’, ‘a’).</p></li>
+<li><p><strong>separator</strong> (<em>str.</em>) – Separator used between values.</p></li>
+<li><p><strong>title_starter</strong> (<em>str.</em>) – The string used to introduce the title line.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO">HashedSVIO</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="anacore.msi.annot.MSIAnnot.recordToLine">
+<code class="sig-name descname"><span class="pre">recordToLine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/annot.html#MSIAnnot.recordToLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.annot.MSIAnnot.recordToLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the record in SV format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>record</strong> (<em>dict.</em>) – The record to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The SV line corresponding to the record.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="anacore.msi.annot.addLociResToSpl">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.annot.</span></code><code class="sig-name descname"><span class="pre">addLociResToSpl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">msi_spl</span></em>, <em class="sig-param"><span class="pre">data_by_locus</span></em>, <em class="sig-param"><span class="pre">res_cls=&lt;class</span> <span class="pre">'anacore.msi.base.LocusRes'&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/annot.html#addLociResToSpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.annot.addLociResToSpl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="anacore.msi.annot.addLociResult">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.annot.</span></code><code class="sig-name descname"><span class="pre">addLociResult</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msi_locus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_by_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_cls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/annot.html#addLociResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.annot.addLociResult" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="anacore.msi.annot.getCastedValue">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.annot.</span></code><code class="sig-name descname"><span class="pre">getCastedValue</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/annot.html#getCastedValue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.annot.getCastedValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="anacore.msi.annot.getLocusAnnotDict">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.annot.</span></code><code class="sig-name descname"><span class="pre">getLocusAnnotDict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_annot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/annot.html#getLocusAnnotDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.annot.getLocusAnnotDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 <div class="section" id="module-anacore.msi.base">
 <span id="anacore-msi-base"></span><h3>anacore.msi.base<a class="headerlink" href="#module-anacore.msi.base" title="Permalink to this headline">¶</a></h3>
 <p>Classes and functions for manipulating/processing MSI information (status, data, locus, …).</p>
@@ -4035,70 +4099,6 @@ clf.set_status(test_dataset)</p>
 </dd>
 </dl>
 </dd></dl>
-
-</div>
-<div class="section" id="module-anacore.msi.msiannot">
-<span id="anacore-msi-msiannot"></span><h3>anacore.msi.msiannot<a class="headerlink" href="#module-anacore.msi.msiannot" title="Permalink to this headline">¶</a></h3>
-<p>Classes and functions for reading/writing MSI annotations files.</p>
-<dl class="py class">
-<dt id="anacore.msi.msiannot.MSIAnnot">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msiannot.</span></code><code class="sig-name descname"><span class="pre">MSIAnnot</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msiannot.html#MSIAnnot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msiannot.MSIAnnot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.sv.HashedSVIO</span></code></a></p>
-<p>Build and return an instance of HashedSVIO.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<em>str.</em>) – The filepath.</p></li>
-<li><p><strong>mode</strong> (<em>str.</em>) – Mode to open the file (‘r’, ‘w’, ‘a’).</p></li>
-<li><p><strong>separator</strong> (<em>str.</em>) – Separator used between values.</p></li>
-<li><p><strong>title_starter</strong> (<em>str.</em>) – The string used to introduce the title line.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The new instance.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO">HashedSVIO</a></p>
-</dd>
-</dl>
-<dl class="py method">
-<dt id="anacore.msi.msiannot.MSIAnnot.recordToLine">
-<code class="sig-name descname"><span class="pre">recordToLine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msiannot.html#MSIAnnot.recordToLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msiannot.MSIAnnot.recordToLine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the record in SV format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>record</strong> (<em>dict.</em>) – The record to process.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The SV line corresponding to the record.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt id="anacore.msi.msiannot.addLociResToSpl">
-<code class="sig-prename descclassname"><span class="pre">anacore.msi.msiannot.</span></code><code class="sig-name descname"><span class="pre">addLociResToSpl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">msi_spl</span></em>, <em class="sig-param"><span class="pre">data_by_locus</span></em>, <em class="sig-param"><span class="pre">res_cls=&lt;class</span> <span class="pre">'anacore.msi.base.LocusRes'&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msiannot.html#addLociResToSpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msiannot.addLociResToSpl" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="anacore.msi.msiannot.addLociResult">
-<code class="sig-prename descclassname"><span class="pre">anacore.msi.msiannot.</span></code><code class="sig-name descname"><span class="pre">addLociResult</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msi_locus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_by_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_cls</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msiannot.html#addLociResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msiannot.addLociResult" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="anacore.msi.msiannot.getCastedValue">
-<code class="sig-prename descclassname"><span class="pre">anacore.msi.msiannot.</span></code><code class="sig-name descname"><span class="pre">getCastedValue</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msiannot.html#getCastedValue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msiannot.getCastedValue" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt id="anacore.msi.msiannot.getLocusAnnotDict">
-<code class="sig-prename descclassname"><span class="pre">anacore.msi.msiannot.</span></code><code class="sig-name descname"><span class="pre">getLocusAnnotDict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_annot</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msiannot.html#getLocusAnnotDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msiannot.getLocusAnnotDict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </div>
 <div class="section" id="module-anacore.msi.msings">

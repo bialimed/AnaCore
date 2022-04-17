@@ -129,6 +129,14 @@ anacore.msi
   :undoc-members:
   :show-inheritance:
 
+  anacore.msi.annot
+  --------------------
+
+  .. automodule:: anacore.msi.annot
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
   anacore.msi.base
   ----------------
 
@@ -141,14 +149,6 @@ anacore.msi
   ------------------
 
   .. automodule:: anacore.msi.hubble
-     :members:
-     :undoc-members:
-     :show-inheritance:
-
-  anacore.msi.msiannot
-  --------------------
-
-  .. automodule:: anacore.msi.msiannot
      :members:
      :undoc-members:
      :show-inheritance:
