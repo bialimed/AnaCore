@@ -1210,6 +1210,40 @@ class VCFRecord:
             raise Exception('The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         return DP
 
+    def getGT(self, spl_name, ploidy=2):
+        """
+        Return the genotype for the specified sample.
+
+        :param spl_name: The sample name.
+        :type spl_name: str
+        :param tr_ht: The ploidy of the sample.
+        :type tr_ht: int
+        :return: The genotype.
+        :rtype: str
+        """
+        GT = None
+        if "GT" in self.samples[spl_name]:  # The GT is already processed for the sample
+            GT = self.samples[spl_name]["GT"]
+        elif len(self.samples) == 1 and spl_name in self.samples and "GT" in self.info:  # Only one sample and GT is already processed for population
+            GT = self.info["GT"]
+        else:
+            try:
+                AF = self.getAF(spl_name)
+            except Exception:
+                raise Exception('The genotype cannot be retrieved in variant "{}:{}".'.format(self.chrom, str(self.pos)))
+            threshold = (1 / (ploidy + 1))
+            GT = ["."] * ploidy
+            idx = 0
+            end = 0
+            for af in AF:
+                nb = min(int(af / threshold), ploidy)
+                start = end + nb
+                GT[end:start] = [idx for aa in GT[end:start]]
+                idx += 1
+                end = start
+            GT = "/".join(map(str, GT))
+        return GT
+
 
 class VCFIO(AbstractFile):
     """Manage VCF file."""
