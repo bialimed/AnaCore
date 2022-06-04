@@ -157,7 +157,7 @@
 <span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing MSI annotations files.&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 IUCT-O&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.1&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
@@ -165,7 +165,8 @@
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="kn">import</span> <span class="n">HashedSVIO</span>
-<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">Status</span><span class="p">,</span> <span class="n">LocusRes</span><span class="p">,</span> <span class="n">MSILocus</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">Status</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.locus</span> <span class="kn">import</span> <span class="n">Locus</span><span class="p">,</span> <span class="n">LocusRes</span>
 
 
 <div class="viewcode-block" id="MSIAnnot"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.annot.MSIAnnot">[docs]</a><span class="k">class</span> <span class="nc">MSIAnnot</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
@@ -260,23 +261,23 @@
     <span class="k">return</span> <span class="n">data_by_spl</span></div>
 
 
-<div class="viewcode-block" id="addLociResToSpl"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.annot.addLociResToSpl">[docs]</a><span class="k">def</span> <span class="nf">addLociResToSpl</span><span class="p">(</span><span class="n">msi_spl</span><span class="p">,</span> <span class="n">data_by_locus</span><span class="p">,</span> <span class="n">res_cls</span><span class="o">=</span><span class="n">LocusRes</span><span class="p">):</span>
+<div class="viewcode-block" id="addLociResToSpl"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.annot.addLociResToSpl">[docs]</a><span class="k">def</span> <span class="nf">addLociResToSpl</span><span class="p">(</span><span class="n">msi_spl</span><span class="p">,</span> <span class="n">data_by_locus</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">locus_id</span><span class="p">,</span> <span class="n">data_by_res</span> <span class="ow">in</span> <span class="n">data_by_locus</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Add locus</span>
         <span class="k">if</span> <span class="n">locus_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">msi_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">:</span>
             <span class="n">msi_spl</span><span class="o">.</span><span class="n">addLocus</span><span class="p">(</span>
-                <span class="n">MSILocus</span><span class="p">(</span><span class="n">locus_id</span><span class="p">)</span>
+                <span class="n">Locus</span><span class="p">(</span><span class="n">locus_id</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="n">msi_locus</span> <span class="o">=</span> <span class="n">msi_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">locus_id</span><span class="p">]</span>
         <span class="c1"># Add result and data</span>
-        <span class="n">addLociResult</span><span class="p">(</span><span class="n">msi_locus</span><span class="p">,</span> <span class="n">data_by_res</span><span class="p">,</span> <span class="n">res_cls</span><span class="p">)</span></div>
+        <span class="n">addLociResult</span><span class="p">(</span><span class="n">msi_locus</span><span class="p">,</span> <span class="n">data_by_res</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="addLociResult"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.annot.addLociResult">[docs]</a><span class="k">def</span> <span class="nf">addLociResult</span><span class="p">(</span><span class="n">msi_locus</span><span class="p">,</span> <span class="n">data_by_res</span><span class="p">,</span> <span class="n">res_cls</span><span class="p">):</span>
+<div class="viewcode-block" id="addLociResult"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.annot.addLociResult">[docs]</a><span class="k">def</span> <span class="nf">addLociResult</span><span class="p">(</span><span class="n">msi_locus</span><span class="p">,</span> <span class="n">data_by_res</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">result_id</span><span class="p">,</span> <span class="n">data_by_key</span> <span class="ow">in</span> <span class="n">data_by_res</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Add result</span>
         <span class="k">if</span> <span class="n">result_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">msi_locus</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
-            <span class="n">msi_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">result_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">res_cls</span><span class="p">(</span><span class="n">Status</span><span class="o">.</span><span class="n">none</span><span class="p">)</span>
+            <span class="n">msi_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">result_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">LocusRes</span><span class="p">(</span><span class="n">Status</span><span class="o">.</span><span class="n">none</span><span class="p">)</span>
         <span class="n">locus_res</span> <span class="o">=</span> <span class="n">msi_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">result_id</span><span class="p">]</span>
         <span class="c1"># Add data</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data_by_key</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

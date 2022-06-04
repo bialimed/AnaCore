@@ -163,7 +163,7 @@ chr11	125536881	T	True	0,0,0,0,0,0,0,0,0,1,15,124,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                 observed.append({
                     "position": record.position,
                     "status": record.results["Hubble"].status,
-                    "nb_by_length": record.results["Hubble"].data["nb_by_length"]
+                    "nb_by_length": record.results["Hubble"].data["lengths"].ct_by_len
                 })
         # Assert
         self.assertEqual(observed, expected)
@@ -275,8 +275,8 @@ chr11	125536881	T	True	0,0,0,0,0,0,0,0,0,1,15,124,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             observed.append({
                 "position": locus.position,
                 "status": locus.results["Hubble"].status,
-                "nb_by_length": locus.results["Hubble"].data["nb_by_length"],
-                "nb": locus.results["Hubble"].getCount(),
+                "nb_by_length": locus.results["Hubble"].data["lengths"].ct_by_len,
+                "nb": locus.results["Hubble"].data["lengths"].getCount(),
                 "distance": locus.results["Hubble"].data["distance"],
                 "p_value": locus.results["Hubble"].data["p_value"]
             })

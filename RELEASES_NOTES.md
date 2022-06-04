@@ -1,6 +1,11 @@
 # Release 2.12.0 [DEV]
 
 ### Changes
+  * Move `anacore.msi.MSIReport` to `anacore.msi.reportIO.ReportIO`.
+  * Refactor `anacore.msi.LocusRes*` to create `anacore.msi.locus.LocusDataDistrib`.
+  This class store length distribution and is linked to `anacore.msi.locus.LocusRes`
+  in `data["lengths"]`. The class `anacore.msi.LocusResDistrib` and children are
+  removed.
   * Move MSI libraries in the new subpackage `msi`:
     * `anacore.msi` to `anacore.msi.base`
     * `anacore.msiannot` to `anacore.msi.annot`

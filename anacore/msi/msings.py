@@ -4,14 +4,16 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 import gzip
 from anacore.abstractFile import isGzip
+from anacore.msi.base import Status
+from anacore.msi.locus import Locus, LocusRes
+from anacore.msi.sample import MSISample, MSISplRes
 from anacore.sv import HashedSVIO
-from anacore.msi.base import MSILocus, LocusRes, MSISample, MSISplRes, Status
 
 
 class MSINGSAnalysis(HashedSVIO):
@@ -35,7 +37,7 @@ class MSINGSAnalysis(HashedSVIO):
         Return a structured record from the current line.
 
         :return: The record described by the current line.
-        :rtype: MSILocus
+        :rtype: anacore.msi.base.Locus
         """
         record = super()._parseLine()
         peaks = record["IndelLength:AlleleFraction:SupportingCalls"].split(" ")
@@ -52,19 +54,18 @@ class MSINGSAnalysis(HashedSVIO):
                 }
                 nb_by_length[int(indel_length)] = int(DP)
 
-        return MSILocus.fromDict({
+        return Locus.fromDict({
             "position": record["Position"],
             "name": record["Name"],
             "results": {
                 "MSINGS": {
-                    "_class": "LocusResDistrib",
                     "status": Status.undetermined,
                     "data": {
                         "avg_depth": record["Average_Depth"],
                         "nb_peaks": record["Number_of_Peaks"],
                         "peaks": peaks,
                         "std_dev": record["Standard_Deviation"],
-                        "nb_by_length": nb_by_length
+                        "lengths": {"ct_by_len": nb_by_length}
                     }
                 }
             }
@@ -75,7 +76,7 @@ class MSINGSAnalysis(HashedSVIO):
         Return the record in SV format.
 
         :param record: The record containing a result coming from mSINGS.
-        :type record: MSILocus
+        :type record: anacore.msi.base.Locus
         :return: The SV line corresponding to the record.
         :rtype: str
         """
@@ -166,7 +167,7 @@ class MSINGSReport(object):
                 else:
                     loci_res = LocusRes(Status.stable)
                 self.samples[curr_spl].addLocus(
-                    MSILocus(curr_locus, None, {self.method_name: loci_res})
+                    Locus(curr_locus, None, {self.method_name: loci_res})
                 )
 
     def parse(self):

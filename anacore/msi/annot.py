@@ -2,7 +2,7 @@
 """Classes and functions for reading/writing MSI annotations files."""
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2018 IUCT-O'
+__copyright__ = 'Copyright (C) 2018 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
@@ -10,7 +10,8 @@ __status__ = 'prod'
 
 import json
 from anacore.sv import HashedSVIO
-from anacore.msi.base import Status, LocusRes, MSILocus
+from anacore.msi.base import Status
+from anacore.msi.locus import Locus, LocusRes
 
 
 class MSIAnnot(HashedSVIO):
@@ -105,23 +106,23 @@ def getLocusAnnotDict(in_annot):
     return data_by_spl
 
 
-def addLociResToSpl(msi_spl, data_by_locus, res_cls=LocusRes):
+def addLociResToSpl(msi_spl, data_by_locus):
     for locus_id, data_by_res in data_by_locus.items():
         # Add locus
         if locus_id not in msi_spl.loci:
             msi_spl.addLocus(
-                MSILocus(locus_id)
+                Locus(locus_id)
             )
         msi_locus = msi_spl.loci[locus_id]
         # Add result and data
-        addLociResult(msi_locus, data_by_res, res_cls)
+        addLociResult(msi_locus, data_by_res)
 
 
-def addLociResult(msi_locus, data_by_res, res_cls):
+def addLociResult(msi_locus, data_by_res):
     for result_id, data_by_key in data_by_res.items():
         # Add result
         if result_id not in msi_locus.results:
-            msi_locus.results[result_id] = res_cls(Status.none)
+            msi_locus.results[result_id] = LocusRes(Status.none)
         locus_res = msi_locus.results[result_id]
         # Add data
         for key, value in data_by_key.items():

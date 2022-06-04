@@ -2,14 +2,16 @@
 """Classes and functions for reading/writing Hubble's outputs."""
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2022 CHU-Toulouse'
+__copyright__ = 'Copyright (C) 2022 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
 from anacore.sv import HashedSVIO
-from anacore.msi.base import MSILocus, MSISample, MSISplRes, Status
+from anacore.msi.base import Status
+from anacore.msi.locus import Locus
+from anacore.msi.sample import MSISample, MSISplRes
 import os
 import json
 
@@ -37,14 +39,13 @@ class HubbleDiff(HashedSVIO):
         Return a structured record from the current line.
 
         :return: The record described by the current line.
-        :rtype: MSILocus
+        :rtype: anacore.msi.base.Locus
         """
         record = super()._parseLine()
-        return MSILocus.fromDict({
+        return Locus.fromDict({
             "position": "{}:{}".format(record["Chromosome"], record["Start"]),
             "results": {
                 "Hubble": {
-                    "_class": "LocusRes",
                     "status": Status.undetermined if record["Assessed"] == "False" else Status.none,
                     "score": None if record["Assessed"] == "False" else 1 - float(record["PValue"]),
                     "data": {
@@ -61,7 +62,7 @@ class HubbleDiff(HashedSVIO):
         Return the record in SV format.
 
         :param record: Record containing differential analysis results coming from Hubble.
-        :type record: MSILocus
+        :type record: anacore.msi.base.Locus
         :return: The SV line corresponding to the record.
         :rtype: str
         """
@@ -103,24 +104,23 @@ class HubbleDist(HashedSVIO):
         Return a structured record from the current line.
 
         :return: The record described by the current line.
-        :rtype: MSILocus
+        :rtype: anacore.mis.base.Locus
         """
         record = super()._parseLine()
         # Parse distribution
         nb_by_length = {}
         for idx, count in enumerate(record["length_distribution"].split(",")):
             if count != "0":
-                nb_by_length[idx + 1] = int(count)
-        # MSILocus
-        return MSILocus.fromDict({
+                nb_by_length[idx + 1] = int(count)  # Lengths count start from 1
+        # Locus
+        return Locus.fromDict({
             "position": "{}:{}".format(record["chromosome"], record["location"]),
             "results": {
                 "Hubble": {
-                    "_class": "LocusResDistrib",
                     "status": Status.none if record["covered"] == "True" else Status.undetermined,
                     "data": {
                         "nt": record["repeat_unit_bases"],
-                        "nb_by_length": nb_by_length
+                        "lengths": {"ct_by_len": nb_by_length}
                     }
                 }
             }
@@ -131,7 +131,7 @@ class HubbleDist(HashedSVIO):
         Return the record in SV format.
 
         :param record: Record containing distributions coming from Hubble.
-        :type record: MSILocus
+        :type record: anacore.msi.base.Locus
         :return: The SV line corresponding to the record.
         :rtype: str
         """
@@ -140,10 +140,10 @@ class HubbleDist(HashedSVIO):
             "chromosome": record.position.split(":")[0],
             "location": record.position.split(":")[1],
             "repeat_unit_bases": res.data["nt"],
-            "covered": "False" if res.getCount() == 0 else "True",
-            "length_distribution": ",".join([
-                str(res.data["nb_by_length"][len + 1]) if len + 1 in res.data["nb_by_length"] else "0" for len in range(self.len_limit)
-            ])
+            "covered": "False" if res.data["lengths"].getCount() == 0 else "True",
+            "length_distribution": ",".join(
+                map(str, res.data["lengths"].getDenseCount(1, self.len_limit))  # Lengths count start from 1
+            )
         }
         return super().recordToLine(formatted_record)
 

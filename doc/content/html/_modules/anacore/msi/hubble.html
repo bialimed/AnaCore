@@ -157,14 +157,16 @@
 <span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing Hubble&#39;s outputs.&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2022 CHU-Toulouse&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2022 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
 <span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
 <span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="kn">import</span> <span class="n">HashedSVIO</span>
-<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">MSILocus</span><span class="p">,</span> <span class="n">MSISample</span><span class="p">,</span> <span class="n">MSISplRes</span><span class="p">,</span> <span class="n">Status</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">Status</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.locus</span> <span class="kn">import</span> <span class="n">Locus</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.sample</span> <span class="kn">import</span> <span class="n">MSISample</span><span class="p">,</span> <span class="n">MSISplRes</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -192,14 +194,13 @@
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record described by the current line.</span>
-<span class="sd">        :rtype: MSILocus</span>
+<span class="sd">        :rtype: anacore.msi.base.Locus</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">record</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">MSILocus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
+        <span class="k">return</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
             <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;Chromosome&quot;</span><span class="p">],</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">]),</span>
             <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;Hubble&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;_class&quot;</span><span class="p">:</span> <span class="s2">&quot;LocusRes&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span><span class="p">,</span>
                     <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span> <span class="k">else</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;PValue&quot;</span><span class="p">]),</span>
                     <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -216,7 +217,7 @@
 <span class="sd">        Return the record in SV format.</span>
 
 <span class="sd">        :param record: Record containing differential analysis results coming from Hubble.</span>
-<span class="sd">        :type record: MSILocus</span>
+<span class="sd">        :type record: anacore.msi.base.Locus</span>
 <span class="sd">        :return: The SV line corresponding to the record.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -258,24 +259,23 @@
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record described by the current line.</span>
-<span class="sd">        :rtype: MSILocus</span>
+<span class="sd">        :rtype: anacore.mis.base.Locus</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">record</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span>
         <span class="c1"># Parse distribution</span>
         <span class="n">nb_by_length</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;length_distribution&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">count</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
-                <span class="n">nb_by_length</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
-        <span class="c1"># MSILocus</span>
-        <span class="k">return</span> <span class="n">MSILocus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
+                <span class="n">nb_by_length</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>  <span class="c1"># Lengths count start from 1</span>
+        <span class="c1"># Locus</span>
+        <span class="k">return</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
             <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]),</span>
             <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;Hubble&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;_class&quot;</span><span class="p">:</span> <span class="s2">&quot;LocusResDistrib&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;covered&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
                     <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;nt&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;nb_by_length&quot;</span><span class="p">:</span> <span class="n">nb_by_length</span>
+                        <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ct_by_len&quot;</span><span class="p">:</span> <span class="n">nb_by_length</span><span class="p">}</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -286,7 +286,7 @@
 <span class="sd">        Return the record in SV format.</span>
 
 <span class="sd">        :param record: Record containing distributions coming from Hubble.</span>
-<span class="sd">        :type record: MSILocus</span>
+<span class="sd">        :type record: anacore.msi.base.Locus</span>
 <span class="sd">        :return: The SV line corresponding to the record.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -295,10 +295,10 @@
             <span class="s2">&quot;chromosome&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
             <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
             <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nt&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;covered&quot;</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">getCount</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;True&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;length_distribution&quot;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nb_by_length&quot;</span><span class="p">][</span><span class="nb">len</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nb_by_length&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;0&quot;</span> <span class="k">for</span> <span class="nb">len</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">len_limit</span><span class="p">)</span>
-            <span class="p">])</span>
+            <span class="s2">&quot;covered&quot;</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">getCount</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;True&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;length_distribution&quot;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">getDenseCount</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">len_limit</span><span class="p">))</span>  <span class="c1"># Lengths count start from 1</span>
+            <span class="p">)</span>
         <span class="p">}</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="n">formatted_record</span><span class="p">)</span></div></div>
 

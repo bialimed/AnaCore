@@ -159,14 +159,16 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.3.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.4.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="kn">import</span> <span class="n">isGzip</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">Status</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.locus</span> <span class="kn">import</span> <span class="n">Locus</span><span class="p">,</span> <span class="n">LocusRes</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.sample</span> <span class="kn">import</span> <span class="n">MSISample</span><span class="p">,</span> <span class="n">MSISplRes</span>
 <span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="kn">import</span> <span class="n">HashedSVIO</span>
-<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">MSILocus</span><span class="p">,</span> <span class="n">LocusRes</span><span class="p">,</span> <span class="n">MSISample</span><span class="p">,</span> <span class="n">MSISplRes</span><span class="p">,</span> <span class="n">Status</span>
 
 
 <div class="viewcode-block" id="MSINGSAnalysis"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msings.MSINGSAnalysis">[docs]</a><span class="k">class</span> <span class="nc">MSINGSAnalysis</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
@@ -190,7 +192,7 @@
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record described by the current line.</span>
-<span class="sd">        :rtype: MSILocus</span>
+<span class="sd">        :rtype: anacore.msi.base.Locus</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">record</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span>
         <span class="n">peaks</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;IndelLength:AlleleFraction:SupportingCalls&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
@@ -207,19 +209,18 @@
                 <span class="p">}</span>
                 <span class="n">nb_by_length</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">indel_length</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DP</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">MSILocus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
+        <span class="k">return</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
             <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Position&quot;</span><span class="p">],</span>
             <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">],</span>
             <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;MSINGS&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;_class&quot;</span><span class="p">:</span> <span class="s2">&quot;LocusResDistrib&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
                     <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;avg_depth&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Average_Depth&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;nb_peaks&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Number_of_Peaks&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;peaks&quot;</span><span class="p">:</span> <span class="n">peaks</span><span class="p">,</span>
                         <span class="s2">&quot;std_dev&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Standard_Deviation&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;nb_by_length&quot;</span><span class="p">:</span> <span class="n">nb_by_length</span>
+                        <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ct_by_len&quot;</span><span class="p">:</span> <span class="n">nb_by_length</span><span class="p">}</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span>
@@ -230,7 +231,7 @@
 <span class="sd">        Return the record in SV format.</span>
 
 <span class="sd">        :param record: The record containing a result coming from mSINGS.</span>
-<span class="sd">        :type record: MSILocus</span>
+<span class="sd">        :type record: anacore.msi.base.Locus</span>
 <span class="sd">        :return: The SV line corresponding to the record.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -321,7 +322,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">loci_res</span> <span class="o">=</span> <span class="n">LocusRes</span><span class="p">(</span><span class="n">Status</span><span class="o">.</span><span class="n">stable</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">curr_spl</span><span class="p">]</span><span class="o">.</span><span class="n">addLocus</span><span class="p">(</span>
-                    <span class="n">MSILocus</span><span class="p">(</span><span class="n">curr_locus</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method_name</span><span class="p">:</span> <span class="n">loci_res</span><span class="p">})</span>
+                    <span class="n">Locus</span><span class="p">(</span><span class="n">curr_locus</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method_name</span><span class="p">:</span> <span class="n">loci_res</span><span class="p">})</span>
                 <span class="p">)</span>
 
 <div class="viewcode-block" id="MSINGSReport.parse"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msings.MSINGSReport.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
