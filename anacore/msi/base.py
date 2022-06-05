@@ -8,6 +8,7 @@ __version__ = '2.0.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+from anacore.msi.locus import LocusRes
 import math
 import numpy as np
 
@@ -102,8 +103,8 @@ class LocusClassifier:
         max_len = -1
         for curr_spl in dataset:
             locus_res = curr_spl.loci[self.locus_id].results[method]
-            min_len = min(min_len, locus_res.getMinLength())
-            max_len = max(max_len, locus_res.getMaxLength())
+            min_len = min(min_len, locus_res.data["lengths"].getMinLength())
+            max_len = max(max_len, locus_res.data["lengths"].getMaxLength())
         return min_len, max_len
 
     def _set_min_max_len(self):
@@ -130,7 +131,7 @@ class LocusClassifier:
         for curr_spl in dataset:
             locus_res = curr_spl.loci[self.locus_id].results[method]
             prct_matrix.append(
-                locus_res.getDensePrct(self._min_len, self._max_len)
+                locus_res.data["lengths"].getDensePrct(self._min_len, self._max_len)
             )
         return np.matrix(prct_matrix)
 
@@ -245,8 +246,8 @@ def getNbSupporting(report, method="model", loci=None):
     """
     Return the number of samples by locus class.
 
-    :param in_report: List of MSISample.
-    :type in_report: list()
+    :param in_report: List of MSI samples.
+    :type in_report: list
     :param method: Evaluated method.
     :type method: str
     :param loci: List of evaluated loci.
