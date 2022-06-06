@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>anacore.msi.reportIO &mdash; AnaCore  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+            
+            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.msi.reportIO</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.msi.reportIO</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing/processing a list of MSI samples.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 CHU Toulouse&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">getNbSupporting</span><span class="p">,</span> <span class="n">Status</span><span class="p">,</span> <span class="n">toDict</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.sample</span> <span class="kn">import</span> <span class="n">MSISample</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+<div class="viewcode-block" id="ReportIO"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.reportIO.ReportIO">[docs]</a><span class="k">class</span> <span class="nc">ReportIO</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read/write the JSON file used to store a list of anacore.msi.sample.Sample.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ReportIO.getIncompleteModels"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.reportIO.ReportIO.getIncompleteModels">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getIncompleteModels</span><span class="p">(</span><span class="n">in_path</span><span class="p">,</span> <span class="n">min_support_model</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return loci status with an unsufficient number of supporting samples.</span>
+
+<span class="sd">        :param in_path: Path to a MSI report file (format: MSIReport).</span>
+<span class="sd">        :type in_path: str</span>
+<span class="sd">        :param min_support_model: Minimum number of samples with locus status determined to validate the model.</span>
+<span class="sd">        :type min_support_model: int</span>
+<span class="sd">        :return: Loci status with an unsufficient number of supporting samples. Each item is a dict with following keys: locus_name, locus_id, status and support.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">incomplete_models</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="n">ReportIO</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">curr_model</span> <span class="ow">in</span> <span class="n">getNbSupporting</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">curr_model</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Status</span><span class="o">.</span><span class="n">stable</span><span class="p">,</span> <span class="n">Status</span><span class="o">.</span><span class="n">unstable</span><span class="p">]</span> <span class="ow">and</span> <span class="n">curr_model</span><span class="p">[</span><span class="s2">&quot;support&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">min_support_model</span><span class="p">:</span>
+                <span class="n">incomplete_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_model</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">incomplete_models</span></div>
+
+<div class="viewcode-block" id="ReportIO.parse"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.reportIO.ReportIO.parse">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">in_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the list of MSI samples stored in the report file.</span>
+
+<span class="sd">        :param in_path: Path to a MSI report file (format: MSIReport).</span>
+<span class="sd">        :type in_path: str</span>
+<span class="sd">        :return: List of anacore.msi.sample.Sample.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spl_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">in_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_in</span><span class="p">:</span>
+            <span class="n">spl_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">FH_in</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">MSISample</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">curr_spl</span><span class="p">)</span> <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">spl_data</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ReportIO.write"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.reportIO.ReportIO.write">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">msi_samples</span><span class="p">,</span> <span class="n">out_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the list of MSI samples in the report file.</span>
+
+<span class="sd">        :param msi_samples: List of anacore.msi.sample.Sample.</span>
+<span class="sd">        :type msi_samples: list</span>
+<span class="sd">        :param out_path: Path to the output file storing MSI samples (format: MSIReport).</span>
+<span class="sd">        :type in_path: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_out</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">msi_samples</span><span class="p">,</span> <span class="n">FH_out</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">toDict</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Frédéric Escudié.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

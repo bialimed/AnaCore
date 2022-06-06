@@ -163,6 +163,7 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
+<span class="kn">from</span> <span class="nn">anacore.msi.locus</span> <span class="kn">import</span> <span class="n">LocusRes</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -257,8 +258,8 @@
         <span class="n">max_len</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
             <span class="n">locus_res</span> <span class="o">=</span> <span class="n">curr_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">locus_id</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span>
-            <span class="n">min_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_len</span><span class="p">,</span> <span class="n">locus_res</span><span class="o">.</span><span class="n">getMinLength</span><span class="p">())</span>
-            <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">locus_res</span><span class="o">.</span><span class="n">getMaxLength</span><span class="p">())</span>
+            <span class="n">min_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">min_len</span><span class="p">,</span> <span class="n">locus_res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">getMinLength</span><span class="p">())</span>
+            <span class="n">max_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">locus_res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">getMaxLength</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">min_len</span><span class="p">,</span> <span class="n">max_len</span>
 
     <span class="k">def</span> <span class="nf">_set_min_max_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -285,7 +286,7 @@
         <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
             <span class="n">locus_res</span> <span class="o">=</span> <span class="n">curr_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">locus_id</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span>
             <span class="n">prct_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">locus_res</span><span class="o">.</span><span class="n">getDensePrct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_len</span><span class="p">)</span>
+                <span class="n">locus_res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">getDensePrct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_len</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">prct_matrix</span><span class="p">)</span>
 
@@ -400,8 +401,8 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the number of samples by locus class.</span>
 
-<span class="sd">    :param in_report: List of MSISample.</span>
-<span class="sd">    :type in_report: list()</span>
+<span class="sd">    :param in_report: List of MSI samples.</span>
+<span class="sd">    :type in_report: list</span>
 <span class="sd">    :param method: Evaluated method.</span>
 <span class="sd">    :type method: str</span>
 <span class="sd">    :param loci: List of evaluated loci.</span>

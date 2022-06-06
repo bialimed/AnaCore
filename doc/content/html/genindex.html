@@ -203,6 +203,8 @@
 </li>
       <li><a href="anacore.html#anacore.msi.annot.addLociResult">addLociResult() (in module anacore.msi.annot)</a>
 </li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.addLocus">addLocus() (anacore.msi.sample.MSISample method)</a>
+</li>
       <li><a href="anacore.html#anacore.genomicRegion.Transcript.addProtein">addProtein() (anacore.genomicRegion.Transcript method)</a>
 </li>
       <li><a href="anacore.html#anacore.gff.GFF3Record.addToAnnot">addToAnnot() (anacore.gff.GFF3Record method)</a>
@@ -295,8 +297,6 @@
         <li><a href="anacore.html#module-anacore.hgvs">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     anacore.illumina
 
@@ -311,6 +311,8 @@
         <li><a href="anacore.html#module-anacore.maf">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     anacore.matrix
 
@@ -347,10 +349,31 @@
 </li>
       </ul></li>
       <li>
+    anacore.msi.locus
+
+      <ul>
+        <li><a href="anacore.html#module-anacore.msi.locus">module</a>
+</li>
+      </ul></li>
+      <li>
     anacore.msi.msings
 
       <ul>
         <li><a href="anacore.html#module-anacore.msi.msings">module</a>
+</li>
+      </ul></li>
+      <li>
+    anacore.msi.reportIO
+
+      <ul>
+        <li><a href="anacore.html#module-anacore.msi.reportIO">module</a>
+</li>
+      </ul></li>
+      <li>
+    anacore.msi.sample
+
+      <ul>
+        <li><a href="anacore.html#module-anacore.msi.sample">module</a>
 </li>
       </ul></li>
       <li>
@@ -506,10 +529,16 @@
 </li>
       <li><a href="anacore.html#anacore.vcf.decodeInfoValue">decodeInfoValue() (in module anacore.vcf)</a>
 </li>
-      <li><a href="anacore.html#anacore.genomicRegion.Transcript.delProtein">delProtein() (anacore.genomicRegion.Transcript method)</a>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.delLoci">delLoci() (anacore.msi.sample.MSISample method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.delLocus">delLocus() (anacore.msi.sample.MSISample method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="anacore.html#anacore.genomicRegion.Transcript.delProtein">delProtein() (anacore.genomicRegion.Transcript method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.locus.Locus.delResult">delResult() (anacore.msi.locus.Locus method)</a>
+</li>
       <li><a href="anacore.html#anacore.matrix.DistanceMatrixIO">DistanceMatrixIO (class in anacore.matrix)</a>
 </li>
       <li><a href="anacore.html#anacore.sequence.DNAAlphabet">DNAAlphabet (class in anacore.sequence)</a>
@@ -570,12 +599,12 @@
 </li>
       <li><a href="anacore.html#anacore.filters.FiltersCombiner">FiltersCombiner (class in anacore.filters)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="anacore.html#anacore.filters.filtersFromDict">filtersFromDict() (in module anacore.filters)</a>
 </li>
       <li><a href="anacore.html#anacore.illumina.ADSSampleSheetIO.findSplFiles">findSplFiles() (anacore.illumina.ADSSampleSheetIO method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="anacore.html#anacore.msi.base.LocusClassifier.fit">fit() (anacore.msi.base.LocusClassifier method)</a>
 </li>
       <li><a href="anacore.html#anacore.node.Node.fromClusterNode">fromClusterNode() (anacore.node.Node static method)</a>
@@ -583,6 +612,14 @@
       <li><a href="anacore.html#anacore.filters.Filter.fromDict">fromDict() (anacore.filters.Filter static method)</a>
 
       <ul>
+        <li><a href="anacore.html#anacore.msi.locus.Locus.fromDict">(anacore.msi.locus.Locus static method)</a>
+</li>
+        <li><a href="anacore.html#anacore.msi.locus.LocusRes.fromDict">(anacore.msi.locus.LocusRes static method)</a>
+</li>
+        <li><a href="anacore.html#anacore.msi.sample.MSISample.fromDict">(anacore.msi.sample.MSISample static method)</a>
+</li>
+        <li><a href="anacore.html#anacore.msi.sample.MSISplRes.fromDict">(anacore.msi.sample.MSISplRes static method)</a>
+</li>
         <li><a href="anacore.html#anacore.node.Node.fromDict">(anacore.node.Node static method)</a>
 </li>
       </ul></li>
@@ -658,6 +695,12 @@
 </li>
       <li><a href="anacore.html#anacore.fusion.getCoordStr">getCoordStr() (in module anacore.fusion)</a>
 </li>
+      <li><a href="anacore.html#anacore.msi.locus.LocusDataDistrib.getCount">getCount() (anacore.msi.locus.LocusDataDistrib method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.locus.LocusDataDistrib.getDenseCount">getDenseCount() (anacore.msi.locus.LocusDataDistrib method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.locus.LocusDataDistrib.getDensePrct">getDensePrct() (anacore.msi.locus.LocusDataDistrib method)</a>
+</li>
       <li><a href="anacore.html#anacore.node.Node.getDepth">getDepth() (anacore.node.Node method)</a>
 </li>
       <li><a href="anacore.html#anacore.node.Node.getDescendants">getDescendants() (anacore.node.Node method)</a>
@@ -676,6 +719,8 @@
 </li>
       <li><a href="anacore.html#anacore.illumina.getIlluminaName">getIlluminaName() (in module anacore.illumina)</a>
 </li>
+      <li><a href="anacore.html#anacore.msi.reportIO.ReportIO.getIncompleteModels">getIncompleteModels() (anacore.msi.reportIO.ReportIO static method)</a>
+</li>
       <li><a href="anacore.html#anacore.illumina.getInfFromSeqDesc">getInfFromSeqDesc() (in module anacore.illumina)</a>
 </li>
       <li><a href="anacore.html#anacore.illumina.getInfFromSeqID">getInfFromSeqID() (in module anacore.illumina)</a>
@@ -684,13 +729,19 @@
 </li>
       <li><a href="anacore.html#anacore.illumina.getLibNameFromReadsPath">getLibNameFromReadsPath() (in module anacore.illumina)</a>
 </li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.getLociMethods">getLociMethods() (anacore.msi.sample.MSISample method)</a>
+</li>
       <li><a href="anacore.html#anacore.msi.annot.getLocusAnnotDict">getLocusAnnotDict() (in module anacore.msi.annot)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.locus.LocusDataDistrib.getMaxLength">getMaxLength() (anacore.msi.locus.LocusDataDistrib method)</a>
+</li>
+      <li><a href="anacore.html#anacore.bed.BEDIO.getMaxNbCol">getMaxNbCol() (anacore.bed.BEDIO static method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="anacore.html#anacore.bed.BEDIO.getMaxNbCol">getMaxNbCol() (anacore.bed.BEDIO static method)</a>
-</li>
       <li><a href="anacore.html#anacore.region.Region.getMinDist">getMinDist() (anacore.region.Region method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.locus.LocusDataDistrib.getMinLength">getMinLength() (anacore.msi.locus.LocusDataDistrib method)</a>
 </li>
       <li><a href="anacore.html#anacore.vcf.VCFRecord.getMostDownstream">getMostDownstream() (anacore.vcf.VCFRecord method)</a>
 </li>
@@ -702,7 +753,19 @@
         <li><a href="anacore.html#anacore.maf.getName">(in module anacore.maf)</a>
 </li>
       </ul></li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.getNbDetermined">getNbDetermined() (anacore.msi.sample.MSISample method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.getNbLoci">getNbLoci() (anacore.msi.sample.MSISample method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.getNbProcessed">getNbProcessed() (anacore.msi.sample.MSISample method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.getNbStable">getNbStable() (anacore.msi.sample.MSISample method)</a>
+</li>
       <li><a href="anacore.html#anacore.msi.base.getNbSupporting">getNbSupporting() (in module anacore.msi.base)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.getNbUndetermined">getNbUndetermined() (anacore.msi.sample.MSISample method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.getNbUnstable">getNbUnstable() (anacore.msi.sample.MSISample method)</a>
 </li>
       <li><a href="anacore.html#anacore.region.RegionList.getNearests">getNearests() (anacore.region.RegionList method)</a>
 </li>
@@ -920,8 +983,12 @@
         <li><a href="anacore.html#anacore.sv.SVIO.isValid">(anacore.sv.SVIO static method)</a>
 </li>
       </ul></li>
-      <li><a href="anacore.html#anacore.vcf.HeaderAttr.items">items() (anacore.vcf.HeaderAttr method)</a>
+      <li><a href="anacore.html#anacore.msi.locus.LocusDataDistrib.items">items() (anacore.msi.locus.LocusDataDistrib method)</a>
+
+      <ul>
+        <li><a href="anacore.html#anacore.vcf.HeaderAttr.items">(anacore.vcf.HeaderAttr method)</a>
 </li>
+      </ul></li>
       <li><a href="anacore.html#anacore.region.iterOverlapped">iterOverlapped() (in module anacore.region)</a>
 </li>
       <li><a href="anacore.html#anacore.region.iterOverlappedByRegion">iterOverlappedByRegion() (in module anacore.region)</a>
@@ -948,13 +1015,19 @@
         <li><a href="anacore.html#anacore.region.Region.length">(anacore.region.Region method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="anacore.html#anacore.fusion.BreakendVCFIO.loadIndex">loadIndex() (anacore.fusion.BreakendVCFIO method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="anacore.html#anacore.gtf.loadModel">loadModel() (in module anacore.gtf)</a>
 </li>
+      <li><a href="anacore.html#anacore.msi.locus.Locus">Locus (class in anacore.msi.locus)</a>
+</li>
       <li><a href="anacore.html#anacore.msi.base.LocusClassifier">LocusClassifier (class in anacore.msi.base)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.locus.LocusDataDistrib">LocusDataDistrib (class in anacore.msi.locus)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.locus.LocusRes">LocusRes (class in anacore.msi.locus)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1008,7 +1081,13 @@
 </li>
         <li><a href="anacore.html#module-anacore.msi.hubble">anacore.msi.hubble</a>
 </li>
+        <li><a href="anacore.html#module-anacore.msi.locus">anacore.msi.locus</a>
+</li>
         <li><a href="anacore.html#module-anacore.msi.msings">anacore.msi.msings</a>
+</li>
+        <li><a href="anacore.html#module-anacore.msi.reportIO">anacore.msi.reportIO</a>
+</li>
+        <li><a href="anacore.html#module-anacore.msi.sample">anacore.msi.sample</a>
 </li>
         <li><a href="anacore.html#module-anacore.node">anacore.node</a>
 </li>
@@ -1036,6 +1115,10 @@
       <li><a href="anacore.html#anacore.msi.msings.MSINGSAnalysis">MSINGSAnalysis (class in anacore.msi.msings)</a>
 </li>
       <li><a href="anacore.html#anacore.msi.msings.MSINGSReport">MSINGSReport (class in anacore.msi.msings)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample">MSISample (class in anacore.msi.sample)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISplRes">MSISplRes (class in anacore.msi.sample)</a>
 </li>
       <li><a href="anacore.html#anacore.hgvs.MutalyzerBatch">MutalyzerBatch (class in anacore.hgvs)</a>
 </li>
@@ -1088,15 +1171,19 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="anacore.html#anacore.msi.msings.MSINGSReport.parse">parse() (anacore.msi.msings.MSINGSReport method)</a>
+
+      <ul>
+        <li><a href="anacore.html#anacore.msi.reportIO.ReportIO.parse">(anacore.msi.reportIO.ReportIO static method)</a>
 </li>
+      </ul></li>
       <li><a href="anacore.html#anacore.msi.hubble.parseHubbleResults">parseHubbleResults() (in module anacore.msi.hubble)</a>
 </li>
       <li><a href="anacore.html#anacore.picardIO.PicardReader">PicardReader (class in anacore.picardIO)</a>
 </li>
-      <li><a href="anacore.html#anacore.illumina.platformFromInstrumentSerialNumber">platformFromInstrumentSerialNumber() (in module anacore.illumina)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="anacore.html#anacore.illumina.platformFromInstrumentSerialNumber">platformFromInstrumentSerialNumber() (in module anacore.illumina)</a>
+</li>
       <li><a href="anacore.html#anacore.msi.base.LocusClassifier.predict">predict() (anacore.msi.base.LocusClassifier method)</a>
 </li>
       <li><a href="anacore.html#anacore.msi.base.LocusClassifier.predict_proba">predict_proba() (anacore.msi.base.LocusClassifier method)</a>
@@ -1159,6 +1246,8 @@
 </li>
       <li><a href="anacore.html#anacore.region.RegionTree">RegionTree (class in anacore.region)</a>
 </li>
+      <li><a href="anacore.html#anacore.msi.reportIO.ReportIO">ReportIO (class in anacore.msi.reportIO)</a>
+</li>
       <li><a href="anacore.html#anacore.sequence.DNAAlphabet.revCom">revCom() (anacore.sequence.DNAAlphabet static method)</a>
 
       <ul>
@@ -1209,10 +1298,18 @@
 </li>
       <li><a href="anacore.html#anacore.region.Region.setReference">setReference() (anacore.region.Region method)</a>
 </li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.setScore">setScore() (anacore.msi.sample.MSISample method)</a>
+</li>
       <li><a href="anacore.html#anacore.illumina.ADSSampleSheetIO.setSplFiles">setSplFiles() (anacore.illumina.ADSSampleSheetIO method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.setStatusByInstabilityCount">setStatusByInstabilityCount() (anacore.msi.sample.MSISample method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.setStatusByInstabilityRatio">setStatusByInstabilityRatio() (anacore.msi.sample.MSISample method)</a>
+</li>
+      <li><a href="anacore.html#anacore.msi.sample.MSISample.setStatusByMajority">setStatusByMajority() (anacore.msi.sample.MSISample method)</a>
+</li>
       <li><a href="anacore.html#anacore.fusion.ArribaIO.setVCFHeader">setVCFHeader() (anacore.fusion.ArribaIO static method)</a>
 
       <ul>
@@ -1351,6 +1448,8 @@
         <li><a href="anacore.html#anacore.gtf.GTFIO.write">(anacore.gtf.GTFIO method)</a>
 </li>
         <li><a href="anacore.html#anacore.maf.MAFIO.write">(anacore.maf.MAFIO method)</a>
+</li>
+        <li><a href="anacore.html#anacore.msi.reportIO.ReportIO.write">(anacore.msi.reportIO.ReportIO static method)</a>
 </li>
         <li><a href="anacore.html#anacore.sequenceIO.FastaIO.write">(anacore.sequenceIO.FastaIO method)</a>
 </li>

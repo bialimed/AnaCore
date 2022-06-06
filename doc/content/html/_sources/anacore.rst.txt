@@ -130,7 +130,7 @@ anacore.msi
   :show-inheritance:
 
   anacore.msi.annot
-  --------------------
+  -----------------
 
   .. automodule:: anacore.msi.annot
      :members:
@@ -153,10 +153,34 @@ anacore.msi
      :undoc-members:
      :show-inheritance:
 
+  anacore.msi.locus
+  -----------------
+
+  .. automodule:: anacore.msi.locus
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
   anacore.msi.msings
   ------------------
 
   .. automodule:: anacore.msi.msings
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+  anacore.msi.reportIO
+  --------------------
+
+  .. automodule:: anacore.msi.reportIO
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+  anacore.msi.sample
+  ------------------
+
+  .. automodule:: anacore.msi.sample
      :members:
      :undoc-members:
      :show-inheritance:
