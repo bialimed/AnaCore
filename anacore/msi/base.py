@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -133,7 +133,7 @@ class LocusClassifier:
             prct_matrix.append(
                 locus_res.data["lengths"].getDensePrct(self._min_len, self._max_len)
             )
-        return np.matrix(prct_matrix)
+        return np.asarray(prct_matrix)
 
     def _get_test_data(self):
         """

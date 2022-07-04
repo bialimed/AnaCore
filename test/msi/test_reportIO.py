@@ -139,7 +139,10 @@ class TestReportIO(unittest.TestCase):
         with open(self.tmp_out, "w") as writer:
             writer.write(REPORT_CONTENT.replace('"SVC"', '"model"'))
         self.assertEqual(
-            ReportIO.getIncompleteModels(self.tmp_out, 2),
+            sorted(
+                ReportIO.getIncompleteModels(self.tmp_out, 2),
+                key=lambda elt: (elt["locus_id"], elt["status"])
+            ),
             [
                 {"locus_id": "1:208454", "locus_name": None, "status": "MSI", "support": 1},
                 {"locus_id": "1:208454", "locus_name": None, "status": "MSS", "support": 0},
@@ -148,7 +151,10 @@ class TestReportIO(unittest.TestCase):
             ]
         )
         self.assertEqual(
-            ReportIO.getIncompleteModels(self.tmp_out, 1),
+            sorted(
+                ReportIO.getIncompleteModels(self.tmp_out, 1),
+                key=lambda elt: (elt["locus_id"], elt["status"])
+            ),
             [
                 {"locus_id": "1:208454", "locus_name": None, "status": "MSS", "support": 0},
                 {"locus_id": "8:578711", "locus_name": "B12", "status": "MSS", "support": 0}
