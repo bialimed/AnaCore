@@ -12,6 +12,10 @@
     * `anacore.msings` to `anacore.msi.msings`
 
 ### Improvements
+  * Add `anacore.illumina.Run` getters to known run information and status from
+  the run folder.
+  * Add `anacore.illumina.DemultStat` to read demultiplex statistics from
+  bcl2fastq.
   * Add `anacore.msi.hubble` to manage results from Hubble software.
 
 # Release 2.11.0 [2022-03-10]

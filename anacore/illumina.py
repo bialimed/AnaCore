@@ -4,14 +4,15 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.21.0'
+__version__ = '1.22.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+import datetime
+import glob
+import json
 import os
 import re
-import glob
-import datetime
 import xml.etree.ElementTree as ET
 
 
@@ -35,7 +36,7 @@ class SampleSheetIO(object):
             section_title = None
             for line in FH_sheet:
                 striped_line = line.strip()
-                if any([re.fullmatch("\[" + elt + "\],*", striped_line) for elt in SampleSheetIO.SECTIONS]):
+                if any([re.fullmatch(r"\[{}\],*".format(elt), striped_line) for elt in SampleSheetIO.SECTIONS]):
                     while striped_line.endswith(","):  # Removes invalid comma used in CSV to obtain the same number of columns in whole file
                         striped_line = striped_line[:-1]
                     section_title = striped_line[1:-1]
@@ -223,6 +224,114 @@ class Bcl2fastqLog(object):
             }
 
 
+class CompletedJobInfo(object):
+    """Reader for CompletedJobInfo.xml."""
+
+    def __init__(self, path, date_format='%Y-%m-%dT%H:%M:%S'):
+        self.filepath = path
+        self.date_format = date_format
+        self.start_datetime = None
+        self.end_datetime = None
+        self.version = None
+        self.workflow_name = None
+        self.parameters = None
+        self._parse()
+
+    def _parse(self):
+        # Retrieve information by section
+        tree = ET.parse(self.filepath)
+        root = tree.getroot()
+        # Process information
+        self.end_datetime = root.find("CompletionTime").text  # 2017-11-23T17:19:55.0941558+01:00
+        self.end_datetime = self.end_datetime.split(".")[0]
+        self.end_datetime = datetime.datetime.strptime(self.end_datetime, self.date_format)
+        self.start_datetime = root.find("StartTime").text  # 2017-11-23T17:19:55.0941558+01:00
+        self.start_datetime = self.start_datetime.split(".")[0]
+        self.start_datetime = datetime.datetime.strptime(self.start_datetime, self.date_format)
+        self.version = root.find("Workflow").find("WorkflowVersion").text
+        self.workflow_name = root.find("Workflow").find("Analysis").text
+        workflow_param = etreeToDict(root.find("Workflow").find("WorkflowSettings"))
+        self.parameters = {"WorkflowSettings": workflow_param}
+        if self.workflow_name == "Amplicon - DS":
+            self.parameters["AmpliconSettings"] = etreeToDict(root.find("Workflow").find("AmpliconSettings"))
+
+
+class DemultStat:
+    """Reader for Data/Intensities/BaseCalls/Stats/Stats.json."""
+
+    def __init__(self, path):
+        """
+        Build and return an instance of DemultStat.
+
+        :param path: Path to demultiplex stats (exmple: my_run/Data/Intensities/BaseCalls/Stats/Stats.json).
+        :type path: str
+        :return: The new instance.
+        :rtype: DemultStat
+        """
+        self.path = path
+        with open(path) as reader:
+            self.data = json.load(reader)
+
+    def samplesCounts(self):
+        """
+        Return number of reads by samples ID.
+
+        :return: Number of reads by samples ID.
+        :rtype: dict
+        """
+        info_by_spl = dict()
+        for lane in self.data["ConversionResults"]:
+            for spl in lane["DemuxResults"]:
+                if spl["SampleId"] not in info_by_spl:
+                    info_by_spl[spl["SampleId"]] = spl["NumberReads"]
+                else:
+                    info_by_spl[spl["SampleId"]] += spl["NumberReads"]
+        return info_by_spl
+
+    def undeterminedCounts(self):
+        """
+        Return number of reads by undetermined UDI.
+
+        :return: Number of reads by undetermined UDI.
+        :rtype: dict
+        """
+        info_by_barcode = dict()
+        for lane in self.data["UnknownBarcodes"]:
+            for barcode, count in lane["Barcodes"].items():
+                if barcode not in info_by_barcode:
+                    info_by_barcode[barcode] = count
+                else:
+                    info_by_barcode[barcode] += count
+        return info_by_barcode
+
+    def unexpectedBarcodes(self, skipped_spl=None):
+        """
+        Return UDI with a number of reads greate than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).
+
+        :param skipped_spl: List of samples excluded from the smallest sample finding. This can be used to exclude negative controls without reads.
+        :type skipped_spl: set
+        :return: UDI with a number of reads greate than or equal to the smallest sample: {"udi": count, ...}.
+        :rtype: dict
+        """
+        unexpected_barcodes = list()
+        # Get smallest sample count
+        if skipped_spl is None:
+            skipped_spl = set()
+        ct_by_identified = {spl: ct for spl, ct in self.samplesCounts().items() if spl not in skipped_spl}
+        smallest_spl = min(ct_by_identified, key=ct_by_identified.get)
+        identified_min_ct = ct_by_identified[smallest_spl]
+        # Get undetermined barcodes with more read than smallest sample
+        for barcode, count in self.undeterminedCounts().items():
+            if count >= identified_min_ct:
+                without_udi = False
+                for udi in barcode.split("+"):
+                    if set(udi) == {"G"} or set(udi) == {"A"}:
+                        without_udi = True
+                if not without_udi:
+                    unexpected_barcodes.append({"spl": barcode, "ct": count})
+        return unexpected_barcodes
+
+
 class RTAComplete(object):
     """Reader for RTAComplete.txt."""
 
@@ -248,6 +357,74 @@ class RTAComplete(object):
                     self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
                 else:
                     raise Exception('"{}" in {} cannot be parsed by {}.'.format(content, self.filepath, self.__class__.__name__))
+
+
+class Run:
+    """Read and provide getters on Run from run folder."""
+
+    def __init__(self, path):
+        """
+        Build and return an instance of Run.
+
+        :param path: Path to the run folder.
+        :type path: str
+        :return: The new instance.
+        :rtype: Run
+        """
+        self.path = path
+
+    def isCopied(self):
+        """
+        Return True if copy from temp to output folder is ended by instrument. Copy step is followed post processing step on instrument.
+
+        :return: True if copy from temp to output folder is ended by instrument.
+        :rtype: boolean
+        """
+        is_completed = False
+        if self.isSequenced():
+            run_params = self.parameters
+            completed_copy_file = os.path.join(self.path, "CopyComplete.txt")
+            if run_params.instrument["platform"] in ["HiSeq", "MiSeq"]:
+                is_completed = True
+            elif run_params.instrument["platform"] == "NextSeq":
+                ncs_version = run_params.software["CS"]
+                if int(ncs_version.split(".")[0]) < 4:
+                    is_completed = True
+                else:  # The universal copy service replace the previous system since NCS v4
+                    if os.path.exists(completed_copy_file):
+                        is_completed = True
+            elif os.path.exists(completed_copy_file):
+                is_completed = True
+        return is_completed
+
+    def isEnded(self):
+        """
+        Return True if all instrument steps are ended (sequencing, copy and post-process).
+
+        :return: True if all instrument steps are ended (sequencing, copy and post-process).
+        :rtype: boolean
+        """
+        is_completed = False
+        if self.isCopied():  # Copy is ended
+            completed_illumina_analysis_file = os.path.join(self.path, "CompletedJobInfo.xml")
+            if self.parameters.post_process is None or os.path.exists(completed_illumina_analysis_file):  # The sequencer does not produce post-processing or they are ended
+                is_completed = True
+        return is_completed
+
+    def isSequenced(self):
+        """
+        Return True if sequencing step is ended on instrument. Sequencing step is followed by copy and post processing step on instrument.
+
+        :return: True if sequencing step is ended on instrument.
+        :rtype: boolean
+        """
+        rta_complete_file = os.path.join(self.path, "RTAComplete.txt")
+        return os.path.exists(rta_complete_file)
+
+    @property
+    def parameters(self):
+        """Return run parameters from [rR]unParameters.xml."""
+        return getRunParam(self.path)
 
 
 class RunInfo(object):
@@ -438,38 +615,6 @@ class RunParameters(object):
         }
 
 
-class CompletedJobInfo(object):
-    """Reader for CompletedJobInfo.xml."""
-
-    def __init__(self, path, date_format='%Y-%m-%dT%H:%M:%S'):
-        self.filepath = path
-        self.date_format = date_format
-        self.start_datetime = None
-        self.end_datetime = None
-        self.version = None
-        self.workflow_name = None
-        self.parameters = None
-        self._parse()
-
-    def _parse(self):
-        # Retrieve information by section
-        tree = ET.parse(self.filepath)
-        root = tree.getroot()
-        # Process information
-        self.end_datetime = root.find("CompletionTime").text  # 2017-11-23T17:19:55.0941558+01:00
-        self.end_datetime = self.end_datetime.split(".")[0]
-        self.end_datetime = datetime.datetime.strptime(self.end_datetime, self.date_format)
-        self.start_datetime = root.find("StartTime").text  # 2017-11-23T17:19:55.0941558+01:00
-        self.start_datetime = self.start_datetime.split(".")[0]
-        self.start_datetime = datetime.datetime.strptime(self.start_datetime, self.date_format)
-        self.version = root.find("Workflow").find("WorkflowVersion").text
-        self.workflow_name = root.find("Workflow").find("Analysis").text
-        workflow_param = etreeToDict(root.find("Workflow").find("WorkflowSettings"))
-        self.parameters = {"WorkflowSettings": workflow_param}
-        if self.workflow_name == "Amplicon - DS":
-            self.parameters["AmpliconSettings"] = etreeToDict(root.find("Workflow").find("AmpliconSettings"))
-
-
 def etreeToDict(node):
     data = {"key": node.tag}
     # Attributes
@@ -512,9 +657,9 @@ def getLibNameFromReadsPath(seq_path):
     for curr_ext in extensions.split("."):
         if curr_ext not in ["fq", "fastq", "fasta", "fa", "gz", "bz", "bz2", "lz", "zip"]:
             raise Exception('The file "{}" cannot be processed by getLibNameFromReadsPath because the extension "{}" is not managed.'.format(seq_path, curr_ext))
-    if re.search('_[rR][1-2]$', library_name):
+    if re.search(r'_[rR][1-2]$', library_name):
         library_name = library_name[:-3]
-    elif re.search('_[rR][1-2]_\d\d\d$', library_name):
+    elif re.search(r'_[rR][1-2]_\d\d\d$', library_name):
         library_name = library_name[:-7]
     return library_name
 
@@ -622,3 +767,20 @@ def getRunFolderInfo(run_folder):
     if os.path.exists(samplesheet_path):
         run["samples"] = SampleSheetIO(samplesheet_path).samples
     return run
+
+
+def getRunParam(in_run_folder):
+    """
+    Return run parameters from RunParameters.xml.
+
+    :param in_run_folder: Path to the run folder.
+    :type in_run_folder: str
+    :return: Run parameters from RunParameters.xml.
+    :rtype: anacore.illumina.RunParameters
+    """
+    run_parameters = os.path.join(in_run_folder, "RunParameters.xml")
+    if not os.path.exists(run_parameters):
+        run_parameters = os.path.join(in_run_folder, "runParameters.xml")
+        if not os.path.exists(run_parameters):
+            raise Exception("RunParameters cannot be found in {}.".format(in_run_folder))
+    return RunParameters(run_parameters)
