@@ -423,8 +423,18 @@ class Run:
 
     @property
     def parameters(self):
-        """Return run parameters from [rR]unParameters.xml."""
-        return getRunParam(self.path)
+        """
+        Return run parameters from [rR]unParameters.xml.
+
+        :return: Run parameters from RunParameters.xml.
+        :rtype: anacore.illumina.RunParameters
+        """
+        run_parameters = os.path.join(self.path, "RunParameters.xml")
+        if not os.path.exists(run_parameters):
+            run_parameters = os.path.join(self.path, "runParameters.xml")
+            if not os.path.exists(run_parameters):
+                raise Exception("RunParameters cannot be found in {}.".format(self.path))
+        return RunParameters(run_parameters)
 
 
 class RunInfo(object):
@@ -767,20 +777,3 @@ def getRunFolderInfo(run_folder):
     if os.path.exists(samplesheet_path):
         run["samples"] = SampleSheetIO(samplesheet_path).samples
     return run
-
-
-def getRunParam(in_run_folder):
-    """
-    Return run parameters from RunParameters.xml.
-
-    :param in_run_folder: Path to the run folder.
-    :type in_run_folder: str
-    :return: Run parameters from RunParameters.xml.
-    :rtype: anacore.illumina.RunParameters
-    """
-    run_parameters = os.path.join(in_run_folder, "RunParameters.xml")
-    if not os.path.exists(run_parameters):
-        run_parameters = os.path.join(in_run_folder, "runParameters.xml")
-        if not os.path.exists(run_parameters):
-            raise Exception("RunParameters cannot be found in {}.".format(in_run_folder))
-    return RunParameters(run_parameters)
