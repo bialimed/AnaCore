@@ -3,21 +3,25 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2022 CHU-Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
-import os
 import json
+import os
 import sys
+import tempfile
 import unittest
+import uuid
 
 TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
 from anacore.msi.base import Status, toDict
-from anacore.msi.locus import Locus, LocusDataDistrib, LocusRes
+from anacore.msi.locus import getRefSeqInfo, Locus, LocusDataDistrib, LocusRes
+from anacore.region import Region
+from anacore.sequenceIO import IdxFastaIO
 
 
 ########################################################################
@@ -25,6 +29,44 @@ from anacore.msi.locus import Locus, LocusDataDistrib, LocusRes
 # FUNCTIONS
 #
 ########################################################################
+class TestGetRefSeqInfo(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_fasta = os.path.join(tmp_folder, unique_id + ".fasta")
+        with open(self.tmp_fasta, "w") as FH_out:
+            FH_out.write(">chr1\nATGGCATAGCATAATCATTTTTTTTTTAGTTTCACA")
+        self.tmp_fasta_idx = os.path.join(tmp_folder, unique_id + ".fasta.fai")
+        with open(self.tmp_fasta_idx, "w") as FH_out:
+            FH_out.write("chr1	36	6	100	101")
+
+    def tearDown(self):
+        for curr_file in [self.tmp_fasta, self.tmp_fasta_idx]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def test(self):
+        with IdxFastaIO(self.tmp_fasta) as ref_reader:
+            microsat = Region(18, 27, None, "chr1")
+            self.assertEqual(
+                getRefSeqInfo(ref_reader, microsat, 4),
+                {
+                    "chromosome": "chr1",
+                    "location": 17,
+                    "repeat_times": 10,
+                    "repeat_unit_bases": "T",
+                    "left_flank_bases": "ATCA",
+                    "right_flank_bases": "AGTT"
+                }
+            )
+
+    def testExcept(self):
+        with self.assertRaises(Exception) as context:
+            with IdxFastaIO(self.tmp_fasta) as ref_reader:
+                microsat = Region(14, 17, None, "chr1")
+                getRefSeqInfo(ref_reader, microsat, 4)
+
+
 class TestLocus(unittest.TestCase):
     def testDelResult(self):
         locus = Locus.fromDict({
@@ -58,6 +100,20 @@ class TestLocus(unittest.TestCase):
 
 
 class TestLocusDataDistrib(unittest.TestCase):
+    def testFromDense(self):
+        self.assertEqual(
+            LocusDataDistrib.fromDense([0, 0, 8, 3, 0, 1]).ct_by_len,
+            {3: 8, 4: 3, 6: 1}
+        )
+        self.assertEqual(
+            LocusDataDistrib.fromDense([0, 0, 8, 3, 0, 1], start=2).ct_by_len,
+            {4: 8, 5: 3, 7: 1}
+        )
+        self.assertEqual(
+            LocusDataDistrib.fromDense([0, 0, 8, 3, 0, 1], start=0).ct_by_len,
+            {2: 8, 3: 3, 5: 1}
+        )
+
     def testGetCount(self):
         self.assertEqual(LocusDataDistrib().getCount(), 0)
         self.assertEqual(LocusDataDistrib({1: 5, 8: 0, 11: 8}).getCount(), 13)
@@ -88,6 +144,38 @@ class TestLocusDataDistrib(unittest.TestCase):
         self.assertEqual(
             LocusDataDistrib({1: 5, 8: 0, 11: 8}).getDensePrct(),
             [(5 * 100) / 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, (8 * 100) / 13]
+        )
+
+    def testMostRepresented(self):
+        self.assertEqual(
+            LocusDataDistrib({}).getMostRepresented(),
+            {"length": None, "count": 0}
+        )
+        self.assertEqual(
+            LocusDataDistrib({1: 5, 8: 0, 11: 8, 12: 4}).getMostRepresented(),
+            {"length": 11, "count": 8}
+        )
+        self.assertEqual(
+            LocusDataDistrib({5: 8, 4: 8, 3: 5, 6: 4}).getMostRepresented(),
+            {"length": 5, "count": 8}
+        )
+
+    def testGetNbPeaks(self):
+        self.assertEqual(
+            LocusDataDistrib({}).getNbPeaks(),
+            0
+        )
+        self.assertEqual(
+            LocusDataDistrib({1: 5, 8: 0, 11: 8, 12: 4}).getNbPeaks(),
+            3
+        )
+        self.assertEqual(
+            LocusDataDistrib({5: 8, 4: 8, 3: 5, 6: 4}).getNbPeaks(5),
+            3
+        )
+        self.assertEqual(
+            LocusDataDistrib({5: 8, 4: 8, 3: 5, 6: 4}).getNbPeaks(6),
+            2
         )
 
     def testGetMaxLength(self):

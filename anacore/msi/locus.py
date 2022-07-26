@@ -4,11 +4,41 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+from anacore.sequence import getShortestRepeatUnit
 from copy import deepcopy
+
+
+def getRefSeqInfo(ref_fh, microsat, flank_size=5):
+    """
+    Return location, flanks bases, repeat sequences and number of occurences from reference sequence and target.
+
+    :param ref_fh: File handle to reference sequences file.
+    :type ref_fh: anacore.sequenceIO.IdxFastaIO
+    :param microsat: Microsatellite region.
+    :type microsat: anacore.region.Region
+    :param flank_size: Size of flanking sequences.
+    :type flank_size: int
+    :return: Location, flanks bases, repeat sequences and number of occurences from reference sequence and target.
+    :rtype: dict
+    """
+    left_flank = ref_fh.getSub(microsat.reference.name, microsat.start - flank_size, microsat.start - 1)
+    right_flank = ref_fh.getSub(microsat.reference.name, microsat.end + 1, microsat.end + flank_size)
+    target_seq = ref_fh.getSub(microsat.reference.name, microsat.start, microsat.end)
+    repeat_unit = getShortestRepeatUnit(target_seq)
+    if repeat_unit is None:
+        raise Exception("The region {} doe not contain any repeat: {}.".format(microsat, target_seq))
+    return {
+        "chromosome": microsat.reference.name,
+        "location": microsat.start - 1,
+        "repeat_times": microsat.length() / len(repeat_unit),
+        "repeat_unit_bases": repeat_unit,
+        "left_flank_bases": left_flank,
+        "right_flank_bases": right_flank
+    }
 
 
 class Locus:
@@ -77,6 +107,23 @@ class LocusDataDistrib:
         if mode not in {"reads", "fragments"}:
             raise Exception('Mode for distribution must be "reads" or "fragments" not: {}.'.format(mode))
         self.mode = mode
+
+    @staticmethod
+    def fromDense(dense, mode="reads", start=1):
+        """
+        Return LocusDataDistrib from dense list of counts (example: [0, 5, 4, 1] => {2: 5, 3: 4, 4: 1}).
+
+        :param dense: List of counts. Each value correspond to a length and each length is represented between start and max length.
+        :type dense: list
+        :param mode: Depth calculation mode ("reads" or "fragments").
+        :type mode: str
+        :param start: Lis of counts start form this value. First length is more often 1 but can be 0.
+        :type start: int
+        :return: LocusDataDistrib from dense list of counts (example: [0, 5, 4, 1] => {2: 5, 3: 4, 4: 1}).
+        :rtype: LocusDataDistrib
+        """
+        ct_by_len = {idx + start: ct for idx, ct in enumerate(dense) if ct != 0}
+        return LocusDataDistrib(ct_by_len, mode)
 
     def getCount(self):
         """
@@ -147,6 +194,35 @@ class LocusDataDistrib:
         :rtype: int
         """
         return min([len for len, ct in self.ct_by_len.items() if ct != 0])
+
+    def getMostRepresented(self):
+        """
+        Return length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.
+
+        :return: Length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.
+        :rtype: dict
+        """
+        highest_peak = {"length": None, "count": 0}
+        for length, count in sorted(self.items()):
+            if count >= highest_peak["count"]:
+                highest_peak["length"] = length
+                highest_peak["count"] = count
+        return highest_peak
+
+    def getNbPeaks(self, min_count=1):
+        """
+        Return number of peaks in the distribution.
+
+        :param min_count: Length with lower count than this value are not taken into account.
+        :type min_count: int
+        :return: Number of peaks in the distribution.
+        :rtype: int
+        """
+        nb_peak = 0
+        for length, count in self.items():
+            if count >= min_count:
+                nb_peak += 1
+        return nb_peak
 
     def items(self):
         """
