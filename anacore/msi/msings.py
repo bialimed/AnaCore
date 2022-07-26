@@ -14,6 +14,7 @@ from anacore.msi.base import Status
 from anacore.msi.locus import Locus, LocusRes
 from anacore.msi.sample import MSISample, MSISplRes
 from anacore.sv import HashedSVIO
+from numpy import average, std
 
 
 class MSINGSAnalysis(HashedSVIO):
@@ -91,6 +92,40 @@ class MSINGSAnalysis(HashedSVIO):
             ["{}:{}:{}".format(curr_peak["indel_length"], curr_peak["AF"], curr_peak["DP"]) for curr_peak in record.results["MSINGS"].data["peaks"]]
         )
         return super().recordToLine(formatted_record)
+
+
+class MSINGSEval:
+    """Provides utils to predict with mSINGS: calculate feature and determine feature threshold."""
+
+    @staticmethod
+    def getNbPeaks(locus_distrib, highest_peak_ratio=0.05):
+        """
+        Return feature used to predict stability status by mSINGS: the number of peaks with height >= peak_height_cutoff * highest_peak_height.
+
+        :param locus_distrib: Lengths distribution of microsatellite.
+        :type locus_distrib: anacore.msi.locus.LocusDataDistrib
+        :param highest_peak_ratio: Minimum rate of highest peak height to consider a peak.
+        :type highest_peak_ratio: float
+        :return: Feature used to predict stability status by mSINGS: the number of peaks with height >= peak_height_cutoff * highest_peak_height.
+        :rtype: int
+        """
+        highest_peak = locus_distrib.getMostRepresented()
+        min_peak_height = highest_peak_ratio * highest_peak["count"]
+        return locus_distrib.getNbPeaks(min_peak_height)
+
+    @staticmethod
+    def getThresholdFromNbPeaks(models_nb_peaks, std_dev_rate=2.0):
+        """
+        Return minimum number of peaks to tag distribution as unstable.
+
+        :param models_nb_peaks: Number of peaks in stable population (see MSINGSEval.getNbPeaks).
+        :type models_nb_peaks: list
+        :param std_dev_rate: Number of standard deviation authorized around average number of peaks in stable population.
+        :type std_dev_rate: float
+        :return: Minimum number of peaks to tag distribution as unstable.
+        :rtype: float
+        """
+        return average(models_nb_peaks) + std(models_nb_peaks) * std_dev_rate
 
 
 class MSINGSReport(object):
