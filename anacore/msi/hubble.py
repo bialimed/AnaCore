@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2022 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -221,6 +221,7 @@ def parseHubbleResults(summary_path, differential_path, distributions_path=None,
         for curr_locus in HubbleDist(distributions_path):
             old_res = msi_spl.loci[curr_locus.position].results["Hubble"]
             curr_locus.results["Hubble"].status = old_res.status
+            curr_locus.results["Hubble"].score = old_res.score
             curr_locus.results["Hubble"].data["distance"] = old_res.data["distance"]
             curr_locus.results["Hubble"].data["p_value"] = old_res.data["p_value"]
             msi_spl.loci[curr_locus.position] = curr_locus

@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2022 CHU-Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -242,7 +242,8 @@ chr11	125536881	T	True	0,0,0,0,0,0,0,0,0,1,15,124,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                 "nb_by_length": {17: 1, 19: 1, 20: 7, 21: 24, 22: 10},
                 "nb": 43,
                 "distance": None,
-                "p_value": None
+                "p_value": None,
+                "score": None
             },
             {
                 "position": "chr11:125536881",
@@ -250,7 +251,8 @@ chr11	125536881	T	True	0,0,0,0,0,0,0,0,0,1,15,124,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                 "nb_by_length": {10: 1, 11: 15, 12: 124, 13: 9},
                 "nb": 149,
                 "distance": 0.17974233508488,
-                "p_value": 2.74351359014847E-12
+                "p_value": 2.74351359014847E-12,
+                "score": 1 - 2.74351359014847E-12,
             },
             {
                 "position": "chr4:106162144",
@@ -258,7 +260,8 @@ chr11	125536881	T	True	0,0,0,0,0,0,0,0,0,1,15,124,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                 "nb_by_length": {10: 104, 11: 1},
                 "nb": 105,
                 "distance": 0.0166435953523248,
-                "p_value": 0.0931187026743588
+                "p_value": 0.0931187026743588,
+                "score": 1 - 0.0931187026743588
             },
             {
                 "position": "chr4:106163095",
@@ -266,7 +269,8 @@ chr11	125536881	T	True	0,0,0,0,0,0,0,0,0,1,15,124,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                 "nb_by_length": {},
                 "nb": 0,
                 "distance": None,
-                "p_value": None
+                "p_value": None,
+                "score": None
             }
         ]
         observed = []
@@ -278,7 +282,8 @@ chr11	125536881	T	True	0,0,0,0,0,0,0,0,0,1,15,124,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                 "nb_by_length": locus.results["Hubble"].data["lengths"].ct_by_len,
                 "nb": locus.results["Hubble"].data["lengths"].getCount(),
                 "distance": locus.results["Hubble"].data["distance"],
-                "p_value": locus.results["Hubble"].data["p_value"]
+                "p_value": locus.results["Hubble"].data["p_value"],
+                "score": locus.results["Hubble"].score
             })
         self.assertEqual(observed, expected)
 
