@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -300,43 +300,14 @@ class MSISample:
         else:
             spl_res.score = self._getScoreCalculation(spl_res.status, method, undetermined_weight)
 
-    def setStatusByInstabilityCount(self, method, min_voting_loci=3, instability_threshold=3):
-        """
-        Add status and score for the sample by number of unstable loci for the selected method.
-
-        :param method: Name of the selected method.
-        :type method: str
-        :param min_voting_loci: Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.
-        :type min_voting_loci: int
-        :param instability_threshold: If the number of unstable is superior or equal than this value the status of the sample will be unstable.
-        :type instability_threshold: int
-        """
-        result = MSISplRes.fromDict({
-            'status': Status.undetermined,
-            'method': method,
-            'score': None,
-            'param': {"aggregation_method": "instability count", "min_voting_loci": min_voting_loci, "instability_threshold": instability_threshold},
-            'version': "1.0.0"
-        })
-        nb_stable = self.getNbStable(method)
-        nb_unstable = self.getNbUnstable(method)
-        result.status = Status.undetermined
-        if nb_stable + nb_unstable >= min_voting_loci:
-            if nb_unstable >= instability_threshold:
-                result.status = Status.unstable
-            else:
-                result.status = Status.stable
-        self.results[method] = result
-        self.setScore(method)
-
-    def setStatusByInstabilityRatio(self, method, min_voting_loci=1, instability_threshold=0.4):
+    def setStatusByInstabilityRatio(self, method, min_voting_loci=0.5, instability_threshold=0.4):
         """
         Add status and score for the sample by ratio of unstable loci for the selected method.
 
         :param method: Name of the selected method.
         :type method: str
-        :param min_voting_loci: Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.
-        :type min_voting_loci: int
+        :param min_voting_loci: Minimum ratio (stable + unstable)/all to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.
+        :type min_voting_loci: float
         :param instability_threshold: If the ratio unstable/(stable + unstable) is superior or equal than this value the status of the sample will be unstable.
         :type instability_threshold: float
         """
@@ -350,37 +321,10 @@ class MSISample:
         nb_stable = self.getNbStable(method)
         nb_unstable = self.getNbUnstable(method)
         result.status = Status.undetermined
-        if nb_stable + nb_unstable >= min_voting_loci:
+        if nb_stable + nb_unstable / self.getNbLoci() >= min_voting_loci:
             if nb_unstable / (nb_stable + nb_unstable) >= instability_threshold:
                 result.status = Status.unstable
             else:
                 result.status = Status.stable
-        self.results[method] = result
-        self.setScore(method)
-
-    def setStatusByMajority(self, method, min_voting_loci=1):
-        """
-        Add status and score for the sample by consensus on loci results for the selected method.
-
-        :param method: Name of the selected method.
-        :type method: str
-        :param min_voting_loci: Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.
-        :type min_voting_loci: int
-        """
-        result = MSISplRes.fromDict({
-            'status': Status.undetermined,
-            'method': method,
-            'score': None,
-            'param': {"aggregation_method": "majority", "min_voting_loci": min_voting_loci},
-            'version': "1.0.0"
-        })
-        nb_stable = self.getNbStable(method)
-        nb_unstable = self.getNbUnstable(method)
-        if nb_stable + nb_unstable >= min_voting_loci:
-            result.status = Status.undetermined
-            if nb_stable > nb_unstable:
-                result.status = Status.stable
-            elif nb_stable < nb_unstable:
-                result.status = Status.unstable
         self.results[method] = result
         self.setScore(method)

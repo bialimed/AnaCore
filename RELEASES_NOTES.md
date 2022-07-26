@@ -1,6 +1,9 @@
 # Release 2.12.0 [DEV]
 
 ### Changes
+  * Change parameter behaviour for `min_voting_loci` in
+  `anacore.msi.sample.MSISample.setStatusByInstabilityRatio()`: from number of
+  loci to rate of loci.
   * Move `anacore.msi.MSIReport` to `anacore.msi.reportIO.ReportIO`.
   * Refactor `anacore.msi.LocusRes*` to create `anacore.msi.locus.LocusDataDistrib`.
   This class store length distribution and is linked to `anacore.msi.locus.LocusRes`
