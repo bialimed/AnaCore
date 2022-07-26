@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2021 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -15,7 +15,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.sequence import AA3LettersAlphabet, CodonAlphabet, DNAAlphabet, RNAAlphabet, Sequence
+from anacore.sequence import AA3LettersAlphabet, CodonAlphabet, DNAAlphabet, getShortestRepeatUnit, RNAAlphabet, Sequence
 
 
 ########################################################################
@@ -69,6 +69,34 @@ class TestDNAAlphabet(unittest.TestCase):
         )
         with self.assertRaises(Exception):
             DNAAlphabet.revCom("GCCGUGAICTGA")  # Invalid nt
+
+
+class TestGetShortestRepeatUnit(unittest.TestCase):
+    def test(self):
+        self.assertEqual(
+            getShortestRepeatUnit("A"),
+            None
+        )
+        self.assertEqual(
+            getShortestRepeatUnit("AA"),
+            "A"
+        )
+        self.assertEqual(
+            getShortestRepeatUnit("ATATATAT"),
+            "AT"
+        )
+        self.assertEqual(
+            getShortestRepeatUnit("AAAAA"),
+            "A"
+        )
+        self.assertEqual(
+            getShortestRepeatUnit("ATCGAATCGA"),
+            "ATCGA"
+        )
+        self.assertEqual(
+            getShortestRepeatUnit("ATATATAG"),
+            None
+        )
 
 
 class TestRNAAlphabet(unittest.TestCase):

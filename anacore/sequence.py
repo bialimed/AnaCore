@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2021 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -187,6 +187,26 @@ class DNAAlphabet(Alphabet):
         :rtype: str
         """
         return "".join([__class__.complement[base] for base in seq[::-1]])
+
+
+def getShortestRepeatUnit(seq):
+    """
+    Return the shortest repeat unit that can be used to reproduce the entire sequence or None if it does not exist.
+
+    :param str: Complete sequence.
+    :type seq: str
+    :return: The shortest repeat unit that can be used to reproduce the entire sequence or None if it does not exist.
+    :rtype: str
+    """
+    seq_len = len(seq)
+    repeat_unit = None
+    for unit_size in range(1, int(seq_len / 2) + 1):
+        if repeat_unit is None and seq_len % unit_size == 0:
+            eval_unit = seq[:unit_size]
+            chunks = {chunk for chunk in wrap(seq, unit_size)}
+            if len(chunks - {eval_unit}) == 0:
+                repeat_unit = eval_unit
+    return repeat_unit
 
 
 class RNAAlphabet(Alphabet):
