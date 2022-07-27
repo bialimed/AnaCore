@@ -148,7 +148,7 @@ class HubbleDist(HashedSVIO):
         return super().recordToLine(formatted_record)
 
 
-def parseHubbleResults(summary_path, differential_path, distributions_path=None, unstable_threshold=0.2):
+def parseHubbleResults(summary_path, differential_path, distributions_path=None, unstable_rate_threshold=0.2):
     """
     Return information on loci and analyses about microsatellites for sample.
 
@@ -158,8 +158,8 @@ def parseHubbleResults(summary_path, differential_path, distributions_path=None,
     :type differential_path: str
     :param distributions_path: Path to microsatellites sizes distributions file (format: JSON).
     :type distributions_path: str
-    :param unstable_threshold: Over this rate of unstable loci the sample is tagged as unstable.
-    :type unstable_threshold: float
+    :param unstable_rate_threshold: Over this rate of unstable loci the sample is tagged as unstable.
+    :type unstable_rate_threshold: float
     :return: Information on loci and analyses about microsatellites for sample.
     :rtype: anacore.msi.MSISpl
     """
@@ -177,8 +177,8 @@ def parseHubbleResults(summary_path, differential_path, distributions_path=None,
     status = Status.undetermined
     if sum_data["ResultIsValid"]:
         status = Status.none
-        if unstable_threshold:
-            if sum_data["PercentageUnstableSites"] > unstable_threshold * 100:
+        if unstable_rate_threshold:
+            if sum_data["PercentageUnstableSites"] > unstable_rate_threshold * 100:
                 status = Status.unstable
             else:
                 status = Status.stable
