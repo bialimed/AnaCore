@@ -15,6 +15,7 @@
     * `anacore.msings` to `anacore.msi.msings`
 
 ### Improvements
+  * Add `anacore.msi.msisensorpro` to manage results from MSIsensor-pro software.
   * Add `anacore.illumina.Run` getters to known run information and status from
   the run folder.
   * Add `anacore.illumina.DemultStat` to read demultiplex statistics from
