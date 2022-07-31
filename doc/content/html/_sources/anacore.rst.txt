@@ -169,6 +169,14 @@ anacore.msi
      :undoc-members:
      :show-inheritance:
 
+  anacore.msi.msisensorpro
+  ------------------------
+
+  .. automodule:: anacore.msi.msisensorpro
+      :members:
+      :undoc-members:
+      :show-inheritance:
+
   anacore.msi.reportIO
   --------------------
 

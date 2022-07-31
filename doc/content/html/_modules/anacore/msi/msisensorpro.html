@@ -1,0 +1,798 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>anacore.msi.msisensorpro &mdash; AnaCore  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> AnaCore
+          
+
+          
+            
+            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../anacore.html">AnaCore package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AnaCore</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>anacore.msi.msisensorpro</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for anacore.msi.msisensorpro</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing MSIsensor-pro&#39;s outputs.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2022 CHU Toulouse&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="kn">import</span> <span class="n">AbstractFile</span><span class="p">,</span> <span class="n">isGzip</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">Status</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.locus</span> <span class="kn">import</span> <span class="n">getRefSeqInfo</span><span class="p">,</span> <span class="n">Locus</span>
+<span class="kn">from</span> <span class="nn">anacore.msi.sample</span> <span class="kn">import</span> <span class="n">MSISample</span><span class="p">,</span> <span class="n">MSISplRes</span>
+<span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="kn">import</span> <span class="n">HashedSVIO</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span>
+
+
+<div class="viewcode-block" id="BaselineIO"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.BaselineIO">[docs]</a><span class="k">class</span> <span class="nc">BaselineIO</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manage baseline file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the new instance of BaselineIO.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :return: New instance of BaselineIO.</span>
+<span class="sd">        :rtype: BaselineIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;chromosome&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;location&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;repeat_unit_length&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;repeat_unit_binary&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;left_flank_binary&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;right_flank_binary&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;left_flank_bases&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;right_flank_bases&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;threshold&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;supportSamples&quot;</span>
+            <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a structured record from the current line.</span>
+
+<span class="sd">        :return: The record described by the current line.</span>
+<span class="sd">        :rtype: anacore.msi.msisensor.BaselineRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">hash</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span> <span class="s2">&quot;supportSamples&quot;</span><span class="p">]:</span>
+            <span class="nb">hash</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">hash</span><span class="p">[</span><span class="n">field</span><span class="p">])</span>
+        <span class="nb">hash</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">hash</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">])</span>
+        <span class="nb">hash</span><span class="p">[</span><span class="s2">&quot;support_samples&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">hash</span><span class="p">[</span><span class="s2">&quot;supportSamples&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;repeat_unit_length&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_unit_binary&quot;</span><span class="p">,</span> <span class="s2">&quot;left_flank_binary&quot;</span><span class="p">,</span> <span class="s2">&quot;right_flank_binary&quot;</span><span class="p">,</span> <span class="s2">&quot;supportSamples&quot;</span><span class="p">]:</span>
+            <span class="k">del</span><span class="p">(</span><span class="nb">hash</span><span class="p">[</span><span class="n">field</span><span class="p">])</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">BaselineRecord</span><span class="p">(</span><span class="o">**</span><span class="nb">hash</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">record</span>
+
+<div class="viewcode-block" id="BaselineIO.recordToLine"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.BaselineIO.recordToLine">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the record in baseline format.</span>
+
+<span class="sd">        :param record: The record to process.</span>
+<span class="sd">        :type record: BaselineRecord</span>
+<span class="sd">        :return: The baseline line corresponding to the record.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="k">if</span> <span class="n">field</span> <span class="o">!=</span> <span class="s2">&quot;supportSamples&quot;</span><span class="p">}</span>
+        <span class="nb">hash</span><span class="p">[</span><span class="s2">&quot;supportSamples&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">support_samples</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="nb">hash</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BaselineRecord"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.BaselineRecord">[docs]</a><span class="k">class</span> <span class="nc">BaselineRecord</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class to manage one baseline record.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chromosome</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">repeat_unit_bases</span><span class="p">,</span> <span class="n">left_flank_bases</span><span class="p">,</span> <span class="n">right_flank_bases</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">support_samples</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the new instance of BaselineRecord.</span>
+
+<span class="sd">        :param chromosome: Chromosome name.</span>
+<span class="sd">        :type chromosome: str</span>
+<span class="sd">        :param location: Start position of locus (0-based).</span>
+<span class="sd">        :type location: int</span>
+<span class="sd">        :param repeat_times: Number of repeat of repeat_unit_bases.</span>
+<span class="sd">        :type repeat_times: int</span>
+<span class="sd">        :param repeat_unit_bases: Sequence of repeat unit.</span>
+<span class="sd">        :type repeat_unit_bases: str</span>
+<span class="sd">        :param left_flank_bases: Sequence before locus.</span>
+<span class="sd">        :type left_flank_bases: str</span>
+<span class="sd">        :param right_flank_bases: Sequence after locus.</span>
+<span class="sd">        :type right_flank_bases: str</span>
+<span class="sd">        :param threshold: Minimum score to classify a locus as unstable.</span>
+<span class="sd">        :type threshold: float</span>
+<span class="sd">        :param support_samples: Number of samples used in threshold calculation.</span>
+<span class="sd">        :type support_samples: int</span>
+<span class="sd">        :return: New instance of BaselineRecord.</span>
+<span class="sd">        :rtype: BaselineRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chromosome</span> <span class="o">=</span> <span class="n">chromosome</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_times</span> <span class="o">=</span> <span class="n">repeat_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeat_unit_bases</span> <span class="o">=</span> <span class="n">repeat_unit_bases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">left_flank_bases</span> <span class="o">=</span> <span class="n">left_flank_bases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right_flank_bases</span> <span class="o">=</span> <span class="n">right_flank_bases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">support_samples</span> <span class="o">=</span> <span class="n">support_samples</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">left_flank_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return MSIsensor binary representation of sequence before locus.</span>
+
+<span class="sd">        :return: MSIsensor binary representation of sequence before locus.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">stringToBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left_flank_bases</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">repeat_unit_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return MSIsensor binary representation of repeat unit sequence.</span>
+
+<span class="sd">        :return: MSIsensor binary representation of repeat unit sequence.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">stringToBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat_unit_bases</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">repeat_unit_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return length of repeat unit sequence.</span>
+
+<span class="sd">        :return: Length of repeat unit sequence.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repeat_unit_bases</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">right_flank_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return MSIsensor binary representation of sequence after locus.</span>
+
+<span class="sd">        :return: MSIsensor binary representation of sequence after locus.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">stringToBinary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_flank_bases</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaselineRecord.fromModel"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.BaselineRecord.fromModel">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromModel</span><span class="p">(</span><span class="n">ref_fh</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">model_method</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="n">flank_size</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return BaselineRecord from model.</span>
+
+<span class="sd">        :param ref_fh: File handle to reference sequences.</span>
+<span class="sd">        :type ref_fh: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param target: Microsatellite region.</span>
+<span class="sd">        :type target: anacore.region.Region</span>
+<span class="sd">        :param models: Samples in model.</span>
+<span class="sd">        :type models: list of MSISample</span>
+<span class="sd">        :param model_method: Name of method used to store model information.</span>
+<span class="sd">        :type model_method: str</span>
+<span class="sd">        :param flank_size: Size of microsatellite flanking sequence used in baseline.</span>
+<span class="sd">        :type flank_size: int</span>
+<span class="sd">        :return: BaselineRecord from model.</span>
+<span class="sd">        :rtype: BaselineRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">locus_id</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+        <span class="n">locus_scan</span> <span class="o">=</span> <span class="n">getRefSeqInfo</span><span class="p">(</span><span class="n">ref_fh</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">flank_size</span><span class="p">)</span>
+        <span class="n">locus_scan</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ProEval</span><span class="o">.</span><span class="n">getThreshold</span><span class="p">(</span>
+            <span class="n">models</span><span class="p">,</span>
+            <span class="n">locus_id</span><span class="p">,</span>
+            <span class="n">method_name</span><span class="o">=</span><span class="n">model_method</span>
+        <span class="p">)</span>
+        <span class="n">locus_scan</span><span class="p">[</span><span class="s2">&quot;support_samples&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span>
+            <span class="n">spl</span> <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">models</span> <span class="k">if</span> <span class="n">spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">locus_id</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">model_method</span><span class="p">]</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
+        <span class="p">])</span>
+        <span class="k">return</span> <span class="n">BaselineRecord</span><span class="p">(</span><span class="o">**</span><span class="n">locus_scan</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="binaryToString"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.binaryToString">[docs]</a><span class="k">def</span> <span class="nf">binaryToString</span><span class="p">(</span><span class="n">binary</span><span class="p">,</span> <span class="nb">len</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return sequence string from MSIsensor binary representation of sequence.</span>
+
+<span class="sd">    :param binary: MSIsensor binary representation of sequence.</span>
+<span class="sd">    :type binary: int</span>
+<span class="sd">    :param len: Length of the original sequence.</span>
+<span class="sd">    :type len: int</span>
+<span class="sd">    :return: Sequence string from MSIsensor binary representation of sequence.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">char_by_idx</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="s2">&quot;N&quot;</span><span class="p">}</span>
+    <span class="n">curr_binary</span> <span class="o">=</span> <span class="n">binary</span>
+    <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">):</span>
+        <span class="n">char_idx</span> <span class="o">=</span> <span class="n">curr_binary</span> <span class="o">&amp;</span> <span class="mi">3</span>
+        <span class="nb">str</span> <span class="o">+=</span> <span class="n">char_by_idx</span><span class="p">[</span><span class="n">char_idx</span><span class="p">]</span>
+        <span class="n">curr_binary</span> <span class="o">=</span> <span class="n">curr_binary</span> <span class="o">&gt;&gt;</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="DistIO"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.DistIO">[docs]</a><span class="k">class</span> <span class="nc">DistIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manage distributions file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">len_limit</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the new instance of DistIO.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :param len_limit: Max length recorded in length_distribution.</span>
+<span class="sd">        :type len_limit: int</span>
+<span class="sd">        :return: New instance of DistIO.</span>
+<span class="sd">        :rtype: DistIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">len_limit</span> <span class="o">=</span> <span class="n">len_limit</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">is_end</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">is_end</span><span class="p">:</span>
+            <span class="n">locus</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextLocus</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">locus</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">yield</span><span class="p">(</span><span class="n">locus</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">is_end</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="DistIO.nextLocus"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.DistIO.nextLocus">[docs]</a>    <span class="k">def</span> <span class="nf">nextLocus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the next locus.</span>
+
+<span class="sd">        :return: The next locus object and locus metadata or None if it is the end of file.</span>
+<span class="sd">        :rtype: anacore.msi.locus.Locus, dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">locus</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">prev_file_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">new_file_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">prev_file_pos</span> <span class="o">!=</span> <span class="n">new_file_pos</span><span class="p">:</span>
+                <span class="c1"># header</span>
+                <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">left_flank</span><span class="p">,</span> <span class="n">nb_repeat_and_nt</span><span class="p">,</span> <span class="n">right_flank</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">nb_repeat</span><span class="p">,</span> <span class="n">nt</span> <span class="o">=</span> <span class="n">nb_repeat_and_nt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span>
+                <span class="n">nt</span> <span class="o">=</span> <span class="n">nt</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># lengths</span>
+                <span class="n">len_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">nb_by_length</span> <span class="o">=</span> <span class="p">{</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">nb</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">len_str</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="k">if</span> <span class="n">nb</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span><span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># record</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;chromosome&quot;</span><span class="p">:</span> <span class="n">chrom</span><span class="p">,</span>
+                    <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">pos</span><span class="p">),</span>
+                    <span class="s2">&quot;left_flank_bases&quot;</span><span class="p">:</span> <span class="n">left_flank</span><span class="p">,</span>
+                    <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_repeat</span><span class="p">),</span>
+                    <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">:</span> <span class="n">nt</span><span class="p">,</span>
+                    <span class="s2">&quot;right_flank_bases&quot;</span><span class="p">:</span> <span class="n">right_flank</span>
+                <span class="p">}</span>
+                <span class="n">locus</span> <span class="o">=</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
+                    <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">nb_repeat</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">nt</span><span class="p">)),</span>
+                    <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;MSIsensor-pro_pro&quot;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span><span class="p">,</span>
+                            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ct_by_len&quot;</span><span class="p">:</span> <span class="n">nb_by_length</span><span class="p">}</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                <span class="s1">&#39;The line </span><span class="si">{}</span><span class="s1"> in &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be parsed by </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">locus</span><span class="p">,</span> <span class="n">meta</span></div>
+
+<div class="viewcode-block" id="DistIO.recordToLines"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.DistIO.recordToLines">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the 2 lines in MSIsensor-pro distribution format.</span>
+
+<span class="sd">        :param record: Record containing distributions coming from MSIsensor-pro.</span>
+<span class="sd">        :type record: anacore.msi.base.Locus</span>
+<span class="sd">        :param meta: Metadata of locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases and right_flank_bases.</span>
+<span class="sd">        :type meta: dict</span>
+<span class="sd">        :return: The 2 lines corresponding to the record.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;MSIsensor-pro_pro&quot;</span><span class="p">]</span>
+        <span class="n">first_line</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">[</span><span class="si">{}</span><span class="s2">] </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">],</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;left_flank_bases&quot;</span><span class="p">],</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">],</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;right_flank_bases&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">second_line</span> <span class="o">=</span> <span class="s2">&quot;T: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">getDenseCount</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">len_limit</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">first_line</span><span class="p">,</span> <span class="n">second_line</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DistIO.write"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.DistIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write record lines in file.</span>
+
+<span class="sd">        :param record: Record containing distributions coming from MSIsensor-pro.</span>
+<span class="sd">        :type record: anacore.msi.base.Locus</span>
+<span class="sd">        :param meta: Metadata of the locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases and right_flank_bases.</span>
+<span class="sd">        :type meta: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recordToLines</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">2</span></div></div>
+
+
+<div class="viewcode-block" id="ProEval"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProEval">[docs]</a><span class="k">class</span> <span class="nc">ProEval</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Provides utils to predict with MSIsensor-pro pro: calculate feature and determine feature threshold.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ProEval.getSlippageScores"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProEval.getSlippageScores">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getSlippageScores</span><span class="p">(</span><span class="n">locus_distrib</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return features used to predict stability status by MSIsensor-pro: deletion score and insertion score.</span>
+
+<span class="sd">        :param locus_distrib: Lengths distribution of microsatellite.</span>
+<span class="sd">        :type locus_distrib: anacore.msi.locus.LocusDataDistrib</span>
+<span class="sd">        :param ref_len: Length of the microsatellite in reference sequence.</span>
+<span class="sd">        :type ref_len: int</span>
+<span class="sd">        :return: features used to predict stability status by MSIsensor-pro: deletion score and insertion score.</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">distribution</span> <span class="o">=</span> <span class="n">locus_distrib</span><span class="o">.</span><span class="n">getDenseCount</span><span class="p">(</span>
+            <span class="mi">1</span><span class="p">,</span>
+            <span class="nb">max</span><span class="p">(</span><span class="n">ref_len</span><span class="p">,</span> <span class="n">locus_distrib</span><span class="o">.</span><span class="n">getMaxLength</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="n">del_score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">normal_score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">insert_score</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ref_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">del_score</span> <span class="o">+=</span> <span class="n">distribution</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">ref_len</span> <span class="o">-</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">normal_score</span> <span class="o">+=</span> <span class="n">distribution</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ref_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">distribution</span><span class="p">)):</span>
+            <span class="n">normal_score</span> <span class="o">+=</span> <span class="n">distribution</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="n">ref_len</span>
+            <span class="n">insert_score</span> <span class="o">+=</span> <span class="n">distribution</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ref_len</span><span class="p">)</span>
+        <span class="n">pro_p</span> <span class="o">=</span> <span class="n">del_score</span> <span class="o">/</span> <span class="p">(</span><span class="n">normal_score</span> <span class="o">+</span> <span class="n">del_score</span> <span class="o">+</span> <span class="n">insert_score</span><span class="p">)</span>  <span class="c1"># Deletion score</span>
+        <span class="n">pro_q</span> <span class="o">=</span> <span class="n">insert_score</span> <span class="o">/</span> <span class="p">(</span><span class="n">normal_score</span> <span class="o">+</span> <span class="n">del_score</span> <span class="o">+</span> <span class="n">insert_score</span><span class="p">)</span>  <span class="c1"># Insertion score</span>
+        <span class="k">return</span> <span class="n">pro_p</span><span class="p">,</span> <span class="n">pro_q</span></div>
+
+<div class="viewcode-block" id="ProEval.getThreshold"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProEval.getThreshold">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getThreshold</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">locus_id</span><span class="p">,</span> <span class="n">method_name</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the minimum score to classify locus as unstable.</span>
+
+<span class="sd">        :param models: List of sample in model.</span>
+<span class="sd">        :type models: list of MSISample</span>
+<span class="sd">        :param locus_id: Selected ID.</span>
+<span class="sd">        :type locus_id: str</span>
+<span class="sd">        :param method_name: Name of the method used to store model information.</span>
+<span class="sd">        :type method_name: str</span>
+<span class="sd">        :return: Minimum score to classify locus as unstable.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">locus_id</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method_name</span><span class="p">]</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span><span class="p">:</span>
+                <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">locus_id</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method_name</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;MSIsensor-pro&quot;</span><span class="p">][</span><span class="s2">&quot;pro_p&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ProEval</span><span class="o">.</span><span class="n">getThresholdFromScores</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProEval.getThresholdFromScores"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProEval.getThresholdFromScores">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getThresholdFromScores</span><span class="p">(</span><span class="n">models_scores</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the minimum score to classify locus as unstable. Due to floating point the result can differ from MSIsensor-pro.</span>
+
+<span class="sd">        :param models_scores: List of scores for stable samples.</span>
+<span class="sd">        :type models_scores: list</span>
+<span class="sd">        :param ddof: Means Delta Degrees of Freedom. The divisor used in calculations is N - ddof, where N represents the number of elements.</span>
+<span class="sd">        :type ddof: int</span>
+<span class="sd">        :return: Minimum score to classify locus as unstable.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rounded_scores</span> <span class="o">=</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">elt</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000000</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">models_scores</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">rounded_scores</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">std</span><span class="p">(</span><span class="n">rounded_scores</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span> <span class="o">/</span> <span class="mi">1000000</span></div></div>
+
+
+<div class="viewcode-block" id="ProIO"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProIO">[docs]</a><span class="k">class</span> <span class="nc">ProIO</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manage differential analysis results file coming from MSIsensor-pro pro.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the new instance of ProIO.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :return: New instance of ProIO.</span>
+<span class="sd">        :rtype: ProIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;chromosome&quot;</span><span class="p">,</span> <span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="s2">&quot;left_flank_bases&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_times&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">,</span> <span class="s2">&quot;right_flank_bases&quot;</span><span class="p">,</span> <span class="s2">&quot;pro_p&quot;</span><span class="p">,</span> <span class="s2">&quot;pro_q&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;CovReads&quot;</span><span class="p">,</span> <span class="s2">&quot;threshold&quot;</span>
+            <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a structured record from the current line.</span>
+
+<span class="sd">        :return: The record described by the current line (locus result and locus metadata).</span>
+<span class="sd">        :rtype: (anacore.msi.base.Locus, dict)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span>
+        <span class="n">locus_meta</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;chromosome&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;left_flank_bases&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;left_flank_bases&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;MSIsensor-pro&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;pro_p_threshold&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">])},</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;right_flank_bases&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;right_flank_bases&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">locus</span> <span class="o">=</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
+            <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span>
+                <span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">],</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">])</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;MSIsensor-pro_pro&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;pro_p&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;pro_p&quot;</span><span class="p">]),</span>
+                        <span class="s2">&quot;pro_q&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;pro_q&quot;</span><span class="p">]),</span>
+                        <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;CovReads&quot;</span><span class="p">])</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="n">locus</span><span class="p">,</span> <span class="n">locus_meta</span>
+
+<div class="viewcode-block" id="ProIO.loci"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProIO.loci">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">loci</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return list of loci present in file.</span>
+
+<span class="sd">        :param filepath: Path to the file (format: TSV).</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: List of loci present in file.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">loci</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="nb">open</span>
+        <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
+        <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span>
+            <span class="n">handler_options</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+        <span class="k">with</span> <span class="n">handler</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">handler_options</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">left_flank_bases</span><span class="p">,</span> <span class="n">repeat_times</span><span class="p">,</span> <span class="n">repeat_unit_bases</span><span class="p">,</span> <span class="n">trash</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="n">loci</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">repeat_times</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">repeat_unit_bases</span><span class="p">))</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">loci</span></div>
+
+<div class="viewcode-block" id="ProIO.recordToLine"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProIO.recordToLine">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the record in SV format.</span>
+
+<span class="sd">        :param record: Record containing all loci results coming from MSIsensor-pro pro.</span>
+<span class="sd">        :type record: anacore.msi.locus.Locus</span>
+<span class="sd">        :param meta: Metadata of the locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases, right_flank_bases and MSIsensor-pro.pro_p_threshold.</span>
+<span class="sd">        :param meta: dict</span>
+<span class="sd">        :return: The SV line corresponding to the record.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;MSIsensor-pro_pro&quot;</span><span class="p">]</span>
+        <span class="n">formatted_record</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;chromosome&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;left_flank_bases&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;left_flank_bases&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;repeat_times&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;right_flank_bases&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;right_flank_bases&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;pro_p&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{:.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;pro_p&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;pro_q&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{:.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;pro_q&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;CovReads&quot;</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{:.6f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;MSIsensor-pro&quot;</span><span class="p">][</span><span class="s2">&quot;pro_p_threshold&quot;</span><span class="p">])</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="n">formatted_record</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProIO.write"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.ProIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">,</span> <span class="n">meta</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write record lines in file.</span>
+
+<span class="sd">        :param record: Record containing distributions coming from MSIsensor-pro.</span>
+<span class="sd">        :type record: anacore.msi.base.Locus</span>
+<span class="sd">        :param meta: Metadata of the locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases, right_flank_bases and MSIsensor-pro.pro_p_threshold.</span>
+<span class="sd">        :type meta: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Write header if the file is empty</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeHeader</span><span class="p">()</span>
+        <span class="c1"># Write record</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+
+
+<div class="viewcode-block" id="parseProResults"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.parseProResults">[docs]</a><span class="k">def</span> <span class="nf">parseProResults</span><span class="p">(</span><span class="n">spl_name</span><span class="p">,</span> <span class="n">all_path</span><span class="p">,</span> <span class="n">distributions_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unstable_rate_threshold</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">determined_rate_threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">min_support</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return information on loci and analyses about microsatellites for sample.</span>
+
+<span class="sd">    :param spl_name: Sample name.</span>
+<span class="sd">    :type spl_name: str</span>
+<span class="sd">    :param all_path: Path to sample analysis rsult for all loci (format: MSIsensor-pro pro all).</span>
+<span class="sd">    :type all_path: str</span>
+<span class="sd">    :param distributions_path: Path to microsatellites sizes distributions file (format: MSIsensor-pro pro dis).</span>
+<span class="sd">    :type distributions_path: str</span>
+<span class="sd">    :param unstable_rate_threshold: Over this rate of unstable loci the sample is tagged as unstable.</span>
+<span class="sd">    :type unstable_rate_threshold: float</span>
+<span class="sd">    :param determined_rate_threshold: Under this rate of loci (determined / all) the sample status cannot be determined.</span>
+<span class="sd">    :type determined_rate_threshold: float</span>
+<span class="sd">    :param min_support: Minimum number of reads on a locus to determine ist status.</span>
+<span class="sd">    :type min_support: int</span>
+<span class="sd">    :return: Information on loci and analyses about microsatellites for sample.</span>
+<span class="sd">    :rtype: anacore.msi.MSISpl</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;MSIsensor-pro_pro&quot;</span>
+    <span class="n">spl</span> <span class="o">=</span> <span class="n">MSISample</span><span class="p">(</span><span class="n">spl_name</span><span class="p">)</span>
+    <span class="c1"># Parse analysis results</span>
+    <span class="k">for</span> <span class="n">locus</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">ProIO</span><span class="p">(</span><span class="n">all_path</span><span class="p">):</span>
+        <span class="n">res_locus</span> <span class="o">=</span> <span class="n">locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span>
+        <span class="n">res_locus</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span>
+        <span class="k">if</span> <span class="n">res_locus</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_support</span><span class="p">:</span>
+            <span class="n">res_locus</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
+            <span class="k">if</span> <span class="n">res_locus</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;pro_p&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;MSIsensor-pro&quot;</span><span class="p">][</span><span class="s2">&quot;pro_p_threshold&quot;</span><span class="p">]:</span>
+                <span class="n">res_locus</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">unstable</span>
+        <span class="n">spl</span><span class="o">.</span><span class="n">addLocus</span><span class="p">(</span><span class="n">locus</span><span class="p">)</span>
+    <span class="c1"># Process sample status</span>
+    <span class="n">spl_status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span>
+    <span class="n">nb_determined</span> <span class="o">=</span> <span class="n">spl</span><span class="o">.</span><span class="n">getNbDetermined</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nb_determined</span> <span class="o">/</span> <span class="n">spl</span><span class="o">.</span><span class="n">getNbProcessed</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">determined_rate_threshold</span><span class="p">:</span>
+        <span class="n">unstable_rate</span> <span class="o">=</span> <span class="n">spl</span><span class="o">.</span><span class="n">getNbUnstable</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="o">/</span> <span class="n">nb_determined</span>
+        <span class="k">if</span> <span class="n">unstable_rate</span> <span class="o">&gt;</span> <span class="n">unstable_rate_threshold</span><span class="p">:</span>
+            <span class="n">spl_status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">unstable</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spl_status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
+    <span class="n">spl</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">MSISplRes</span><span class="p">(</span>
+        <span class="n">spl_status</span><span class="p">,</span>
+        <span class="n">unstable_rate</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;aggregation_method&quot;</span><span class="p">:</span> <span class="s2">&quot;instability ratio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;instability_threshold&quot;</span><span class="p">:</span> <span class="n">unstable_rate_threshold</span><span class="p">,</span>
+            <span class="s2">&quot;min_voting_loci&quot;</span><span class="p">:</span> <span class="n">determined_rate_threshold</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="c1"># Parse distributions</span>
+    <span class="k">if</span> <span class="n">distributions_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">locus</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">DistIO</span><span class="p">(</span><span class="n">distributions_path</span><span class="p">):</span>
+            <span class="n">prev_res</span> <span class="o">=</span> <span class="n">spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">locus</span><span class="o">.</span><span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span>
+            <span class="n">prev_res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">spl</span></div>
+
+
+<div class="viewcode-block" id="stringToBinary"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msisensorpro.stringToBinary">[docs]</a><span class="k">def</span> <span class="nf">stringToBinary</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return MSIsensor binary representation of the sequence.</span>
+
+<span class="sd">    :param str: Sequence.</span>
+<span class="sd">    :type str: str</span>
+<span class="sd">    :return: MSIsensor binary representation of the sequence.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">idx_by_char</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
+    <span class="n">binary</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">curr_char</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">binary</span> <span class="o">=</span> <span class="n">binary</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span>  <span class="c1"># Switch to next char (decimal: 0-3 -&gt; binary: 0-11)</span>
+        <span class="n">char_idx</span> <span class="o">=</span> <span class="n">idx_by_char</span><span class="p">[</span><span class="n">curr_char</span><span class="p">]</span>
+        <span class="n">binary</span> <span class="o">=</span> <span class="n">binary</span> <span class="o">|</span> <span class="n">char_idx</span>
+    <span class="k">return</span> <span class="n">binary</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2019, Frédéric Escudié.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

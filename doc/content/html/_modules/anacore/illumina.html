@@ -159,14 +159,15 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.21.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.22.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
 
 
@@ -190,7 +191,7 @@
             <span class="n">section_title</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">FH_sheet</span><span class="p">:</span>
                 <span class="n">striped_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="s2">&quot;\[&quot;</span> <span class="o">+</span> <span class="n">elt</span> <span class="o">+</span> <span class="s2">&quot;\],*&quot;</span><span class="p">,</span> <span class="n">striped_line</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">SampleSheetIO</span><span class="o">.</span><span class="n">SECTIONS</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\[</span><span class="si">{}</span><span class="s2">\],*&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elt</span><span class="p">),</span> <span class="n">striped_line</span><span class="p">)</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">SampleSheetIO</span><span class="o">.</span><span class="n">SECTIONS</span><span class="p">]):</span>
                     <span class="k">while</span> <span class="n">striped_line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>  <span class="c1"># Removes invalid comma used in CSV to obtain the same number of columns in whole file</span>
                         <span class="n">striped_line</span> <span class="o">=</span> <span class="n">striped_line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                     <span class="n">section_title</span> <span class="o">=</span> <span class="n">striped_line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -378,6 +379,114 @@
             <span class="p">}</span></div>
 
 
+<div class="viewcode-block" id="CompletedJobInfo"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.CompletedJobInfo">[docs]</a><span class="k">class</span> <span class="nc">CompletedJobInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reader for CompletedJobInfo.xml.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">date_format</span> <span class="o">=</span> <span class="n">date_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Retrieve information by section</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+        <span class="c1"># Process information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;CompletionTime&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># 2017-11-23T17:19:55.0941558+01:00</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_format</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;StartTime&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># 2017-11-23T17:19:55.0941558+01:00</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_format</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;WorkflowVersion&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Analysis&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="n">workflow_param</span> <span class="o">=</span> <span class="n">etreeToDict</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;WorkflowSettings&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;WorkflowSettings&quot;</span><span class="p">:</span> <span class="n">workflow_param</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span> <span class="o">==</span> <span class="s2">&quot;Amplicon - DS&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;AmpliconSettings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">etreeToDict</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;AmpliconSettings&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DemultStat"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.DemultStat">[docs]</a><span class="k">class</span> <span class="nc">DemultStat</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reader for Data/Intensities/BaseCalls/Stats/Stats.json.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of DemultStat.</span>
+
+<span class="sd">        :param path: Path to demultiplex stats (exmple: my_run/Data/Intensities/BaseCalls/Stats/Stats.json).</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: DemultStat</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DemultStat.samplesCounts"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.DemultStat.samplesCounts">[docs]</a>    <span class="k">def</span> <span class="nf">samplesCounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return number of reads by samples ID.</span>
+
+<span class="sd">        :return: Number of reads by samples ID.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">info_by_spl</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">lane</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;ConversionResults&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">lane</span><span class="p">[</span><span class="s2">&quot;DemuxResults&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;SampleId&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info_by_spl</span><span class="p">:</span>
+                    <span class="n">info_by_spl</span><span class="p">[</span><span class="n">spl</span><span class="p">[</span><span class="s2">&quot;SampleId&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;NumberReads&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">info_by_spl</span><span class="p">[</span><span class="n">spl</span><span class="p">[</span><span class="s2">&quot;SampleId&quot;</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;NumberReads&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">info_by_spl</span></div>
+
+<div class="viewcode-block" id="DemultStat.undeterminedCounts"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.DemultStat.undeterminedCounts">[docs]</a>    <span class="k">def</span> <span class="nf">undeterminedCounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return number of reads by undetermined UDI.</span>
+
+<span class="sd">        :return: Number of reads by undetermined UDI.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">info_by_barcode</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">lane</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;UnknownBarcodes&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">barcode</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">lane</span><span class="p">[</span><span class="s2">&quot;Barcodes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">barcode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info_by_barcode</span><span class="p">:</span>
+                    <span class="n">info_by_barcode</span><span class="p">[</span><span class="n">barcode</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">info_by_barcode</span><span class="p">[</span><span class="n">barcode</span><span class="p">]</span> <span class="o">+=</span> <span class="n">count</span>
+        <span class="k">return</span> <span class="n">info_by_barcode</span></div>
+
+<div class="viewcode-block" id="DemultStat.unexpectedBarcodes"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.DemultStat.unexpectedBarcodes">[docs]</a>    <span class="k">def</span> <span class="nf">unexpectedBarcodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skipped_spl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return UDI with a number of reads greate than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).</span>
+
+<span class="sd">        :param skipped_spl: List of samples excluded from the smallest sample finding. This can be used to exclude negative controls without reads.</span>
+<span class="sd">        :type skipped_spl: set</span>
+<span class="sd">        :return: UDI with a number of reads greate than or equal to the smallest sample: {&quot;udi&quot;: count, ...}.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unexpected_barcodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="c1"># Get smallest sample count</span>
+        <span class="k">if</span> <span class="n">skipped_spl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">skipped_spl</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">ct_by_identified</span> <span class="o">=</span> <span class="p">{</span><span class="n">spl</span><span class="p">:</span> <span class="n">ct</span> <span class="k">for</span> <span class="n">spl</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplesCounts</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">spl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skipped_spl</span><span class="p">}</span>
+        <span class="n">smallest_spl</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ct_by_identified</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">ct_by_identified</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+        <span class="n">identified_min_ct</span> <span class="o">=</span> <span class="n">ct_by_identified</span><span class="p">[</span><span class="n">smallest_spl</span><span class="p">]</span>
+        <span class="c1"># Get undetermined barcodes with more read than smallest sample</span>
+        <span class="k">for</span> <span class="n">barcode</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">undeterminedCounts</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="n">identified_min_ct</span><span class="p">:</span>
+                <span class="n">without_udi</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">for</span> <span class="n">udi</span> <span class="ow">in</span> <span class="n">barcode</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">udi</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;G&quot;</span><span class="p">}</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">udi</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">}:</span>
+                        <span class="n">without_udi</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">without_udi</span><span class="p">:</span>
+                    <span class="n">unexpected_barcodes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;spl&quot;</span><span class="p">:</span> <span class="n">barcode</span><span class="p">,</span> <span class="s2">&quot;ct&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">unexpected_barcodes</span></div></div>
+
+
 <div class="viewcode-block" id="RTAComplete"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.RTAComplete">[docs]</a><span class="k">class</span> <span class="nc">RTAComplete</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reader for RTAComplete.txt.&quot;&quot;&quot;</span>
 
@@ -403,6 +512,84 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">date_str</span><span class="p">,</span> <span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y %I:%M:%S %p&#39;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot; in </span><span class="si">{}</span><span class="s1"> cannot be parsed by </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Run"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.Run">[docs]</a><span class="k">class</span> <span class="nc">Run</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read and provide getters on Run from run folder.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Run.</span>
+
+<span class="sd">        :param path: Path to the run folder.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: Run</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+
+<div class="viewcode-block" id="Run.isCopied"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.Run.isCopied">[docs]</a>    <span class="k">def</span> <span class="nf">isCopied</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if copy from temp to output folder is ended by instrument. Copy step is followed post processing step on instrument.</span>
+
+<span class="sd">        :return: True if copy from temp to output folder is ended by instrument.</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isSequenced</span><span class="p">():</span>
+            <span class="n">run_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+            <span class="n">completed_copy_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;CopyComplete.txt&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">run_params</span><span class="o">.</span><span class="n">instrument</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;HiSeq&quot;</span><span class="p">,</span> <span class="s2">&quot;MiSeq&quot;</span><span class="p">]:</span>
+                <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">run_params</span><span class="o">.</span><span class="n">instrument</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">:</span>
+                <span class="n">ncs_version</span> <span class="o">=</span> <span class="n">run_params</span><span class="o">.</span><span class="n">software</span><span class="p">[</span><span class="s2">&quot;CS&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncs_version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># The universal copy service replace the previous system since NCS v4</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">completed_copy_file</span><span class="p">):</span>
+                        <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">completed_copy_file</span><span class="p">):</span>
+                <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">is_completed</span></div>
+
+<div class="viewcode-block" id="Run.isEnded"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.Run.isEnded">[docs]</a>    <span class="k">def</span> <span class="nf">isEnded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if all instrument steps are ended (sequencing, copy and post-process).</span>
+
+<span class="sd">        :return: True if all instrument steps are ended (sequencing, copy and post-process).</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCopied</span><span class="p">():</span>  <span class="c1"># Copy is ended</span>
+            <span class="n">completed_illumina_analysis_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;CompletedJobInfo.xml&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">post_process</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">completed_illumina_analysis_file</span><span class="p">):</span>  <span class="c1"># The sequencer does not produce post-processing or they are ended</span>
+                <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">is_completed</span></div>
+
+<div class="viewcode-block" id="Run.isSequenced"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.Run.isSequenced">[docs]</a>    <span class="k">def</span> <span class="nf">isSequenced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if sequencing step is ended on instrument. Sequencing step is followed by copy and post processing step on instrument.</span>
+
+<span class="sd">        :return: True if sequencing step is ended on instrument.</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rta_complete_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;RTAComplete.txt&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">rta_complete_file</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return run parameters from [rR]unParameters.xml.</span>
+
+<span class="sd">        :return: Run parameters from RunParameters.xml.</span>
+<span class="sd">        :rtype: anacore.illumina.RunParameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">run_parameters</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;RunParameters.xml&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">run_parameters</span><span class="p">):</span>
+            <span class="n">run_parameters</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;runParameters.xml&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">run_parameters</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;RunParameters cannot be found in </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">RunParameters</span><span class="p">(</span><span class="n">run_parameters</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="RunInfo"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.RunInfo">[docs]</a><span class="k">class</span> <span class="nc">RunInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -593,38 +780,6 @@
         <span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="CompletedJobInfo"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.CompletedJobInfo">[docs]</a><span class="k">class</span> <span class="nc">CompletedJobInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Reader for CompletedJobInfo.xml.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">date_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">date_format</span> <span class="o">=</span> <span class="n">date_format</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Retrieve information by section</span>
-        <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span>
-        <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
-        <span class="c1"># Process information</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;CompletionTime&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># 2017-11-23T17:19:55.0941558+01:00</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_datetime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_format</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;StartTime&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>  <span class="c1"># 2017-11-23T17:19:55.0941558+01:00</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_datetime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_format</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;WorkflowVersion&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Analysis&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
-        <span class="n">workflow_param</span> <span class="o">=</span> <span class="n">etreeToDict</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;WorkflowSettings&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;WorkflowSettings&quot;</span><span class="p">:</span> <span class="n">workflow_param</span><span class="p">}</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span> <span class="o">==</span> <span class="s2">&quot;Amplicon - DS&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;AmpliconSettings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">etreeToDict</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Workflow&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;AmpliconSettings&quot;</span><span class="p">))</span></div>
-
-
 <div class="viewcode-block" id="etreeToDict"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.etreeToDict">[docs]</a><span class="k">def</span> <span class="nf">etreeToDict</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">tag</span><span class="p">}</span>
     <span class="c1"># Attributes</span>
@@ -667,9 +822,9 @@
     <span class="k">for</span> <span class="n">curr_ext</span> <span class="ow">in</span> <span class="n">extensions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">curr_ext</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fq&quot;</span><span class="p">,</span> <span class="s2">&quot;fastq&quot;</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">,</span> <span class="s2">&quot;fa&quot;</span><span class="p">,</span> <span class="s2">&quot;gz&quot;</span><span class="p">,</span> <span class="s2">&quot;bz&quot;</span><span class="p">,</span> <span class="s2">&quot;bz2&quot;</span><span class="p">,</span> <span class="s2">&quot;lz&quot;</span><span class="p">,</span> <span class="s2">&quot;zip&quot;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The file &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be processed by getLibNameFromReadsPath because the extension &quot;</span><span class="si">{}</span><span class="s1">&quot; is not managed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_path</span><span class="p">,</span> <span class="n">curr_ext</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;_[rR][1-2]$&#39;</span><span class="p">,</span> <span class="n">library_name</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;_[rR][1-2]$&#39;</span><span class="p">,</span> <span class="n">library_name</span><span class="p">):</span>
         <span class="n">library_name</span> <span class="o">=</span> <span class="n">library_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
-    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;_[rR][1-2]_\d\d\d$&#39;</span><span class="p">,</span> <span class="n">library_name</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;_[rR][1-2]_\d\d\d$&#39;</span><span class="p">,</span> <span class="n">library_name</span><span class="p">):</span>
         <span class="n">library_name</span> <span class="o">=</span> <span class="n">library_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">library_name</span></div>
 

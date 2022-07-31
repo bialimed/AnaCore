@@ -113,6 +113,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.hubble">anacore.msi.hubble</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.locus">anacore.msi.locus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.msings">anacore.msi.msings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.msisensorpro">anacore.msi.msisensorpro</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.reportIO">anacore.msi.reportIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.msi.sample">anacore.msi.sample</a></li>
 </ul>
@@ -2913,10 +2914,149 @@ with mode “i”.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="anacore.illumina.DemultStat">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.illumina.</span></code><code class="sig-name descname"><span class="pre">DemultStat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#DemultStat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.DemultStat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reader for Data/Intensities/BaseCalls/Stats/Stats.json.</p>
+<p>Build and return an instance of DemultStat.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to demultiplex stats (exmple: my_run/Data/Intensities/BaseCalls/Stats/Stats.json).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.illumina.DemultStat" title="anacore.illumina.DemultStat">DemultStat</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="anacore.illumina.DemultStat.samplesCounts">
+<code class="sig-name descname"><span class="pre">samplesCounts</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#DemultStat.samplesCounts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.DemultStat.samplesCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return number of reads by samples ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of reads by samples ID.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.illumina.DemultStat.undeterminedCounts">
+<code class="sig-name descname"><span class="pre">undeterminedCounts</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#DemultStat.undeterminedCounts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.DemultStat.undeterminedCounts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return number of reads by undetermined UDI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Number of reads by undetermined UDI.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.illumina.DemultStat.unexpectedBarcodes">
+<code class="sig-name descname"><span class="pre">unexpectedBarcodes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skipped_spl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#DemultStat.unexpectedBarcodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.DemultStat.unexpectedBarcodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return UDI with a number of reads greate than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>skipped_spl</strong> (<em>set</em>) – List of samples excluded from the smallest sample finding. This can be used to exclude negative controls without reads.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>UDI with a number of reads greate than or equal to the smallest sample: {“udi”: count, …}.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="anacore.illumina.RTAComplete">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.illumina.</span></code><code class="sig-name descname"><span class="pre">RTAComplete</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#RTAComplete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.RTAComplete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Reader for RTAComplete.txt.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="anacore.illumina.Run">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.illumina.</span></code><code class="sig-name descname"><span class="pre">Run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#Run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.Run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Read and provide getters on Run from run folder.</p>
+<p>Build and return an instance of Run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to the run folder.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.illumina.Run" title="anacore.illumina.Run">Run</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="anacore.illumina.Run.isCopied">
+<code class="sig-name descname"><span class="pre">isCopied</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#Run.isCopied"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.Run.isCopied" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if copy from temp to output folder is ended by instrument. Copy step is followed post processing step on instrument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if copy from temp to output folder is ended by instrument.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.illumina.Run.isEnded">
+<code class="sig-name descname"><span class="pre">isEnded</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#Run.isEnded"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.Run.isEnded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if all instrument steps are ended (sequencing, copy and post-process).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if all instrument steps are ended (sequencing, copy and post-process).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.illumina.Run.isSequenced">
+<code class="sig-name descname"><span class="pre">isSequenced</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina.html#Run.isSequenced"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.Run.isSequenced" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if sequencing step is ended on instrument. Sequencing step is followed by copy and post processing step on instrument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if sequencing step is ended on instrument.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.illumina.Run.parameters">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">parameters</span></code><a class="headerlink" href="#anacore.illumina.Run.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return run parameters from [rR]unParameters.xml.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Run parameters from RunParameters.xml.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#anacore.illumina.RunParameters" title="anacore.illumina.RunParameters">anacore.illumina.RunParameters</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -3397,7 +3537,7 @@ clf.set_status(test_dataset)</p>
 <p>Classes and functions for reading/writing Hubble’s outputs.</p>
 <dl class="py class">
 <dt id="anacore.msi.hubble.HubbleDiff">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.hubble.</span></code><code class="sig-name descname"><span class="pre">HubbleDiff</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/hubble.html#HubbleDiff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.hubble.HubbleDiff" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.hubble.</span></code><code class="sig-name descname"><span class="pre">HubbleDiff</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/hubble.html#HubbleDiff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.hubble.HubbleDiff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.sv.HashedSVIO</span></code></a></p>
 <p>Manage differential analysis results file coming from Hubble.</p>
 <p>Return the new instance of HubbleDiff.</p>
@@ -3406,6 +3546,7 @@ clf.set_status(test_dataset)</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filepath</strong> (<em>str</em>) – The filepath.</p></li>
 <li><p><strong>mode</strong> (<em>str</em>) – Mode to open the file (‘r’, ‘w’, ‘a’).</p></li>
+<li><p><strong>ref_path</strong> (<em>str</em>) – Path to reference sequences file used in analysis (format: fasta with index).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -3436,7 +3577,7 @@ clf.set_status(test_dataset)</p>
 
 <dl class="py class">
 <dt id="anacore.msi.hubble.HubbleDist">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.hubble.</span></code><code class="sig-name descname"><span class="pre">HubbleDist</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/hubble.html#HubbleDist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.hubble.HubbleDist" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.hubble.</span></code><code class="sig-name descname"><span class="pre">HubbleDist</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/hubble.html#HubbleDist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.hubble.HubbleDist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.sv.HashedSVIO</span></code></a></p>
 <p>Manage distributions file coming from hubble.</p>
 <p>Return the new instance of HubbleDist.</p>
@@ -3445,6 +3586,7 @@ clf.set_status(test_dataset)</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filepath</strong> (<em>str</em>) – The filepath.</p></li>
 <li><p><strong>mode</strong> (<em>str</em>) – Mode to open the file (‘r’, ‘w’, ‘a’).</p></li>
+<li><p><strong>ref_path</strong> (<em>str</em>) – Path to reference sequences file used in analysis (format: fasta with index).</p></li>
 <li><p><strong>len_limit</strong> (<em>int</em>) – Max length recorded in length_distribution.</p></li>
 </ul>
 </dd>
@@ -3475,16 +3617,39 @@ clf.set_status(test_dataset)</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="anacore.msi.hubble.nbRepeatFromStart">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.hubble.</span></code><code class="sig-name descname"><span class="pre">nbRepeatFromStart</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chrom</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">motif</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/hubble.html#nbRepeatFromStart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.hubble.nbRepeatFromStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return number of occurrences of the pattern at the beginning of the sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_reader</strong> (<a class="reference internal" href="#anacore.sequenceIO.IdxFastaIO" title="anacore.sequenceIO.IdxFastaIO"><em>anacore.sequenceIO.IdxFastaIO</em></a>) – File handle to reference sequences file.</p></li>
+<li><p><strong>chrom</strong> (<em>str</em>) – Name of reference region.</p></li>
+<li><p><strong>start</strong> (<em>int</em>) – Start position on reference (0-based).</p></li>
+<li><p><strong>motif</strong> (<em>str</em>) – Repeat motif base.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of occurrences of the pattern at the beginning of the sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="anacore.msi.hubble.parseHubbleResults">
-<code class="sig-prename descclassname"><span class="pre">anacore.msi.hubble.</span></code><code class="sig-name descname"><span class="pre">parseHubbleResults</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">differential_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distributions_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unstable_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/hubble.html#parseHubbleResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.hubble.parseHubbleResults" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.hubble.</span></code><code class="sig-name descname"><span class="pre">parseHubbleResults</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">differential_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distributions_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unstable_rate_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/hubble.html#parseHubbleResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.hubble.parseHubbleResults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return information on loci and analyses about microsatellites for sample.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences_path</strong> (<em>str</em>) – Path to reference sequences file used in analysis (format: fasta with index).</p></li>
 <li><p><strong>summary_path</strong> (<em>str</em>) – Path to microsatellites analysis summary file (format: JSON).</p></li>
 <li><p><strong>differential_path</strong> (<em>str</em>) – Path to microsatellites diffrential analysis results file (format: JSON).</p></li>
 <li><p><strong>distributions_path</strong> (<em>str</em>) – Path to microsatellites sizes distributions file (format: JSON).</p></li>
-<li><p><strong>unstable_threshold</strong> (<em>float</em>) – Over this rate of unstable loci the sample is tagged as unstable.</p></li>
+<li><p><strong>unstable_rate_threshold</strong> (<em>float</em>) – Over this rate of unstable loci the sample is tagged as unstable.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -3533,6 +3698,20 @@ clf.set_status(test_dataset)</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="anacore.msi.locus.Locus.end">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">end</span></code><a class="headerlink" href="#anacore.msi.locus.Locus.end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return end position on reference (1-based).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>End position on reference (1-based).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="anacore.msi.locus.Locus.fromDict">
 <em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">fromDict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hash</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/locus.html#Locus.fromDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.locus.Locus.fromDict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build and return an instance of Locus from a dict. This method is used for load instance from JSON.</p>
@@ -3545,6 +3724,34 @@ clf.set_status(test_dataset)</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>anacore.msi.base.Locus</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.locus.Locus.length">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">length</span></code><a class="headerlink" href="#anacore.msi.locus.Locus.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return length of locus in reference sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length of locus in reference sequence.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.locus.Locus.start">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">start</span></code><a class="headerlink" href="#anacore.msi.locus.Locus.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return start position on reference (1-based).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Start position on reference (1-based).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3571,6 +3778,27 @@ clf.set_status(test_dataset)</p>
 <dd class="field-odd"><p><a class="reference internal" href="#anacore.msi.locus.LocusDataDistrib" title="anacore.msi.locus.LocusDataDistrib">LocusDataDistrib</a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt id="anacore.msi.locus.LocusDataDistrib.fromDense">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">fromDense</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dense</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'reads'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/locus.html#LocusDataDistrib.fromDense"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.locus.LocusDataDistrib.fromDense" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return LocusDataDistrib from dense list of counts (example: [0, 5, 4, 1] =&gt; {2: 5, 3: 4, 4: 1}).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dense</strong> (<em>list</em>) – List of counts. Each value correspond to a length and each length is represented between start and max length.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – Depth calculation mode (“reads” or “fragments”).</p></li>
+<li><p><strong>start</strong> (<em>int</em>) – Lis of counts start form this value. First length is more often 1 but can be 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LocusDataDistrib from dense list of counts (example: [0, 5, 4, 1] =&gt; {2: 5, 3: 4, 4: 1}).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.msi.locus.LocusDataDistrib" title="anacore.msi.locus.LocusDataDistrib">LocusDataDistrib</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="anacore.msi.locus.LocusDataDistrib.getCount">
 <code class="sig-name descname"><span class="pre">getCount</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/locus.html#LocusDataDistrib.getCount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.locus.LocusDataDistrib.getCount" title="Permalink to this definition">¶</a></dt>
@@ -3654,6 +3882,37 @@ clf.set_status(test_dataset)</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="anacore.msi.locus.LocusDataDistrib.getMostRepresented">
+<code class="sig-name descname"><span class="pre">getMostRepresented</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/locus.html#LocusDataDistrib.getMostRepresented"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.locus.LocusDataDistrib.getMostRepresented" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.locus.LocusDataDistrib.getNbPeaks">
+<code class="sig-name descname"><span class="pre">getNbPeaks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/locus.html#LocusDataDistrib.getNbPeaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.locus.LocusDataDistrib.getNbPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return number of peaks in the distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>min_count</strong> (<em>int</em>) – Length with lower count than this value are not taken into account.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of peaks in the distribution.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="anacore.msi.locus.LocusDataDistrib.items">
 <code class="sig-name descname"><span class="pre">items</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/locus.html#LocusDataDistrib.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.locus.LocusDataDistrib.items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a generator on tuples (lengths, count). Lengths are sparse.</p>
@@ -3709,6 +3968,27 @@ clf.set_status(test_dataset)</p>
 
 </dd></dl>
 
+<dl class="py function">
+<dt id="anacore.msi.locus.getRefSeqInfo">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.locus.</span></code><code class="sig-name descname"><span class="pre">getRefSeqInfo</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_fh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">microsat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flank_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/locus.html#getRefSeqInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.locus.getRefSeqInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return location, flanks bases, repeat sequences and number of occurences from reference sequence and target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_fh</strong> (<a class="reference internal" href="#anacore.sequenceIO.IdxFastaIO" title="anacore.sequenceIO.IdxFastaIO"><em>anacore.sequenceIO.IdxFastaIO</em></a>) – File handle to reference sequences file.</p></li>
+<li><p><strong>microsat</strong> (<a class="reference internal" href="#anacore.region.Region" title="anacore.region.Region"><em>anacore.region.Region</em></a>) – Microsatellite region.</p></li>
+<li><p><strong>flank_size</strong> (<em>int</em>) – Size of flanking sequences.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Location, flanks bases, repeat sequences and number of occurences from reference sequence and target.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-anacore.msi.msings">
 <span id="anacore-msi-msings"></span><h3>anacore.msi.msings<a class="headerlink" href="#module-anacore.msi.msings" title="Permalink to this headline">¶</a></h3>
@@ -3747,6 +4027,53 @@ clf.set_status(test_dataset)</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="anacore.msi.msings.MSINGSEval">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msings.</span></code><code class="sig-name descname"><span class="pre">MSINGSEval</span></code><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSEval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSEval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provides utils to predict with mSINGS: calculate feature and determine feature threshold.</p>
+<dl class="py method">
+<dt id="anacore.msi.msings.MSINGSEval.getNbPeaks">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">getNbPeaks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locus_distrib</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highest_peak_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSEval.getNbPeaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSEval.getNbPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return feature used to predict stability status by mSINGS: the number of peaks with height &gt;= peak_height_cutoff * highest_peak_height.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>locus_distrib</strong> (<a class="reference internal" href="#anacore.msi.locus.LocusDataDistrib" title="anacore.msi.locus.LocusDataDistrib"><em>anacore.msi.locus.LocusDataDistrib</em></a>) – Lengths distribution of microsatellite.</p></li>
+<li><p><strong>highest_peak_ratio</strong> (<em>float</em>) – Minimum rate of highest peak height to consider a peak.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Feature used to predict stability status by mSINGS: the number of peaks with height &gt;= peak_height_cutoff * highest_peak_height.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msings.MSINGSEval.getThresholdFromNbPeaks">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">getThresholdFromNbPeaks</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models_nb_peaks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_dev_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSEval.getThresholdFromNbPeaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSEval.getThresholdFromNbPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return minimum number of peaks to tag distribution as unstable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models_nb_peaks</strong> (<em>list</em>) – Number of peaks in stable population (see MSINGSEval.getNbPeaks).</p></li>
+<li><p><strong>std_dev_rate</strong> (<em>float</em>) – Number of standard deviation authorized around average number of peaks in stable population.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Minimum number of peaks to tag distribution as unstable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="anacore.msi.msings.MSINGSReport">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msings.</span></code><code class="sig-name descname"><span class="pre">MSINGSReport</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSReport" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -3763,6 +4090,430 @@ clf.set_status(test_dataset)</p>
 <dd><p>Parse file and store information in self.</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-anacore.msi.msisensorpro">
+<span id="anacore-msi-msisensorpro"></span><h3>anacore.msi.msisensorpro<a class="headerlink" href="#module-anacore.msi.msisensorpro" title="Permalink to this headline">¶</a></h3>
+<p>Classes and functions for reading/writing MSIsensor-pro’s outputs.</p>
+<dl class="py class">
+<dt id="anacore.msi.msisensorpro.BaselineIO">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">BaselineIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#BaselineIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.sv.HashedSVIO</span></code></a></p>
+<p>Manage baseline file.</p>
+<p>Return the new instance of BaselineIO.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em>) – The filepath.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – Mode to open the file (‘r’, ‘w’, ‘a’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New instance of BaselineIO.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.msi.msisensorpro.BaselineIO" title="anacore.msi.msisensorpro.BaselineIO">BaselineIO</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.BaselineIO.recordToLine">
+<code class="sig-name descname"><span class="pre">recordToLine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#BaselineIO.recordToLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineIO.recordToLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the record in baseline format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>record</strong> (<a class="reference internal" href="#anacore.msi.msisensorpro.BaselineRecord" title="anacore.msi.msisensorpro.BaselineRecord"><em>BaselineRecord</em></a>) – The record to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The baseline line corresponding to the record.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="anacore.msi.msisensorpro.BaselineRecord">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">BaselineRecord</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chromosome</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_unit_bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_flank_bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_flank_bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">support_samples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#BaselineRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to manage one baseline record.</p>
+<p>Return the new instance of BaselineRecord.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chromosome</strong> (<em>str</em>) – Chromosome name.</p></li>
+<li><p><strong>location</strong> (<em>int</em>) – Start position of locus (0-based).</p></li>
+<li><p><strong>repeat_times</strong> (<em>int</em>) – Number of repeat of repeat_unit_bases.</p></li>
+<li><p><strong>repeat_unit_bases</strong> (<em>str</em>) – Sequence of repeat unit.</p></li>
+<li><p><strong>left_flank_bases</strong> (<em>str</em>) – Sequence before locus.</p></li>
+<li><p><strong>right_flank_bases</strong> (<em>str</em>) – Sequence after locus.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Minimum score to classify a locus as unstable.</p></li>
+<li><p><strong>support_samples</strong> (<em>int</em>) – Number of samples used in threshold calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New instance of BaselineRecord.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.msi.msisensorpro.BaselineRecord" title="anacore.msi.msisensorpro.BaselineRecord">BaselineRecord</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.BaselineRecord.fromModel">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">fromModel</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_fh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flank_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#BaselineRecord.fromModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineRecord.fromModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return BaselineRecord from model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_fh</strong> (<a class="reference internal" href="#anacore.sequenceIO.IdxFastaIO" title="anacore.sequenceIO.IdxFastaIO"><em>anacore.sequenceIO.IdxFastaIO</em></a>) – File handle to reference sequences.</p></li>
+<li><p><strong>target</strong> (<a class="reference internal" href="#anacore.region.Region" title="anacore.region.Region"><em>anacore.region.Region</em></a>) – Microsatellite region.</p></li>
+<li><p><strong>models</strong> (<em>list of MSISample</em>) – Samples in model.</p></li>
+<li><p><strong>model_method</strong> (<em>str</em>) – Name of method used to store model information.</p></li>
+<li><p><strong>flank_size</strong> (<em>int</em>) – Size of microsatellite flanking sequence used in baseline.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>BaselineRecord from model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.msi.msisensorpro.BaselineRecord" title="anacore.msi.msisensorpro.BaselineRecord">BaselineRecord</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.BaselineRecord.left_flank_binary">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">left_flank_binary</span></code><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineRecord.left_flank_binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return MSIsensor binary representation of sequence before locus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>MSIsensor binary representation of sequence before locus.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.BaselineRecord.repeat_unit_binary">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">repeat_unit_binary</span></code><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineRecord.repeat_unit_binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return MSIsensor binary representation of repeat unit sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>MSIsensor binary representation of repeat unit sequence.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.BaselineRecord.repeat_unit_length">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">repeat_unit_length</span></code><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineRecord.repeat_unit_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return length of repeat unit sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Length of repeat unit sequence.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.BaselineRecord.right_flank_binary">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">right_flank_binary</span></code><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineRecord.right_flank_binary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return MSIsensor binary representation of sequence after locus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>MSIsensor binary representation of sequence after locus.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="anacore.msi.msisensorpro.DistIO">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">DistIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#DistIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.DistIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.abstractFile.AbstractFile" title="anacore.abstractFile.AbstractFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.abstractFile.AbstractFile</span></code></a></p>
+<p>Manage distributions file.</p>
+<p>Return the new instance of DistIO.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em>) – The filepath.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – Mode to open the file (‘r’, ‘w’, ‘a’).</p></li>
+<li><p><strong>len_limit</strong> (<em>int</em>) – Max length recorded in length_distribution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New instance of DistIO.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.msi.msisensorpro.DistIO" title="anacore.msi.msisensorpro.DistIO">DistIO</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.DistIO.nextLocus">
+<code class="sig-name descname"><span class="pre">nextLocus</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#DistIO.nextLocus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.DistIO.nextLocus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the next locus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The next locus object and locus metadata or None if it is the end of file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#anacore.msi.locus.Locus" title="anacore.msi.locus.Locus">anacore.msi.locus.Locus</a>, dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.DistIO.recordToLines">
+<code class="sig-name descname"><span class="pre">recordToLines</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#DistIO.recordToLines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.DistIO.recordToLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the 2 lines in MSIsensor-pro distribution format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>record</strong> (<em>anacore.msi.base.Locus</em>) – Record containing distributions coming from MSIsensor-pro.</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Metadata of locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases and right_flank_bases.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The 2 lines corresponding to the record.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.DistIO.write">
+<code class="sig-name descname"><span class="pre">write</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#DistIO.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.DistIO.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write record lines in file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>record</strong> (<em>anacore.msi.base.Locus</em>) – Record containing distributions coming from MSIsensor-pro.</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Metadata of the locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases and right_flank_bases.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="anacore.msi.msisensorpro.ProEval">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">ProEval</span></code><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProEval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProEval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provides utils to predict with MSIsensor-pro pro: calculate feature and determine feature threshold.</p>
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.ProEval.getSlippageScores">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">getSlippageScores</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">locus_distrib</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProEval.getSlippageScores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProEval.getSlippageScores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return features used to predict stability status by MSIsensor-pro: deletion score and insertion score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>locus_distrib</strong> (<a class="reference internal" href="#anacore.msi.locus.LocusDataDistrib" title="anacore.msi.locus.LocusDataDistrib"><em>anacore.msi.locus.LocusDataDistrib</em></a>) – Lengths distribution of microsatellite.</p></li>
+<li><p><strong>ref_len</strong> (<em>int</em>) – Length of the microsatellite in reference sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>features used to predict stability status by MSIsensor-pro: deletion score and insertion score.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.ProEval.getThreshold">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">getThreshold</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">locus_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'model'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProEval.getThreshold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProEval.getThreshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum score to classify locus as unstable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> (<em>list of MSISample</em>) – List of sample in model.</p></li>
+<li><p><strong>locus_id</strong> (<em>str</em>) – Selected ID.</p></li>
+<li><p><strong>method_name</strong> (<em>str</em>) – Name of the method used to store model information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Minimum score to classify locus as unstable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.ProEval.getThresholdFromScores">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">getThresholdFromScores</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models_scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProEval.getThresholdFromScores"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProEval.getThresholdFromScores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the minimum score to classify locus as unstable. Due to floating point the result can differ from MSIsensor-pro.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models_scores</strong> (<em>list</em>) – List of scores for stable samples.</p></li>
+<li><p><strong>ddof</strong> (<em>int</em>) – Means Delta Degrees of Freedom. The divisor used in calculations is N - ddof, where N represents the number of elements.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Minimum score to classify locus as unstable.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="anacore.msi.msisensorpro.ProIO">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">ProIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.sv.HashedSVIO</span></code></a></p>
+<p>Manage differential analysis results file coming from MSIsensor-pro pro.</p>
+<p>Return the new instance of ProIO.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> (<em>str</em>) – The filepath.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – Mode to open the file (‘r’, ‘w’, ‘a’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>New instance of ProIO.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.msi.msisensorpro.ProIO" title="anacore.msi.msisensorpro.ProIO">ProIO</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.ProIO.loci">
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">loci</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProIO.loci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProIO.loci" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of loci present in file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – Path to the file (format: TSV).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of loci present in file.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.ProIO.recordToLine">
+<code class="sig-name descname"><span class="pre">recordToLine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProIO.recordToLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProIO.recordToLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the record in SV format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>record</strong> (<a class="reference internal" href="#anacore.msi.locus.Locus" title="anacore.msi.locus.Locus"><em>anacore.msi.locus.Locus</em></a>) – Record containing all loci results coming from MSIsensor-pro pro.</p></li>
+<li><p><strong>meta</strong> – Metadata of the locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases, right_flank_bases and MSIsensor-pro.pro_p_threshold.</p></li>
+<li><p><strong>meta</strong> – dict</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The SV line corresponding to the record.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="anacore.msi.msisensorpro.ProIO.write">
+<code class="sig-name descname"><span class="pre">write</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#ProIO.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.ProIO.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write record lines in file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>record</strong> (<em>anacore.msi.base.Locus</em>) – Record containing distributions coming from MSIsensor-pro.</p></li>
+<li><p><strong>meta</strong> (<em>dict</em>) – Metadata of the locus: chromosome, location (0-based), left_flank_bases, repeat_times, repeat_unit_bases, right_flank_bases and MSIsensor-pro.pro_p_threshold.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="anacore.msi.msisensorpro.binaryToString">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">binaryToString</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">binary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#binaryToString"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.binaryToString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return sequence string from MSIsensor binary representation of sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>binary</strong> (<em>int</em>) – MSIsensor binary representation of sequence.</p></li>
+<li><p><strong>len</strong> (<em>int</em>) – Length of the original sequence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Sequence string from MSIsensor binary representation of sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="anacore.msi.msisensorpro.parseProResults">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">parseProResults</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spl_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distributions_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unstable_rate_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">determined_rate_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_support</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#parseProResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.parseProResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return information on loci and analyses about microsatellites for sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spl_name</strong> (<em>str</em>) – Sample name.</p></li>
+<li><p><strong>all_path</strong> (<em>str</em>) – Path to sample analysis rsult for all loci (format: MSIsensor-pro pro all).</p></li>
+<li><p><strong>distributions_path</strong> (<em>str</em>) – Path to microsatellites sizes distributions file (format: MSIsensor-pro pro dis).</p></li>
+<li><p><strong>unstable_rate_threshold</strong> (<em>float</em>) – Over this rate of unstable loci the sample is tagged as unstable.</p></li>
+<li><p><strong>determined_rate_threshold</strong> (<em>float</em>) – Under this rate of loci (determined / all) the sample status cannot be determined.</p></li>
+<li><p><strong>min_support</strong> (<em>int</em>) – Minimum number of reads on a locus to determine ist status.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Information on loci and analyses about microsatellites for sample.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>anacore.msi.MSISpl</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="anacore.msi.msisensorpro.stringToBinary">
+<code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">stringToBinary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#stringToBinary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.stringToBinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return MSIsensor binary representation of the sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>str</strong> (<em>str</em>) – Sequence.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>MSIsensor binary representation of the sequence.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -4034,44 +4785,15 @@ clf.set_status(test_dataset)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="anacore.msi.sample.MSISample.setStatusByInstabilityCount">
-<code class="sig-name descname"><span class="pre">setStatusByInstabilityCount</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_voting_loci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instability_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/sample.html#MSISample.setStatusByInstabilityCount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.sample.MSISample.setStatusByInstabilityCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add status and score for the sample by number of unstable loci for the selected method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>method</strong> (<em>str</em>) – Name of the selected method.</p></li>
-<li><p><strong>min_voting_loci</strong> (<em>int</em>) – Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</p></li>
-<li><p><strong>instability_threshold</strong> (<em>int</em>) – If the number of unstable is superior or equal than this value the status of the sample will be unstable.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt id="anacore.msi.sample.MSISample.setStatusByInstabilityRatio">
-<code class="sig-name descname"><span class="pre">setStatusByInstabilityRatio</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_voting_loci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instability_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/sample.html#MSISample.setStatusByInstabilityRatio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.sample.MSISample.setStatusByInstabilityRatio" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">setStatusByInstabilityRatio</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_voting_loci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instability_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/sample.html#MSISample.setStatusByInstabilityRatio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.sample.MSISample.setStatusByInstabilityRatio" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add status and score for the sample by ratio of unstable loci for the selected method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>method</strong> (<em>str</em>) – Name of the selected method.</p></li>
-<li><p><strong>min_voting_loci</strong> (<em>int</em>) – Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</p></li>
+<li><p><strong>min_voting_loci</strong> (<em>float</em>) – Minimum ratio (stable + unstable)/all to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</p></li>
 <li><p><strong>instability_threshold</strong> (<em>float</em>) – If the ratio unstable/(stable + unstable) is superior or equal than this value the status of the sample will be unstable.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="anacore.msi.sample.MSISample.setStatusByMajority">
-<code class="sig-name descname"><span class="pre">setStatusByMajority</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_voting_loci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/sample.html#MSISample.setStatusByMajority"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.sample.MSISample.setStatusByMajority" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add status and score for the sample by consensus on loci results for the selected method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>method</strong> (<em>str</em>) – Name of the selected method.</p></li>
-<li><p><strong>min_voting_loci</strong> (<em>int</em>) – Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</p></li>
 </ul>
 </dd>
 </dl>
@@ -5101,6 +5823,23 @@ clf.set_status(test_dataset)</p>
 
 </dd></dl>
 
+<dl class="py function">
+<dt id="anacore.sequence.getShortestRepeatUnit">
+<code class="sig-prename descclassname"><span class="pre">anacore.sequence.</span></code><code class="sig-name descname"><span class="pre">getShortestRepeatUnit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/sequence.html#getShortestRepeatUnit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.sequence.getShortestRepeatUnit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the shortest repeat unit that can be used to reproduce the entire sequence or None if it does not exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>str</strong> – Complete sequence.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The shortest repeat unit that can be used to reproduce the entire sequence or None if it does not exist.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-anacore.sequenceIO">
 <span id="anacore-sequenceio"></span><h2>anacore.sequenceIO<a class="headerlink" href="#module-anacore.sequenceIO" title="Permalink to this headline">¶</a></h2>
@@ -5468,7 +6207,7 @@ clf.set_status(test_dataset)</p>
 <dl class="py method">
 <dt id="anacore.sequenceIO.IdxFastaIO.getSub">
 <code class="sig-name descname"><span class="pre">getSub</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/sequenceIO.html#IdxFastaIO.getSub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.sequenceIO.IdxFastaIO.getSub" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the selected sub of the sequence from file.</p>
+<dd><p>Return the selected sub of the sequence from file. Return empty sequence if start position is out. Return fitted sequence if end is out.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

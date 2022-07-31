@@ -159,22 +159,24 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2022 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.2&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
+<span class="kn">from</span> <span class="nn">anacore.sequenceIO</span> <span class="kn">import</span> <span class="n">IdxFastaIO</span>
 <span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="kn">import</span> <span class="n">HashedSVIO</span>
 <span class="kn">from</span> <span class="nn">anacore.msi.base</span> <span class="kn">import</span> <span class="n">Status</span>
 <span class="kn">from</span> <span class="nn">anacore.msi.locus</span> <span class="kn">import</span> <span class="n">Locus</span>
 <span class="kn">from</span> <span class="nn">anacore.msi.sample</span> <span class="kn">import</span> <span class="n">MSISample</span><span class="p">,</span> <span class="n">MSISplRes</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">wrap</span>
 
 
 <div class="viewcode-block" id="HubbleDiff"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.HubbleDiff">[docs]</a><span class="k">class</span> <span class="nc">HubbleDiff</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manage differential analysis results file coming from Hubble.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">ref_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the new instance of HubbleDiff.</span>
 
@@ -182,12 +184,18 @@
 <span class="sd">        :type filepath: str</span>
 <span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
 <span class="sd">        :type mode: str</span>
+<span class="sd">        :param ref_path: Path to reference sequences file used in analysis (format: fasta with index).</span>
+<span class="sd">        :type ref_path: str</span>
 <span class="sd">        :return: New instance of HubbleDiff.</span>
 <span class="sd">        :rtype: HubbleDiff</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Chromosome&quot;</span><span class="p">,</span> <span class="s2">&quot;Start&quot;</span><span class="p">,</span> <span class="s2">&quot;RepeatUnit&quot;</span><span class="p">,</span> <span class="s2">&quot;Assessed&quot;</span><span class="p">,</span> <span class="s2">&quot;Distance&quot;</span><span class="p">,</span> <span class="s2">&quot;PValue&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ref_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;In read mode </span><span class="si">{}</span><span class="s2"> require reference sequences path.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">IdxFastaIO</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -197,8 +205,15 @@
 <span class="sd">        :rtype: anacore.msi.base.Locus</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">record</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span>
+        <span class="n">microsat_length</span> <span class="o">=</span> <span class="n">nbRepeatFromStart</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Chromosome&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">]),</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;RepeatUnit&quot;</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;RepeatUnit&quot;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
-            <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;Chromosome&quot;</span><span class="p">],</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Chromosome&quot;</span><span class="p">],</span>
+                <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">],</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">microsat_length</span>
+            <span class="p">),</span>
             <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;Hubble&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span><span class="p">,</span>
@@ -223,8 +238,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span>
         <span class="n">formatted_record</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;Chromosome&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;Chromosome&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;Start&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span>
             <span class="s2">&quot;RepeatUnit&quot;</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nt&quot;</span><span class="p">],</span>
             <span class="s2">&quot;Assessed&quot;</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;True&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Distance&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">],</span>
@@ -236,7 +251,7 @@
 <div class="viewcode-block" id="HubbleDist"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.HubbleDist">[docs]</a><span class="k">class</span> <span class="nc">HubbleDist</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manage distributions file coming from hubble.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">len_limit</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">ref_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">len_limit</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the new instance of HubbleDist.</span>
 
@@ -244,6 +259,8 @@
 <span class="sd">        :type filepath: str</span>
 <span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
 <span class="sd">        :type mode: str</span>
+<span class="sd">        :param ref_path: Path to reference sequences file used in analysis (format: fasta with index).</span>
+<span class="sd">        :type ref_path: str</span>
 <span class="sd">        :param len_limit: Max length recorded in length_distribution.</span>
 <span class="sd">        :type len_limit: int</span>
 <span class="sd">        :return: New instance of HubbleDist.</span>
@@ -253,6 +270,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">len_limit</span> <span class="o">=</span> <span class="n">len_limit</span>
         <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;w&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">,</span> <span class="s2">&quot;location&quot;</span><span class="p">,</span> <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">,</span> <span class="s2">&quot;covered&quot;</span><span class="p">,</span> <span class="s2">&quot;length_distribution&quot;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;r&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ref_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;In read mode </span><span class="si">{}</span><span class="s2"> require reference sequences path.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">IdxFastaIO</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -267,9 +288,17 @@
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;length_distribution&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">count</span> <span class="o">!=</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
                 <span class="n">nb_by_length</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>  <span class="c1"># Lengths count start from 1</span>
+        <span class="c1"># Get locus reference length</span>
+        <span class="n">microsat_length</span> <span class="o">=</span> <span class="n">nbRepeatFromStart</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]),</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">])</span>
         <span class="c1"># Locus</span>
         <span class="k">return</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
-            <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span>
+                <span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">],</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">microsat_length</span>
+            <span class="p">),</span>
             <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;Hubble&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;covered&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
@@ -292,8 +321,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span>
         <span class="n">formatted_record</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;chromosome&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;chromosome&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span>
             <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">:</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;nt&quot;</span><span class="p">],</span>
             <span class="s2">&quot;covered&quot;</span><span class="p">:</span> <span class="s2">&quot;False&quot;</span> <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">getCount</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;True&quot;</span><span class="p">,</span>
             <span class="s2">&quot;length_distribution&quot;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -303,18 +332,56 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="n">formatted_record</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="parseHubbleResults"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.parseHubbleResults">[docs]</a><span class="k">def</span> <span class="nf">parseHubbleResults</span><span class="p">(</span><span class="n">summary_path</span><span class="p">,</span> <span class="n">differential_path</span><span class="p">,</span> <span class="n">distributions_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unstable_threshold</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+<div class="viewcode-block" id="nbRepeatFromStart"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.nbRepeatFromStart">[docs]</a><span class="k">def</span> <span class="nf">nbRepeatFromStart</span><span class="p">(</span><span class="n">ref_reader</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">motif</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return number of occurrences of the pattern at the beginning of the sequence.</span>
+
+<span class="sd">    :param ref_reader: File handle to reference sequences file.</span>
+<span class="sd">    :type ref_reader: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">    :param chrom: Name of reference region.</span>
+<span class="sd">    :type chrom: str</span>
+<span class="sd">    :param start: Start position on reference (0-based).</span>
+<span class="sd">    :type start: int</span>
+<span class="sd">    :param motif: Repeat motif base.</span>
+<span class="sd">    :type motif: str</span>
+<span class="sd">    :return: Number of occurrences of the pattern at the beginning of the sequence.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">motif</span> <span class="o">=</span> <span class="n">motif</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">read_chunk_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">motif</span><span class="p">)</span> <span class="o">*</span> <span class="mi">30</span>
+    <span class="n">end_search</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">end_search</span><span class="p">:</span>
+        <span class="n">sub_seq</span> <span class="o">=</span> <span class="n">ref_reader</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span>
+            <span class="n">chrom</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">read_chunk_size</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">sub_seq</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>  <span class="c1"># Chromosome is ended</span>
+            <span class="n">end_search</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sub_seq</span> <span class="o">=</span> <span class="n">sub_seq</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">sub_seq_win</span> <span class="ow">in</span> <span class="n">wrap</span><span class="p">(</span><span class="n">sub_seq</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">motif</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">sub_seq_win</span> <span class="o">!=</span> <span class="n">motif</span><span class="p">:</span>
+                    <span class="n">end_search</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+                <span class="n">nb</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">start</span> <span class="o">+=</span> <span class="n">read_chunk_size</span>
+    <span class="k">return</span> <span class="n">nb</span></div>
+
+
+<div class="viewcode-block" id="parseHubbleResults"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.parseHubbleResults">[docs]</a><span class="k">def</span> <span class="nf">parseHubbleResults</span><span class="p">(</span><span class="n">sequences_path</span><span class="p">,</span> <span class="n">summary_path</span><span class="p">,</span> <span class="n">differential_path</span><span class="p">,</span> <span class="n">distributions_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unstable_rate_threshold</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return information on loci and analyses about microsatellites for sample.</span>
 
+<span class="sd">    :param sequences_path: Path to reference sequences file used in analysis (format: fasta with index).</span>
+<span class="sd">    :type sequences_path: str</span>
 <span class="sd">    :param summary_path: Path to microsatellites analysis summary file (format: JSON).</span>
 <span class="sd">    :type summary_path: str</span>
 <span class="sd">    :param differential_path: Path to microsatellites diffrential analysis results file (format: JSON).</span>
 <span class="sd">    :type differential_path: str</span>
 <span class="sd">    :param distributions_path: Path to microsatellites sizes distributions file (format: JSON).</span>
 <span class="sd">    :type distributions_path: str</span>
-<span class="sd">    :param unstable_threshold: Over this rate of unstable loci the sample is tagged as unstable.</span>
-<span class="sd">    :type unstable_threshold: float</span>
+<span class="sd">    :param unstable_rate_threshold: Over this rate of unstable loci the sample is tagged as unstable.</span>
+<span class="sd">    :type unstable_rate_threshold: float</span>
 <span class="sd">    :return: Information on loci and analyses about microsatellites for sample.</span>
 <span class="sd">    :rtype: anacore.msi.MSISpl</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -332,8 +399,8 @@
     <span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span>
     <span class="k">if</span> <span class="n">sum_data</span><span class="p">[</span><span class="s2">&quot;ResultIsValid&quot;</span><span class="p">]:</span>
         <span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span>
-        <span class="k">if</span> <span class="n">unstable_threshold</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">sum_data</span><span class="p">[</span><span class="s2">&quot;PercentageUnstableSites&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">unstable_threshold</span> <span class="o">*</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">unstable_rate_threshold</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sum_data</span><span class="p">[</span><span class="s2">&quot;PercentageUnstableSites&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">unstable_rate_threshold</span> <span class="o">*</span> <span class="mi">100</span><span class="p">:</span>
                 <span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">unstable</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
@@ -344,7 +411,7 @@
         <span class="n">params</span>
     <span class="p">)</span>
     <span class="c1"># Parse differential analysis results</span>
-    <span class="k">for</span> <span class="n">curr_locus</span> <span class="ow">in</span> <span class="n">HubbleDiff</span><span class="p">(</span><span class="n">differential_path</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">curr_locus</span> <span class="ow">in</span> <span class="n">HubbleDiff</span><span class="p">(</span><span class="n">differential_path</span><span class="p">,</span> <span class="n">ref_path</span><span class="o">=</span><span class="n">sequences_path</span><span class="p">):</span>
         <span class="n">res_locus</span> <span class="o">=</span> <span class="n">curr_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">res_locus</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">:</span>  <span class="c1"># Status can be assessed</span>
             <span class="n">res_locus</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
@@ -373,9 +440,10 @@
         <span class="p">)</span>
     <span class="c1"># Parse distributions</span>
     <span class="k">if</span> <span class="n">distributions_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">curr_locus</span> <span class="ow">in</span> <span class="n">HubbleDist</span><span class="p">(</span><span class="n">distributions_path</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">curr_locus</span> <span class="ow">in</span> <span class="n">HubbleDist</span><span class="p">(</span><span class="n">distributions_path</span><span class="p">,</span> <span class="n">ref_path</span><span class="o">=</span><span class="n">sequences_path</span><span class="p">):</span>
             <span class="n">old_res</span> <span class="o">=</span> <span class="n">msi_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">curr_locus</span><span class="o">.</span><span class="n">position</span><span class="p">]</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span>
             <span class="n">curr_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">old_res</span><span class="o">.</span><span class="n">status</span>
+            <span class="n">curr_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="n">old_res</span><span class="o">.</span><span class="n">score</span>
             <span class="n">curr_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span>
             <span class="n">curr_locus</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Hubble&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;p_value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_res</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;p_value&quot;</span><span class="p">]</span>
             <span class="n">msi_spl</span><span class="o">.</span><span class="n">loci</span><span class="p">[</span><span class="n">curr_locus</span><span class="o">.</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_locus</span>

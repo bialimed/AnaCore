@@ -159,7 +159,7 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.1.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
@@ -455,43 +455,14 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">spl_res</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getScoreCalculation</span><span class="p">(</span><span class="n">spl_res</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">undetermined_weight</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MSISample.setStatusByInstabilityCount"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.sample.MSISample.setStatusByInstabilityCount">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByInstabilityCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">instability_threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add status and score for the sample by number of unstable loci for the selected method.</span>
-
-<span class="sd">        :param method: Name of the selected method.</span>
-<span class="sd">        :type method: str</span>
-<span class="sd">        :param min_voting_loci: Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</span>
-<span class="sd">        :type min_voting_loci: int</span>
-<span class="sd">        :param instability_threshold: If the number of unstable is superior or equal than this value the status of the sample will be unstable.</span>
-<span class="sd">        :type instability_threshold: int</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">MSISplRes</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
-            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
-            <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
-            <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;aggregation_method&quot;</span><span class="p">:</span> <span class="s2">&quot;instability count&quot;</span><span class="p">,</span> <span class="s2">&quot;min_voting_loci&quot;</span><span class="p">:</span> <span class="n">min_voting_loci</span><span class="p">,</span> <span class="s2">&quot;instability_threshold&quot;</span><span class="p">:</span> <span class="n">instability_threshold</span><span class="p">},</span>
-            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span>
-        <span class="p">})</span>
-        <span class="n">nb_stable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNbStable</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-        <span class="n">nb_unstable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNbUnstable</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-        <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span>
-        <span class="k">if</span> <span class="n">nb_stable</span> <span class="o">+</span> <span class="n">nb_unstable</span> <span class="o">&gt;=</span> <span class="n">min_voting_loci</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">nb_unstable</span> <span class="o">&gt;=</span> <span class="n">instability_threshold</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">unstable</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setScore</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="MSISample.setStatusByInstabilityRatio"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.sample.MSISample.setStatusByInstabilityRatio">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByInstabilityRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">instability_threshold</span><span class="o">=</span><span class="mf">0.4</span><span class="p">):</span>
+<div class="viewcode-block" id="MSISample.setStatusByInstabilityRatio"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.sample.MSISample.setStatusByInstabilityRatio">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByInstabilityRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">instability_threshold</span><span class="o">=</span><span class="mf">0.4</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add status and score for the sample by ratio of unstable loci for the selected method.</span>
 
 <span class="sd">        :param method: Name of the selected method.</span>
 <span class="sd">        :type method: str</span>
-<span class="sd">        :param min_voting_loci: Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</span>
-<span class="sd">        :type min_voting_loci: int</span>
+<span class="sd">        :param min_voting_loci: Minimum ratio (stable + unstable)/all to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</span>
+<span class="sd">        :type min_voting_loci: float</span>
 <span class="sd">        :param instability_threshold: If the ratio unstable/(stable + unstable) is superior or equal than this value the status of the sample will be unstable.</span>
 <span class="sd">        :type instability_threshold: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -505,38 +476,11 @@
         <span class="n">nb_stable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNbStable</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
         <span class="n">nb_unstable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNbUnstable</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
         <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span>
-        <span class="k">if</span> <span class="n">nb_stable</span> <span class="o">+</span> <span class="n">nb_unstable</span> <span class="o">&gt;=</span> <span class="n">min_voting_loci</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nb_stable</span> <span class="o">+</span> <span class="n">nb_unstable</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNbLoci</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">min_voting_loci</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">nb_unstable</span> <span class="o">/</span> <span class="p">(</span><span class="n">nb_stable</span> <span class="o">+</span> <span class="n">nb_unstable</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">instability_threshold</span><span class="p">:</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">unstable</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setScore</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="MSISample.setStatusByMajority"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.sample.MSISample.setStatusByMajority">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusByMajority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">min_voting_loci</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add status and score for the sample by consensus on loci results for the selected method.</span>
-
-<span class="sd">        :param method: Name of the selected method.</span>
-<span class="sd">        :type method: str</span>
-<span class="sd">        :param min_voting_loci: Minimum number of voting loci (stable + unstable) to determine the sample status. If the number of voting loci is lower than this value the status for the sample will be undetermined.</span>
-<span class="sd">        :type min_voting_loci: int</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">MSISplRes</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
-            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
-            <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="n">method</span><span class="p">,</span>
-            <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s1">&#39;param&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;aggregation_method&quot;</span><span class="p">:</span> <span class="s2">&quot;majority&quot;</span><span class="p">,</span> <span class="s2">&quot;min_voting_loci&quot;</span><span class="p">:</span> <span class="n">min_voting_loci</span><span class="p">},</span>
-            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span>
-        <span class="p">})</span>
-        <span class="n">nb_stable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNbStable</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-        <span class="n">nb_unstable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNbUnstable</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">nb_stable</span> <span class="o">+</span> <span class="n">nb_unstable</span> <span class="o">&gt;=</span> <span class="n">min_voting_loci</span><span class="p">:</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span>
-            <span class="k">if</span> <span class="n">nb_stable</span> <span class="o">&gt;</span> <span class="n">nb_unstable</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">stable</span>
-            <span class="k">elif</span> <span class="n">nb_stable</span> <span class="o">&lt;</span> <span class="n">nb_unstable</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">Status</span><span class="o">.</span><span class="n">unstable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setScore</span><span class="p">(</span><span class="n">method</span><span class="p">)</span></div></div>
 </pre></div>

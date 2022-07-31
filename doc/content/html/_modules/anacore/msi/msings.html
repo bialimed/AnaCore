@@ -169,6 +169,7 @@
 <span class="kn">from</span> <span class="nn">anacore.msi.locus</span> <span class="kn">import</span> <span class="n">Locus</span><span class="p">,</span> <span class="n">LocusRes</span>
 <span class="kn">from</span> <span class="nn">anacore.msi.sample</span> <span class="kn">import</span> <span class="n">MSISample</span><span class="p">,</span> <span class="n">MSISplRes</span>
 <span class="kn">from</span> <span class="nn">anacore.sv</span> <span class="kn">import</span> <span class="n">HashedSVIO</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">average</span><span class="p">,</span> <span class="n">std</span>
 
 
 <div class="viewcode-block" id="MSINGSAnalysis"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msings.MSINGSAnalysis">[docs]</a><span class="k">class</span> <span class="nc">MSINGSAnalysis</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
@@ -246,6 +247,40 @@
             <span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">curr_peak</span><span class="p">[</span><span class="s2">&quot;indel_length&quot;</span><span class="p">],</span> <span class="n">curr_peak</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">],</span> <span class="n">curr_peak</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">curr_peak</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;MSINGS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;peaks&quot;</span><span class="p">]]</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">recordToLine</span><span class="p">(</span><span class="n">formatted_record</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MSINGSEval"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msings.MSINGSEval">[docs]</a><span class="k">class</span> <span class="nc">MSINGSEval</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Provides utils to predict with mSINGS: calculate feature and determine feature threshold.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MSINGSEval.getNbPeaks"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msings.MSINGSEval.getNbPeaks">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getNbPeaks</span><span class="p">(</span><span class="n">locus_distrib</span><span class="p">,</span> <span class="n">highest_peak_ratio</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return feature used to predict stability status by mSINGS: the number of peaks with height &gt;= peak_height_cutoff * highest_peak_height.</span>
+
+<span class="sd">        :param locus_distrib: Lengths distribution of microsatellite.</span>
+<span class="sd">        :type locus_distrib: anacore.msi.locus.LocusDataDistrib</span>
+<span class="sd">        :param highest_peak_ratio: Minimum rate of highest peak height to consider a peak.</span>
+<span class="sd">        :type highest_peak_ratio: float</span>
+<span class="sd">        :return: Feature used to predict stability status by mSINGS: the number of peaks with height &gt;= peak_height_cutoff * highest_peak_height.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">highest_peak</span> <span class="o">=</span> <span class="n">locus_distrib</span><span class="o">.</span><span class="n">getMostRepresented</span><span class="p">()</span>
+        <span class="n">min_peak_height</span> <span class="o">=</span> <span class="n">highest_peak_ratio</span> <span class="o">*</span> <span class="n">highest_peak</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">locus_distrib</span><span class="o">.</span><span class="n">getNbPeaks</span><span class="p">(</span><span class="n">min_peak_height</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MSINGSEval.getThresholdFromNbPeaks"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msings.MSINGSEval.getThresholdFromNbPeaks">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getThresholdFromNbPeaks</span><span class="p">(</span><span class="n">models_nb_peaks</span><span class="p">,</span> <span class="n">std_dev_rate</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return minimum number of peaks to tag distribution as unstable.</span>
+
+<span class="sd">        :param models_nb_peaks: Number of peaks in stable population (see MSINGSEval.getNbPeaks).</span>
+<span class="sd">        :type models_nb_peaks: list</span>
+<span class="sd">        :param std_dev_rate: Number of standard deviation authorized around average number of peaks in stable population.</span>
+<span class="sd">        :type std_dev_rate: float</span>
+<span class="sd">        :return: Minimum number of peaks to tag distribution as unstable.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">average</span><span class="p">(</span><span class="n">models_nb_peaks</span><span class="p">)</span> <span class="o">+</span> <span class="n">std</span><span class="p">(</span><span class="n">models_nb_peaks</span><span class="p">)</span> <span class="o">*</span> <span class="n">std_dev_rate</span></div></div>
 
 
 <div class="viewcode-block" id="MSINGSReport"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.msings.MSINGSReport">[docs]</a><span class="k">class</span> <span class="nc">MSINGSReport</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

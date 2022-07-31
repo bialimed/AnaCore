@@ -159,11 +159,42 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.1.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
+<span class="kn">from</span> <span class="nn">anacore.sequence</span> <span class="kn">import</span> <span class="n">getShortestRepeatUnit</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<div class="viewcode-block" id="getRefSeqInfo"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.getRefSeqInfo">[docs]</a><span class="k">def</span> <span class="nf">getRefSeqInfo</span><span class="p">(</span><span class="n">ref_fh</span><span class="p">,</span> <span class="n">microsat</span><span class="p">,</span> <span class="n">flank_size</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return location, flanks bases, repeat sequences and number of occurences from reference sequence and target.</span>
+
+<span class="sd">    :param ref_fh: File handle to reference sequences file.</span>
+<span class="sd">    :type ref_fh: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">    :param microsat: Microsatellite region.</span>
+<span class="sd">    :type microsat: anacore.region.Region</span>
+<span class="sd">    :param flank_size: Size of flanking sequences.</span>
+<span class="sd">    :type flank_size: int</span>
+<span class="sd">    :return: Location, flanks bases, repeat sequences and number of occurences from reference sequence and target.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">left_flank</span> <span class="o">=</span> <span class="n">ref_fh</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">microsat</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">microsat</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="n">flank_size</span><span class="p">,</span> <span class="n">microsat</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">right_flank</span> <span class="o">=</span> <span class="n">ref_fh</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">microsat</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">microsat</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">microsat</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="n">flank_size</span><span class="p">)</span>
+    <span class="n">target_seq</span> <span class="o">=</span> <span class="n">ref_fh</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">microsat</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">microsat</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">microsat</span><span class="o">.</span><span class="n">end</span><span class="p">)</span>
+    <span class="n">repeat_unit</span> <span class="o">=</span> <span class="n">getShortestRepeatUnit</span><span class="p">(</span><span class="n">target_seq</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">repeat_unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The region </span><span class="si">{}</span><span class="s2"> doe not contain any repeat: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">microsat</span><span class="p">,</span> <span class="n">target_seq</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;chromosome&quot;</span><span class="p">:</span> <span class="n">microsat</span><span class="o">.</span><span class="n">reference</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="n">microsat</span><span class="o">.</span><span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;repeat_times&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">microsat</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">repeat_unit</span><span class="p">)),</span>
+        <span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">:</span> <span class="n">repeat_unit</span><span class="p">,</span>
+        <span class="s2">&quot;left_flank_bases&quot;</span><span class="p">:</span> <span class="n">left_flank</span><span class="p">,</span>
+        <span class="s2">&quot;right_flank_bases&quot;</span><span class="p">:</span> <span class="n">right_flank</span>
+    <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="Locus"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.Locus">[docs]</a><span class="k">class</span> <span class="nc">Locus</span><span class="p">:</span>
@@ -182,8 +213,10 @@
 <span class="sd">        :return: The new instance.</span>
 <span class="sd">        :rtype: Locus</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^.+:\d+-\d+$&quot;</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is invalid for locus position. Locus position must be in format: chr:start-end.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">position</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
 <div class="viewcode-block" id="Locus.delResult"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.Locus.delResult">[docs]</a>    <span class="k">def</span> <span class="nf">delResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_id</span><span class="p">):</span>
@@ -194,6 +227,16 @@
 <span class="sd">        :type result_id: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">result_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return end position on reference (1-based).</span>
+
+<span class="sd">        :return: End position on reference (1-based).</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
 
 <div class="viewcode-block" id="Locus.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.Locus.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="nb">hash</span><span class="p">):</span>
@@ -209,7 +252,27 @@
         <span class="k">if</span> <span class="s2">&quot;results&quot;</span> <span class="ow">in</span> <span class="nb">hash</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">method</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">hash</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">cleaned_hash</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">][</span><span class="n">method</span><span class="p">]</span> <span class="o">=</span> <span class="n">LocusRes</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Locus</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_hash</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">Locus</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_hash</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return length of locus in reference sequence.</span>
+
+<span class="sd">        :return: Length of locus in reference sequence.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return start position on reference (1-based).</span>
+
+<span class="sd">        :return: Start position on reference (1-based).</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="LocusDataDistrib"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib">[docs]</a><span class="k">class</span> <span class="nc">LocusDataDistrib</span><span class="p">:</span>
@@ -232,6 +295,23 @@
         <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;reads&quot;</span><span class="p">,</span> <span class="s2">&quot;fragments&quot;</span><span class="p">}:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Mode for distribution must be &quot;reads&quot; or &quot;fragments&quot; not: </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+
+<div class="viewcode-block" id="LocusDataDistrib.fromDense"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.fromDense">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromDense</span><span class="p">(</span><span class="n">dense</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reads&quot;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return LocusDataDistrib from dense list of counts (example: [0, 5, 4, 1] =&gt; {2: 5, 3: 4, 4: 1}).</span>
+
+<span class="sd">        :param dense: List of counts. Each value correspond to a length and each length is represented between start and max length.</span>
+<span class="sd">        :type dense: list</span>
+<span class="sd">        :param mode: Depth calculation mode (&quot;reads&quot; or &quot;fragments&quot;).</span>
+<span class="sd">        :type mode: str</span>
+<span class="sd">        :param start: Lis of counts start form this value. First length is more often 1 but can be 0.</span>
+<span class="sd">        :type start: int</span>
+<span class="sd">        :return: LocusDataDistrib from dense list of counts (example: [0, 5, 4, 1] =&gt; {2: 5, 3: 4, 4: 1}).</span>
+<span class="sd">        :rtype: LocusDataDistrib</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ct_by_len</span> <span class="o">=</span> <span class="p">{</span><span class="n">idx</span> <span class="o">+</span> <span class="n">start</span><span class="p">:</span> <span class="n">ct</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dense</span><span class="p">)</span> <span class="k">if</span> <span class="n">ct</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">LocusDataDistrib</span><span class="p">(</span><span class="n">ct_by_len</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getCount"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getCount">[docs]</a>    <span class="k">def</span> <span class="nf">getCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -302,6 +382,35 @@
 <span class="sd">        :rtype: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">min</span><span class="p">([</span><span class="nb">len</span> <span class="k">for</span> <span class="nb">len</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_by_len</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">ct</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="LocusDataDistrib.getMostRepresented"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getMostRepresented">[docs]</a>    <span class="k">def</span> <span class="nf">getMostRepresented</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.</span>
+
+<span class="sd">        :return: Length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">highest_peak</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="n">highest_peak</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]:</span>
+                <span class="n">highest_peak</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">length</span>
+                <span class="n">highest_peak</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+        <span class="k">return</span> <span class="n">highest_peak</span></div>
+
+<div class="viewcode-block" id="LocusDataDistrib.getNbPeaks"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getNbPeaks">[docs]</a>    <span class="k">def</span> <span class="nf">getNbPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return number of peaks in the distribution.</span>
+
+<span class="sd">        :param min_count: Length with lower count than this value are not taken into account.</span>
+<span class="sd">        :type min_count: int</span>
+<span class="sd">        :return: Number of peaks in the distribution.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nb_peak</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">length</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="n">min_count</span><span class="p">:</span>
+                <span class="n">nb_peak</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">nb_peak</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.items"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
