@@ -61,7 +61,7 @@ class TestGetRefSeqInfo(unittest.TestCase):
             )
 
     def testExcept(self):
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(Exception):
             with IdxFastaIO(self.tmp_fasta) as ref_reader:
                 microsat = Region(14, 17, None, "chr1")
                 getRefSeqInfo(ref_reader, microsat, 4)
@@ -70,7 +70,7 @@ class TestGetRefSeqInfo(unittest.TestCase):
 class TestLocus(unittest.TestCase):
     def testDelResult(self):
         locus = Locus.fromDict({
-            "position": "4:54732045",
+            "position": "4:54732045-54732070",
             "results": {"SVC": {"status": "MSS", "score": 0.99}}
         })
         self.assertEqual(locus.results["SVC"].__class__, LocusRes)
@@ -79,23 +79,45 @@ class TestLocus(unittest.TestCase):
 
     def testFromDict(self):
         locus = Locus.fromDict({
-            "position": "4:54732045",
+            "position": "4:54732045-54732070",
             "results": {"SVC": {"status": "MSS", "score": 0.99}}
         })
         self.assertEqual(locus.name, None)
-        self.assertEqual(locus.position, "4:54732045")
+        self.assertEqual(locus.position, "4:54732045-54732070")
         self.assertEqual(locus.results["SVC"].__class__, LocusRes)
         self.assertEqual(locus.results["SVC"].status, Status.stable)
 
+    def testEnd(self):
+        self.assertEqual(
+            Locus("chr1:125464646-125464656").end,
+            125464656
+        )
+
+    def testInitException(self):
+        with self.assertRaises(ValueError):
+            Locus("chr1:125464646")
+
+    def testLength(self):
+        self.assertEqual(
+            Locus("chr1:125464646-125464656").length,
+            10
+        )
+
     def testToDict(self):
         locus = Locus.fromDict({
-            "position": "4:54732045",
+            "position": "4:54732045-54732070",
             "results": {"SVC": {"status": "MSS", "score": 0.99}}
         })
         locus_hash = json.dumps(locus, sort_keys=True, default=toDict)
         self.assertEqual(
             locus_hash,
-            '{"name": null, "position": "4:54732045", "results": {"SVC": {"data": {}, "score": 0.99, "status": "MSS"}}}'
+            '{"name": null, "position": "4:54732045-54732070", "results": {"SVC": {"data": {}, "score": 0.99, "status": "MSS"}}}'
+        )
+
+    def testStart(self):
+        self.assertEqual(
+            Locus("chr1:125464646-125464656").start,
+            125464647
         )
 
 

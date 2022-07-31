@@ -10,6 +10,7 @@ __status__ = 'prod'
 
 from anacore.sequence import getShortestRepeatUnit
 from copy import deepcopy
+import re
 
 
 def getRefSeqInfo(ref_fh, microsat, flank_size=5):
@@ -34,7 +35,7 @@ def getRefSeqInfo(ref_fh, microsat, flank_size=5):
     return {
         "chromosome": microsat.reference.name,
         "location": microsat.start - 1,
-        "repeat_times": microsat.length() / len(repeat_unit),
+        "repeat_times": int(microsat.length() / len(repeat_unit)),
         "repeat_unit_bases": repeat_unit,
         "left_flank_bases": left_flank,
         "right_flank_bases": right_flank
@@ -57,8 +58,10 @@ class Locus:
         :return: The new instance.
         :rtype: Locus
         """
-        self.position = position
         self.name = name
+        if not re.search(r"^.+:\d+-\d+$", position):
+            raise ValueError("{} is invalid for locus position. Locus position must be in format: chr:start-end.".format(position))
+        self.position = position
         self.results = {} if results is None else results
 
     def delResult(self, result_id):
@@ -69,6 +72,16 @@ class Locus:
         :type result_id: str
         """
         self.results.pop(result_id, None)
+
+    @property
+    def end(self):
+        """
+        Return end position on reference (1-based).
+
+        :return: End position on reference (1-based).
+        :rtype: int
+        """
+        return int(self.position.rsplit("-", 1)[1])
 
     @staticmethod
     def fromDict(hash):
@@ -85,6 +98,26 @@ class Locus:
             for method, result in hash["results"].items():
                 cleaned_hash["results"][method] = LocusRes.fromDict(result)
         return Locus(**cleaned_hash)
+
+    @property
+    def length(self):
+        """
+        Return length of locus in reference sequence.
+
+        :return: Length of locus in reference sequence.
+        :rtype: int
+        """
+        return self.end - self.start + 1
+
+    @property
+    def start(self):
+        """
+        Return start position on reference (1-based).
+
+        :return: Start position on reference (1-based).
+        :rtype: int
+        """
+        return int(self.position.rsplit("-", 1)[0].rsplit(":", 1)[1]) + 1
 
 
 class LocusDataDistrib:
