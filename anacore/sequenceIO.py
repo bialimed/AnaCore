@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie - Plateforme bioinformatique Toulouse'
 __copyright__ = 'Copyright (C) 2015 INRA'
 __license__ = 'GNU General Public License'
-__version__ = '2.5.0'
+__version__ = '2.6.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -568,7 +568,7 @@ class IdxFastaIO(FastaIO):
 
     def getSub(self, id, start, end=None):
         """
-        Return the selected sub of the sequence from file.
+        Return the selected sub of the sequence from file. Return empty sequence if start position is out. Return fitted sequence if end is out.
 
         :param id: The sequence ID.
         :type id: str
@@ -579,12 +579,15 @@ class IdxFastaIO(FastaIO):
         :return: The sequence selected.
         :rtype: str
         """
+        if start > self.index[id].length + 1:
+            return ""
         endline_marker_len = self.index[id].line_width - self.index[id].line_bases
         # Start position
         start_line_idx = int((start - 1) / self.index[id].line_bases)
         read_start = self.index[id].offset + start - 1 + start_line_idx * endline_marker_len
         # End position
-        end = self.index[id].length if end is None else end
+        if end is None or end > self.index[id].length + 1:
+             end = self.index[id].length
         end_line_idx = int((end - 1) / self.index[id].line_bases)
         read_end = self.index[id].offset + end - 1 + end_line_idx * endline_marker_len
         # Get sequence

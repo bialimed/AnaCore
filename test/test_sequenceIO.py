@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.0'
+__version__ = '1.7.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -492,6 +492,21 @@ two	28	98	14	15"""
             self.assertEqual(
                 self.expected_rec["one"].string[29:63],
                 FH.getSub("one", 30, 63)
+            )
+            # End of first
+            self.assertEqual(
+                self.expected_rec["one"].string[63:66],
+                FH.getSub("one", 64, 66)
+            )
+            # Ends out of first
+            self.assertEqual(
+                self.expected_rec["one"].string[63:66],
+                FH.getSub("one", 64, 80)
+            )
+            # Starts out of first
+            self.assertEqual(
+                "",
+                FH.getSub("one", 67, 80)
             )
 
 
