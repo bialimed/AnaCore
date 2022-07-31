@@ -172,7 +172,7 @@ class BaselineRecord:
         :return: BaselineRecord from model.
         :rtype: BaselineRecord
         """
-        locus_id = "{}:{}".format(target.reference.name, target.start - 1)
+        locus_id = "{}:{}-{}".format(target.reference.name, target.start - 1, target.end)
         locus_scan = getRefSeqInfo(ref_fh, target, flank_size)
         locus_scan["threshold"] = ProEval.getThreshold(
             models,
@@ -267,7 +267,7 @@ class DistIO(AbstractFile):
                     "right_flank_bases": right_flank
                 }
                 locus = Locus.fromDict({
-                    "position": "{}:{}".format(chrom, pos),
+                    "position": "{}:{}-{}".format(chrom, pos, int(pos) + int(nb_repeat) * len(nt)),
                     "results": {
                         "MSIsensor-pro_pro": {
                             "status": Status.none,
@@ -435,7 +435,11 @@ class ProIO(HashedSVIO):
             "right_flank_bases": record["right_flank_bases"]
         }
         locus = Locus.fromDict({
-            "position": "{}:{}".format(record["chromosome"], record["location"]),
+            "position": "{}:{}-{}".format(
+                record["chromosome"],
+                record["location"],
+                int(record["location"]) + int(record["repeat_times"]) * len(record["repeat_unit_bases"])
+            ),
             "results": {
                 "MSIsensor-pro_pro": {
                     "data": {
@@ -469,8 +473,10 @@ class ProIO(HashedSVIO):
         with handler(filepath, handler_options) as reader:
             reader.readline()
             for line in reader:
-                chrom, pos, trash = line.split(None, 2)
-                loci.append("{}:{}".format(chrom, pos))
+                chrom, pos, left_flank_bases, repeat_times, repeat_unit_bases, trash = line.split(None, 5)
+                loci.append(
+                    "{}:{}-{}".format(chrom, pos, int(pos) + int(repeat_times) * len(repeat_unit_bases))
+                )
         return loci
 
     def recordToLine(self, record, meta):
@@ -487,7 +493,7 @@ class ProIO(HashedSVIO):
         res = record.results["MSIsensor-pro_pro"]
         formatted_record = {
             "chromosome": record.position.split(":")[0],
-            "location": record.position.split(":")[1],
+            "location": record.position.split(":")[1].split("-")[0],
             "left_flank_bases": meta["left_flank_bases"],
             "repeat_times": meta["repeat_times"],
             "repeat_unit_bases": meta["repeat_unit_bases"],

@@ -102,8 +102,8 @@ class TestBaselineRecord(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSS",
@@ -127,8 +127,8 @@ class TestBaselineRecord(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSS",
@@ -151,8 +151,8 @@ class TestBaselineRecord(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSI",
@@ -175,8 +175,8 @@ class TestBaselineRecord(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSS",
@@ -1053,7 +1053,7 @@ T: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 2 6 8 11 23 17 20 7 1 1 0 0 0 0 0 0 0 0 0 0 0
         self.records = [
             (
                 Locus.fromDict({
-                    "position": "2:47414420",
+                    "position": "2:47414420-47414447",
                     "results": {
                         "MSIsensor-pro_pro": {
                             "status": Status.none,
@@ -1093,7 +1093,7 @@ T: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 2 6 8 11 23 17 20 7 1 1 0 0 0 0 0 0 0 0 0 0 0
                 }
             ), (
                 Locus.fromDict({
-                    "position": "2:95183613",
+                    "position": "2:95183613-95183636",
                     "results": {
                         "MSIsensor-pro_pro": {
                             "status": Status.none,
@@ -1189,8 +1189,8 @@ T: 0 0 0 0 0 0 0 0 0 1 2 21 84 423 1210 1967 320 38 4 0 0 0 0 0 0 0 0 0 0 0 0 0 
                 }
             },
             "loci": {
-                "11:125620870": {
-                    "position": "11:125620870",
+                "11:125620870-125620891": {
+                    "position": "11:125620870-125620891",
                     "results": {
                         "MSIsensor-pro_pro": {
                             "status": "MSI",
@@ -1217,8 +1217,8 @@ T: 0 0 0 0 0 0 0 0 0 1 2 21 84 423 1210 1967 320 38 4 0 0 0 0 0 0 0 0 0 0 0 0 0 
                         }
                     }
                 },
-                "13:31148483": {
-                    "position": "13:31148483",
+                "13:31148483-31148500": {
+                    "position": "13:31148483-31148500",
                     "results": {
                         "MSIsensor-pro_pro": {
                             "status": "MSS",
@@ -1316,8 +1316,8 @@ class TestProEval(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSS",
@@ -1341,8 +1341,8 @@ class TestProEval(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSS",
@@ -1365,8 +1365,8 @@ class TestProEval(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSI",
@@ -1389,8 +1389,8 @@ class TestProEval(unittest.TestCase):
                     }
                 },
                 "loci": {
-                    "chr1:17": {
-                        "position": "chr1:17",
+                    "chr1:17-27": {
+                        "position": "chr1:17-27",
                         "results": {
                             "train": {
                                 "status": "MSS",
@@ -1406,7 +1406,7 @@ class TestProEval(unittest.TestCase):
             })
         ]
         self.assertEqual(
-            ProEval.getThreshold(models, "chr1:17", "train"),
+            ProEval.getThreshold(models, "chr1:17-27", "train"),
             0.13
         )
 
@@ -1522,7 +1522,7 @@ class TestProIO(unittest.TestCase):
         self.records = [
             (
                 Locus.fromDict({
-                    "position": "2:47414420",
+                    "position": "2:47414420-47414447",
                     "results": {
                         "MSIsensor-pro_pro": {
                             "status": Status.none,
@@ -1545,7 +1545,7 @@ class TestProIO(unittest.TestCase):
                 }
             ), (
                 Locus.fromDict({
-                    "position": "2:95183613",
+                    "position": "2:95183613-95183636",
                     "results": {
                         "MSIsensor-pro_pro": {
                             "status": Status.none,

@@ -30,9 +30,9 @@ from anacore.msi.reportIO import ReportIO
 REPORT_CONTENT = """[
     {
         "loci": {
-            "1:208454": {
+            "1:208454-208466": {
                 "name": null,
-                "position": "1:208454",
+                "position": "1:208454-208466",
                 "results": {
                     "mSINGSUp": {
                         "data": {
@@ -64,9 +64,9 @@ REPORT_CONTENT = """[
                     }
                 }
             },
-            "8:578711": {
+            "8:578711-578723": {
                 "name": "B12",
-                "position": "8:578711",
+                "position": "8:578711-578723",
                 "results": {
                     "mSINGSUp": {
                         "data": {
@@ -144,10 +144,10 @@ class TestReportIO(unittest.TestCase):
                 key=lambda elt: (elt["locus_id"], elt["status"])
             ),
             [
-                {"locus_id": "1:208454", "locus_name": None, "status": "MSI", "support": 1},
-                {"locus_id": "1:208454", "locus_name": None, "status": "MSS", "support": 0},
-                {"locus_id": "8:578711", "locus_name": "B12", "status": "MSI", "support": 1},
-                {"locus_id": "8:578711", "locus_name": "B12", "status": "MSS", "support": 0}
+                {"locus_id": "1:208454-208466", "locus_name": None, "status": "MSI", "support": 1},
+                {"locus_id": "1:208454-208466", "locus_name": None, "status": "MSS", "support": 0},
+                {"locus_id": "8:578711-578723", "locus_name": "B12", "status": "MSI", "support": 1},
+                {"locus_id": "8:578711-578723", "locus_name": "B12", "status": "MSS", "support": 0}
             ]
         )
         self.assertEqual(
@@ -156,8 +156,8 @@ class TestReportIO(unittest.TestCase):
                 key=lambda elt: (elt["locus_id"], elt["status"])
             ),
             [
-                {"locus_id": "1:208454", "locus_name": None, "status": "MSS", "support": 0},
-                {"locus_id": "8:578711", "locus_name": "B12", "status": "MSS", "support": 0}
+                {"locus_id": "1:208454-208466", "locus_name": None, "status": "MSS", "support": 0},
+                {"locus_id": "8:578711-578723", "locus_name": "B12", "status": "MSS", "support": 0}
             ]
         )
 
@@ -167,10 +167,10 @@ class TestReportIO(unittest.TestCase):
         self.assertEqual(report[0].results["SVC"].status, Status.unstable)
         self.assertEqual(report[0].results["mSINGSUp"].status, Status.stable)
         self.assertEqual(len(report[0].loci), 2)
-        self.assertEqual(report[0].loci["1:208454"].name, None)
-        self.assertEqual(report[0].loci["8:578711"].name, "B12")
-        self.assertEqual(report[0].loci["1:208454"].results["SVC"].data["lengths"].getCount(), 420)
-        self.assertEqual(report[0].loci["8:578711"].results["mSINGSUp"].data["lengths"].getCount(), 65)
+        self.assertEqual(report[0].loci["1:208454-208466"].name, None)
+        self.assertEqual(report[0].loci["8:578711-578723"].name, "B12")
+        self.assertEqual(report[0].loci["1:208454-208466"].results["SVC"].data["lengths"].getCount(), 420)
+        self.assertEqual(report[0].loci["8:578711-578723"].results["mSINGSUp"].data["lengths"].getCount(), 65)
 
     def testWrite(self):
         report = ReportIO.parse(self.tmp_in)
