@@ -198,12 +198,13 @@ def getShortestRepeatUnit(seq):
     :return: The shortest repeat unit that can be used to reproduce the entire sequence or None if it does not exist.
     :rtype: str
     """
+    uc_seq = seq.upper()
     seq_len = len(seq)
     repeat_unit = None
     for unit_size in range(1, int(seq_len / 2) + 1):
         if repeat_unit is None and seq_len % unit_size == 0:
             eval_unit = seq[:unit_size]
-            chunks = {chunk for chunk in wrap(seq, unit_size)}
+            chunks = {chunk for chunk in wrap(uc_seq, unit_size)}
             if len(chunks - {eval_unit}) == 0:
                 repeat_unit = eval_unit
     return repeat_unit
