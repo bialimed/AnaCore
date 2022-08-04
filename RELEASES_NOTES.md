@@ -1,6 +1,12 @@
 # Release 2.12.0 [DEV]
 
 ### Changes
+  * `anacore.msi.msings`:
+    * Remove `record.results["mSINGS"].data["peaks"]` from returned records in parser
+    `anacore.msi.msings.MSINGSAnalysisIO`: data can be retrieved from
+    `record.results["mSINGS"].data["lengths"]`.
+    * Rename `MSINGSAnalysis` to `MSINGSAnalysisIO`.
+    * Rename method name `MSINGS` to `mSINGS`.
   * Change parameter behaviour for `min_voting_loci` in
   `anacore.msi.sample.MSISample.setStatusByInstabilityRatio()`: from number of
   loci to rate of loci.

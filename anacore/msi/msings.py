@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing mSINGS's outputs."""
+"""Classes and functions to predict with mSINGS's algorithm and to read/write mSINGS binaries outputs."""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -17,7 +17,7 @@ from anacore.sv import HashedSVIO
 from numpy import average, std
 
 
-class MSINGSAnalysis(HashedSVIO):
+class MSINGSAnalysisIO(HashedSVIO):
     """Manage output file produced by the command "msi analyzer" of mSINGS (https://bitbucket.org/uwlabmed/msings)."""
 
     def __init__(self, filepath, mode="r"):
@@ -41,31 +41,23 @@ class MSINGSAnalysis(HashedSVIO):
         :rtype: anacore.msi.base.Locus
         """
         record = super()._parseLine()
+        locus_len = int(record["Position"].rsplit("-", 1)[1]) - int(record["Position"].rsplit(":", 1)[1].rsplit("-", 1)[0])
         peaks = record["IndelLength:AlleleFraction:SupportingCalls"].split(" ")
         nb_by_length = {}
-        if len(peaks) == 1 and peaks[0] == "0:0.0:0":
-            peaks = []
-        else:
-            for idx, curr_peak in enumerate(peaks):
-                indel_length, AF, DP = curr_peak.split(":")
-                peaks[idx] = {
-                    "indel_length": int(indel_length),
-                    "AF": float(AF),
-                    "DP": int(DP)
-                }
-                nb_by_length[int(indel_length)] = int(DP)
-
+        for idx, curr_peak in enumerate(peaks):
+            indel_length, AF, DP = curr_peak.split(":")
+            if DP != "0":
+                nb_by_length[int(indel_length) + locus_len] = int(DP)
         return Locus.fromDict({
             "position": record["Position"],
             "name": record["Name"],
             "results": {
-                "MSINGS": {
+                "mSINGS": {
                     "status": Status.undetermined,
                     "data": {
-                        "avg_depth": record["Average_Depth"],
-                        "nb_peaks": record["Number_of_Peaks"],
-                        "peaks": peaks,
-                        "std_dev": record["Standard_Deviation"],
+                        "avg_depth": int(record["Average_Depth"]),
+                        "nb_peaks": int(record["Number_of_Peaks"]),
+                        "std_dev": float(record["Standard_Deviation"]),
                         "lengths": {"ct_by_len": nb_by_length}
                     }
                 }
@@ -84,13 +76,23 @@ class MSINGSAnalysis(HashedSVIO):
         formatted_record = {
             "Position": record.position,
             "Name": record.name,
-            "Average_Depth": record.results["MSINGS"].data["avg_depth"],
-            "Number_of_Peaks": record.results["MSINGS"].data["nb_peaks"],
-            "Standard_Deviation": record.results["MSINGS"].data["std_dev"]
+            "Average_Depth": record.results["mSINGS"].data["avg_depth"],
+            "Number_of_Peaks": record.results["mSINGS"].data["nb_peaks"],
+            "Standard_Deviation": record.results["mSINGS"].data["std_dev"]
         }
-        formatted_record["IndelLength:AlleleFraction:SupportingCalls"] = " ".join(
-            ["{}:{}:{}".format(curr_peak["indel_length"], curr_peak["AF"], curr_peak["DP"]) for curr_peak in record.results["MSINGS"].data["peaks"]]
-        )
+        ct_by_len = record.results["mSINGS"].data["lengths"]
+        max_ct = ct_by_len.getMostRepresented()["count"]
+        if max_ct == 0:
+            formatted_record["IndelLength:AlleleFraction:SupportingCalls"] = "0:0.0000000:0"
+        else:
+            locus_ref_len = record.length
+            locus_min_len = ct_by_len.getMinLength()
+            formatted_record["IndelLength:AlleleFraction:SupportingCalls"] = " ".join(
+                [
+                    "{}:{:.7f}:{}".format((locus_min_len + idx) - locus_ref_len, ct / max_ct, ct)
+                    for idx, ct in enumerate(ct_by_len.getDenseCount())
+                ]
+            )
         return super().recordToLine(formatted_record)
 
 
@@ -141,8 +143,17 @@ class MSINGSReport(object):
         self.filepath = filepath
         self.samples = dict()
         self.loci = list()
-        self.method_name = "MSINGS"
-        self.parse()
+        self.method_name = "mSINGS"
+        self._parse()
+
+    def _parse(self):
+        """Parse file and store information in self."""
+        if isGzip(self.filepath):
+            with gzip.open(self.filepath, "rt") as FH:
+                self._parseFileHandle(FH)
+        else:
+            with open(self.filepath, "r") as FH:
+                self._parseFileHandle(FH)
 
     def _parseFileHandle(self, FH):
         """
@@ -156,7 +167,7 @@ class MSINGSReport(object):
         nb_unstable = [int(elt.strip()) for elt in FH.readline().split("\t")[1:]]
         nb_evaluated = [int(elt.strip()) for elt in FH.readline().split("\t")[1:]]
         line = FH.readline()
-        if not line.startswith("msing_score"):
+        if not line.startswith("msings_score"):
             scores = [None for curr_spl in samples]
         else:
             scores = [elt.strip() for elt in line.split("\t")][1:]
@@ -197,19 +208,12 @@ class MSINGSReport(object):
                 loci_res = None
                 if curr_val == "":
                     loci_res = LocusRes(Status.undetermined)
-                elif curr_val == "1":
+                elif curr_val == "1" or curr_val == "Unstable":
                     loci_res = LocusRes(Status.unstable)
-                else:
+                elif curr_val == "0" or curr_val == "Stable":
                     loci_res = LocusRes(Status.stable)
+                else:
+                    raise Exception("{} cannot be parsed by {}.".format(self.filepath, self.__class__.__name__,))
                 self.samples[curr_spl].addLocus(
                     Locus(curr_locus, None, {self.method_name: loci_res})
                 )
-
-    def parse(self):
-        """Parse file and store information in self."""
-        if isGzip(self.filepath):
-            with gzip.open(self.filepath, "rt") as FH:
-                self._parseFileHandle(FH)
-        else:
-            with open(self.filepath, "r") as FH:
-                self._parseFileHandle(FH)
