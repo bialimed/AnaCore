@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing MSIsensor-pro's outputs."""
+"""Classes and functions to predict with MSISensor-pro's algorithm and to read/write MSIsensor-pro binaries outputs."""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2022 CHU Toulouse'
