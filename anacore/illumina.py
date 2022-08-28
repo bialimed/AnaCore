@@ -329,7 +329,7 @@ class DemultStat:
                         without_udi = True
                 if not without_udi:
                     unexpected_barcodes.append({"spl": barcode, "ct": count})
-        return unexpected_barcodes
+        return sorted(unexpected_barcodes, key=lambda elt: elt["ct"], reverse=True)
 
 
 class RTAComplete(object):
