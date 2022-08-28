@@ -20,7 +20,7 @@ sys.path.append(PACKAGE_DIR)
 
 from anacore.msi.base import Status
 from anacore.msi.locus import Locus, LocusDataDistrib
-from anacore.msi.msings import MSINGSAnalysisIO, MSINGSReport
+from anacore.msi.msings import MSINGSAnalysisIO, MSINGSEval, MSINGSReport
 from anacore.msi.sample import MSISample
 
 
@@ -123,6 +123,73 @@ class TestMSINGSAnalysisIO(unittest.TestCase):
         expected[2] = expected[2].replace("-7:0:0", "-7:0.0000000:0")
         with open(self.tmp_out) as reader:
             observed = reader.readlines()
+        self.assertEqual(observed, expected)
+
+
+class TestMSINGSEval(unittest.TestCase):
+    def testGetNbPeaks(self):
+        records = [
+            {
+                "data": LocusDataDistrib({
+                    23 - 7: 1,
+                    23 - 6: 6,
+                    23 - 5: 5,
+                    23 - 4: 4,
+                    23 - 3: 19,
+                    23 - 2: 49,
+                    23 - 1: 48,
+                    23 - 0: 623,
+                    23 + 1: 7,
+                    23 + 2: 4,
+                    23 + 3: 1
+                }),
+                "expected": 3
+            },
+            {
+                "data": LocusDataDistrib({
+                    25 - 8: 1,
+                    25 - 6: 5,
+                    25 - 5: 13,
+                    25 - 4: 29,
+                    25 - 3: 34,
+                    25 - 2: 85,
+                    25 - 1: 112,
+                    25 - 0: 1851,
+                    25 + 1: 37,
+                    25 + 2: 19,
+                    25 + 3: 4,
+                    25 + 4: 1
+                }),
+                "expected": 2
+            }
+        ]
+        expected = list()
+        observed = list()
+        for curr in records:
+            expected.append(curr["expected"])
+            observed.append(
+                MSINGSEval.getNbPeaks(curr["data"])
+            )
+        self.assertEqual(observed, expected)
+
+    def testGetThresholdFromNbPeaks(self):
+        records = [
+            {"data": [3, 3, 4], "expected": 0.47140452079103168 * 2.0 +	3.3333333333333335},
+            {"data": [2, 2, 2], "expected": 0.0 * 2.0 + 2.0},
+            {"data": [3, 2, 4], "expected": 0.81649658092772603 * 2.0 + 3.0},
+            {"data": [5, 4, 5], "expected": 0.47140452079103168 * 2.0 + 4.666666666666667},
+            {"data": [1, 3, 2], "expected": 0.81649658092772603 * 2.0 + 2.0}
+        ]
+        expected = list()
+        observed = list()
+        for curr in records:
+            expected.append(round(curr["expected"], 7))
+            observed.append(
+                round(
+                    MSINGSEval.getThresholdFromNbPeaks(curr["data"]),
+                    7
+                )
+            )
         self.assertEqual(observed, expected)
 
 
