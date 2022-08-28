@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.12.0'
+__version__ = '1.13.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -27,6 +27,219 @@ from anacore.vcf import VCFRecord, VCFIO, getHeaderAttr, HeaderInfoAttr
 # FUNCTIONS
 #
 ########################################################################
+class TestVCFHeader(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+
+        # Temporary files
+        self.tmp_in_variants = os.path.join(tmp_folder, unique_id + "_in.vcf")
+        self.tmp_out_variants = os.path.join(tmp_folder, unique_id + "_out.vcf")
+        content = """##fileformat=VCFv4.3
+##fileDate=20090805
+##source=myImputationProgramV3.1
+##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
+##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
+##phasing=partial
+##SAMPLE=<ID=NA00001,Assay="WholeGenome",Description="Patient germline genome from unaffected",Disease="None",DOI="url",Ethnicity="AFR">
+##SAMPLE=<ID=NA00002,Assay="Exome",Description="European patient exome from breast cancer",Disease="Cancer",Ethnicity="CEU",Tissue="Breast">
+##PEDIGREE=<ID=TumourSample,Original=GermlineID>
+##PEDIGREE=<ID=SomaticNonTumour,Original=GermlineID>
+##PEDIGREE=<ID=ChildID,Father=FatherID,Mother=MotherID>
+##PEDIGREE=<ID=SampleID,Name_1=Ancestor_1,Name_N=Ancestor_N>
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data",Source="myImputationProgram",Version="3.1">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=SRC,Number=.,Type=String,Description="Caller source">
+##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership",Version="129">
+##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
+##FILTER=<ID=q10,Description="Quality below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples have data">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype \\"test\\"">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+"""
+        with open(self.tmp_in_variants, "w") as FH_variants:
+            FH_variants.write(content)
+
+    def tearDown(self):
+        # Clean temporary files
+        for curr_file in [self.tmp_in_variants, self.tmp_out_variants]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testReadWriteHeader(self):
+        with VCFIO(self.tmp_in_variants) as FH_in:
+            with VCFIO(self.tmp_out_variants, "w") as FH_out:
+                FH_out.copyHeader(FH_in)
+                FH_out.writeHeader()
+        expected = None
+        with open(self.tmp_in_variants) as FH_exp:
+            expected = FH_exp.readlines()
+        observed = None
+        with open(self.tmp_out_variants) as FH_obs:
+            observed = FH_obs.readlines()
+        self.assertTrue(len(expected) != 0)
+        self.assertEqual(sorted(expected), sorted(observed))
+
+    def testHeaderAttrDel(self):
+        data = HeaderInfoAttr(
+            id="NS",
+            number="1",
+            type="Integer",
+            description="Number of Samples With Data",
+            source="myImputationProgram",
+            version="3.1"
+        )
+        del(data.source)
+        expected = {"id": "NS", "number": "1", "type": "Integer", "description": "Number of Samples With Data", "version": "3.1"}
+        self.assertEqual(expected, data.datastore)
+
+    def testHeaderAttrKeys(self):
+        data = HeaderInfoAttr(
+            id="NS",
+            number="1",
+            type="Integer",
+            description="Number of Samples With Data",
+            source="myImputationProgram",
+            version="3.1"
+        )
+        expected = sorted(["id", "number", "type", "description", "source", "version"])
+        self.assertEqual(expected, sorted(data.keys()))
+
+    def testHeaderAttrStr(self):
+        data = HeaderInfoAttr(
+            id="NS",
+            number="1",
+            type="Integer",
+            description="Number of Samples With Data",
+            source="myImputationProgram",
+            version="3.1"
+        )
+        expected = '<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data",Source="myImputationProgram",Version="3.1">'
+        self.assertEqual(expected, str(data))
+
+    def testGetHeaderAttr(self):
+        data = [
+            {
+                "text": '##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data",Source="myImputationProgram",Version="3.1">',
+                "expected_dict": {"id": "NS", "number": "1", "type": "Integer", "description": "Number of Samples With Data", "source": "myImputationProgram", "version": "3.1"},
+                "expected_cls": "HeaderInfoAttr"
+            },
+            {
+                "text": '##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">',
+                "expected_dict": {"id": "DP", "number": "1", "type": "Integer", "description": "Total Depth"},
+                "expected_cls": "HeaderInfoAttr"
+            },
+            {
+                "text": '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">',
+                "expected_dict": {"id": "AF", "number": "A", "type": "Float", "description": "Allele Frequency"},
+                "expected_cls": "HeaderInfoAttr"
+            },
+            {
+                "text": '##INFO=<ID=SRC,Number=.,Type=String,Description="Caller source">',
+                "expected_dict": {"id": "SRC", "number": ".", "type": "String", "description": "Caller source"},
+                "expected_cls": "HeaderInfoAttr"
+            },
+            {
+                "text": '##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, 2018-01",Version="129">',
+                "expected_dict": {"id": "DB", "number": "0", "type": "Flag", "description": "dbSNP membership, 2018-01", "version": "129"},
+                "expected_cls": "HeaderInfoAttr"
+            },
+            {
+                "text": '##FILTER=<ID=q10,Description="Quality below 10",Source="myImputationProgram",Version=10>',
+                "expected_dict": {"id": "q10", "description": "Quality below 10", "source": "myImputationProgram", "version": "10"},
+                "expected_cls": "HeaderFilterAttr"
+            },
+            {
+                "text": '##FILTER=<ID=s50,Description="Less than 50% of samples have data">',
+                "expected_dict": {"id": "s50", "description": "Less than 50% of samples have data"},
+                "expected_cls": "HeaderFilterAttr"
+            },
+            {
+                "text": '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+                "expected_dict": {"id": "GT", "number": "1", "type": "String", "description": "Genotype"},
+                "expected_cls": "HeaderFormatAttr"
+            },
+            {
+                "text": '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype \\"test\\"">',
+                "expected_dict": {"id": "GT", "number": "1", "type": "String", "description": 'Genotype "test"'},
+                "expected_cls": "HeaderFormatAttr"
+            }
+        ]
+        for curr in data:
+            attr = getHeaderAttr(curr["text"])
+            self.assertEqual(curr["expected_dict"], attr.datastore)
+            self.assertEqual(curr["expected_cls"], attr.__class__.__name__)
+
+
+class TestNoneInfo(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_in = os.path.join(tmp_folder, unique_id + "_in.vcf")
+        self.tmp_out = os.path.join(tmp_folder, unique_id + "_out.vcf")
+        with open(self.tmp_in, "w") as FH_variants:
+            FH_variants.write("""##fileformat=VCFv4.3
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+20	14370	.	G	A	29.0	PASS	DP=.;AF=.	GT	0|0	1|0	1/1
+20	14371	.	T	A	29.0	PASS	.	GT	0|0	1|0	1/1
+20	14372	.	C	A	29.0	PASS	DP=300;AF=.	GT	0|0	1|0	1/1
+20	14373	.	C	A	29.0	PASS	DP=300	GT	0|0	1|0	1/1
+20	14374	.	G	A	29.0	PASS	DP=.;AF=0.5	GT	0|0	1|0	1/1
+20	14375	.	T	A	29.0	PASS	AF=0.5	GT	0|0	1|0	1/1
+20	14376	.	C	A	29.0	PASS	DP=300;AF=0.5	GT	0|0	1|0	1/1""")
+
+    def tearDown(self):
+        for curr_file in [self.tmp_in, self.tmp_out]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testRecord(self):
+        with VCFIO(self.tmp_in) as reader:
+            for record in reader:
+                if record.pos in {14374, 14375, 14376}:
+                    self.assertTrue("AF" in record.info and record.info["AF"] == [0.5])
+                else:
+                    self.assertTrue("AF" not in record.info)
+                if record.pos in {14372, 14373, 14376}:
+                    self.assertTrue("DP" in record.info and record.info["DP"] == 300)
+                else:
+                    self.assertTrue("DP" not in record.info)
+
+    def testWrite(self):
+        expected_content = """##fileformat=VCFv4.3
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+20	14370	.	G	A	29.0	PASS	.	GT	0|0	1|0	1/1
+20	14371	.	T	A	29.0	PASS	.	GT	0|0	1|0	1/1
+20	14372	.	C	A	29.0	PASS	DP=300	GT	0|0	1|0	1/1
+20	14373	.	C	A	29.0	PASS	DP=300	GT	0|0	1|0	1/1
+20	14374	.	G	A	29.0	PASS	AF=0.5	GT	0|0	1|0	1/1
+20	14375	.	T	A	29.0	PASS	AF=0.5	GT	0|0	1|0	1/1
+20	14376	.	C	A	29.0	PASS	AF=0.5;DP=300	GT	0|0	1|0	1/1"""
+        # Read and write VCF
+        with VCFIO(self.tmp_in) as reader:
+            with VCFIO(self.tmp_out, "w") as writer:
+                writer.copyHeader(reader)
+                writer.writeHeader()
+                for record in reader:
+                    writer.write(record)
+        # Compare input content with output
+        observed_content = None
+        with open(self.tmp_out) as reader:
+            observed_content = "".join(reader.readlines()).strip()
+        self.assertEqual(observed_content, expected_content)
+
+
 class TestVCFIO(unittest.TestCase):
     def setUp(self):
         tmp_folder = tempfile.gettempdir()
@@ -824,155 +1037,6 @@ class TestVCFRecord(unittest.TestCase):
         ]
         for curr in data:
             self.assertEqual(curr["variant"].isInsertion(), curr["expected"])
-
-
-class TestVCFHeader(unittest.TestCase):
-    def setUp(self):
-        tmp_folder = tempfile.gettempdir()
-        unique_id = str(uuid.uuid1())
-
-        # Temporary files
-        self.tmp_in_variants = os.path.join(tmp_folder, unique_id + "_in.vcf")
-        self.tmp_out_variants = os.path.join(tmp_folder, unique_id + "_out.vcf")
-        content = """##fileformat=VCFv4.3
-##fileDate=20090805
-##source=myImputationProgramV3.1
-##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
-##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
-##phasing=partial
-##SAMPLE=<ID=NA00001,Assay="WholeGenome",Description="Patient germline genome from unaffected",Disease="None",DOI="url",Ethnicity="AFR">
-##SAMPLE=<ID=NA00002,Assay="Exome",Description="European patient exome from breast cancer",Disease="Cancer",Ethnicity="CEU",Tissue="Breast">
-##PEDIGREE=<ID=TumourSample,Original=GermlineID>
-##PEDIGREE=<ID=SomaticNonTumour,Original=GermlineID>
-##PEDIGREE=<ID=ChildID,Father=FatherID,Mother=MotherID>
-##PEDIGREE=<ID=SampleID,Name_1=Ancestor_1,Name_N=Ancestor_N>
-##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data",Source="myImputationProgram",Version="3.1">
-##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
-##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
-##INFO=<ID=SRC,Number=.,Type=String,Description="Caller source">
-##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
-##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership",Version="129">
-##INFO=<ID=H2,Number=0,Type=Flag,Description="HapMap2 membership">
-##FILTER=<ID=q10,Description="Quality below 10">
-##FILTER=<ID=s50,Description="Less than 50% of samples have data">
-##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype \\"test\\"">
-##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype Quality">
-##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
-##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype Quality">
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
-"""
-        with open(self.tmp_in_variants, "w") as FH_variants:
-            FH_variants.write(content)
-
-    def tearDown(self):
-        # Clean temporary files
-        for curr_file in [self.tmp_in_variants, self.tmp_out_variants]:
-            if os.path.exists(curr_file):
-                os.remove(curr_file)
-
-    def testReadWriteHeader(self):
-        with VCFIO(self.tmp_in_variants) as FH_in:
-            with VCFIO(self.tmp_out_variants, "w") as FH_out:
-                FH_out.copyHeader(FH_in)
-                FH_out.writeHeader()
-        expected = None
-        with open(self.tmp_in_variants) as FH_exp:
-            expected = FH_exp.readlines()
-        observed = None
-        with open(self.tmp_out_variants) as FH_obs:
-            observed = FH_obs.readlines()
-        self.assertTrue(len(expected) != 0)
-        self.assertEqual(sorted(expected), sorted(observed))
-
-    def testHeaderAttrDel(self):
-        data = HeaderInfoAttr(
-            id="NS",
-            number="1",
-            type="Integer",
-            description="Number of Samples With Data",
-            source="myImputationProgram",
-            version="3.1"
-        )
-        del(data.source)
-        expected = {"id": "NS", "number": "1", "type": "Integer", "description": "Number of Samples With Data", "version": "3.1"}
-        self.assertEqual(expected, data.datastore)
-
-    def testHeaderAttrKeys(self):
-        data = HeaderInfoAttr(
-            id="NS",
-            number="1",
-            type="Integer",
-            description="Number of Samples With Data",
-            source="myImputationProgram",
-            version="3.1"
-        )
-        expected = sorted(["id", "number", "type", "description", "source", "version"])
-        self.assertEqual(expected, sorted(data.keys()))
-
-    def testHeaderAttrStr(self):
-        data = HeaderInfoAttr(
-            id="NS",
-            number="1",
-            type="Integer",
-            description="Number of Samples With Data",
-            source="myImputationProgram",
-            version="3.1"
-        )
-        expected = '<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data",Source="myImputationProgram",Version="3.1">'
-        self.assertEqual(expected, str(data))
-
-    def testGetHeaderAttr(self):
-        data = [
-            {
-                "text": '##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data",Source="myImputationProgram",Version="3.1">',
-                "expected_dict": {"id": "NS", "number": "1", "type": "Integer", "description": "Number of Samples With Data", "source": "myImputationProgram", "version": "3.1"},
-                "expected_cls": "HeaderInfoAttr"
-            },
-            {
-                "text": '##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">',
-                "expected_dict": {"id": "DP", "number": "1", "type": "Integer", "description": "Total Depth"},
-                "expected_cls": "HeaderInfoAttr"
-            },
-            {
-                "text": '##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">',
-                "expected_dict": {"id": "AF", "number": "A", "type": "Float", "description": "Allele Frequency"},
-                "expected_cls": "HeaderInfoAttr"
-            },
-            {
-                "text": '##INFO=<ID=SRC,Number=.,Type=String,Description="Caller source">',
-                "expected_dict": {"id": "SRC", "number": ".", "type": "String", "description": "Caller source"},
-                "expected_cls": "HeaderInfoAttr"
-            },
-            {
-                "text": '##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, 2018-01",Version="129">',
-                "expected_dict": {"id": "DB", "number": "0", "type": "Flag", "description": "dbSNP membership, 2018-01", "version": "129"},
-                "expected_cls": "HeaderInfoAttr"
-            },
-            {
-                "text": '##FILTER=<ID=q10,Description="Quality below 10",Source="myImputationProgram",Version=10>',
-                "expected_dict": {"id": "q10", "description": "Quality below 10", "source": "myImputationProgram", "version": "10"},
-                "expected_cls": "HeaderFilterAttr"
-            },
-            {
-                "text": '##FILTER=<ID=s50,Description="Less than 50% of samples have data">',
-                "expected_dict": {"id": "s50", "description": "Less than 50% of samples have data"},
-                "expected_cls": "HeaderFilterAttr"
-            },
-            {
-                "text": '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
-                "expected_dict": {"id": "GT", "number": "1", "type": "String", "description": "Genotype"},
-                "expected_cls": "HeaderFormatAttr"
-            },
-            {
-                "text": '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype \\"test\\"">',
-                "expected_dict": {"id": "GT", "number": "1", "type": "String", "description": 'Genotype "test"'},
-                "expected_cls": "HeaderFormatAttr"
-            }
-        ]
-        for curr in data:
-            attr = getHeaderAttr(curr["text"])
-            self.assertEqual(curr["expected_dict"], attr.datastore)
-            self.assertEqual(curr["expected_cls"], attr.__class__.__name__)
 
 
 ########################################################################

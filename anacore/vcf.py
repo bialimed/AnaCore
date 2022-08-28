@@ -79,7 +79,7 @@ Classes and functions for reading/writing/processing VCF.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.31.0'
+__version__ = '1.32.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -1350,12 +1350,15 @@ class VCFIO(AbstractFile):
                     else:
                         tag, value = tag_and_value.split('=', 1)
                         if self.info[tag]._number == 1:  # The field contains an unique value
-                            info[tag] = self.info[tag]._type(value)
-                            if self.info[tag].type == "String":
-                                info[tag] = decodeInfoValue(info[tag])
+                            if value != ".":  # Exclude key None value
+                                info[tag] = self.info[tag]._type(value)
+                                if self.info[tag].type == "String":
+                                    info[tag] = decodeInfoValue(info[tag])
                         else:  # The field contains a list (self.info[tag]._number is None or self.info[tag]._number > 1)
                             if value == "":
                                 info[tag] = []
+                            elif value == ".":
+                                pass  # Exclude key with None list
                             elif self.info[tag].type == "String":
                                 info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
                             else:

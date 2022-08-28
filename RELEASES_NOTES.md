@@ -1,6 +1,9 @@
 # Release 2.12.0 [DEV]
 
 ### Changes
+  * `anacore.vcf.VCFIO`: Manage None value in a vcf INFO field as missing key.
+  Example: for an INFO field equal to `AF=0.5;DP=.` the record.info is
+  `{"AF": 0.5}`.
   * `anacore.msi.msings`:
     * Remove `record.results["mSINGS"].data["peaks"]` from returned records in parser
     `anacore.msi.msings.MSINGSAnalysisIO`: data can be retrieved from
@@ -21,12 +24,12 @@
     * `anacore.msings` to `anacore.msi.msings`
 
 ### Improvements
-  * Add `anacore.msi.msisensorpro` to manage results from MSIsensor-pro software.
-  * Add `anacore.illumina.Run` getters to known run information and status from
-  the run folder.
   * Add `anacore.illumina.DemultStat` to read demultiplex statistics from
   bcl2fastq.
+  * Add `anacore.illumina.Run` getters to known run information and status from
+  the run folder.
   * Add `anacore.msi.hubble` to manage results from Hubble software.
+  * Add `anacore.msi.msisensorpro` to manage results from MSIsensor-pro software.
 
 # Release 2.11.0 [2022-03-10]
 
