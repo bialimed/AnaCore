@@ -1,4 +1,4 @@
-# Release 2.12.0 [DEV]
+# Release 2.12.0 [2022-09-06]
 
 ### Changes
   * `anacore.vcf.VCFIO`: Manage None value in a vcf INFO field as missing key.
