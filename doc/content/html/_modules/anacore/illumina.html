@@ -484,7 +484,7 @@
                         <span class="n">without_udi</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">without_udi</span><span class="p">:</span>
                     <span class="n">unexpected_barcodes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;spl&quot;</span><span class="p">:</span> <span class="n">barcode</span><span class="p">,</span> <span class="s2">&quot;ct&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">})</span>
-        <span class="k">return</span> <span class="n">unexpected_barcodes</span></div></div>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unexpected_barcodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">elt</span><span class="p">:</span> <span class="n">elt</span><span class="p">[</span><span class="s2">&quot;ct&quot;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="RTAComplete"><a class="viewcode-back" href="../../anacore.html#anacore.illumina.RTAComplete">[docs]</a><span class="k">class</span> <span class="nc">RTAComplete</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

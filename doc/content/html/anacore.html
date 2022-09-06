@@ -3992,10 +3992,10 @@ clf.set_status(test_dataset)</p>
 </div>
 <div class="section" id="module-anacore.msi.msings">
 <span id="anacore-msi-msings"></span><h3>anacore.msi.msings<a class="headerlink" href="#module-anacore.msi.msings" title="Permalink to this headline">¶</a></h3>
-<p>Classes and functions for reading/writing mSINGS’s outputs.</p>
+<p>Classes and functions to predict with mSINGS’s algorithm and to read/write mSINGS binaries outputs.</p>
 <dl class="py class">
-<dt id="anacore.msi.msings.MSINGSAnalysis">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msings.</span></code><code class="sig-name descname"><span class="pre">MSINGSAnalysis</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSAnalysis" title="Permalink to this definition">¶</a></dt>
+<dt id="anacore.msi.msings.MSINGSAnalysisIO">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msings.</span></code><code class="sig-name descname"><span class="pre">MSINGSAnalysisIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSAnalysisIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSAnalysisIO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#anacore.sv.HashedSVIO" title="anacore.sv.HashedSVIO"><code class="xref py py-class docutils literal notranslate"><span class="pre">anacore.sv.HashedSVIO</span></code></a></p>
 <p>Manage output file produced by the command “msi analyzer” of mSINGS (<a class="reference external" href="https://bitbucket.org/uwlabmed/msings">https://bitbucket.org/uwlabmed/msings</a>).</p>
 <p>Return the new instance of MSINGSAnalysis.</p>
@@ -4008,8 +4008,8 @@ clf.set_status(test_dataset)</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="anacore.msi.msings.MSINGSAnalysis.recordToLine">
-<code class="sig-name descname"><span class="pre">recordToLine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSAnalysis.recordToLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSAnalysis.recordToLine" title="Permalink to this definition">¶</a></dt>
+<dt id="anacore.msi.msings.MSINGSAnalysisIO.recordToLine">
+<code class="sig-name descname"><span class="pre">recordToLine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSAnalysisIO.recordToLine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSAnalysisIO.recordToLine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the record in SV format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -4084,18 +4084,12 @@ clf.set_status(test_dataset)</p>
 <dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – The filepath.</p>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="anacore.msi.msings.MSINGSReport.parse">
-<code class="sig-name descname"><span class="pre">parse</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msings.html#MSINGSReport.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msings.MSINGSReport.parse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse file and store information in self.</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
 <div class="section" id="module-anacore.msi.msisensorpro">
 <span id="anacore-msi-msisensorpro"></span><h3>anacore.msi.msisensorpro<a class="headerlink" href="#module-anacore.msi.msisensorpro" title="Permalink to this headline">¶</a></h3>
-<p>Classes and functions for reading/writing MSIsensor-pro’s outputs.</p>
+<p>Classes and functions to predict with MSISensor-pro’s algorithm and to read/write MSIsensor-pro binaries outputs.</p>
 <dl class="py class">
 <dt id="anacore.msi.msisensorpro.BaselineIO">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">anacore.msi.msisensorpro.</span></code><code class="sig-name descname"><span class="pre">BaselineIO</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/msi/msisensorpro.html#BaselineIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.msi.msisensorpro.BaselineIO" title="Permalink to this definition">¶</a></dt>
