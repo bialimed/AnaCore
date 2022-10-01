@@ -1,3 +1,9 @@
+# Release 2.12.1 [DEV]
+
+### Bug fixes
+  * Fix bug in `anacore.msi.sample.setScore()`: the value locus_weight_is_score
+  was ignored.
+
 # Release 2.12.0 [2022-09-06]
 
 ### Changes

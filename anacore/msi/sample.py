@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.1.1'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -298,7 +298,7 @@ class MSISample:
         if spl_res.status == Status.undetermined or spl_res.status == Status.none:
             spl_res.score = None
         else:
-            spl_res.score = self._getScoreCalculation(spl_res.status, method, undetermined_weight)
+            spl_res.score = self._getScoreCalculation(spl_res.status, method, undetermined_weight, locus_weight_is_score)
 
     def setStatusByInstabilityRatio(self, method, min_voting_loci=0.5, instability_threshold=0.4):
         """
