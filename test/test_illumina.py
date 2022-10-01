@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2019 IUCT-O'
+__copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.4.0'
+__version__ = '1.5.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -846,7 +846,81 @@ class TestRunParameters(unittest.TestCase):
     <ScannedBarcode />
   </Setup>
   <Version>1</Version>
-</RunParameters>'''
+</RunParameters>''',
+            "MiSeq_invalid_RFID": """<?xml version="1.0"?>
+<RunParameters xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EnableCloud>false</EnableCloud>
+  <RunParametersVersion>MiSeq_1_1</RunParametersVersion>
+  <CopyManifests>true</CopyManifests>
+  <FlowcellRFIDTag>
+    <PartNumber>20660742</PartNumber>
+    <ExpirationDate>0001-01-01T00:00:00</ExpirationDate>
+  </FlowcellRFIDTag>
+  <PR2BottleRFIDTag>
+    <PartNumber>20663557</PartNumber>
+    <ExpirationDate>0001-01-01T00:00:00</ExpirationDate>
+  </PR2BottleRFIDTag>
+  <ReagentKitRFIDTag>
+    <SerialNumber>MS3133997-500V2</SerialNumber>
+    <PartNumber>15033573</PartNumber>
+    <ExpirationDate>2023-05-02T00:00:00</ExpirationDate>
+  </ReagentKitRFIDTag>
+  <Resumable>true</Resumable>
+  <ManifestFiles />
+  <AfterRunWashMethod>Post-Run Wash</AfterRunWashMethod>
+  <Setup>
+    <SupportMultipleSurfacesInUI>true</SupportMultipleSurfacesInUI>
+    <ApplicationVersion>2.5.0.5</ApplicationVersion>
+    <NumTilesPerSwath>14</NumTilesPerSwath>
+    <NumSwaths>1</NumSwaths>
+    <NumLanes>1</NumLanes>
+    <ApplicationName>MiSeq Control Software</ApplicationName>
+  </Setup>
+  <RunID>220913_M02726_0919_KKY8G</RunID>
+  <ScannerID>M02726</ScannerID>
+  <RunNumber>919</RunNumber>
+  <FPGAVersion>9.5.12</FPGAVersion>
+  <MCSVersion>2.5.0.5</MCSVersion>
+  <RTAVersion>1.18.54</RTAVersion>
+  <Barcode>KKY8G</Barcode>
+  <PR2BottleBarcode>15041807</PR2BottleBarcode>
+  <ReagentKitPartNumberEntered>15033573</ReagentKitPartNumberEntered>
+  <ReagentKitVersion>Version2</ReagentKitVersion>
+  <ReagentKitBarcode>MS3133997-500V2</ReagentKitBarcode>
+  <PreviousPR2BottleBarcode>15041807</PreviousPR2BottleBarcode>
+  <PreviousReagentKitBarcode />
+  <ExperimentName>Run_Chim</ExperimentName>
+  <Chemistry>Amplicon</Chemistry>
+  <Username>sbsuser</Username>
+  <Workflow>
+    <Analysis>GenerateFASTQ</Analysis>
+  </Workflow>
+  <EnableAnalysis>false</EnableAnalysis>
+  <Reads>
+    <RunInfoRead Number="1" NumCycles="251" IsIndexedRead="N" />
+    <RunInfoRead Number="2" NumCycles="8" IsIndexedRead="Y" />
+    <RunInfoRead Number="3" NumCycles="8" IsIndexedRead="Y" />
+    <RunInfoRead Number="4" NumCycles="251" IsIndexedRead="N" />
+  </Reads>
+  <TempFolder>D:\Illumina\MiSeqTemp\220913_M02726_0919_KKY8G</TempFolder>
+  <AnalysisFolder>D:\Illumina\MiSeqAnalysis\220913_M02726_0919_KKY8G</AnalysisFolder>
+  <RunStartDate>220913</RunStartDate>
+  <MostRecentWashType>PostRun</MostRecentWashType>
+  <RecipeFolder>D:\Illumina\MiSeq Control Software\CustomRecipe</RecipeFolder>
+  <ILMNOnlyRecipeFolder>C:\Illumina\MiSeq Control Software\Recipe</ILMNOnlyRecipeFolder>
+  <SampleSheetName>Run_Chim_500</SampleSheetName>
+  <SampleSheetFolder>D:\lab</SampleSheetFolder>
+  <ManifestFolder>D:\Illumina\MiSeq Control Software\Manifests</ManifestFolder>
+  <OutputFolder>\\sequencers\MiSeq\220913_M02726_0919_KKY8G</OutputFolder>
+  <FocusMethod>AutoFocus</FocusMethod>
+  <SurfaceToScan>Both</SurfaceToScan>
+  <SaveFocusImages>false</SaveFocusImages>
+  <SaveScanImages>true</SaveScanImages>
+  <CloudUsername />
+  <RunManagementType>Standalone</RunManagementType>
+  <CloudRunId />
+  <SendInstrumentHealthToILMN>false</SendInstrumentHealthToILMN>
+</RunParameters>"""
         }
 
     def setUp(self):
@@ -883,6 +957,17 @@ class TestRunParameters(unittest.TestCase):
                     "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}],
                     "run": {"number": "149", "id": "141105_M01102_0149_000000000-AAC1Y", "start_date": datetime(2014, 11, 5)},
                     "kit": {"flowcell_id": "000000000-AAC1Y", "reagent_kit_id": "MS2740035-300V2"},
+                    "post_process": "GenerateFASTQ",
+                    "software": {"RTA": "1.18.54", "CS": "2.5.0.5"}
+                }
+            },
+            {  # MiSeq invalid RFID
+                "content": TestRunParameters.CONTENT["MiSeq_invalid_RFID"],
+                "expected": {
+                    "instrument": {"id": "M02726", "platform": "MiSeq"},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 251}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 251}],
+                    "run": {"number": "919", "id": "220913_M02726_0919_KKY8G", "start_date": datetime(2022, 9, 13)},
+                    "kit": {"flowcell_id": "KKY8G", "reagent_kit_id": "MS3133997-500V2"},
                     "post_process": "GenerateFASTQ",
                     "software": {"RTA": "1.18.54", "CS": "2.5.0.5"}
                 }

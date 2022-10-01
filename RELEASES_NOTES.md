@@ -1,5 +1,8 @@
 # Release 2.12.1 [DEV]
 
+### Improvements
+  * Add MiSeq invalid RFID markup management in `anacore.illumina.RunParameters`.
+
 ### Bug fixes
   * Fix bug in `anacore.msi.sample.setStatusByInstabilityRatio()`: the value
   voting_loci was invalid.

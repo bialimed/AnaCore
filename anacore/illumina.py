@@ -2,9 +2,9 @@
 """Classes and functions for reading Illumina's files (samplesheet, runInfo, runParameters, ...) and parsing header, filenames and run folder informations."""
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT-O'
+__copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.22.0'
+__version__ = '1.23.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -596,10 +596,10 @@ class RunParameters(object):
             flowcell_id = flowcell_id.text
         else:
             flowcell_markup = root.find("FlowcellRFIDTag")  # MiSeq style
-            if flowcell_markup is not None:
+            if flowcell_markup is not None and flowcell_markup.find("SerialNumber") is not None:
                 flowcell_id = flowcell_markup.find("SerialNumber").text
             else:
-                flowcell_id = root.find("Barcode")  # HiSeq style
+                flowcell_id = root.find("Barcode")  # HiSeq style or MiSeq with invalid RFID markup
                 if flowcell_id is not None:
                     flowcell_id = flowcell_id.text
                 else:
