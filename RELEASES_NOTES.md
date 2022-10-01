@@ -1,4 +1,4 @@
-# Release 2.12.1 [DEV]
+# Release 2.12.1 [2022-10-01]
 
 ### Improvements
   * Add MiSeq invalid RFID markup management in `anacore.illumina.RunParameters`.
