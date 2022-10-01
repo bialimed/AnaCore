@@ -1,6 +1,8 @@
 # Release 2.12.1 [DEV]
 
 ### Bug fixes
+  * Fix bug in `anacore.msi.sample.setStatusByInstabilityRatio()`: the value
+  voting_loci was invalid.
   * Fix bug in `anacore.msi.sample.setScore()`: the value locus_weight_is_score
   was ignored.
 

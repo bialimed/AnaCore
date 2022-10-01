@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2018 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.1'
+__version__ = '2.1.2'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -321,7 +321,7 @@ class MSISample:
         nb_stable = self.getNbStable(method)
         nb_unstable = self.getNbUnstable(method)
         result.status = Status.undetermined
-        if nb_stable + nb_unstable / self.getNbLoci() >= min_voting_loci:
+        if (nb_stable + nb_unstable) / self.getNbLoci() >= min_voting_loci:
             if nb_unstable / (nb_stable + nb_unstable) >= instability_threshold:
                 result.status = Status.unstable
             else:

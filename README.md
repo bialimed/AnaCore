@@ -2,7 +2,7 @@
 
 
 ![license](https://img.shields.io/badge/license-GPLv3-blue)
-![coverage](https://img.shields.io/badge/coverage-76%25-yellowgreen)
+![coverage](https://img.shields.io/badge/coverage-%25-blue)
 
 ## Description
 Anapath Core is a package containing libraries for managing standard file
