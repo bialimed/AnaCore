@@ -1,3 +1,9 @@
+# Release 2.13.0 [DEV]
+
+### Changes
+  * `anacore.illumina.SampleSheetIO(path)` replaced by
+  `anacore.illumina.SampleSheetFactory.get(path)`.
+
 # Release 2.12.1 [2022-10-01]
 
 ### Improvements
