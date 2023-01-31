@@ -40,15 +40,35 @@ Classes and functions for reading Illumina's files (samplesheet, runInfo, runPar
         #   1- sequencing ended: True
         #   2- copy ended: False
         #   3- pos-processing ended: False
+
+    List undetermined barcodes with a count greater than smallest sample
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.illumina import DemultStatFactory
+
+        demult_stat = DemultStatFactory.get("my_demultiplex_folder")
+        print("count\tbarcode")
+        for barcode in demult_stat.unexpectedBarcodes():
+            print(
+                "{}\t{}".format(barcode["ct"], barcode["seq"])
+            )
+
+        # Result (with smallest sample count equal to 10000)>
+        # count barcode
+        # 14879 AATGC+TTTA
+        # 10457 AGCGC+TTGA
 """
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
+import csv
 import datetime
 import glob
 import json
@@ -70,25 +90,31 @@ class Bcl2fastqLog(object):
         :rtype: Bcl2fastqLog
         """
         self.command = None
-        self.complete = None
         self.end_time = None
         self.filepath = path
         self.start_time = None
+        self.status = None  # COMPLETED or FAILED or RUNNING
         self.version = None
         self._parse()
 
     def _parse(self):
         """Read file content and store information on the instance's attributes."""
         self.command = None
-        self.complete = None
         self.end_time = None
         self.start_time = None
+        self.status = "RUNNING"
         self.version = None
         last_info = ""
         with open(self.filepath) as reader:
             for line in reader:
                 line = line.strip()
-                if self.version is None and line.startswith("bcl2fastq v"):
+                if " ERROR" in line:
+                    self.end_time = datetime.datetime.strptime(
+                        " ".join(line.split(" ", 3)[:2]),
+                        '%Y-%m-%d %H:%M:%S'
+                    )
+                    self.status = "FAILED"
+                elif self.version is None and line.startswith("bcl2fastq v"):
                     self.version = line.split(" ")[1]
                 elif self.command is None and "Command-line invocation:" in line:
                     trace_time, command = line.split(" Command-line invocation: ")
@@ -104,14 +130,77 @@ class Bcl2fastqLog(object):
                 " ".join(last_info.split(" ", 3)[:2]),
                 '%Y-%m-%d %H:%M:%S'
             )
-            self.complete = {
-                "nb_errors": int(
-                    re.search(r"(\d+) errors", last_info).group(1)
-                ),
-                "nb_warnings": int(
-                    re.search(r"(\d+) warnings", last_info).group(1)
-                )
-            }
+            nb_errors = int(
+                re.search(r"(\d+) errors", last_info).group(1)
+            )
+            if nb_errors != 0:
+                self.status = "FAILED"
+            else:
+                self.status = "COMPLETED"
+
+
+class BclConvertLog(object):
+    """Reader for bcl-convert log."""
+
+    def __init__(self, folder_path):
+        """
+        Build and return an instance of BclConvertLog.
+
+        :param folder_path: Path to BclConvertLog ${out_folder}/Logs folder.
+        :type folder_path: str
+        :return: The new instance.
+        :rtype: BclConvertLog
+        """
+        self.command = None
+        self.end_time = None
+        self.folder_path = folder_path
+        self.start_time = None
+        self.status = None  # COMPLETED or FAILED or RUNNING
+        self.version = None
+        self._parse()
+
+    def _parse(self):
+        """Read logs and store information on the instance's attributes."""
+        self.command = None
+        self.end_time = None
+        self.start_time = None
+        self.status = "RUNNING"
+        self.version = None
+        self._parseInfo()
+        self._parseError()
+
+    def _parseError(self):
+        """Read error log file and store information on the instance's attributes."""
+        error_path = os.path.join(self.folder_path, "Errors.log")
+        if os.path.getsize(error_path) > 0:
+            self.status = "FAILED"
+            with open(error_path) as reader:
+                line = reader.readline()
+                date, trash, thread, info = line.strip().split(" ", 3)
+                self.end_time = datetime.datetime.fromisoformat(date.replace('Z', '+00:00'))
+            if self.start_time is None:
+                self.start_time = self.end_time
+
+    def _parseInfo(self):
+        """Read info log file and store information on the instance's attributes."""
+        last = (None, None)  # (date, info)
+        info_path = os.path.join(self.folder_path, "Info.log")
+        with open(info_path) as reader:
+            for line in reader:
+                if line.strip().count(" ") > 2:  # info message is not empty
+                    date, trash, thread, info = line.strip().split(" ", 3)
+                    if self.start_time is None:
+                        self.start_time = datetime.datetime.fromisoformat(date.replace('Z', '+00:00'))
+                    if self.version is None and info.startswith("bcl-convert Version "):
+                        self.version = info.rsplit(" ", 1)[1].strip()
+                        self.version = self.version.replace("00.000.000.", "")
+                    elif self.command is None and info.startswith("Command Line: "):
+                        arguments = info.split(":", 1)[1].strip()
+                        self.command = "bcl-convert {}".format(arguments)
+                    last = (date, info)
+        if last[1] is not None and last[1].startswith("Conversion Complete."):
+            self.end_time = datetime.datetime.fromisoformat(last[0].replace('Z', '+00:00'))
+            self.status = "COMPLETED"
 
 
 class CompletedJobInfo(object):
@@ -157,21 +246,41 @@ class CompletedJobInfo(object):
             self.parameters["AmpliconSettings"] = etreeToDict(root.find("Workflow").find("AmpliconSettings"))
 
 
-class DemultStat:
-    """Reader for Data/Intensities/BaseCalls/Stats/Stats.json."""
+class AbstractDemultStat:
+    """
+    Reader for demultiplex statistics.
+
+    The attribute samples contains for each sample its ID, these barcodes
+    sequences and their counts by lane. This count is a list for 0, 1 and 2
+    mismatches. Example: [
+        {
+            "id": "splA",
+            "barcodes": [
+                {
+                    "seq": "ATGC",
+                    "lanes": [{"id": 1, "ct": [12, 14, 15]}, ...]
+                }, ...
+            ]
+        }, ...
+    ]
+    """
 
     def __init__(self, path):
         """
-        Build and return an instance of DemultStat.
+        Build and return an instance of DemultStat from demultiplexing statistics file.
 
-        :param path: Path to demultiplex stats (exmple: my_run/Data/Intensities/BaseCalls/Stats/Stats.json).
+        :param path: Path to the demultiplexing statistics file.
         :type path: str
         :return: The new instance.
         :rtype: DemultStat
         """
-        self.path = path
-        with open(path) as reader:
-            self.data = json.load(reader)
+        self.samples = None
+        self._path = path
+        self._parse()
+
+    def _parse(self):
+        """Read self._path content and store information in self.samples."""
+        raise NotImplementedError
 
     def samplesCounts(self):
         """
@@ -180,14 +289,23 @@ class DemultStat:
         :return: Number of reads by samples ID.
         :rtype: dict
         """
-        info_by_spl = dict()
-        for lane in self.data["ConversionResults"]:
-            for spl in lane["DemuxResults"]:
-                if spl["SampleId"] not in info_by_spl:
-                    info_by_spl[spl["SampleId"]] = spl["NumberReads"]
-                else:
-                    info_by_spl[spl["SampleId"]] += spl["NumberReads"]
-        return info_by_spl
+        ct_by_spl = dict()
+        for spl in self.samples:
+            nb_reads = 0
+            for barcode in spl["barcodes"]:
+                nb_reads += sum(sum(lane["ct"]) for lane in barcode["lanes"])
+            ct_by_spl[spl["id"]] = nb_reads
+        return ct_by_spl
+
+    @property
+    def undetermined(self):
+        """
+        Return undetermined barcodes.
+
+        :return: Undetermined barcodes. Format: [{"seq": "ATGG+TTC", "lanes": [{"id": 1, "ct": 154782}, {"id": 2, "ct": 255567]}].
+        :rtype: list
+        """
+        raise NotImplementedError
 
     def undeterminedCounts(self):
         """
@@ -196,14 +314,10 @@ class DemultStat:
         :return: Number of reads by undetermined UDI.
         :rtype: dict
         """
-        info_by_barcode = dict()
-        for lane in self.data["UnknownBarcodes"]:
-            for barcode, count in lane["Barcodes"].items():
-                if barcode not in info_by_barcode:
-                    info_by_barcode[barcode] = count
-                else:
-                    info_by_barcode[barcode] += count
-        return info_by_barcode
+        ct_by_barcode = dict()
+        for barcode in self.undetermined:
+            ct_by_barcode[barcode["seq"]] = sum(lane["ct"] for lane in barcode["lanes"])
+        return ct_by_barcode
 
     def unexpectedBarcodes(self, skipped_spl=None):
         """
@@ -231,6 +345,189 @@ class DemultStat:
                 if not without_udi:
                     unexpected_barcodes.append({"spl": barcode, "ct": count})
         return sorted(unexpected_barcodes, key=lambda elt: elt["ct"], reverse=True)
+
+
+class DemultStatBcl2fastq(AbstractDemultStat):
+    """Reader for demultipexing statistics file (Data/Intensities/BaseCalls/Stats/Stats.json) from bcl2fastq."""
+
+    def _parse(self):
+        """Read self._path content and store information in self.samples."""
+        with open(self._path) as reader:
+            in_data = json.load(reader)["ConversionResults"]
+        tmp_data = dict()
+        for in_lane in in_data:
+            # Sample
+            for in_spl in in_lane["DemuxResults"]:
+                spl_id = in_spl["SampleId"]
+                if spl_id not in tmp_data:
+                    tmp_data[spl_id] = {
+                        "id": spl_id,
+                        "barcodes": dict()
+                    }
+                spl = tmp_data[spl_id]
+                # Barcode
+                for in_barcode in in_spl["IndexMetrics"]:
+                    idx_seq = in_barcode["IndexSequence"]
+                    if idx_seq not in spl["barcodes"]:
+                        spl["barcodes"][idx_seq] = {
+                            "seq": idx_seq,
+                            "lanes": dict()
+                        }
+                    barcode = spl["barcodes"][idx_seq]
+                    # Lane
+                    lane_id = in_lane["LaneNumber"]
+                    if lane_id not in barcode["lanes"]:
+                        barcode["lanes"][lane_id] = {
+                            "id": lane_id,
+                            "ct": [0, 0, 0]
+                        }
+                    lane = barcode["lanes"][lane_id]
+                    for nb_mis, ct in in_barcode["MismatchCounts"].items():
+                        lane["ct"][int(nb_mis)] += ct
+        # Remove dict only necessary for parsing
+        self.samples = list()
+        for spl_id, spl in tmp_data.items():
+            spl["barcodes"] = spl["barcodes"].values()
+            for barcode in spl["barcodes"]:
+                barcode["lanes"] = barcode["lanes"].values()
+            self.samples.append(spl)
+
+    @property
+    def undetermined(self):
+        """
+        Return undetermined barcodes.
+
+        :return: Undetermined barcodes. Format: [{"seq": "ATGG+TTC", "lanes": [{"id": 1, "ct": 154782}, {"id": 2, "ct": 255567]}].
+        :rtype: list
+        """
+        with open(self._path) as reader:
+            in_data = json.load(reader)["UnknownBarcodes"]
+        barcode_by_seq = dict()
+        for in_lane in in_data:
+            for idx_seq, count in in_lane["Barcodes"].items():
+                if idx_seq not in barcode_by_seq:
+                    barcode_by_seq[idx_seq] = {
+                        "seq": idx_seq,
+                        "lanes": list()
+                    }
+                barcode_by_seq[idx_seq]["lanes"].append({
+                    "id": in_lane["Lane"],
+                    "ct": count
+                })
+        return barcode_by_seq.values()
+
+
+class DemultStatBclConvert(AbstractDemultStat):
+    """Reader for demultipexing statistics file (Demultiplex_Stats.csv and Top_Unknown_Barcodes.csv) from bcl-convert."""
+
+    def __init__(self, demult_path, undet_path=None):
+        """
+        Build and return an instance of DemultStat from bcl-convert.
+
+        :param demult_path: Path to the samples demultiplexing statistics file.
+        :type demult_path: str
+        :param undeter_path: Path to the undetermined demultiplexing statistics file.
+        :type undeter_path: str
+        :return: The new instance.
+        :rtype: DemultStatBclConvert
+        """
+        super().__init__(demult_path)
+        self._undet_path = undet_path
+
+    def _parse(self):
+        """Read self._path content and store information in self.samples."""
+        tmp_data = dict()
+        with open(self._path) as handle:
+            reader = csv.DictReader(handle, delimiter=',')
+            for row in reader:
+                # Sample
+                spl_id = row["SampleID"]
+                if spl_id not in tmp_data:
+                    tmp_data[spl_id] = {
+                        "id": spl_id,
+                        "barcodes": dict()
+                    }
+                spl = tmp_data[spl_id]
+                # Barcode
+                idx_seq = row["Index"].replace("-", "+")
+                if idx_seq not in spl["barcodes"]:
+                    spl["barcodes"][idx_seq] = {
+                        "seq": idx_seq,
+                        "lanes": dict()
+                    }
+                barcode = spl["barcodes"][idx_seq]
+                # Lane
+                lane_id = int(row["Lane"])
+                if lane_id not in barcode["lanes"]:
+                    barcode["lanes"][lane_id] = {
+                        "id": lane_id,
+                        "ct": [0, 0, 0]
+                    }
+                lane = barcode["lanes"][lane_id]
+                lane["ct"][0] += int(row["# Perfect Index Reads"])
+                lane["ct"][1] += int(row["# One Mismatch Index Reads"])
+                lane["ct"][2] += int(row["# Two Mismatch Index Reads"])
+        # Remove dict only necessary for parsing
+        self.samples = list()
+        for spl_id, spl in tmp_data.items():
+            spl["barcodes"] = spl["barcodes"].values()
+            for barcode in spl["barcodes"]:
+                barcode["lanes"] = barcode["lanes"].values()
+            self.samples.append(spl)
+
+    @property
+    def undetermined(self):
+        """
+        Return undetermined barcodes.
+
+        :return: Undetermined barcodes. Format: [{"seq": "ATGG+TTC", "lanes": [{"id": 1, "ct": 154782}, {"id": 2, "ct": 255567]}].
+        :rtype: list
+        """
+        if self._undet_path is None:
+            raise Exception("Top_Unknown_Barcodes.csv must be provide for access to undetermined.")
+        barcode_by_seq = dict()
+        with open(self._undet_path) as handle:
+            reader = csv.DictReader(handle, delimiter=',')
+            for row in reader:
+                idx_seq = row["index"]
+                if "index2" in row:
+                    idx_seq = "{}+{}".format(row["index"], row["index2"])
+                if idx_seq not in barcode_by_seq:
+                    barcode_by_seq[idx_seq] = {
+                        "seq": idx_seq,
+                        "lanes": list()
+                    }
+                barcode_by_seq[idx_seq]["lanes"].append({
+                    "id": row["Lane"],
+                    "ct": int(row["# Reads"])
+                })
+        return barcode_by_seq.values()
+
+
+class DemultStatFactory:
+    """Factory to identify and return version compliant handler to DemultStat."""
+
+    @staticmethod
+    def get(folder_path):
+        """
+        Return instance of DemultStat from the demultiplexing folder.
+
+        :param folder_path: Path to the demultiplexing folder.
+        :type folder_path: str
+        :return: Instance of DemultStat from the demultiplexing folder.
+        :rtype: anacore.illumina.AbstractDemultStat
+        """
+        if os.path.exists(os.path.join(folder_path, "Stats", "Stats.json")):
+            return DemultStatBcl2fastq(
+                os.path.join(folder_path, "Stats", "Stats.json")
+            )
+        elif os.path.exists(os.path.join(folder_path, "Reports", "Demultiplex_Stats.csv")):
+            return DemultStatBclConvert(
+                os.path.join(folder_path, "Reports", "Demultiplex_Stats.csv"),
+                os.path.join(folder_path, "Reports", "Top_Unknown_Barcodes.csv"),
+            )
+        else:
+            raise IOError("The folder {} does not is not valid for DemultStat.".format(folder_path))
 
 
 class RTAComplete(object):

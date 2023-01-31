@@ -1,6 +1,12 @@
 # Release 2.13.0 [DEV]
 
+### Improvements
+  * Add log and statistics reader for bcl-convert:
+  `anacore.illumina.BclConvertLog` and `anacore.illumina.DemultStatBclConvert`.
+
 ### Changes
+  * `anacore.illumina.DemultStat(demult_stats_path)` replaced by
+  `anacore.illumina.DemultStatFactory.get(demult_folder_path)`.
   * `anacore.illumina.SampleSheetIO(path)` replaced by
   `anacore.illumina.SampleSheetFactory.get(path)`.
 
