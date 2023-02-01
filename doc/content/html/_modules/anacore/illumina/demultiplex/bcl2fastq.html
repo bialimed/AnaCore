@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>anacore.illumina.demultiplex.bcl2fastq &mdash; AnaCore  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/anacore.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> AnaCore
+            <img src="../../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../anacore.html">AnaCore package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">AnaCore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../demultiplex.html">anacore.illumina.demultiplex</a></li>
+      <li class="breadcrumb-item active">anacore.illumina.demultiplex.bcl2fastq</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for anacore.illumina.demultiplex.bcl2fastq</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes to read bcl2fastq logs and stats files.&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">from</span> <span class="nn">anacore.illumina.demultiplex.base</span> <span class="kn">import</span> <span class="n">AbstractDemultStat</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<div class="viewcode-block" id="DemultLog"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.bcl2fastq.DemultLog">[docs]</a><span class="k">class</span> <span class="nc">DemultLog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader for bcl2fastq log.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of DemultLog.</span>
+
+<span class="sd">        :param path: Path to BCL2fastq log file (format: txt).</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: DemultLog</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># COMPLETED or FAILED or RUNNING</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read file content and store information on the instance&#39;s attributes.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;RUNNING&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">last_info</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="s2">&quot; ERROR&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+                        <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]),</span>
+                        <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;FAILED&quot;</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;bcl2fastq v&quot;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;Command-line invocation:&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    <span class="n">trace_time</span><span class="p">,</span> <span class="n">command</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; Command-line invocation: &quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+                        <span class="n">trace_time</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">line</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                    <span class="n">last_info</span> <span class="o">=</span> <span class="n">line</span>
+        <span class="k">if</span> <span class="s2">&quot;Processing completed&quot;</span> <span class="ow">in</span> <span class="n">last_info</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+                <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">last_info</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]),</span>
+                <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span>
+            <span class="p">)</span>
+            <span class="n">nb_errors</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(\d+) errors&quot;</span><span class="p">,</span> <span class="n">last_info</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">nb_errors</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;FAILED&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;COMPLETED&quot;</span></div>
+
+
+<div class="viewcode-block" id="DemultStat"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.bcl2fastq.DemultStat">[docs]</a><span class="k">class</span> <span class="nc">DemultStat</span><span class="p">(</span><span class="n">AbstractDemultStat</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader for demultipexing statistics file (Data/Intensities/BaseCalls/Stats/Stats.json) from bcl2fastq.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read self._path content and store information in self.samples.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="n">in_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">reader</span><span class="p">)[</span><span class="s2">&quot;ConversionResults&quot;</span><span class="p">]</span>
+        <span class="n">tmp_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">in_lane</span> <span class="ow">in</span> <span class="n">in_data</span><span class="p">:</span>
+            <span class="c1"># Sample</span>
+            <span class="k">for</span> <span class="n">in_spl</span> <span class="ow">in</span> <span class="n">in_lane</span><span class="p">[</span><span class="s2">&quot;DemuxResults&quot;</span><span class="p">]:</span>
+                <span class="n">spl_id</span> <span class="o">=</span> <span class="n">in_spl</span><span class="p">[</span><span class="s2">&quot;SampleId&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">spl_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tmp_data</span><span class="p">:</span>
+                    <span class="n">tmp_data</span><span class="p">[</span><span class="n">spl_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">spl_id</span><span class="p">,</span>
+                        <span class="s2">&quot;barcodes&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="p">}</span>
+                <span class="n">spl</span> <span class="o">=</span> <span class="n">tmp_data</span><span class="p">[</span><span class="n">spl_id</span><span class="p">]</span>
+                <span class="c1"># Barcode</span>
+                <span class="k">for</span> <span class="n">in_barcode</span> <span class="ow">in</span> <span class="n">in_spl</span><span class="p">[</span><span class="s2">&quot;IndexMetrics&quot;</span><span class="p">]:</span>
+                    <span class="n">idx_seq</span> <span class="o">=</span> <span class="n">in_barcode</span><span class="p">[</span><span class="s2">&quot;IndexSequence&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">idx_seq</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;barcodes&quot;</span><span class="p">]:</span>
+                        <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;barcodes&quot;</span><span class="p">][</span><span class="n">idx_seq</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;seq&quot;</span><span class="p">:</span> <span class="n">idx_seq</span><span class="p">,</span>
+                            <span class="s2">&quot;lanes&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span>
+                        <span class="p">}</span>
+                    <span class="n">barcode</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;barcodes&quot;</span><span class="p">][</span><span class="n">idx_seq</span><span class="p">]</span>
+                    <span class="c1"># Lane</span>
+                    <span class="n">lane_id</span> <span class="o">=</span> <span class="n">in_lane</span><span class="p">[</span><span class="s2">&quot;LaneNumber&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">lane_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;lanes&quot;</span><span class="p">]:</span>
+                        <span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;lanes&quot;</span><span class="p">][</span><span class="n">lane_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">lane_id</span><span class="p">,</span>
+                            <span class="s2">&quot;ct&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                        <span class="p">}</span>
+                    <span class="n">lane</span> <span class="o">=</span> <span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;lanes&quot;</span><span class="p">][</span><span class="n">lane_id</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">nb_mis</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="n">in_barcode</span><span class="p">[</span><span class="s2">&quot;MismatchCounts&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">lane</span><span class="p">[</span><span class="s2">&quot;ct&quot;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">nb_mis</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">ct</span>
+        <span class="c1"># Remove dict only necessary for parsing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">spl_id</span><span class="p">,</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">tmp_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;barcodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;barcodes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">barcode</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;barcodes&quot;</span><span class="p">]:</span>
+                <span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;lanes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;lanes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spl</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">undetermined</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return undetermined barcodes.</span>
+
+<span class="sd">        :return: Undetermined barcodes. Format: [{&quot;seq&quot;: &quot;ATGG+TTC&quot;, &quot;lanes&quot;: [{&quot;id&quot;: 1, &quot;ct&quot;: 154782}, {&quot;id&quot;: 2, &quot;ct&quot;: 255567]}].</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="n">in_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">reader</span><span class="p">)[</span><span class="s2">&quot;UnknownBarcodes&quot;</span><span class="p">]</span>
+        <span class="n">barcode_by_seq</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">in_lane</span> <span class="ow">in</span> <span class="n">in_data</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx_seq</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">in_lane</span><span class="p">[</span><span class="s2">&quot;Barcodes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">idx_seq</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">barcode_by_seq</span><span class="p">:</span>
+                    <span class="n">barcode_by_seq</span><span class="p">[</span><span class="n">idx_seq</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;seq&quot;</span><span class="p">:</span> <span class="n">idx_seq</span><span class="p">,</span>
+                        <span class="s2">&quot;lanes&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="p">}</span>
+                <span class="n">barcode_by_seq</span><span class="p">[</span><span class="n">idx_seq</span><span class="p">][</span><span class="s2">&quot;lanes&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">in_lane</span><span class="p">[</span><span class="s2">&quot;Lane&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;ct&quot;</span><span class="p">:</span> <span class="n">count</span>
+                <span class="p">})</span>
+        <span class="k">return</span> <span class="n">barcode_by_seq</span><span class="o">.</span><span class="n">values</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

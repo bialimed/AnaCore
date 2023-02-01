@@ -2,13 +2,22 @@
 
 ### Improvements
   * Add log and statistics reader for bcl-convert:
-  `anacore.illumina.BclConvertLog` and `anacore.illumina.DemultStatBclConvert`.
+  `anacore.illumina.demultiplex.bclconvert.DemultLog` and
+  `anacore.illumina.demultiplex.bclconvert.DemultStat`.
 
 ### Changes
   * `anacore.illumina.DemultStat(demult_stats_path)` replaced by
-  `anacore.illumina.DemultStatFactory.get(demult_folder_path)`.
+  `anacore.illumina.demultiplex.DemultStatFactory.get(demult_folder_path)`.
   * `anacore.illumina.SampleSheetIO(path)` replaced by
-  `anacore.illumina.SampleSheetFactory.get(path)`.
+  `anacore.illumina.samplesheet.SampleSheetFactory.get(path)`.
+  * Split `illumina` library in new sub-packages:
+    * `anacore.illumina.base`
+    * `anacore.illumina.demultiplex`
+      * `anacore.illumina.demultiplex.base`
+      * `anacore.illumina.demultiplex.bcl2fastq`
+      * `anacore.illumina.demultiplex.bclconvert`
+    * `anacore.illumina.run`
+    * `anacore.illumina.samplesheet`
 
 # Release 2.12.1 [2022-10-01]
 

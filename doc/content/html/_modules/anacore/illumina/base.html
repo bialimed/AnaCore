@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>anacore.illumina.base &mdash; AnaCore  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> AnaCore
+            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../anacore.html">AnaCore package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">AnaCore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.illumina.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for anacore.illumina.base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Functions to manage reads headers and filenames.</span>
+
+<span class="sd">:Code example:</span>
+
+<span class="sd">    Get info from read ID</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.illumina.base import getInfFromSeqID</span>
+
+<span class="sd">        read_id = &quot;EAS139:136:FC706VJ:2:2104:15343:197393:ATGCATA+CTAGC&quot;</span>
+<span class="sd">        print(getInfFromSeqID(read_id))</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # {</span>
+<span class="sd">        #    &quot;sequencer_id&quot;: &quot;EAS139&quot;,</span>
+<span class="sd">        #    &quot;run_id&quot;: &quot;136&quot;,</span>
+<span class="sd">        #    &quot;flowcell_id&quot;: &quot;FC706VJ&quot;,</span>
+<span class="sd">        #    &quot;lane_id&quot;: &quot;2&quot;,</span>
+<span class="sd">        #    &quot;tile_id&quot;: &quot;2104&quot;,</span>
+<span class="sd">        #    &quot;x_pos&quot;: &quot;15343&quot;,</span>
+<span class="sd">        #    &quot;y_pos&quot;: &quot;197393&quot;,</span>
+<span class="sd">        #    &quot;umi&quot;: &quot;ATGCATA+CTAGC&quot;</span>
+<span class="sd">        # }</span>
+
+<span class="sd">    Get platform type from instrument serial number</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.illumina.base import getPlatformFromSerialNumber</span>
+
+<span class="sd">        print(getPlatformFromSerialNumber(&quot;EAS139&quot;))</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # HiSeq</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<div class="viewcode-block" id="getIlluminaName"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.base.getIlluminaName">[docs]</a><span class="k">def</span> <span class="nf">getIlluminaName</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return sample name used by Illumina in filename.</span>
+
+<span class="sd">    :param name: The name provided to Illumina process (for example in samplesheet).</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :return: The sample name used by Illumina as part of filename.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getLibNameFromReadsPath"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.base.getLibNameFromReadsPath">[docs]</a><span class="k">def</span> <span class="nf">getLibNameFromReadsPath</span><span class="p">(</span><span class="n">seq_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return library name from the path of the sequences file.</span>
+
+<span class="sd">    :param seq_path: The path of the sequences file.</span>
+<span class="sd">    :type seq_path: str</span>
+<span class="sd">    :return: The library name.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">library_name</span><span class="p">,</span> <span class="n">extensions</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">seq_path</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">curr_ext</span> <span class="ow">in</span> <span class="n">extensions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">curr_ext</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;fq&quot;</span><span class="p">,</span> <span class="s2">&quot;fastq&quot;</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">,</span> <span class="s2">&quot;fa&quot;</span><span class="p">,</span> <span class="s2">&quot;gz&quot;</span><span class="p">,</span> <span class="s2">&quot;bz&quot;</span><span class="p">,</span> <span class="s2">&quot;bz2&quot;</span><span class="p">,</span> <span class="s2">&quot;lz&quot;</span><span class="p">,</span> <span class="s2">&quot;zip&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The file &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be processed by getLibNameFromReadsPath because the extension &quot;</span><span class="si">{}</span><span class="s1">&quot; is not managed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_path</span><span class="p">,</span> <span class="n">curr_ext</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;_[rR][1-2]$&#39;</span><span class="p">,</span> <span class="n">library_name</span><span class="p">):</span>
+        <span class="n">library_name</span> <span class="o">=</span> <span class="n">library_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;_[rR][1-2]_\d\d\d$&#39;</span><span class="p">,</span> <span class="n">library_name</span><span class="p">):</span>
+        <span class="n">library_name</span> <span class="o">=</span> <span class="n">library_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">library_name</span></div>
+
+
+<div class="viewcode-block" id="getInfFromSeqID"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.base.getInfFromSeqID">[docs]</a><span class="k">def</span> <span class="nf">getInfFromSeqID</span><span class="p">(</span><span class="n">seq_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.</span>
+
+<span class="sd">    :param sequence: The ID of the sequence provided by the sequencer.</span>
+<span class="sd">    :type sequence: str</span>
+<span class="sd">    :return: The sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">seq_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>  <span class="c1"># Illumina&#39;s ID: EAS139:136:FC706VJ:2:2104:15343:197393</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># else  Illumina&#39;s ID: EAS139:136:FC706VJ:2:2104:15343:197393:ATGCATA+CTAGC</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;sequencer_id&quot;</span><span class="p">:</span> <span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">&quot;run_id&quot;</span><span class="p">:</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="s2">&quot;flowcell_id&quot;</span><span class="p">:</span> <span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="s2">&quot;lane_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+        <span class="s2">&quot;tile_id&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span>
+        <span class="s2">&quot;x_pos&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span>
+        <span class="s2">&quot;y_pos&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">6</span><span class="p">]),</span>
+        <span class="s2">&quot;umi&quot;</span><span class="p">:</span> <span class="n">fields</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="getInfFromSeqDesc"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.base.getInfFromSeqDesc">[docs]</a><span class="k">def</span> <span class="nf">getInfFromSeqDesc</span><span class="p">(</span><span class="n">seq_desc</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.</span>
+
+<span class="sd">    :param sequence: The ID of the sequence provided by the sequencer.</span>
+<span class="sd">    :type sequence: str</span>
+<span class="sd">    :return: The sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Illumina&#39;s description: 1:Y:18:ATCACG</span>
+    <span class="n">reads_phases</span><span class="p">,</span> <span class="n">kept_status</span><span class="p">,</span> <span class="n">control_bits</span><span class="p">,</span> <span class="n">barcode</span> <span class="o">=</span> <span class="n">seq_desc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;reads_phases&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">reads_phases</span><span class="p">),</span>
+        <span class="s2">&quot;is_kept&quot;</span><span class="p">:</span> <span class="n">kept_status</span> <span class="o">==</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;control_bits&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">control_bits</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">control_bits</span><span class="p">),</span>
+        <span class="s2">&quot;barcode&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">barcode</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="n">barcode</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="getPlatformFromSerialNumber"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.base.getPlatformFromSerialNumber">[docs]</a><span class="k">def</span> <span class="nf">getPlatformFromSerialNumber</span><span class="p">(</span><span class="n">instrument_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return platform name from instrument ID.</span>
+
+<span class="sd">    :param instrument_id: The instrument serial number.</span>
+<span class="sd">    :type instrument_id: str</span>
+<span class="sd">    :return: The platform name (Hiseq or NextSeq or ...).</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">platform_by_re</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># &quot;?&quot;: &quot;iSeq&quot;,</span>
+        <span class="s2">&quot;^MN[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;MiniSeq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^ML-..-[0-9]</span><span class="si">{2}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;MiniSeq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^M[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;MiSeq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^N[SB][0-9]</span><span class="si">{6}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^NDX[0-9]</span><span class="si">{6}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^[CDJKE][0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;HiSeq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^A[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NovaSeq&quot;</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">instrument_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;HWI&quot;</span><span class="p">):</span>
+        <span class="n">instrument_id</span> <span class="o">=</span> <span class="n">instrument_id</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+    <span class="n">platform</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">curr_re</span><span class="p">,</span> <span class="n">curr_instru</span> <span class="ow">in</span> <span class="n">platform_by_re</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">platform</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">curr_re</span><span class="p">,</span> <span class="n">instrument_id</span><span class="p">):</span>
+                <span class="n">platform</span> <span class="o">=</span> <span class="n">curr_instru</span>
+    <span class="k">return</span> <span class="n">platform</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

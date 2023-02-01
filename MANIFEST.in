@@ -3,6 +3,8 @@ include RELEASES_NOTES.md
 include anacore/*.py
 include anacore/db/*.py
 include anacore/db/*/*.py
+include anacore/illumina/*.py
+include anacore/illumina/demultiplex/*.py
 include anacore/msi/*.py
 include requirements.txt
 include setup.cfg

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>anacore.illumina.demultiplex.base &mdash; AnaCore  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/anacore.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html" class="icon icon-home"> AnaCore
+            <img src="../../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../anacore.html">AnaCore package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">AnaCore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../demultiplex.html">anacore.illumina.demultiplex</a></li>
+      <li class="breadcrumb-item active">anacore.illumina.demultiplex.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for anacore.illumina.demultiplex.base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions required for demultiplex sub-packages.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="AbstractDemultStat"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.base.AbstractDemultStat">[docs]</a><span class="k">class</span> <span class="nc">AbstractDemultStat</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reader for demultiplex statistics.</span>
+
+<span class="sd">    The attribute samples contains for each sample its ID, these barcodes</span>
+<span class="sd">    sequences and their counts by lane. This count is a list for 0, 1 and 2</span>
+<span class="sd">    mismatches.</span>
+
+<span class="sd">    :Content example for instance.samples:</span>
+
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            [</span>
+<span class="sd">                {</span>
+<span class="sd">                    &quot;id&quot;: &quot;splA&quot;,</span>
+<span class="sd">                    &quot;barcodes&quot;: [</span>
+<span class="sd">                        {</span>
+<span class="sd">                            &quot;seq&quot;: &quot;ATGC&quot;,</span>
+<span class="sd">                            &quot;lanes&quot;: [</span>
+<span class="sd">                                {</span>
+<span class="sd">                                    &quot;id&quot;: 1,</span>
+<span class="sd">                                    &quot;ct&quot;: [12, 14, 15]</span>
+<span class="sd">                                }, ...</span>
+<span class="sd">                            ]</span>
+<span class="sd">                        }, ...</span>
+<span class="sd">                    ]</span>
+<span class="sd">                }, ...</span>
+<span class="sd">            ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of DemultStat from demultiplexing statistics file.</span>
+
+<span class="sd">        :param path: Path to the demultiplexing statistics file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: DemultStat</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read self._path content and store information in self.samples.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="AbstractDemultStat.samplesCounts"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.base.AbstractDemultStat.samplesCounts">[docs]</a>    <span class="k">def</span> <span class="nf">samplesCounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return number of reads by samples ID.</span>
+
+<span class="sd">        :return: Number of reads by samples ID.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ct_by_spl</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+            <span class="n">nb_reads</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">barcode</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;barcodes&quot;</span><span class="p">]:</span>
+                <span class="n">nb_reads</span> <span class="o">+=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">lane</span><span class="p">[</span><span class="s2">&quot;ct&quot;</span><span class="p">])</span> <span class="k">for</span> <span class="n">lane</span> <span class="ow">in</span> <span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;lanes&quot;</span><span class="p">])</span>
+            <span class="n">ct_by_spl</span><span class="p">[</span><span class="n">spl</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">nb_reads</span>
+        <span class="k">return</span> <span class="n">ct_by_spl</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">undetermined</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return undetermined barcodes.</span>
+
+<span class="sd">        :return: Undetermined barcodes. Format: [{&quot;seq&quot;: &quot;ATGG+TTC&quot;, &quot;lanes&quot;: [{&quot;id&quot;: 1, &quot;ct&quot;: 154782}, {&quot;id&quot;: 2, &quot;ct&quot;: 255567]}].</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="AbstractDemultStat.undeterminedCounts"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.base.AbstractDemultStat.undeterminedCounts">[docs]</a>    <span class="k">def</span> <span class="nf">undeterminedCounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return number of reads by undetermined UDI.</span>
+
+<span class="sd">        :return: Number of reads by undetermined UDI.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ct_by_barcode</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">barcode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">undetermined</span><span class="p">:</span>
+            <span class="n">ct_by_barcode</span><span class="p">[</span><span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;seq&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lane</span><span class="p">[</span><span class="s2">&quot;ct&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">lane</span> <span class="ow">in</span> <span class="n">barcode</span><span class="p">[</span><span class="s2">&quot;lanes&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ct_by_barcode</span></div>
+
+<div class="viewcode-block" id="AbstractDemultStat.unexpectedBarcodes"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.base.AbstractDemultStat.unexpectedBarcodes">[docs]</a>    <span class="k">def</span> <span class="nf">unexpectedBarcodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skipped_spl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return UDI with a number of reads greate than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).</span>
+
+<span class="sd">        :param skipped_spl: List of samples excluded from the smallest sample finding. This can be used to exclude negative controls without reads.</span>
+<span class="sd">        :type skipped_spl: set</span>
+<span class="sd">        :return: UDI with a number of reads greate than or equal to the smallest sample: {&quot;udi&quot;: count, ...}.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unexpected_barcodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="c1"># Get smallest sample count</span>
+        <span class="k">if</span> <span class="n">skipped_spl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">skipped_spl</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">ct_by_identified</span> <span class="o">=</span> <span class="p">{</span><span class="n">spl</span><span class="p">:</span> <span class="n">ct</span> <span class="k">for</span> <span class="n">spl</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplesCounts</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">spl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skipped_spl</span><span class="p">}</span>
+        <span class="n">smallest_spl</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ct_by_identified</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">ct_by_identified</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+        <span class="n">identified_min_ct</span> <span class="o">=</span> <span class="n">ct_by_identified</span><span class="p">[</span><span class="n">smallest_spl</span><span class="p">]</span>
+        <span class="c1"># Get undetermined barcodes with more read than smallest sample</span>
+        <span class="k">for</span> <span class="n">barcode</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">undeterminedCounts</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;=</span> <span class="n">identified_min_ct</span><span class="p">:</span>
+                <span class="n">without_udi</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">for</span> <span class="n">udi</span> <span class="ow">in</span> <span class="n">barcode</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">udi</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;G&quot;</span><span class="p">}</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">udi</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;A&quot;</span><span class="p">}:</span>
+                        <span class="n">without_udi</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">without_udi</span><span class="p">:</span>
+                    <span class="n">unexpected_barcodes</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;spl&quot;</span><span class="p">:</span> <span class="n">barcode</span><span class="p">,</span> <span class="s2">&quot;ct&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">})</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unexpected_barcodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">elt</span><span class="p">:</span> <span class="n">elt</span><span class="p">[</span><span class="s2">&quot;ct&quot;</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

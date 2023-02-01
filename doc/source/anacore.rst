@@ -98,12 +98,68 @@ anacore.hgvs
    :show-inheritance:
 
 anacore.illumina
------------------------
+----------------
 
 .. automodule:: anacore.illumina
-   :members:
-   :undoc-members:
-   :show-inheritance:
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+  anacore.illumina.base
+  ---------------------
+
+  .. automodule:: anacore.illumina.base
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+  anacore.illumina.demultiplex
+  ----------------------------
+
+  .. automodule:: anacore.illumina.demultiplex
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+     anacore.illumina.demultiplex.base
+     ---------------------------------
+
+     .. automodule:: anacore.illumina.demultiplex.base
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+     anacore.illumina.demultiplex.bcl2fastq
+     --------------------------------------
+
+     .. automodule:: anacore.illumina.demultiplex.bcl2fastq
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+     anacore.illumina.demultiplex.bclconvert
+     ---------------------------------------
+
+     .. automodule:: anacore.illumina.demultiplex.bclconvert
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+  anacore.illumina.run
+  --------------------
+
+  .. automodule:: anacore.illumina.run
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+  anacore.illumina.samplesheet
+  ----------------------------
+
+  .. automodule:: anacore.illumina.samplesheet
+     :members:
+     :undoc-members:
+     :show-inheritance:
 
 anacore.maf
 ------------------

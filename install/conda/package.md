@@ -16,6 +16,7 @@
     # In interpreter
       from anacore.vcf import VCFIO
       from anacore.db.homo_sapiens.accession import AssemblyAccession
+      from anacore.illumina.demultiplex import DemultStatFactory
       quit()
     conda deactivate
     conda env remove --name test_package
