@@ -180,6 +180,72 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
 ,,,,,,,,
 ,,,,,,,,
 ,,,,,,,,"""
+            },
+            {
+                "name": "SureSelectXT_V1_PE_0-INDEX",
+                "version": 1,
+                "content": """[Header],,,,,,,,
+Application,NextSeq FASTQ Only,,,,,,,
+,,,,,,,,
+[Reads],,,,,,,,
+151,,,,,,,,
+151,,,,,,,,
+,,,,,,,,
+[Settings],,,,,,,,
+CreateFastqForIndexReads,1,,,,,,,
+BarcodeMismatches,2,,,,,,,
+,,,,,,,,
+[Data],,,,,,,,
+Sample_ID,Sample_Name,Description,Library_ID,Read_Structure,Reference_Name,Sample_Project,Target_Set
+1823A,1823A-tissue,0.5x treatment,2017-01-20,151T8B151T,mm10,exp001,Intervals-001
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,"""
+            },
+            {
+                "name": "repeat_sample_V1",
+                "version": 1,
+                "content": """[Header],,,,,
+Workflow,GenerateFASTQ,,,,
+,,,,,
+[Reads],,,,,
+101,,,,,
+101,,,,,
+,,,,,
+[Settings],,,,,
+,,,,,
+[Data],,,,,
+Sample_ID,index,index2,Sample_Type,Project,Description
+spl_A,TCCGGAGA,AGGATAGG,DNA,FunSeq,
+spl_B,CTGAAGCT,TCAGAGCC,DNA,FunSeq,First rep for sample B
+spl_B,TATCTTCA,GTTGTCTG,DNA,FunSeq,Second rep for sample B
+spl_C,GGTTGATA,TCTGCTCC,DNA,FunSeq,"""
+            },
+            {
+                "name": "multi_lane_V2",
+                "version": 2,
+                "content": """[Header],,,
+FileFormatVersion,2,,
+[Reads],,,
+Read1Cycles,101,,
+Read2Cycles,101,,
+Index1Cycles,10,,
+Index2Cycles,10,,
+[TSO500S_Settings],,,
+OverrideCycles,U7N1Y93;I10;I10;U7N1Y93,,
+[TSO500S_Data],,,
+Sample_ID,Sample_Name,Pair_ID,Sample_Type
+Sample1-DNA,Sample1-DNA,Sample1,DNA
+Sample1-RNA,Sample1-RNA,Sample1,RNA
+[BCLConvert_Settings],,,
+AdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,
+AdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,
+[BCLConvert_Data],,,
+Lane,Sample_ID,index,index2
+1,Sample1-DNA,GTCCGTAAGC,CGTGTATCTT
+1,Sample1-RNA,CCTGCGGAAC,ATCATAGGCT
+2,Sample1-DNA,GTCCGTAAGC,CGTGTATCTT
+2,Sample1-RNA,CCTGCGGAAC,ATCATAGGCT"""
             }
         ]
 
@@ -234,21 +300,33 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
                         },
                         'data': [
                             {
-                                'Sample_ID': 'Sample1-DNA', 'Sample_Name': 'Sample1-DNA',
-                                'Sample_Plate': '', 'Sample_Well': 'A12',
-                                'Index_ID': 'UDP0089', 'index': 'GTCCGTAAGC',
-                                'index2': 'CGTGTATCTT', 'I7_Index_ID': 'UDP0089',
-                                'I5_Index_ID': 'UDP0089', 'Project': '',
-                                'Description': '', 'Pair_ID': 'Sample1',
+                                'Sample_ID': 'Sample1-DNA',
+                                'index': 'GTCCGTAAGC',
+                                'index2': 'CGTGTATCTT',
+                                'Description': '',
+                                'Sample_Name': 'Sample1-DNA',
+                                'Sample_Plate': '',
+                                'Sample_Well': 'A12',
+                                'Index_ID': 'UDP0089',
+                                'I7_Index_ID': 'UDP0089',
+                                'I5_Index_ID': 'UDP0089',
+                                'Project': '',
+                                'Pair_ID': 'Sample1',
                                 'Sample_Type': 'DNA'
                             },
                             {
-                                'Sample_ID': 'Sample1-RNA', 'Sample_Name': 'Sample1-RNA',
-                                'Sample_Plate': '', 'Sample_Well': 'A10',
-                                'Index_ID': 'UDP0073', 'index': 'CCTGCGGAAC',
-                                'index2': 'ATCATAGGCT', 'I7_Index_ID': 'UDP0073',
-                                'I5_Index_ID': 'UDP0073', 'Project': '',
-                                'Description': '', 'Pair_ID': 'Sample1',
+                                'Sample_ID': 'Sample1-RNA',
+                                'index': 'CCTGCGGAAC',
+                                'index2': 'ATCATAGGCT',
+                                'Description': '',
+                                'Sample_Name': 'Sample1-RNA',
+                                'Sample_Plate': '',
+                                'Sample_Well': 'A10',
+                                'Index_ID': 'UDP0073',
+                                'I7_Index_ID': 'UDP0073',
+                                'I5_Index_ID': 'UDP0073',
+                                'Project': '',
+                                'Pair_ID': 'Sample1',
                                 'Sample_Type': 'RNA'
                             }
                         ]
@@ -270,14 +348,16 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
                 },
                 'samples': [
                     {
-                        'Sample_ID': 'Sample1-DNA', 'index': 'GTCCGTAAGC',
-                        'index2': 'CGTGTATCTT', 'Sample_Basename': 'Sample1-DNA',
-                        'Library_Basename': 'Sample1-DNA_S1'
+                        'id': 'Sample1-DNA', 'barcodes': {'index': 'GTCCGTAAGC', 'index2': 'CGTGTATCTT'},
+                        'sheet_index': 1, 'description': None,
+                        'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1',
+                        'metadata': {}
                     },
                     {
-                        'Sample_ID': 'Sample1-RNA', 'index': 'CCTGCGGAAC',
-                        'index2': 'ATCATAGGCT', 'Sample_Basename': 'Sample1-RNA',
-                        'Library_Basename': 'Sample1-RNA_S2'
+                        'id': 'Sample1-RNA', 'barcodes': {'index': 'CCTGCGGAAC', 'index2': 'ATCATAGGCT'},
+                        'sheet_index': 2, 'description': None,
+                        'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2',
+                        'metadata': {}
                     }
                 ]
             },
@@ -293,20 +373,30 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
                 'reads': {'nb_cycles': {'R1': 101, 'R2': 101}},
                 'samples': [
                     {
-                        'Sample_ID': 'Test_Sample_UP01', 'Sample_Name': '',
-                        'Sample_Plate': '', 'Sample_Well': '', 'Index_ID': 'UP01',
-                        'index': 'TCCGGAGA', 'index2': 'AGGATAGG',
-                        'Sample_Type': 'DNA', 'Pair_ID': 'Test_Sample_UP01',
-                        'Sample_Basename': 'Test-Sample-UP01',
-                        'Library_Basename': 'Test-Sample-UP01_S1'
+                        'id': 'Test_Sample_UP01', 'barcodes': {'index': 'TCCGGAGA', 'index2': 'AGGATAGG'},
+                        'sheet_index': 1, 'description': None,
+                        'basename': 'Test-Sample-UP01', 'library_basename': 'Test-Sample-UP01_S1',
+                        'metadata': {
+                            'Sample_Name': '',
+                            'Sample_Plate': '',
+                            'Sample_Well': '',
+                            'Index_ID': 'UP01',
+                            'Sample_Type': 'DNA',
+                            'Pair_ID': 'Test_Sample_UP01'
+                        }
                     },
                     {
-                        'Sample_ID': 'Test_Sample_UP02', 'Sample_Name': '',
-                        'Sample_Plate': '', 'Sample_Well': '', 'Index_ID': 'UP02',
-                        'index': 'CTGAAGCT', 'index2': 'TCAGAGCC',
-                        'Sample_Type': 'DNA', 'Pair_ID': 'Test_Sample_UP02',
-                        'Sample_Basename': 'Test-Sample-UP02',
-                        'Library_Basename': 'Test-Sample-UP02_S2'
+                        'id': 'Test_Sample_UP02', 'barcodes': {'index': 'CTGAAGCT', 'index2': 'TCAGAGCC'},
+                        'sheet_index': 2, 'description': None,
+                        'basename': 'Test-Sample-UP02', 'library_basename': 'Test-Sample-UP02_S2',
+                        'metadata': {
+                            'Sample_Name': '',
+                            'Sample_Plate': '',
+                            'Sample_Well': '',
+                            'Index_ID': 'UP02',
+                            'Sample_Type': 'DNA',
+                            'Pair_ID': 'Test_Sample_UP02'
+                        }
                     }
                 ]
             },
@@ -329,16 +419,20 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
                 },
                 "samples":  [
                     {
-                        "Lane": "1", "Sample_ID": "S01-TOO-12plex-P1-rep1",
-                        "index": "ATCCACTG", "index2": "AGGTGCGT",
-                        "Sample_Basename": "S01-TOO-12plex-P1-rep1",
-                        "Library_Basename": "S01-TOO-12plex-P1-rep1_S1"
+                        'id': 'S01-TOO-12plex-P1-rep1', 'barcodes': {'index': 'ATCCACTG', 'index2': 'AGGTGCGT'},
+                        'sheet_index': 1, 'description': None,
+                        'basename': 'S01-TOO-12plex-P1-rep1', 'library_basename': 'S01-TOO-12plex-P1-rep1_S1',
+                        'metadata': {
+                            'Lane': '1' ############################### pb repeat
+                        }
                     },
                     {
-                        "Lane": "1", "Sample_ID": "S02-TOO-12plex-P1-rep2",
-                        "index": "GCTTGTCA", "index2": "GAACATAC",
-                        "Sample_Basename": "S02-TOO-12plex-P1-rep2",
-                        "Library_Basename": "S02-TOO-12plex-P1-rep2_S2"
+                        'id': 'S02-TOO-12plex-P1-rep2', 'barcodes': {'index': 'GCTTGTCA', 'index2': 'GAACATAC'},
+                        'sheet_index': 2, 'description': None,
+                        'basename': 'S02-TOO-12plex-P1-rep2', 'library_basename': 'S02-TOO-12plex-P1-rep2_S2',
+                        'metadata': {
+                            'Lane': '1' ############################### pb repeat
+                        }
                     }
                 ]
             },
@@ -360,16 +454,24 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
                 'reads': {'nb_cycles': {'R1': 151, 'R2': 100}},
                 'samples': [
                     {
-                        'Sample_ID': '1', 'Sample_Name': 'DG-1-A01',
-                        'I7_Index_ID': 'i7A01', 'index': 'GTACGTCA',
-                        'I5_Index_ID': 'i5A01', 'index2': 'GAGGTAGT',
-                        'Sample_Basename': '1', 'Library_Basename': '1_S1'
+                        'id': '1', 'barcodes': {'index': 'GTACGTCA', 'index2': 'GAGGTAGT'},
+                        'sheet_index': 1, 'description': None,
+                        'basename': '1', 'library_basename': '1_S1',
+                        'metadata': {
+                            'Sample_Name': 'DG-1-A01',
+                            'I7_Index_ID': 'i7A01',
+                            'I5_Index_ID': 'i5A01'
+                        }
                     },
                     {
-                        'Sample_ID': '2', 'Sample_Name': 'DG-1-A02',
-                        'I7_Index_ID': 'i7A02', 'index': 'TGCAGTTA',
-                        'I5_Index_ID': 'i5A01', 'index2': 'GAGGTAGT',
-                        'Sample_Basename': '2', 'Library_Basename': '2_S2'
+                        'id': '2', 'barcodes': {'index': 'TGCAGTTA', 'index2': 'GAGGTAGT'},
+                        'sheet_index': 2, 'description': None,
+                        'basename': '2', 'library_basename': '2_S2',
+                        'metadata': {
+                            'Sample_Name': 'DG-1-A02',
+                            'I7_Index_ID': 'i7A02',
+                            'I5_Index_ID': 'i5A01'
+                        }
                     }
                 ]
             },
@@ -386,20 +488,155 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
                 'reads': {'nb_cycles': {'R1': 151}},
                 'samples': [
                     {
-                        'Sample_ID': '1823A', 'Sample_Name': '1823A-tissue',
-                        'index': 'GAATCTGA', 'Description': '0.5x treatment',
-                        'Library_ID': '2017-01-20', 'Read_Structure': '151T8B151T',
-                        'Reference_Name': 'mm10', 'Sample_Project': 'exp001',
-                        'Target_Set': 'Intervals-001', 'Sample_Basename': '1823A',
-                        'Library_Basename': '1823A_S1'
+                        'id': '1823A', 'barcodes': {'index': 'GAATCTGA'},
+                        'sheet_index': 1, 'description': '0.5x treatment',
+                        'basename': '1823A', 'library_basename': '1823A_S1',
+                        'metadata': {
+                            'Sample_Name': '1823A-tissue',
+                            'Library_ID': '2017-01-20',
+                            'Read_Structure': '151T8B151T',
+                            'Reference_Name': 'mm10',
+                            'Sample_Project': 'exp001',
+                            'Target_Set': 'Intervals-001'
+                        }
                     },
                     {
-                        'Sample_ID': '1823B', 'Sample_Name': '1823B-tissue',
-                        'index': 'AGCAGGAA', 'Description': '0.5x treatment',
-                        'Library_ID': '2017-01-20', 'Read_Structure': '151T8B151T',
-                        'Reference_Name': 'mm10', 'Sample_Project': 'exp001',
-                        'Target_Set': 'Intervals-001', 'Sample_Basename': '1823B',
-                        'Library_Basename': '1823B_S2'
+                        'id': '1823B', 'barcodes': {'index': 'AGCAGGAA'},
+                        'sheet_index': 2, 'description': '0.5x treatment',
+                        'basename': '1823B', 'library_basename': '1823B_S2',
+                        'metadata': {
+                            'Sample_Name': '1823B-tissue',
+                            'Library_ID': '2017-01-20',
+                            'Read_Structure': '151T8B151T',
+                            'Reference_Name': 'mm10',
+                            'Sample_Project': 'exp001',
+                            'Target_Set': 'Intervals-001'
+                        }
+                    }
+                ]
+            },
+            "SureSelectXT_V1_PE_0-INDEX": {
+                'extra': {},
+                'header': {
+                    'Description': '',
+                    'Application': 'NextSeq FASTQ Only'
+                },
+                'manifests': {},
+                'reads': {'nb_cycles': {'R1': 151, 'R2': 151}},
+                'samples': [
+                    {
+                        'id': '1823A', 'barcodes': dict(),
+                        'sheet_index': 1, 'description': '0.5x treatment',
+                        'basename': '1823A', 'library_basename': '1823A_S1',
+                        'metadata': {
+                            'Sample_Name': '1823A-tissue',
+                            'Library_ID': '2017-01-20',
+                            'Read_Structure': '151T8B151T',
+                            'Reference_Name': 'mm10',
+                            'Sample_Project': 'exp001',
+                            'Target_Set': 'Intervals-001'
+                        }
+                    }
+                ]
+            },
+            "repeat_sample_V1": {
+                'extra': {},
+                'header': {
+                    'Description': '',
+                    'Workflow': 'GenerateFASTQ'
+                },
+                'manifests': {},
+                'reads': {'nb_cycles': {'R1': 101, 'R2': 101}},
+                'samples': [
+                    {
+                        'id': 'spl_A', 'barcodes': {'index': 'TCCGGAGA', 'index2': 'AGGATAGG'},
+                        'sheet_index': 1, 'description': '',
+                        'basename': 'spl-A', 'library_basename': 'spl-A_S1',
+                        'metadata': {
+                            'Sample_Type': 'DNA',
+                            'Project': 'FunSeq'
+                        }
+                    },
+                    {
+                        'id': 'spl_B', 'barcodes': {'index': 'CTGAAGCT', 'index2': 'TCAGAGCC'},
+                        'sheet_index': 2, 'description': 'First rep for sample B',
+                        'basename': 'spl-B', 'library_basename': 'spl-B_S2',
+                        'metadata': {
+                            'Sample_Type': 'DNA',
+                            'Project': 'FunSeq'
+                        }
+                    },
+                    {
+                        'id': 'spl_B', 'barcodes': {'index': 'TATCTTCA', 'index2': 'GTTGTCTG'},
+                        'sheet_index': 2, 'description': 'Second rep for sample B',
+                        'basename': 'spl-B', 'library_basename': 'spl-B_S2',
+                        'metadata': {
+                            'Sample_Type': 'DNA',
+                            'Project': 'FunSeq'
+                        }
+                    },
+                    {
+                        'id': 'spl_C', 'barcodes': {'index': 'GGTTGATA', 'index2': 'TCTGCTCC'},
+                        'sheet_index': 3, 'description': '',
+                        'basename': 'spl-C', 'library_basename': 'spl-C_S3',
+                        'metadata': {
+                            'Sample_Type': 'DNA',
+                            'Project': 'FunSeq'
+                        }
+                    }
+                ]
+            },
+            "multi_lane_V2": {
+                'extra': {
+                    'TSO500S': {
+                        'settings': {
+                            'OverrideCycles': 'U7N1Y93;I10;I10;U7N1Y93'
+                        },
+                        'data': [
+                            {
+                                'Sample_ID': 'Sample1-DNA',
+                                'Sample_Name': 'Sample1-DNA',
+                                'Pair_ID': 'Sample1',
+                                'Sample_Type': 'DNA'
+                            },
+                            {
+                                'Sample_ID': 'Sample1-RNA',
+                                'Sample_Name': 'Sample1-RNA',
+                                'Pair_ID': 'Sample1',
+                                'Sample_Type': 'RNA'
+                            }
+                        ]
+                    }
+                },
+                'header': {
+                    'FileFormatVersion': '2',
+                    'Description': ''
+                },
+                'manifests': {},
+                'reads': {
+                    'phases': [
+                        {'is_index': False, 'nb_cycles': 101},
+                        {'is_index': True, 'nb_cycles': 10},
+                        {'is_index': True, 'nb_cycles': 10},
+                        {'is_index': False, 'nb_cycles': 101}
+                    ]
+                },
+                'samples': [
+                    {
+                        'id': 'Sample1-DNA', 'barcodes': {'index': 'GTCCGTAAGC', 'index2': 'CGTGTATCTT'},
+                        'sheet_index': 1, 'description': None,
+                        'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1',
+                        'metadata': {
+                            'Lane': '1,2'
+                        }
+                    },
+                    {
+                        'id': 'Sample1-RNA', 'barcodes': {'index': 'CCTGCGGAAC', 'index2': 'ATCATAGGCT'},
+                        'sheet_index': 2, 'description': None,
+                        'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2',
+                        'metadata': {
+                            'Lane': '1,2'
+                        }
                     }
                 ]
             }
@@ -409,6 +646,11 @@ Sample_ID,Sample_Name,index,Description,Library_ID,Read_Structure,Reference_Name
                 writer.write(curr_test["content"])
             observed = SampleSheetFactory.get(self.tmp_file)
             observed = {k: v for k, v in observed.__dict__.items() if k != "filepath"}
+            observed["samples"] = [spl.toDict() for spl in observed["samples"]]
+            print(curr_test["name"])
+            print(expected[curr_test["name"]])
+            print(observed)
+            print()
             self.assertEqual(observed, expected[curr_test["name"]])
 
 

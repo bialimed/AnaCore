@@ -4,7 +4,7 @@ Classes and functions for reading Illumina's samplesheet.
 
 :Code example:
 
-    List samples from the samplesheet
+    List samples and index from the samplesheet
 
     .. highlight:: python
     .. code-block:: python
@@ -14,13 +14,13 @@ Classes and functions for reading Illumina's samplesheet.
         samplesheet = SampleSheetFactory.get("my_run/SampleSheet.csv"):
         print("Samples:")
         for spl in samplesheet.samples:
-            print("", spl["Library_Basename"])
+            print("", spl.library_basename, spl.barcodes)
 
         # Result>
         # Samples:
-        #   sapmleA_S1
-        #   sampleB_S2
-        #   sampleC_S3
+        #  sapmleA_S1 {"index": "TATCTTCAGC", "index2": "CGAATATTGG"}
+        #  sampleB_S2 {"index": "TGCACGGATA", "index2": "GTTGTCTGCG"}
+        #  sampleC_S3 {"index": "GGTTGATAGA", "index2": "TCTGCTCCGA"}
 """
 
 __author__ = 'Frederic Escudie'
@@ -129,16 +129,54 @@ class AbstractSampleSheet(object):
 
         :param section: Lines from section with a titles row. Each row contains one entry where columns correspond to key and cells to values.
         :type section: list
-        :return: Samples list containing for each: keys and values from data section as dict.
+        :return: Samples list as anacore.illumina.samplesheet.Sample.
         :rtype: list
         """
+        samples_obj = list()
         titles, samples = self._getInfoFromTitledSection(data_section)
-        for idx, spl in enumerate(samples):
-            spl["Sample_Basename"] = getIlluminaName(spl["Sample_ID"])
-            spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(idx + 1)
-            if "Sample_Description" in spl:
-                spl["Description"] = spl["Sample_Description"]
-        return samples
+        protected_fields = {"sample_id", "sample_description", "description", "index", "index2"}
+        spl_idx = 1  # Index come from position in Data (for V1) or BCLConvert_Data (for V3) list afterremove same Sample_ID
+        spl_idx_by_id = dict()
+        lib_by_barcode = dict()
+        for spl in samples:
+            spl_id = spl["Sample_ID"]
+            barcodes = dict()
+            if "index" in spl:
+                barcodes["index"] = spl["index"]
+            if "index2" in spl:
+                if "index" not in spl:
+                    barcodes["index"] = ""
+                barcodes["index2"] = spl["index2"]
+            barcodes_str = "+".join([str(val) for key, val in sorted(barcodes.items())])
+            if barcodes_str in lib_by_barcode:  # Same lib on multiple lanes
+                if "Lane" in spl:
+                    lib_by_barcode[barcodes_str].metadata["Lane"] += "," + spl["Lane"]
+                else:
+                    raise Exception("Sample {} is repeated with same barcodes: {}".format(spl_id, barcodes_str))
+            else:  # New library
+                # Get description
+                description = None
+                if "Sample_Description" in spl:
+                    description = spl["Sample_Description"]
+                elif "Description" in spl:
+                    description = spl["Description"]
+                # Get metadata
+                meta = dict()
+                for key, val in spl.items():
+                    lower_key = key.lower()
+                    if lower_key not in protected_fields:
+                        meta[key] = val
+                # Store library
+                lib_spl_idx = spl_idx
+                if spl_id in spl_idx_by_id:  # Different libraries with same sample ID
+                    lib_spl_idx = spl_idx_by_id[spl_id]  # Libraries with same sample ID keep the same S{idx}
+                else:  # New sample
+                    spl_idx_by_id[spl_id] = lib_spl_idx
+                    spl_idx += 1
+                lib_obj = Sample(lib_spl_idx, spl_id, barcodes, description, meta)
+                samples_obj.append(lib_obj)
+                lib_by_barcode[barcodes_str] = lib_obj
+        return samples_obj
 
     def _getSections(self):
         """
@@ -169,6 +207,18 @@ class AbstractSampleSheet(object):
         sections_by_title = self._getSections()
         # Process information
         cls = self.__class__
+        self.header = self._getInfoFromSection(
+            sections_by_title["Header"]
+        )
+        self.manifests = dict()
+        if "Manifests" in sections_by_title:
+            self.manifests = self._getInfoFromSection(sections_by_title["Manifests"])
+        self.samples = self._getSamplesFromData(
+            sections_by_title[cls.SAMPLES_SECTION]
+        )
+        self.reads = self._getReads(
+            sections_by_title[cls.DEMULTIPLEX_SECTION]
+        )
         self.extra = dict()
         for title, data in sections_by_title.items():
             if title not in cls.REQUIRED_SECTIONS:
@@ -183,21 +233,71 @@ class AbstractSampleSheet(object):
                         self.extra[title][sub_title] = self._getInfoFromSection(data)
                 else:
                     self.extra[title] = self._getInfoFromSection(data)
-        self.header = self._getInfoFromSection(
-            sections_by_title["Header"]
-        )
-        self.manifests = dict()
-        if "Manifests" in sections_by_title:
-            self.manifests = self._getInfoFromSection(sections_by_title["Manifests"])
-        self.samples = self._getSamplesFromData(
-            sections_by_title[cls.SAMPLES_SECTION]
-        )
-        self.reads = self._getReads(
-            sections_by_title[cls.DEMULTIPLEX_SECTION]
-        )
         # Post process
         if "Description" not in self.header:
             self.header["Description"] = ""
+
+
+class Sample:
+    """Class to manage a sample from sample sheet. One sample could represent several libraries if they are the same sample ID."""
+
+    def __init__(self, sheet_index, id, barcodes=None, description=None, metadata=None):
+        """
+        Build and return an instance of Sample.
+
+        :param sheet_index: Index of sample in samplesheet (start from 1). This element is used for library name: <splID>_S<splSheetIndex>.
+        :type sheet_index: int
+        :param id: Sample ID (example: splA).
+        :type id: str
+        :param barcodes: Sample molecular index used in demultiplex. Example:
+            * For single-end: {"index": "ATGC"}
+            * For paired-end: {"index": "ATGC", "index2": "CGCA"}
+            * For paired-end with skipped index 1: {"index": "", "index2": "CGCA"}
+        :type barcodes: dict
+        :param description: Sample description.
+        :type description: str
+        :param metadata: Additional data on sample (example: {"panel": "Enrich_Soli-Tumor_V3", "project": "Rimo"}). These data come from additional column in section Data.
+        :type metadata: dict
+        :return: The new instance.
+        :rtype: Sample
+        """
+        self.barcodes = dict() if barcodes is None else barcodes
+        self.description = description
+        self.id = id
+        self.sheet_index = sheet_index
+        self.metadata = dict() if metadata is None else metadata
+
+    @property
+    def basename(self):
+        """
+        Return the start of file basename corresponding to the sample (example: splA).
+
+        :return: Sample basename.
+        :rtype: str
+        """
+        return getIlluminaName(self.id)
+
+    @property
+    def library_basename(self):
+        """
+        Return the start of file basename corresponding to the library (example: splA_S3).
+
+        :return: Library basename.
+        :rtype: str
+        """
+        return "{}_S{}".format(self.basename, self.sheet_index)
+
+    def toDict(self):
+        """
+        Return dict representation of the instance.
+
+        :return: Dict representation of the instance.
+        :rtype: dict
+        """
+        res = self.__dict__
+        res["library_basename"] = self.library_basename
+        res["basename"] = self.basename
+        return res
 
 
 class SampleSheetFactory(object):
@@ -302,6 +402,27 @@ class SampleSheetV2(AbstractSampleSheet):
                 )
         return {"phases": reads_phases}
 
+    # def _parse(self):
+    #     """Read file content and store information on the instance's attributes."""
+    #     super().__init__(self)
+    #     # Add samples data from software data to self.samples like in V1 format
+    #     spl_by_id = dict()
+    #     for spl in self.samples:
+    #         spl_by_id[spl.id].append(spl)
+    #     for title, curr_extra in self.extra.items():
+    #         if "data" in curr_extra and isinstance(curr_extra["data"], list):
+    #             if len(curr_extra["data"]) != 0 and "sample_id" in curr_extra["data"][0]:  # Section contains data by sample
+    #                 for spl_metadata in curr_extra["data"]:
+    #                     for key, val in spl_metadata.items():
+    #                         lower_key = key.lower()
+    #                         if lower_key != "sample_id":
+    #                             if lower_key in {"sample_description", "description"}:
+    #                                 for curr_spl in spl_by_id[lower_key["sample_id"]]:
+    #                                     curr_spl.description = val
+    #                             else:
+    #                                 for curr_spl in spl_by_id[lower_key["sample_id"]]:
+    #                                     curr_spl.metadata[key] = val
+
     @staticmethod
     def isValid(filepath):
         """
@@ -342,12 +463,15 @@ class SampleSheetV2(AbstractSampleSheet):
 class SampleSheetADS(SampleSheetV1):
     """Reader for SampleSheet.csv designed for AmpliconDS analysis."""
 
-    def _getSamplesFromData(self, data_section):
-        samples = super()._getSamplesFromData(data_section)
-        for spl_idx, spl in enumerate(samples):
-            spl["Sample_Basename"] = getIlluminaName(spl["Sample_Name"])
-            spl["Library_Basename"] = spl["Sample_Basename"] + "_S" + str(spl_idx + 1)
-        return samples
+    @property
+    def basename(self):
+        """
+        Return the start of file basename corresponding to the sample (example: splA).
+
+        :return: Sample basename.
+        :rtype: str
+        """
+        return getIlluminaName(self.metadata["Sample_Name"])
 
     def filterPanels(self, selected_manifests):
         """
@@ -372,11 +496,11 @@ class SampleSheetADS(SampleSheetV1):
         # Update samples
         new_spl = list()
         for spl in self.samples:
-            if spl["Manifest"] in new_by_old_id:
-                if spl["Sample_ID"].endswith("_" + spl["Manifest"]):
-                    spl["Sample_ID"] = spl["Sample_ID"].rsplit("_" + spl["Manifest"], 1)[0]
-                    spl["Sample_ID"] += "_" + new_by_old_id[spl["Manifest"]]
-                spl["Manifest"] = new_by_old_id[spl["Manifest"]]
+            if spl.metadata["Manifest"] in new_by_old_id:
+                if spl.id.endswith("_" + spl.metadata["Manifest"]):
+                    spl.id = spl.id.rsplit("_" + spl.metadata["Manifest"], 1)[0]
+                    spl.id += "_" + new_by_old_id[spl.metadata["Manifest"]]
+                spl.metadata["Manifest"] = new_by_old_id[spl.metadata["Manifest"]]
                 new_spl.append(spl)
         self.samples = new_spl
 
@@ -393,12 +517,12 @@ class SampleSheetADS(SampleSheetV1):
         :return: By subject the paths of the corresponding files.
         :rtype: dict
         """
-        subject_start_tag = subject.capitalize()
         files_by_elt = {}
         for spl in self.samples:
-            if subject == "library" or spl["Sample_Name"] not in files_by_elt:  # The subject is the library or the subject is the sample and no library has been already processed for this sample
-                files_by_elt[spl[subject_start_tag + "_Name"]] = sorted(glob.glob(
-                    os.path.join(directory, spl[subject_start_tag + "_Basename"] + end_pattern)
+            if subject == "library" or spl.metadata["Sample_Name"] not in files_by_elt:  # The subject is the library or the subject is the sample and no library has been already processed for this sample
+                selector = spl.libray_basename if subject == "library" else spl.basename
+                files_by_elt[selector] = sorted(glob.glob(
+                    os.path.join(directory, selector + end_pattern)
                 ))
         return files_by_elt
 
@@ -415,7 +539,7 @@ class SampleSheetADS(SampleSheetV1):
         :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
         :type subject: str
         """
-        subject_tag = subject.capitalize() + "_Name"
         files_by_spl = self.findSplFiles(directory, end_pattern, subject)
         for spl in self.samples:
-            spl[tag] = files_by_spl[spl[subject_tag]]
+            selector = spl.libray_basename if subject == "library" else spl.basename
+            spl.metadata[tag] = files_by_spl[selector]
