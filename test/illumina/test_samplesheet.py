@@ -246,6 +246,37 @@ Lane,Sample_ID,index,index2
 1,Sample1-RNA,CCTGCGGAAC,ATCATAGGCT
 2,Sample1-DNA,GTCCGTAAGC,CGTGTATCTT
 2,Sample1-RNA,CCTGCGGAAC,ATCATAGGCT"""
+            },
+            {
+                "name": "amplicon_double_strand_V1",
+                "version": 1,
+                "content": """[Header]
+IEMFileVersion,4
+Investigator Name,ope1
+Experiment Name,INCaV1_171115
+Date,15/11/2017
+Workflow,Amplicon - DS
+Application,Amplicon - DS
+Assay,TruSight Tumor
+Description,
+Chemistry,Amplicon
+
+[Manifests]
+A,INCa_V1_A.txt
+B,INCa_V1_B.txt
+
+[Reads]
+151
+151
+
+[Settings]
+
+[Data]
+Sample_ID,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,index,I5_Index_ID,index2,Manifest,GenomeFolder,Sample_Project,Description
+NTC_A ,NTC,171114_INCaV1,A01,A703,CAGATCCA,A501,TGAACCTT,A,Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta,,
+17T051074_A ,17T051074,171114_INCaV1,A02,A704,ACAAACGG,A501,TGAACCTT,A,Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta,,
+NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta,,
+17T051074_B ,17T051074,171114_INCaV1,A05,A707,CCCAACCT,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta,,"""
             }
         ]
 
@@ -423,7 +454,7 @@ Lane,Sample_ID,index,index2
                         'sheet_index': 1, 'description': None,
                         'basename': 'S01-TOO-12plex-P1-rep1', 'library_basename': 'S01-TOO-12plex-P1-rep1_S1',
                         'metadata': {
-                            'Lane': '1' ############################### pb repeat
+                            'Lane': '1'
                         }
                     },
                     {
@@ -431,7 +462,7 @@ Lane,Sample_ID,index,index2
                         'sheet_index': 2, 'description': None,
                         'basename': 'S02-TOO-12plex-P1-rep2', 'library_basename': 'S02-TOO-12plex-P1-rep2_S2',
                         'metadata': {
-                            'Lane': '1' ############################### pb repeat
+                            'Lane': '1'
                         }
                     }
                 ]
@@ -639,6 +670,87 @@ Lane,Sample_ID,index,index2
                         }
                     }
                 ]
+            },
+            "amplicon_double_strand_V1": {
+                'extra': {},
+                'header': {
+                    'IEMFileVersion': '4',
+                    'Investigator Name': 'ope1',
+                    'Experiment Name': 'INCaV1_171115',
+                    'Date': '15/11/2017',
+                    'Workflow': 'Amplicon - DS',
+                    'Application': 'Amplicon - DS',
+                    'Assay': 'TruSight Tumor',
+                    'Description': '',
+                    'Chemistry': 'Amplicon'
+                },
+                'manifests': {
+                    'A': 'INCa_V1_A.txt',
+                    'B': 'INCa_V1_B.txt'
+                },
+                'reads': {'nb_cycles': {'R1': 151, 'R2': 151}},
+                'samples': [
+                    {
+                        'id': 'NTC_A', 'barcodes': {'index': 'CAGATCCA', 'index2': 'TGAACCTT'},
+                        'sheet_index': 1, 'description': '',
+                        'basename': 'NTC', 'library_basename': 'NTC_S1',
+                        'metadata': {
+                            'Sample_Name': 'NTC',
+                            'Sample_Plate': '171114_INCaV1',
+                            'Sample_Well': 'A01',
+                            'I7_Index_ID': 'A703',
+                            'I5_Index_ID': 'A501',
+                            'Manifest': 'A',
+                            'GenomeFolder': "Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta",
+                            'Sample_Project': ''
+                        }
+                    },
+                    {
+                        'id': '17T051074_A', 'barcodes': {'index': 'ACAAACGG', 'index2': 'TGAACCTT'},
+                        'sheet_index': 2, 'description': '',
+                        'basename': '17T051074', 'library_basename': '17T051074_S2',
+                        'metadata': {
+                            'Sample_Name': '17T051074',
+                            'Sample_Plate': '171114_INCaV1',
+                            'Sample_Well': 'A02',
+                            'I7_Index_ID': 'A704',
+                            'I5_Index_ID': 'A501',
+                            'Manifest': 'A',
+                            'GenomeFolder': "Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta",
+                            'Sample_Project': ''
+                        }
+                    },
+                    {
+                        'id': 'NTC_B', 'barcodes': {'index': 'AACCCCTC', 'index2': 'TGAACCTT'},
+                        'sheet_index': 3, 'description': '',
+                        'basename': 'NTC', 'library_basename': 'NTC_S3',
+                        'metadata': {
+                            'Sample_Name': 'NTC',
+                            'Sample_Plate': '171114_INCaV1',
+                            'Sample_Well': 'A04',
+                            'I7_Index_ID': 'A706',
+                            'I5_Index_ID': 'A501',
+                            'Manifest': 'B',
+                            'GenomeFolder': "Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta",
+                            'Sample_Project': ''
+                        }
+                    },
+                    {
+                        'id': '17T051074_B', 'barcodes': {'index': 'CCCAACCT', 'index2': 'TGAACCTT'},
+                        'sheet_index': 4, 'description': '',
+                        'basename': '17T051074', 'library_basename': '17T051074_S4',
+                        'metadata': {
+                            'Sample_Name': '17T051074',
+                            'Sample_Plate': '171114_INCaV1',
+                            'Sample_Well': 'A05',
+                            'I7_Index_ID': 'A707',
+                            'I5_Index_ID': 'A501',
+                            'Manifest': 'B',
+                            'GenomeFolder': "Homo_sapiens\\UCSC\\hg19\\Sequence\\WholeGenomeFasta",
+                            'Sample_Project': ''
+                        }
+                    }
+                ]
             }
         }
         for curr_test in self.test_cases:
@@ -647,10 +759,6 @@ Lane,Sample_ID,index,index2
             observed = SampleSheetFactory.get(self.tmp_file)
             observed = {k: v for k, v in observed.__dict__.items() if k != "filepath"}
             observed["samples"] = [spl.toDict() for spl in observed["samples"]]
-            print(curr_test["name"])
-            print(expected[curr_test["name"]])
-            print(observed)
-            print()
             self.assertEqual(observed, expected[curr_test["name"]])
 
 

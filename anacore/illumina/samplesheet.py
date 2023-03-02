@@ -221,7 +221,7 @@ class AbstractSampleSheet(object):
         )
         self.extra = dict()
         for title, data in sections_by_title.items():
-            if title not in cls.REQUIRED_SECTIONS:
+            if title not in cls.REQUIRED_SECTIONS and title != "Manifests":
                 if title.endswith("_Data") or title.endswith("_Settings"):
                     title, sub_title = title.rsplit("_", 1)
                     sub_title = sub_title.lower()
@@ -295,9 +295,58 @@ class Sample:
         :rtype: dict
         """
         res = self.__dict__
-        res["library_basename"] = self.library_basename
         res["basename"] = self.basename
+        res["library_basename"] = self.library_basename
         return res
+
+
+class SampleADS(Sample):
+    """Class to manage an amplicon double strand sample from sample sheet. One sample could represent several libraries if they are the same sample ID."""
+
+    @property
+    def basename(self):
+        """
+        Return the start of file basename corresponding to the sample (example: splA).
+
+        :return: Sample basename.
+        :rtype: str
+        """
+        return getIlluminaName(self.metadata["Sample_Name"])
+
+    def findSplFiles(self, directory, end_pattern, subject="library"):
+        """
+        Return paths to files in directory corresponding to the subject.
+
+        :param directory: The path to the directory where the files names are evaluated.
+        :type directory: str
+        :param end_pattern: File pattern added at the end of sample basename or library basename to select files.
+        :type end_pattern: str
+        :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
+        :type subject: str
+        :return: Paths of the corresponding files.
+        :rtype: list
+        """
+        selector = self.libray_basename if subject == "library" else self.basename
+        return sorted(
+            glob.glob(
+                os.path.join(directory, selector + end_pattern)
+            )
+        )
+
+    def setSplFiles(self, tag, directory, end_pattern, subject="library"):
+        """
+        Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.
+
+        :param tag: The attribute used in self.sample to store the files paths.
+        :type tag: str
+        :param directory: The path to the directory where the files names are evaluated.
+        :type directory: str
+        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.
+        :type end_pattern: str
+        :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
+        :type subject: str
+        """
+        self.metadata[tag] = self.findSplFiles(directory, end_pattern, subject)
 
 
 class SampleSheetFactory(object):
@@ -315,6 +364,8 @@ class SampleSheetFactory(object):
         """
         if SampleSheetV2.isValid(filepath):
             return SampleSheetV2(filepath, *args, **kwargs)
+        elif SampleSheetADS.isValid(filepath):
+            return SampleSheetADS(filepath, *args, **kwargs)
         elif SampleSheetV1.isValid(filepath):
             return SampleSheetV1(filepath, *args, **kwargs)
         else:
@@ -404,10 +455,12 @@ class SampleSheetV2(AbstractSampleSheet):
 
     # def _parse(self):
     #     """Read file content and store information on the instance's attributes."""
-    #     super().__init__(self)
+    #     super()._parse()
     #     # Add samples data from software data to self.samples like in V1 format
     #     spl_by_id = dict()
     #     for spl in self.samples:
+    #         if spl.id not in spl_by_id:
+    #             spl_by_id[spl.id] = list()
     #         spl_by_id[spl.id].append(spl)
     #     for title, curr_extra in self.extra.items():
     #         if "data" in curr_extra and isinstance(curr_extra["data"], list):
@@ -463,15 +516,47 @@ class SampleSheetV2(AbstractSampleSheet):
 class SampleSheetADS(SampleSheetV1):
     """Reader for SampleSheet.csv designed for AmpliconDS analysis."""
 
-    @property
-    def basename(self):
+    def _getSamplesFromData(self, data_section):
         """
-        Return the start of file basename corresponding to the sample (example: splA).
+        Return samples list containing for each: keys and values from data section as dict.
 
-        :return: Sample basename.
-        :rtype: str
+        :param section: Lines from section with a titles row. Each row contains one entry where columns correspond to key and cells to values.
+        :type section: list
+        :return: Samples list as anacore.illumina.samplesheet.SampleADS.
+        :rtype: list
         """
-        return getIlluminaName(self.metadata["Sample_Name"])
+        samples = super()._getSamplesFromData(data_section)
+        return [
+            SampleADS(spl.sheet_index, spl.id, spl.barcodes, spl.description, spl.metadata)
+            for spl in samples
+        ]
+
+    @staticmethod
+    def isValid(filepath):
+        """
+        Return true if the file is in SamplSheet Amplicon Double Strand format.
+
+        :param filepath: The file path.
+        :type filepath: str
+        :return: True if the file is in SamplSheet Amplicon Double Strand format.
+        :rtype: bool
+        """
+        is_valid = False
+        if SampleSheetV1.isValid(filepath):
+            try:
+                samplesheet = SampleSheetV1(filepath)
+                if "Application" in samplesheet.header and \
+                   samplesheet.header["Application"] == "Amplicon - DS" and \
+                   len(samplesheet.manifests) != 0:
+                    if len(samplesheet.samples) == 0:
+                        is_valid = True
+                    elif "Manifest" in samplesheet.samples[0].metadata:
+                        is_valid = True
+            except FileNotFoundError:
+                raise
+            except Exception:
+                pass
+        return is_valid
 
     def filterPanels(self, selected_manifests):
         """
@@ -503,43 +588,3 @@ class SampleSheetADS(SampleSheetV1):
                 spl.metadata["Manifest"] = new_by_old_id[spl.metadata["Manifest"]]
                 new_spl.append(spl)
         self.samples = new_spl
-
-    def findSplFiles(self, directory, end_pattern, subject="library"):
-        """
-        Return by sample name or library name all the files in directory corresponding to the subject.
-
-        :param directory: The path to the directory where the files names are evaluated.
-        :type directory: str
-        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.
-        :type end_pattern: str
-        :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
-        :type subject: str
-        :return: By subject the paths of the corresponding files.
-        :rtype: dict
-        """
-        files_by_elt = {}
-        for spl in self.samples:
-            if subject == "library" or spl.metadata["Sample_Name"] not in files_by_elt:  # The subject is the library or the subject is the sample and no library has been already processed for this sample
-                selector = spl.libray_basename if subject == "library" else spl.basename
-                files_by_elt[selector] = sorted(glob.glob(
-                    os.path.join(directory, selector + end_pattern)
-                ))
-        return files_by_elt
-
-    def setSplFiles(self, tag, directory, end_pattern, subject="library"):
-        """
-        Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.
-
-        :param tag: The attribute used in self.sample to store the files paths.
-        :type tag: str
-        :param directory: The path to the directory where the files names are evaluated.
-        :type directory: str
-        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.
-        :type end_pattern: str
-        :param subject: "library" or "sample" to select files corresponding to libraries or corresponding to samples.
-        :type subject: str
-        """
-        files_by_spl = self.findSplFiles(directory, end_pattern, subject)
-        for spl in self.samples:
-            selector = spl.libray_basename if subject == "library" else spl.basename
-            spl.metadata[tag] = files_by_spl[selector]
