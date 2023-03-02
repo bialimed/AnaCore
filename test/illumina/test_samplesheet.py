@@ -380,15 +380,39 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                 'samples': [
                     {
                         'id': 'Sample1-DNA', 'barcodes': {'index': 'GTCCGTAAGC', 'index2': 'CGTGTATCTT'},
-                        'sheet_index': 1, 'description': None,
+                        'sheet_index': 1, 'description': '',
                         'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1',
-                        'metadata': {}
+                        'metadata': {
+                            'index': 'GTCCGTAAGC',
+                            'index2': 'CGTGTATCTT',
+                            'Sample_Name': 'Sample1-DNA',
+                            'Sample_Plate': '',
+                            'Sample_Well': 'A12',
+                            'Index_ID': 'UDP0089',
+                            'I7_Index_ID': 'UDP0089',
+                            'I5_Index_ID': 'UDP0089',
+                            'Project': '',
+                            'Pair_ID': 'Sample1',
+                            'Sample_Type': 'DNA'
+                        }
                     },
                     {
                         'id': 'Sample1-RNA', 'barcodes': {'index': 'CCTGCGGAAC', 'index2': 'ATCATAGGCT'},
-                        'sheet_index': 2, 'description': None,
+                        'sheet_index': 2, 'description': '',
                         'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2',
-                        'metadata': {}
+                        'metadata': {
+                            'index': 'CCTGCGGAAC',
+                            'index2': 'ATCATAGGCT',
+                            'Sample_Name': 'Sample1-RNA',
+                            'Sample_Plate': '',
+                            'Sample_Well': 'A10',
+                            'Index_ID': 'UDP0073',
+                            'I7_Index_ID': 'UDP0073',
+                            'I5_Index_ID': 'UDP0073',
+                            'Project': '',
+                            'Pair_ID': 'Sample1',
+                            'Sample_Type': 'RNA'
+                        }
                     }
                 ]
             },
@@ -658,7 +682,10 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                         'sheet_index': 1, 'description': None,
                         'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1',
                         'metadata': {
-                            'Lane': '1,2'
+                            'Lane': '1,2',
+                            'Sample_Name': 'Sample1-DNA',
+                            'Pair_ID': 'Sample1',
+                            'Sample_Type': 'DNA'
                         }
                     },
                     {
@@ -666,7 +693,10 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                         'sheet_index': 2, 'description': None,
                         'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2',
                         'metadata': {
-                            'Lane': '1,2'
+                            'Lane': '1,2',
+                            'Sample_Name': 'Sample1-RNA',
+                            'Pair_ID': 'Sample1',
+                            'Sample_Type': 'RNA'
                         }
                     }
                 ]

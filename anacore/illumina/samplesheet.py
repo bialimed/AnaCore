@@ -453,28 +453,31 @@ class SampleSheetV2(AbstractSampleSheet):
                 )
         return {"phases": reads_phases}
 
-    # def _parse(self):
-    #     """Read file content and store information on the instance's attributes."""
-    #     super()._parse()
-    #     # Add samples data from software data to self.samples like in V1 format
-    #     spl_by_id = dict()
-    #     for spl in self.samples:
-    #         if spl.id not in spl_by_id:
-    #             spl_by_id[spl.id] = list()
-    #         spl_by_id[spl.id].append(spl)
-    #     for title, curr_extra in self.extra.items():
-    #         if "data" in curr_extra and isinstance(curr_extra["data"], list):
-    #             if len(curr_extra["data"]) != 0 and "sample_id" in curr_extra["data"][0]:  # Section contains data by sample
-    #                 for spl_metadata in curr_extra["data"]:
-    #                     for key, val in spl_metadata.items():
-    #                         lower_key = key.lower()
-    #                         if lower_key != "sample_id":
-    #                             if lower_key in {"sample_description", "description"}:
-    #                                 for curr_spl in spl_by_id[lower_key["sample_id"]]:
-    #                                     curr_spl.description = val
-    #                             else:
-    #                                 for curr_spl in spl_by_id[lower_key["sample_id"]]:
-    #                                     curr_spl.metadata[key] = val
+    def _parse(self):
+        """Read file content and store information on the instance's attributes."""
+        super()._parse()
+        # Add samples data from software data to self.samples like in V1 format
+        spl_by_id = dict()
+        for spl in self.samples:
+            if spl.id not in spl_by_id:
+                spl_by_id[spl.id] = list()
+            spl_by_id[spl.id].append(spl)
+        for title, curr_extra in self.extra.items():
+            if "data" in curr_extra and isinstance(curr_extra["data"], list):
+                if len(curr_extra["data"]) != 0:
+                    lower_keys = [key.lower() for key in curr_extra["data"][0].keys()]
+                    if "sample_id" in lower_keys:  # Section contains data by sample
+                        for spl_metadata in curr_extra["data"]:
+                            spl_id = [val for key, val in spl_metadata.items() if key.lower() == "sample_id"][0]
+                            for key, val in spl_metadata.items():
+                                lower_key = key.lower()
+                                if lower_key != "sample_id":
+                                    if lower_key in {"sample_description", "description"}:
+                                        for curr_spl in spl_by_id[spl_id]:
+                                            curr_spl.description = val
+                                    else:
+                                        for curr_spl in spl_by_id[spl_id]:
+                                            curr_spl.metadata[key] = val
 
     @staticmethod
     def isValid(filepath):
