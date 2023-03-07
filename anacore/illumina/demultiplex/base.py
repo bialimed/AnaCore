@@ -52,9 +52,9 @@ class AbstractDemultStat:
 
     def samplesCounts(self):
         """
-        Return number of reads by samples ID.
+        Return number of clusters by samples ID.
 
-        :return: Number of reads by samples ID.
+        :return: Number of clusters by samples ID.
         :rtype: dict
         """
         ct_by_spl = dict()
@@ -77,9 +77,9 @@ class AbstractDemultStat:
 
     def undeterminedCounts(self):
         """
-        Return number of reads by undetermined UDI.
+        Return number of clusters by undetermined UDI.
 
-        :return: Number of reads by undetermined UDI.
+        :return: Number of clusters by undetermined UDI.
         :rtype: dict
         """
         ct_by_barcode = dict()
@@ -89,11 +89,11 @@ class AbstractDemultStat:
 
     def unexpectedBarcodes(self, skipped_spl=None):
         """
-        Return UDI with a number of reads greate than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).
+        Return UDI with a number of clusters greater than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).
 
         :param skipped_spl: List of samples excluded from the smallest sample finding. This can be used to exclude negative controls without reads.
         :type skipped_spl: set
-        :return: UDI with a number of reads greate than or equal to the smallest sample: {"udi": count, ...}.
+        :return: UDI with a number of clusters greater than or equal to the smallest sample: {"udi": count, ...}.
         :rtype: dict
         """
         unexpected_barcodes = list()
