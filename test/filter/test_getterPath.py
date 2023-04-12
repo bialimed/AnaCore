@@ -50,6 +50,7 @@ class GetterPath:
         """
         Call parse() on both values and return True if they match
         """
+        pass
 
 
 ########################################################################
@@ -57,9 +58,7 @@ class GetterPath:
 # Test cases
 #
 ########################################################################
-class TestFilter(unittest.TestCase):
-    def setUp(self):
-        pass
+class TestGetterPath(unittest.TestCase):
 
     def assertParseEqual(self, sequence, expected, safe):
         if safe is None:
