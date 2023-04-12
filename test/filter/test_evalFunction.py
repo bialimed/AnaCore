@@ -10,12 +10,16 @@ import os
 import sys
 import unittest
 import datetime
+from dict_util import flattenDict
 
 TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
 
+#
+# Temporay class (must be implemented)
+#
 class EvalFunction:
     @staticmethod
     def build(operator, operand):
@@ -29,21 +33,8 @@ class EvalFunction:
 ########################################################################
 class TestEvalFunction(unittest.TestCase):
 
-    def flattenDict(self, dict, result=None, prefix=None):
-        if result is None:
-            result = {}
-
-        for key, value in dict.items():
-            long_key = key if prefix is None else f'{prefix}.{key}'
-            if type(value) == list:
-                result[long_key] = value
-            else:
-                self.flattenDict(value, result, long_key)
-
-        return result
-
     def applyEvalTestSuite(self, case_dict):
-        case_list = self.flattenDict(case_dict)
+        case_list = flattenDict(case_dict)
         for caseName, caseValues in case_list.items():
             with self.subTest(caseName):
                 a = caseValues[0]
@@ -60,7 +51,7 @@ class TestEvalFunction(unittest.TestCase):
                     self.assertEquals(result, expected)
 
     def applyBuildTestSuite(self, case_dict):
-        case_list = self.flattenDict(case_dict)
+        case_list = flattenDict(case_dict)
         for caseName, caseValues in case_list.items():
             with self.subTest(caseName):
                 if caseValues[2]:  # should succeed

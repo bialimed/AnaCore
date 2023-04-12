@@ -9,12 +9,16 @@ __status__ = 'prod'
 import os
 import sys
 import unittest
+from dict_util import flattenDict
 
 TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
 
+#
+# Temporay class (must be implemented)
+#
 class GetterPath:
     @staticmethod
     def parse(input, safe=True):
@@ -111,19 +115,6 @@ class TestGetterPath(unittest.TestCase):
         result = GetterPath.equals(path1, path2)
         self.assertEquals(expected, result)
 
-    def flattenDict(self, dict, result=None, prefix=None):
-        if result is None:
-            result = {}
-
-        for key, value in dict.items():
-            long_key = key if prefix is None else f'{prefix}.{key}'
-            if type(value) == list:
-                result[long_key] = value
-            else:
-                self.flattenDict(value, result, long_key)
-
-        return result
-
     def testParse(self):
         case_dict = {
             "nullish": {
@@ -209,7 +200,7 @@ class TestGetterPath(unittest.TestCase):
             }
         }
 
-        case_list = self.flattenDict(case_dict)
+        case_list = flattenDict(case_dict)
         for caseName, caseValues in case_list.items():
             with self.subTest(caseName):
                 safe = caseValues[2] if len(caseValues) > 2 else None
@@ -247,7 +238,7 @@ class TestGetterPath(unittest.TestCase):
           }
         }
 
-        case_list = self.flattenDict(case_dict)
+        case_list = flattenDict(case_dict)
         for caseName, caseValues in case_list.items():
             with self.subTest(caseName):
                 safe = caseValues[2] if len(caseValues) > 2 else None
@@ -291,7 +282,7 @@ class TestGetterPath(unittest.TestCase):
             }
         }
 
-        case_list = self.flattenDict(case_dict)
+        case_list = flattenDict(case_dict)
         for caseName, caseValues in case_list.items():
             with self.subTest(caseName):
                 self.assertPathEquals(caseValues[0], caseValues[1], caseValues[2])
@@ -426,7 +417,7 @@ class TestGetterPath(unittest.TestCase):
           }
         }
 
-        case_list = self.flattenDict(case_dict)
+        case_list = flattenDict(case_dict)
         for caseName, caseValues in case_list.items():
             with self.subTest(caseName):
                 if caseValues[2] is Exception:
