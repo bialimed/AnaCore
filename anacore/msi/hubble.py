@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2022 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.2'
+__version__ = '1.1.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -53,6 +53,7 @@ class HubbleDiff(HashedSVIO):
         microsat_length = nbRepeatFromStart(
             self.ref, record["Chromosome"], int(record["Start"]), record["RepeatUnit"]
         ) * len(record["RepeatUnit"])
+        is_assessed = record["Assessed"].lower() == "true"
         return Locus.fromDict({
             "position": "{}:{}-{}".format(
                 record["Chromosome"],
@@ -61,12 +62,12 @@ class HubbleDiff(HashedSVIO):
             ),
             "results": {
                 "Hubble": {
-                    "status": Status.undetermined if record["Assessed"] == "False" else Status.none,
-                    "score": None if record["Assessed"] == "False" else 1 - float(record["PValue"]),
+                    "status": Status.none if is_assessed else Status.undetermined,
+                    "score": 1 - float(record["PValue"]) if is_assessed else None,
                     "data": {
                         "nt": record["RepeatUnit"],
-                        "distance": None if record["Assessed"] == "False" else float(record["Distance"]),
-                        "p_value": None if record["Assessed"] == "False" else float(record["PValue"])
+                        "distance": float(record["Distance"]) if is_assessed else None,
+                        "p_value": float(record["PValue"]) if is_assessed else None
                     }
                 }
             }
@@ -138,6 +139,7 @@ class HubbleDist(HashedSVIO):
             self.ref, record["chromosome"], int(record["location"]), record["repeat_unit_bases"]
         ) * len(record["repeat_unit_bases"])
         # Locus
+        is_covered = record["covered"].lower() == "true"
         return Locus.fromDict({
             "position": "{}:{}-{}".format(
                 record["chromosome"],
@@ -146,7 +148,7 @@ class HubbleDist(HashedSVIO):
             ),
             "results": {
                 "Hubble": {
-                    "status": Status.none if record["covered"] == "True" else Status.undetermined,
+                    "status": Status.none if is_covered else Status.undetermined,
                     "data": {
                         "nt": record["repeat_unit_bases"],
                         "lengths": {"ct_by_len": nb_by_length}
