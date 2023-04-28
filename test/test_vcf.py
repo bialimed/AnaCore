@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.14.0'
+__version__ = '1.15.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -608,40 +608,52 @@ class TestVCFRecord(unittest.TestCase):
 11	2	two_spl_rAD_aAF_2	A	T	29	PASS	expModel=model_4	AF:AD	0.96,0.04:2	0.84,0.16:8
 11	3	two_spl_rAD_aAF_3	A	T	29	PASS	expModel=model_4	AF:DP	0.96,0.04:50	0.84,0.16:50
 11	1	two_spl_rAD_aAF_4	A	T,G	29	PASS	expModel=model_5	AD:DP	2,5:50	8,1:50
-11	2	two_spl_rAD_aAF_5	A	T,G	29	PASS	expModel=model_5	AF:AD	0.96,0.04,0.1:2,5	0.84,0.16,0.02:8,1
-11	3	two_spl_rAD_aAF_6	A	T,G	29	PASS	expModel=model_5	AF:DP	0.96,0.04,0.1:50	0.84,0.16,0.02:50"""
+11	2	two_spl_rAD_aAF_5	A	T,G	29	PASS	expModel=model_5	AF:AD	0.86,0.04,0.1:2,5	0.82,0.16,0.02:8,1
+11	3	two_spl_rAD_aAF_6	A	T,G	29	PASS	expModel=model_5	AF:DP	0.86,0.04,0.1:50	0.82,0.16,0.02:50"""
         self.freq_expected = {
             "model_0": {
-                "AF": {"pop": [0.1]},
-                "AD": {"pop": [10]},
+                "AF": {"pop": [0.1], "pop_ref": 0.9},
+                "AD": {"pop": [10], "pop_ref": 90},
                 "DP": {"pop": 100}
             },
             "model_1": {
-                "AF": {"pop": [0.1, 0.05]},
-                "AD": {"pop": [10, 5]},
+                "AF": {"pop": [0.1, 0.05], "pop_ref": 0.85},
+                "AD": {"pop": [10, 5], "pop_ref": 85},
                 "DP": {"pop": 100}
             },
             "model_2": {
-                "AF": {"splA": [0.1], "pop": [0.1]},
-                "AD": {"splA": [10], "pop": [10]},
+                "AF": {"splA": [0.1], "pop": [0.1], "pop_ref": 0.9},
+                "AD": {"splA": [10], "pop": [10], "pop_ref": 90},
                 "DP": {"splA": 100, "pop": 100}
             },
             "model_3": {
-                "AF": {"splA": [0.1, 0.05], "pop": [0.1, 0.05]},
-                "AD": {"splA": [10, 5], "pop": [10, 5]},
+                "AF": {"splA": [0.1, 0.05], "pop": [0.1, 0.05], "pop_ref": 0.85},
+                "AD": {"splA": [10, 5], "pop": [10, 5], "pop_ref": 85},
                 "DP": {"splA": 100, "pop": 100}
             },
             "model_4": {
-                "AF": {"splA": [0.04], "splB": [0.16], "pop": [0.1]},
-                "AD": {"splA": [2], "splB": [8], "pop": [10]},
+                "AF": {"splA": [0.04], "splB": [0.16], "pop": [0.1], "pop_ref": 0.9},
+                "AD": {"splA": [2], "splB": [8], "pop": [10], "pop_ref": 90},
                 "DP": {"splA": 50, "splB": 50, "pop": 100}
             },
             "model_5": {
-                "AF": {"splA": [0.04, 0.1], "splB": [0.16, 0.02], "pop": [0.1, 0.06]},
-                "AD": {"splA": [2, 5], "splB": [8, 1], "pop": [10, 6]},
+                "AF": {"splA": [0.04, 0.1], "splB": [0.16, 0.02], "pop": [0.1, 0.06], "pop_ref": 0.84},
+                "AD": {"splA": [2, 5], "splB": [8, 1], "pop": [10, 6], "pop_ref": 84},
                 "DP": {"splA": 50, "splB": 50, "pop": 100}
             }
         }
+
+    def testContainsIndel(self):
+        data = [
+            {"variant": VCFRecord("chr1", 2, None, "A", ["T"]), "expected": False},
+            {"variant": VCFRecord("chr1", 2, None, "A", ["AT"]), "expected": True},
+            {"variant": VCFRecord("chr1", 1, None, "CA", ["C"]), "expected": True},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GT"]), "expected": False},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GTT"]), "expected": True},
+            {"variant": VCFRecord("chr1", 15, None, "CAC", ["GT"]), "expected": True}
+        ]
+        for curr in data:
+            self.assertEqual(curr["variant"].containsIndel(), curr["expected"])
 
     def tearDown(self):
         # Clean temporary files
@@ -775,6 +787,46 @@ class TestVCFRecord(unittest.TestCase):
                         observed_records.append("{} {}".format(variant.id, variant.getPopDP()))
                     except Exception:
                         raise Exception('Error in TestVCFRecord.testGetPopDP() for variant "' + variant.id + '".')
+            # Assert
+            self.assertEqual(expected_records, observed_records)
+
+    def testGetPopRefAD(self):
+        for curr_dataset in sorted(self.freq_data):
+            # Write test data
+            content = self.freq_data[curr_dataset]
+            with open(self.tmp_variants, "w") as FH_variants:
+                FH_variants.write(content)
+            # Parse
+            expected_records = list()
+            observed_records = list()
+            with VCFIO(self.tmp_variants) as FH_vcf:
+                for variant in FH_vcf:
+                    try:
+                        expected_AD = self.freq_expected[variant.info["expModel"]]["AD"]["pop_ref"]
+                        expected_records.append("{} {}".format(variant.id, expected_AD))
+                        observed_records.append("{} {}".format(variant.id, variant.getPopRefAD()))
+                    except Exception:
+                        raise Exception('Error in TestVCFRecord.testGetPopRefAD() for variant "{}".'.format(variant.id))
+            # Assert
+            self.assertEqual(expected_records, observed_records)
+
+    def testGetPopRefAF(self):
+        for curr_dataset in sorted(self.freq_data):
+            # Write test data
+            content = self.freq_data[curr_dataset]
+            with open(self.tmp_variants, "w") as FH_variants:
+                FH_variants.write(content)
+            # Parse
+            expected_records = list()
+            observed_records = list()
+            with VCFIO(self.tmp_variants) as FH_vcf:
+                for variant in FH_vcf:
+                    try:
+                        expected_AF = self.freq_expected[variant.info["expModel"]]["AF"]["pop_ref"]
+                        expected_records.append("{} {}".format(variant.id, expected_AF))
+                        observed_records.append("{} {}".format(variant.id, variant.getPopRefAF()))
+                    except Exception:
+                        raise Exception('Error in TestVCFRecord.testGetPopRefAF() for variant "{}".'.format(variant.id))
             # Assert
             self.assertEqual(expected_records, observed_records)
 
@@ -1038,8 +1090,20 @@ class TestVCFRecord(unittest.TestCase):
         for curr in data:
             self.assertEqual(curr["variant"].isInsertion(), curr["expected"])
 
+    def testType(self):
+        data = [
+            {"variant": VCFRecord("chr1", 2, None, "A", ["T"]), "expected": "snp"},
+            {"variant": VCFRecord("chr1", 2, None, "A", ["AT"]), "expected": "indel"},
+            {"variant": VCFRecord("chr1", 1, None, "CA", ["C"]), "expected": "indel"},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GT"]), "expected": "variation"},
+            {"variant": VCFRecord("chr1", 15, None, "CA", ["GTT"]), "expected": "indel"},
+            {"variant": VCFRecord("chr1", 15, None, "CAC", ["GT"]), "expected": "indel"}
+        ]
+        for curr in data:
+            self.assertEqual(curr["variant"].type(), curr["expected"])
 
-class TestVCFRecord(unittest.TestCase):
+
+class TestVCFSymbAltRecord(unittest.TestCase):
     def setUp(self):
         tmp_folder = tempfile.gettempdir()
         unique_id = str(uuid.uuid1())
@@ -1072,6 +1136,7 @@ class TestVCFRecord(unittest.TestCase):
 ##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
 ##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001
+1	100	cnv_notation	T	<CNV:TR>	.	.	END=130;SVLEN=30	GT	1/2
 1	2827694	rs2376870	CGTGGATGCGGGGAC	C	.	PASS	SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14	GT:GQ	1/1:14
 2	321682	.	T	<DEL>	6	PASS	SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62	GT:GQ	0/1:12
 2	321682	INV0	T	<INV>	6	PASS	SVTYPE=INV;END=421681	.	.
@@ -1088,7 +1153,7 @@ class TestVCFRecord(unittest.TestCase):
 
     def testEnd(self):
         # With END
-        expected = [321887, 421681, 14477381, 9425916, 12686200, 18665204, 41246879]
+        expected = [130, 321887, 421681, 14477381, 9425916, 12686200, 18665204, 41246879]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1096,7 +1161,7 @@ class TestVCFRecord(unittest.TestCase):
                     observed.append(record.end)
         self.assertEqual(observed, expected)
         # Without END
-        expected = [321887, None, 14477381, 9425916, 12686200, 18665204, None]
+        expected = [130, 321887, None, 14477381, 9425916, 12686200, 18665204, None]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1108,6 +1173,7 @@ class TestVCFRecord(unittest.TestCase):
 
     def testGetName(self):
         expected = [
+            "1:100[30]=T/<CNV:TR>",
             "1:2827694=CGTGGATGCGGGGAC/C",
             "2:321682[-205]=T/<DEL>",
             "2:321682[99999]=T/<INV>",
@@ -1124,7 +1190,7 @@ class TestVCFRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsDeletion(self):
-        expected = [True, True, False, True, False, False, False, True]
+        expected = [False, True, True, False, True, False, False, False, True]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1132,7 +1198,7 @@ class TestVCFRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsIndel(self):
-        expected = [True, True, False, True, True, True, True, True]
+        expected = [True, True, True, False, True, True, True, True, True]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1140,7 +1206,7 @@ class TestVCFRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsInsAndDel(self):
-        expected = [False, False, False, False, False, False, False, False]
+        expected = [False, False, False, False, False, False, False, False, False]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1148,7 +1214,7 @@ class TestVCFRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsInsertion(self):
-        expected = [False, False, False, False, True, True, True, False]
+        expected = [True, False, False, False, False, True, True, True, False]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1156,7 +1222,7 @@ class TestVCFRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsInversion(self):
-        expected = [False, True, False, False, False, False, False]
+        expected = [False, False, True, False, False, False, False, False]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1166,7 +1232,7 @@ class TestVCFRecord(unittest.TestCase):
 
     def testParsingClass(self):
         expected = [
-            VCFRecord, VCFSymbAltRecord, VCFSymbAltRecord,
+            VCFSymbAltRecord, VCFRecord, VCFSymbAltRecord, VCFSymbAltRecord,
             VCFSymbAltRecord, VCFSymbAltRecord, VCFSymbAltRecord,
             VCFSymbAltRecord, VCFSymbAltRecord
         ]
@@ -1177,24 +1243,15 @@ class TestVCFRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testRefEnd(self):
-        expected = [2827708, 321887, 421681, 14477381, 9425916.5, 12665100.5, 18665128.5, 41246879]
+        expected = [100.5, 2827708, 321887, 421681, 14477381, 9425916.5, 12665100.5, 18665128.5, 41246879]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
                 observed.append(record.refEnd())
         self.assertEqual(observed, expected)
 
-    # def testRefLen(self):
-    #     expected = [205, 99999, 297, 0, 0, 0, 4157]
-    #     observed = list()
-    #     with VCFIO(self.tmp_variants) as reader:
-    #         for record in reader:
-    #             if record.__class__ is VCFSymbAltRecord:
-    #                 observed.append(record.ref_len)
-    #     self.assertEqual(observed, expected)
-
     def testRefStart(self):
-        expected = [2827695, 321683, 321683, 14477085, 9425916.5, 12665100.5, 18665128.5, 41242723]
+        expected = [100.5, 2827695, 321683, 321683, 14477085, 9425916.5, 12665100.5, 18665128.5, 41242723]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1203,7 +1260,7 @@ class TestVCFRecord(unittest.TestCase):
 
     def testSvLen(self):
         # With SVLEN
-        expected = [-205, 99999, -297, 6027, 21100, 76, -4157]
+        expected = [30, -205, 99999, -297, 6027, 21100, 76, -4157]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1211,7 +1268,7 @@ class TestVCFRecord(unittest.TestCase):
                     observed.append(record.sv_len)
         self.assertEqual(observed, expected)
         # Without SVLEN
-        expected = [-205, 99999, -297, None, 21100, 76, -4157]
+        expected = [None, -205, 99999, -297, None, 21100, 76, -4157]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1221,9 +1278,8 @@ class TestVCFRecord(unittest.TestCase):
                     observed.append(record.sv_len)
         self.assertEqual(observed, expected)
 
-
     def testType(self):
-        expected = ["indel", "indel", "inv", "indel", "indel", "indel", "indel", "indel"]
+        expected = ["indel", "indel", "indel", "inv", "indel", "indel", "indel", "indel", "indel"]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:

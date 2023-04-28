@@ -1,14 +1,5 @@
 # Release 3.0.0 [DEV]
 
-### Improvements
-  * Add `anacore.vcf.VCFSymbAltRecord` to handle structural variants with
-  symbolic alternative like <DUP>, <DEL>, etc. `anacore.vcf.VCFIO` can now reads
-  VCF containing standard variants and structural variants except BND. BND keep
-  currently manage in `anacore.fusion`.
-  * Add log and statistics reader for bcl-convert:
-  `anacore.illumina.demultiplex.bclconvert.DemultLog` and
-  `anacore.illumina.demultiplex.bclconvert.DemultStat`.
-
 ### Changes
   * `anacore.illumina.SampleSheetV[1|2].samples` return a list of Sample object
   instead of the previous list of dict.
@@ -24,6 +15,20 @@
       * `anacore.illumina.demultiplex.bclconvert`
     * `anacore.illumina.run`
     * `anacore.illumina.samplesheet`
+
+### Improvements
+  * Add `anacore.vcf.VCFSymbAltRecord` to handle structural variants with
+  symbolic alternative like <DUP>, <DEL>, etc. `anacore.vcf.VCFIO` can now reads
+  VCF containing standard variants and structural variants except BND. BND keep
+  currently manage in `anacore.fusion`.
+  * Add log and statistics reader for bcl-convert:
+  `anacore.illumina.demultiplex.bclconvert.DemultLog` and
+  `anacore.illumina.demultiplex.bclconvert.DemultStat`.
+
+### Bug fixes
+  * Fix bug in `anacore.vcf.VCFRecord.getPopRefAD` and
+  `anacore.vcf.VCFRecord.getPopRefAF`: Prevent exception when ref is not in INFO
+  and it exists several samples.
 
 # Release 2.12.1 [2022-10-01]
 

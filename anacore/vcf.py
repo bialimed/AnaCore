@@ -79,7 +79,7 @@ Classes and functions for reading/writing/processing VCF.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.33.0'
+__version__ = '1.34.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -857,25 +857,27 @@ class VCFRecord:
         """
         ref_pop_AD = None
         if "AD" in self.info and len(self.info["AD"]) == len(self.alt) + 1:  # INFO.AD contains ref allele
-            ref_pop_AD = self.info["AD"]
+            ref_pop_AD = self.info["AD"][0]
         elif "AF" in self.info and "DP" in self.info and len(self.info["AF"]) == len(self.alt) + 1:  # INFO.AF contains ref allele and INFO.DP exists
             ref_pop_AD = int(self.info["AF"][0] * self.info["DP"])
         elif len(self.samples) != 0:  # Must be processed by samples data
-            first_spl = self.samples.keys()[0]
-            if "AD" in self.format and len(first_spl["AD"]) == len(self.alt) + 1:  # AD contains ref allele
-                try:
-                    ref_pop_AD = 0
-                    for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
-                        ref_pop_AD += spl_data["AD"][0]
-                except Exception:
-                    ref_pop_AD = None
-            if ref_pop_AD is None and "AF" in self.format and "DP" in self.format and len(first_spl["AF"]) == len(self.alt) + 1:  # AF contains ref allele
-                try:
-                    ref_pop_AD = 0
-                    for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
-                        ref_pop_AD += spl_data["AF"][0] * spl_data["DP"]
-                except Exception:
-                    ref_pop_AD = None
+            if self.format:  # Counts are present by samples
+                first_spl = list(self.samples.values())[0]
+                if "AD" in self.format and len(first_spl["AD"]) == len(self.alt) + 1:  # AD contains ref allele
+                    try:
+                        ref_pop_AD = 0
+                        for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
+                            ref_pop_AD += spl_data["AD"][0]
+                    except Exception:
+                        ref_pop_AD = None
+                if ref_pop_AD is None and "AF" in self.format and "DP" in self.format and len(first_spl["AF"]) == len(self.alt) + 1:  # AF contains ref allele
+                    try:
+                        ref_pop_AD = 0
+                        for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
+                            ref_pop_AD += spl_data["AF"][0] * spl_data["DP"]
+                        ref_pop_AD = int(ref_pop_AD)
+                    except Exception:
+                        ref_pop_AD = None
         if ref_pop_AD is None:  # Erroneous when several variants exist on position and are line splitted
             if "AD" in self.info:  # INFO.AD does not contain ref
                 ref_pop_AD = self.getPopDP() - sum(self.info["AD"])
@@ -939,31 +941,32 @@ class VCFRecord:
         """
         ref_pop_AF = None
         if "AF" in self.info and len(self.info["AF"]) == len(self.alt) + 1:  # INFO.AF contains ref allele
-            ref_pop_AF = self.info["AF"]
+            ref_pop_AF = self.info["AF"][0]
         elif "AD" in self.info and "DP" in self.info and len(self.info["AD"]) == len(self.alt) + 1:  # INFO.AD contains ref allele and INFO.DP exists
             ref_pop_AF = self.info["AD"][0] / self.info["DP"]
         elif len(self.samples) != 0:  # Must be processed by samples data
-            first_spl = self.samples.keys()[0]
-            if "AD" in self.format and "DP" in self.format and len(first_spl["AD"]) == len(self.alt) + 1:  # AD contains ref allele
-                try:
-                    ref_pop_AD = 0
-                    pop_DP = 0
-                    for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
-                        pop_DP += spl_data["DP"]
-                        ref_pop_AD += spl_data["AD"][0]
-                    ref_pop_AF = ref_pop_AD / pop_DP
-                except Exception:
-                    ref_pop_AF = None
-            if ref_pop_AF is None and "AF" in self.format and "DP" in self.format and len(first_spl["AF"]) == len(self.alt) + 1:  # AF contains ref allele
-                try:
-                    ref_pop_AD = 0
-                    pop_DP = 0
-                    for spl_name, spl_data in self.samples.items():  # Sum ref AF for all samples
-                        pop_DP += spl_data["DP"]
-                        ref_pop_AD += spl_data["AF"][0] * spl_data["DP"]
-                    ref_pop_AF = ref_pop_AD / pop_DP
-                except Exception:
-                    ref_pop_AF = None
+            if self.format:  # Counts are present by samples
+                first_spl = list(self.samples.values())[0]
+                if "AD" in self.format and "DP" in self.format and len(first_spl["AD"]) == len(self.alt) + 1:  # AD contains ref allele
+                    try:
+                        ref_pop_AD = 0
+                        pop_DP = 0
+                        for spl_name, spl_data in self.samples.items():  # Sum ref AD for all samples
+                            pop_DP += spl_data["DP"]
+                            ref_pop_AD += spl_data["AD"][0]
+                        ref_pop_AF = ref_pop_AD / pop_DP
+                    except Exception:
+                        ref_pop_AF = None
+                if ref_pop_AF is None and "AF" in self.format and "DP" in self.format and len(first_spl["AF"]) == len(self.alt) + 1:  # AF contains ref allele
+                    try:
+                        ref_pop_AD = 0
+                        pop_DP = 0
+                        for spl_name, spl_data in self.samples.items():  # Sum ref AF for all samples
+                            pop_DP += spl_data["DP"]
+                            ref_pop_AD += spl_data["AF"][0] * spl_data["DP"]
+                        ref_pop_AF = ref_pop_AD / pop_DP
+                    except Exception:
+                        ref_pop_AF = None
         if ref_pop_AF is None:  # Erroneous when several variants exist on position and are line splitted
             if "AF" in self.info:  # INFO.AF does not contain ref
                 ref_pop_AF = 1 - sum(self.info["AF"])
@@ -1250,7 +1253,7 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The attribute 'end' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The attribute 'end' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
         end = None
         if "END" in self.info:
             end = self.info["END"]
@@ -1322,12 +1325,19 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
-        if self.alt[0].startswith("<CNV"):
-            raise Exception("CNV can be deletion or insertion on variant {}.".format(self.getName()))
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
         is_deletion = False
         if self.alt[0].startswith("<DEL"):
             is_deletion = True
+        elif self.alt[0].startswith("<CNV"):
+            if "SVLEN" in self.info:
+                sv_len = self.info["SVLEN"]
+                if isinstance(sv_len, (list, tuple)):
+                    sv_len = sv_len[0]
+                if sv_len < 0:
+                    is_deletion = True
+            else:
+                raise Exception("CNV can be deletion or insertion on variant {}.".format(VCFRecord.getName(self)))
         return is_deletion
 
     def isIndel(self):
@@ -1339,7 +1349,7 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isIndel' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The function 'isIndel' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
         return self.isDeletion() or self.isInsertion() or self.alt[0].startswith("<CNV")  # CNV may be both deletion and duplication
 
     def isInsAndDel(self):
@@ -1351,7 +1361,7 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isInsAndDel' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The function 'isInsAndDel' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
         return False
 
     def isInsertion(self):
@@ -1363,12 +1373,20 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
         is_insertion = False
         if self.alt[0].startswith("<DUP") or self.alt[0].startswith("<INS"):
             is_insertion = True
         elif self.alt[0].startswith("<CNV"):
-            raise Exception("CNV can be deletion or insertion on variant {}.".format(self.getName()))
+            if "SVLEN" in self.info:
+                sv_len = self.info["SVLEN"]
+                if isinstance(sv_len, (list, tuple)):
+                    sv_len = sv_len[0]
+                if sv_len >= 0:
+                    is_insertion = True
+                # else: is_insertion = False
+            else:
+                raise Exception("CNV can be deletion or insertion on variant {}.".format(VCFRecord.getName(self)))
         return is_insertion
 
     def isInversion(self):
@@ -1380,7 +1398,7 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The function 'isInversion' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The function 'isInversion' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
         is_inversion = False
         if self.alt[0].startswith("<INV"):
             is_inversion = True
@@ -1388,29 +1406,6 @@ class VCFSymbAltRecord(VCFRecord):
 
     def normalizeSingleAllele(self):
         raise NotImplementedError("Method 'normalizeSingleAllele' is not implemented for {}.".format(self.__class__.__name__))
-
-    # @property
-    # def ref_len(self):
-    #     """
-    #     Return length of the altered reference.
-    #
-    #     :return: Length of the altered reference.
-    #     :rtype: int
-    #     :warnings: This method can only be used on record with only one alternative allele.
-    #     """
-    #     if len(self.alt) > 1:
-    #         raise Exception("The attribute 'ref_len' cannot be used on multi-allelic variant {}.".format(self.getName()))
-    #     ref_len = None
-    #     if "REFLEN" in self.info:
-    #         ref_len = self.info["REFLEN"]
-    #         if isinstance(ref_len, (list, tuple)):
-    #             ref_len = ref_len[0]
-    #     else:
-    #         if self.isInsertion():  # DUP or INS
-    #             ref_len = 0
-    #         elif not self.alt[0].startswith("<CNV"):  # DEL or INV
-    #             ref_len = self.refEnd() - self.refStart() + 1
-    #     return ref_len
 
     def refEnd(self):
         """
@@ -1421,7 +1416,7 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         end = self.end
-        if self.isInsertion():  # DUP or INS
+        if self.isInsertion():  # DUP or INS or CNV representing INS
             end = self.pos + 0.5
         return end
 
@@ -1434,7 +1429,7 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         start = None  # CNV
-        if self.isInsertion():  # DUP or INS
+        if self.isInsertion():  # DUP or INS or CNV representing INS
             start = self.pos + 0.5
         elif not self.alt[0].startswith("<CNV"):  # DEL or INV
             start = self.pos + 1
@@ -1450,17 +1445,20 @@ class VCFSymbAltRecord(VCFRecord):
         :warnings: This method can only be used on record with only one alternative allele.
         """
         if len(self.alt) > 1:
-            raise Exception("The attribute 'sv_len' cannot be used on multi-allelic variant {}.".format(self.getName()))
+            raise Exception("The attribute 'sv_len' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
         sv_len = None
         if "SVLEN" in self.info:
             sv_len = self.info["SVLEN"]
             if isinstance(sv_len, (list, tuple)):
                 sv_len = sv_len[0]
         elif "END" in self.info:
-            if self.isDeletion():  # DEL
-                sv_len = - (self.end - self.pos)
-            elif not self.alt[0].startswith("<INS"):  # CNV or DUP or INV (Exclude INS because length is unknown)
-                sv_len = (self.end - self.pos)
+            try:
+                if self.isDeletion():  # DEL
+                    sv_len = - (self.end - self.pos)
+                elif not self.alt[0].startswith("<INS"):  # CNV or DUP or INV (Exclude INS because length is unknown)
+                    sv_len = (self.end - self.pos)
+            except Exception:
+                pass  # CNV with unknown type del or ins
         return sv_len
 
     def type(self):
