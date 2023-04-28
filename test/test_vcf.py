@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT-O'
+__copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.13.0'
+__version__ = '1.14.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -19,7 +19,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.vcf import VCFRecord, VCFIO, getHeaderAttr, HeaderInfoAttr
+from anacore.vcf import getHeaderAttr, HeaderInfoAttr, VCFIO, VCFRecord, VCFSymbAltRecord
 
 
 ########################################################################
@@ -1037,6 +1037,198 @@ class TestVCFRecord(unittest.TestCase):
         ]
         for curr in data:
             self.assertEqual(curr["variant"].isInsertion(), curr["expected"])
+
+
+class TestVCFRecord(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_variants = os.path.join(tmp_folder, unique_id + ".vcf")
+        with open(self.tmp_variants, "w") as writer:
+            writer.write("""##fileformat=VCFv4.3
+##fileDate=20100501
+##reference=1000GenomesPilot-NCBI36
+##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
+##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
+##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=INS,Description="Insertion of novel sequence">
+##ALT=<ID=INS:ME:ALU,Description="Insertion of ALU element">
+##ALT=<ID=INS:ME:L1,Description="Insertion of L1 element">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
+##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001
+1	2827694	rs2376870	CGTGGATGCGGGGAC	C	.	PASS	SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14	GT:GQ	1/1:14
+2	321682	.	T	<DEL>	6	PASS	SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62	GT:GQ	0/1:12
+2	321682	INV0	T	<INV>	6	PASS	SVTYPE=INV;END=421681	.	.
+2	14477084	.	C	<DEL:ME:ALU>	12	PASS	SVTYPE=DEL;END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32	GT:GQ	0/1:12
+3	9425916	.	C	<INS:ME:L1>	23	PASS	SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22	GT:GQ	1/1:15
+3	12665100	.	A	<DUP>	14	PASS	SVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500	GT:GQ:CN:CNQ	./.:0:3:16.2
+4	18665128	.	T	<DUP:TANDEM>	11	PASS	SVTYPE=DUP;END=18665204;SVLEN=76;CIPOS=-10,10;CIEND=-10,10	GT:GQ:CN:CNQ	./.:0:5:8.3
+17	41242722	.	N	<DEL>	.	.	END=41246879	GT	./.""")
+
+    def tearDown(self):
+        for curr_file in [self.tmp_variants]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testEnd(self):
+        # With END
+        expected = [321887, 421681, 14477381, 9425916, 12686200, 18665204, 41246879]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                if record.__class__ is VCFSymbAltRecord:
+                    observed.append(record.end)
+        self.assertEqual(observed, expected)
+        # Without END
+        expected = [321887, None, 14477381, 9425916, 12686200, 18665204, None]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                if record.__class__ is VCFSymbAltRecord:
+                    if "END" in record.info:
+                        del record.info["END"]
+                    observed.append(record.end)
+        self.assertEqual(observed, expected)
+
+    def testGetName(self):
+        expected = [
+            "1:2827694=CGTGGATGCGGGGAC/C",
+            "2:321682[-205]=T/<DEL>",
+            "2:321682[99999]=T/<INV>",
+            "2:14477084[-297]=C/<DEL:ME:ALU>",
+            "3:9425916[6027]=C/<INS:ME:L1>",
+            "3:12665100[21100]=A/<DUP>",
+            "4:18665128[76]=T/<DUP:TANDEM>",
+            "17:41242722[-4157]=N/<DEL>"
+        ]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.getName())
+        self.assertEqual(observed, expected)
+
+    def testIsDeletion(self):
+        expected = [True, True, False, True, False, False, False, True]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.isDeletion())
+        self.assertEqual(observed, expected)
+
+    def testIsIndel(self):
+        expected = [True, True, False, True, True, True, True, True]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.isIndel())
+        self.assertEqual(observed, expected)
+
+    def testIsInsAndDel(self):
+        expected = [False, False, False, False, False, False, False, False]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.isInsAndDel())
+        self.assertEqual(observed, expected)
+
+    def testIsInsertion(self):
+        expected = [False, False, False, False, True, True, True, False]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.isInsertion())
+        self.assertEqual(observed, expected)
+
+    def testIsInversion(self):
+        expected = [False, True, False, False, False, False, False]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                if record.__class__ is VCFSymbAltRecord:
+                    observed.append(record.isInversion())
+        self.assertEqual(observed, expected)
+
+    def testParsingClass(self):
+        expected = [
+            VCFRecord, VCFSymbAltRecord, VCFSymbAltRecord,
+            VCFSymbAltRecord, VCFSymbAltRecord, VCFSymbAltRecord,
+            VCFSymbAltRecord, VCFSymbAltRecord
+        ]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.__class__)
+        self.assertEqual(observed, expected)
+
+    def testRefEnd(self):
+        expected = [2827708, 321887, 421681, 14477381, 9425916.5, 12665100.5, 18665128.5, 41246879]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.refEnd())
+        self.assertEqual(observed, expected)
+
+    # def testRefLen(self):
+    #     expected = [205, 99999, 297, 0, 0, 0, 4157]
+    #     observed = list()
+    #     with VCFIO(self.tmp_variants) as reader:
+    #         for record in reader:
+    #             if record.__class__ is VCFSymbAltRecord:
+    #                 observed.append(record.ref_len)
+    #     self.assertEqual(observed, expected)
+
+    def testRefStart(self):
+        expected = [2827695, 321683, 321683, 14477085, 9425916.5, 12665100.5, 18665128.5, 41242723]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.refStart())
+        self.assertEqual(observed, expected)
+
+    def testSvLen(self):
+        # With SVLEN
+        expected = [-205, 99999, -297, 6027, 21100, 76, -4157]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                if record.__class__ is VCFSymbAltRecord:
+                    observed.append(record.sv_len)
+        self.assertEqual(observed, expected)
+        # Without SVLEN
+        expected = [-205, 99999, -297, None, 21100, 76, -4157]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                if record.__class__ is VCFSymbAltRecord:
+                    if "SVLEN" in record.info:
+                        del record.info["SVLEN"]
+                    observed.append(record.sv_len)
+        self.assertEqual(observed, expected)
+
+
+    def testType(self):
+        expected = ["indel", "indel", "inv", "indel", "indel", "indel", "indel", "indel"]
+        observed = list()
+        with VCFIO(self.tmp_variants) as reader:
+            for record in reader:
+                observed.append(record.type())
+        self.assertEqual(observed, expected)
 
 
 ########################################################################

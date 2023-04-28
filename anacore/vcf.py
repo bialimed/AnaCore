@@ -77,9 +77,9 @@ Classes and functions for reading/writing/processing VCF.
 """
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT-O'
+__copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.32.0'
+__version__ = '1.33.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -1211,6 +1211,272 @@ class VCFRecord:
         return DP
 
 
+class VCFSymbAltRecord(VCFRecord):
+    """Class to manage a variant record with symbolic alternative like <DUP>, <DEL>, etc."""
+
+    def __setattr__(self, name, value):
+        """
+        Assign value to the attribute.
+
+        :param name: The attribute name.
+        :type name: str
+        :param value: The value to be assigned to the attribute.
+        :type value: *
+        """
+        if name == "alt":
+            for alt in value:
+                if not alt.startswith("<"):
+                    raise Exception("Alternative allele {} is not a symbolic allele.".format(alt))
+                if alt.startswith("<BND"):
+                    raise Exception("BND are not managed by {}.".format(self.__class__.__name__))
+        super().__setattr__(name, value)
+
+    def containsIndel(self):
+        """
+        Return True if the variant contains an allele corresponding to an insertion or a deletion.
+
+        :return: True if the variant contains an allele corresponding to an insertion or a deletion.
+        :rtype: bool
+        """
+        raise NotImplementedError("Method 'containsIndel' is not implemented for {}.".format(self.__class__.__name__))
+
+    @property
+    def end(self):
+        """
+        Return end position of the variant (1-based).
+
+        :return: End position of the variant (1-based). This position correspond to the last reference nt implicated in variant. For example, in DUP, the position correspond to last duplicated nt on reference.
+        :rtype: int | None
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The attribute 'end' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        end = None
+        if "END" in self.info:
+            end = self.info["END"]
+            if isinstance(end, (list, tuple)):
+                end = end[0]
+        elif self.alt[0].startswith("<INS"):  # INS
+            end = self.pos
+        elif "SVLEN" in self.info:  # CNV or DEL or DUP or INV
+            end = self.pos + abs(self.sv_len)
+        return end
+
+    def fastDownstreamed(self, seq_handler, padding=500):
+        raise NotImplementedError("Method 'fastDownstreamed' is not implemented for {}.".format(self.__class__.__name__))
+
+    def fastStandardize(self, seq_handler, padding=500):
+        raise NotImplementedError("Method 'fastStandardize' is not implemented for {}.".format(self.__class__.__name__))
+
+    @staticmethod
+    def fromStdRecord(record):
+        """
+        Build and return an instance of VCFSymbAltRecord from VCFRecord.
+
+        :param record: Initial VCFRecord.
+        :type record: VCFRecord
+        :return: The new instance.
+        :rtype: VCFSymbAltRecord
+        """
+        return VCFSymbAltRecord(
+            record.chrom,
+            record.pos,
+            record.id,
+            record.ref,
+            record.alt,
+            record.qual,
+            record.filter,
+            record.info,
+            record.format,
+            record.samples
+        )
+
+    def getMostUpstream(self, ref_seq):
+        raise NotImplementedError("Method 'getMostUpstream' is not implemented for {}.".format(self.__class__.__name__))
+
+    def getMostDownstream(self, ref_seq):
+        raise NotImplementedError("Method 'getMostDownstream' is not implemented for {}.".format(self.__class__.__name__))
+
+    def getName(self):
+        """
+        Return an unique name to identified the variant.
+
+        :return: The variant name.
+        :rtype: str
+        :warnings: This name can be not uniq for two insertions on same position and with same length.
+        """
+        return "{}:{}[{}]={}/{}".format(
+            self.chrom,
+            self.pos,
+            self.sv_len if self.sv_len else "",
+            self.ref,
+            "/".join(self.alt)
+        )
+
+    def isDeletion(self):
+        """
+        Return True if the variant is a deletion.
+
+        :return: True if the variant is a deletion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        if self.alt[0].startswith("<CNV"):
+            raise Exception("CNV can be deletion or insertion on variant {}.".format(self.getName()))
+        is_deletion = False
+        if self.alt[0].startswith("<DEL"):
+            is_deletion = True
+        return is_deletion
+
+    def isIndel(self):
+        """
+        Return True if the variant is an insertion or a deletion.
+
+        :return: True if the variant is an insertion or a deletion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isIndel' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        return self.isDeletion() or self.isInsertion() or self.alt[0].startswith("<CNV")  # CNV may be both deletion and duplication
+
+    def isInsAndDel(self):
+        """
+        Return True if the variant is an insertion and also a deletion.
+
+        :return: True if the variant is an insertion and also a deletion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isInsAndDel' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        return False
+
+    def isInsertion(self):
+        """
+        Return True if the variant is an insertion.
+
+        :return: True if the variant is an insertion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        is_insertion = False
+        if self.alt[0].startswith("<DUP") or self.alt[0].startswith("<INS"):
+            is_insertion = True
+        elif self.alt[0].startswith("<CNV"):
+            raise Exception("CNV can be deletion or insertion on variant {}.".format(self.getName()))
+        return is_insertion
+
+    def isInversion(self):
+        """
+        Return True if the variant is a deletion.
+
+        :return: True if the variant is a deletion.
+        :rtype: bool
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'isInversion' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        is_inversion = False
+        if self.alt[0].startswith("<INV"):
+            is_inversion = True
+        return is_inversion
+
+    def normalizeSingleAllele(self):
+        raise NotImplementedError("Method 'normalizeSingleAllele' is not implemented for {}.".format(self.__class__.__name__))
+
+    # @property
+    # def ref_len(self):
+    #     """
+    #     Return length of the altered reference.
+    #
+    #     :return: Length of the altered reference.
+    #     :rtype: int
+    #     :warnings: This method can only be used on record with only one alternative allele.
+    #     """
+    #     if len(self.alt) > 1:
+    #         raise Exception("The attribute 'ref_len' cannot be used on multi-allelic variant {}.".format(self.getName()))
+    #     ref_len = None
+    #     if "REFLEN" in self.info:
+    #         ref_len = self.info["REFLEN"]
+    #         if isinstance(ref_len, (list, tuple)):
+    #             ref_len = ref_len[0]
+    #     else:
+    #         if self.isInsertion():  # DUP or INS
+    #             ref_len = 0
+    #         elif not self.alt[0].startswith("<CNV"):  # DEL or INV
+    #             ref_len = self.refEnd() - self.refStart() + 1
+    #     return ref_len
+
+    def refEnd(self):
+        """
+        Return the last position on reference affected by the alternative allele (1-based).
+
+        :return: The last position on reference affected by the alternative allele (1-based). For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
+        :rtype: float | None
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        end = self.end
+        if self.isInsertion():  # DUP or INS
+            end = self.pos + 0.5
+        return end
+
+    def refStart(self):
+        """
+        Return the first position on reference affected by the alternative allele (1-based).
+
+        :return: The first position on reference affected by the alternative allele (1-based). For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.
+        :rtype: float | None
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        start = None  # CNV
+        if self.isInsertion():  # DUP or INS
+            start = self.pos + 0.5
+        elif not self.alt[0].startswith("<CNV"):  # DEL or INV
+            start = self.pos + 1
+        return start
+
+    @property
+    def sv_len(self):
+        """
+        Return difference in length between REF and ALT alleles.
+
+        :return: Difference in length between REF and ALT alleles. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.
+        :rtype: int | None
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The attribute 'sv_len' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        sv_len = None
+        if "SVLEN" in self.info:
+            sv_len = self.info["SVLEN"]
+            if isinstance(sv_len, (list, tuple)):
+                sv_len = sv_len[0]
+        elif "END" in self.info:
+            if self.isDeletion():  # DEL
+                sv_len = - (self.end - self.pos)
+            elif not self.alt[0].startswith("<INS"):  # CNV or DUP or INV (Exclude INS because length is unknown)
+                sv_len = (self.end - self.pos)
+        return sv_len
+
+    def type(self):
+        """
+        Return the variant type.
+
+        :return: 'indel' or 'inv'.
+        :rtype: str
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        record_type = "indel"
+        if self.alt[0].startswith("<INV"):
+            record_type = "inv"
+        return record_type
+
+
 class VCFIO(AbstractFile):
     """Manage VCF file."""
 
@@ -1408,6 +1674,9 @@ class VCFIO(AbstractFile):
                     data_by_spl[self.samples[spl_idx]] = spl_data
                 variation.samples = data_by_spl
 
+        if variation.alt[0].startswith("<"):
+            variation = VCFSymbAltRecord.fromStdRecord(variation)
+
         return variation
 
     def write(self, record):
@@ -1535,7 +1804,10 @@ def getAlleleRecord(FH_vcf, record, idx_alt):
     :return: The record corresponding to the specified allele in variant.
     :rtype: anacore.vcf.VCFRecord
     """
-    new_record = VCFRecord(
+    new_class = VCFRecord
+    if record.alt[idx_alt].startswith("<"):
+        new_class = VCFSymbAltRecord
+    new_record = new_class(
         region=record.chrom,
         position=record.pos,
         knownSNPId=record.id,
