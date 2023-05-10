@@ -17,15 +17,15 @@ Classes and functions for reading/writing fusions callers's output and VCF conta
 
         spl_name = "spl1"
         print("Breakpoint_1\\tGene_brkpt_1\\tBreakpoint_2\\tGene_brkpt_2\\tSpanning_pair\\tSplit_read")
-        with FusionFileReader.factory("test.tsv", sample_name=spl_name) as reader:
+        with FusionFileReader.factory("test.tsv", sample_name=spl_name, annot_field="ANN") as reader:
             for first, second in reader:
                 print(
                     "{}:{}".format(first.chrom, frist.pos),
                     ",".join([elt["SYMBOL"] for elt in first.info["ANN"]]),
                     "{}:{}".format(second.chrom, second.pos),
                     ",".join([elt["SYMBOL"] for elt in second.info["ANN"]]),
-                    first.sample["spl_name"]["PR"],
-                    first.sample["spl_name"]["SR"],
+                    first.samples[spl_name]["PR"],
+                    first.samples[spl_name]["SR"],
                     sep="\\t"
                 )
 
@@ -55,9 +55,9 @@ Classes and functions for reading/writing fusions callers's output and VCF conta
             for first, second in reader:
                 print(
                     "{}:{}".format(first.chrom, frist.pos),
-                    first.id
+                    first.id,
                     "{}:{}".format(second.chrom, second.pos),
-                    second.id
+                    second.id,
                     sep="\\t"
                 )
 
