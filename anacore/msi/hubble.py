@@ -269,7 +269,7 @@ def parseHubbleResults(sequences_path, summary_path, differential_path, distribu
     # Check parsing
     if sum_data["TotalMicrosatelliteSitesAssessed"] != msi_spl.getNbDetermined("Hubble"):
         raise Exception(
-            "Assessed microsat number is discordant betseen {} ({}) and {} ({}).".format(
+            "Assessed microsat number is discordant between {} ({}) and {} ({}).".format(
                 summary_path,
                 sum_data["TotalMicrosatelliteSitesAssessed"],
                 differential_path,
@@ -278,7 +278,7 @@ def parseHubbleResults(sequences_path, summary_path, differential_path, distribu
         )
     if sum_data["TotalMicrosatelliteSitesUnstable"] != msi_spl.getNbUnstable("Hubble"):
         raise Exception(
-            "Unstable microsat number is discordant betseen {} ({}) and {} ({}).".format(
+            "Unstable microsat number is discordant between {} ({}) and {} ({}).".format(
                 summary_path,
                 sum_data["TotalMicrosatelliteSitesUnstable"],
                 differential_path,
