@@ -196,29 +196,29 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.getterPath">anacore.getterPath</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.GetterPath"><code class="docutils literal notranslate"><span class="pre">GetterPath</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.dict"><code class="docutils literal notranslate"><span class="pre">GetterPath.dict</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.fromDict"><code class="docutils literal notranslate"><span class="pre">GetterPath.fromDict()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.fromStr"><code class="docutils literal notranslate"><span class="pre">GetterPath.fromStr()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.get"><code class="docutils literal notranslate"><span class="pre">GetterPath.get()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.str"><code class="docutils literal notranslate"><span class="pre">GetterPath.str</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.toDict"><code class="docutils literal notranslate"><span class="pre">GetterPath.toDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.toStr"><code class="docutils literal notranslate"><span class="pre">GetterPath.toStr()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.IterableToken"><code class="docutils literal notranslate"><span class="pre">IterableToken</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.dict"><code class="docutils literal notranslate"><span class="pre">IterableToken.dict</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.get"><code class="docutils literal notranslate"><span class="pre">IterableToken.get()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.str"><code class="docutils literal notranslate"><span class="pre">IterableToken.str</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.toDict"><code class="docutils literal notranslate"><span class="pre">IterableToken.toDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.toStr"><code class="docutils literal notranslate"><span class="pre">IterableToken.toStr()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.KeyToken"><code class="docutils literal notranslate"><span class="pre">KeyToken</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.dict"><code class="docutils literal notranslate"><span class="pre">KeyToken.dict</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.get"><code class="docutils literal notranslate"><span class="pre">KeyToken.get()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.str"><code class="docutils literal notranslate"><span class="pre">KeyToken.str</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.toDict"><code class="docutils literal notranslate"><span class="pre">KeyToken.toDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.toStr"><code class="docutils literal notranslate"><span class="pre">KeyToken.toStr()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.MethodToken"><code class="docutils literal notranslate"><span class="pre">MethodToken</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.dict"><code class="docutils literal notranslate"><span class="pre">MethodToken.dict</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.get"><code class="docutils literal notranslate"><span class="pre">MethodToken.get()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.str"><code class="docutils literal notranslate"><span class="pre">MethodToken.str</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.toDict"><code class="docutils literal notranslate"><span class="pre">MethodToken.toDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.toStr"><code class="docutils literal notranslate"><span class="pre">MethodToken.toStr()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -3033,7 +3033,7 @@ path (as dict or string).</p>
     <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;class&quot;</span><span class="p">},</span>
     <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;status&quot;</span><span class="p">}</span>
 <span class="p">]</span>
-<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 <span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: &quot;pathogen&quot;</span>
 </pre></div>
 </div>
@@ -3047,7 +3047,7 @@ path (as dict or string).</p>
     <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;iterate&quot;</span><span class="p">},</span>
     <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;scaleUp&quot;</span><span class="p">,</span> <span class="s2">&quot;arguments&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">]},</span>
 <span class="p">]</span>
-<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 <span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: [&lt;Square (l:4, w:4)&gt;, &lt;Rectange (l:4, w:10)&gt;]</span>
 </pre></div>
 </div>
@@ -3061,7 +3061,7 @@ path (as dict or string).</p>
     <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;scores&quot;</span><span class="p">},</span>
     <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
 <span class="p">]</span>
-<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 <span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: [0.9, 0.7]</span>
 </pre></div>
 </div>
@@ -3087,20 +3087,6 @@ path (as dict or string).</p>
 <dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.GetterPath" title="anacore.getterPath.GetterPath">getterPath.GetterPath</a></p>
 </dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.dict">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.GetterPath.dict" title="Permalink to this definition"></a></dt>
-<dd><p>Return getter path as dict path.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Getter path as dictpath.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.getterPath.GetterPath.fromDict">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#GetterPath.fromDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.GetterPath.fromDict" title="Permalink to this definition"></a></dt>
@@ -3158,9 +3144,23 @@ path (as dict or string).</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.str">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.GetterPath.str" title="Permalink to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.toDict">
+<span class="sig-name descname"><span class="pre">toDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#GetterPath.toDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.GetterPath.toDict" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter path as dict path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter path as dict path.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.toStr">
+<span class="sig-name descname"><span class="pre">toStr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#GetterPath.toStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.GetterPath.toStr" title="Permalink to this definition"></a></dt>
 <dd><p>Return getter path as str path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3191,9 +3191,26 @@ path (as dict or string).</p>
 <dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.IterableToken" title="anacore.getterPath.IterableToken">getterPath.IterableToken</a></p>
 </dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.dict">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.IterableToken.dict" title="Permalink to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#IterableToken.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.IterableToken.get" title="Permalink to this definition"></a></dt>
+<dd><p>Return value corresponding to getter from item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – Object on wich getter is apply.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values corresponding to getter from item.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.toDict">
+<span class="sig-name descname"><span class="pre">toDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#IterableToken.toDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.IterableToken.toDict" title="Permalink to this definition"></a></dt>
 <dd><p>Return getter token and sub-token as dict path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3206,25 +3223,8 @@ path (as dict or string).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#IterableToken.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.IterableToken.get" title="Permalink to this definition"></a></dt>
-<dd><p>Return value corresponding to getter from item.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>item</strong> – Object on wich getter is apply.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Values corresponding to getter from item or None if element is undefined.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list | None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.str">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.IterableToken.str" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.toStr">
+<span class="sig-name descname"><span class="pre">toStr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#IterableToken.toStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.IterableToken.toStr" title="Permalink to this definition"></a></dt>
 <dd><p>Return getter token and sub-token as str path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3255,20 +3255,6 @@ path (as dict or string).</p>
 <dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.KeyToken" title="anacore.getterPath.KeyToken">getterPath.KeyToken</a></p>
 </dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.KeyToken.dict">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.KeyToken.dict" title="Permalink to this definition"></a></dt>
-<dd><p>Return getter token as dict.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Getter token as dict.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.getterPath.KeyToken.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#KeyToken.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.KeyToken.get" title="Permalink to this definition"></a></dt>
@@ -3292,9 +3278,23 @@ path (as dict or string).</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.KeyToken.str">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.KeyToken.str" title="Permalink to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.KeyToken.toDict">
+<span class="sig-name descname"><span class="pre">toDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#KeyToken.toDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.KeyToken.toDict" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token as dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token as dict.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.KeyToken.toStr">
+<span class="sig-name descname"><span class="pre">toStr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#KeyToken.toStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.KeyToken.toStr" title="Permalink to this definition"></a></dt>
 <dd><p>Return getter token as str.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -3328,20 +3328,6 @@ path (as dict or string).</p>
 <dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.MethodToken" title="anacore.getterPath.MethodToken">getterPath.MethodToken</a></p>
 </dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.MethodToken.dict">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.MethodToken.dict" title="Permalink to this definition"></a></dt>
-<dd><p>Return getter token as dict.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Getter token as dict.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.getterPath.MethodToken.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#MethodToken.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.MethodToken.get" title="Permalink to this definition"></a></dt>
@@ -3365,9 +3351,23 @@ path (as dict or string).</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="anacore.getterPath.MethodToken.str">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.MethodToken.str" title="Permalink to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.MethodToken.toDict">
+<span class="sig-name descname"><span class="pre">toDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#MethodToken.toDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.MethodToken.toDict" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token as dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token as dict.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.MethodToken.toStr">
+<span class="sig-name descname"><span class="pre">toStr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#MethodToken.toStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.MethodToken.toStr" title="Permalink to this definition"></a></dt>
 <dd><p>Return getter token as str.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
