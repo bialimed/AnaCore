@@ -1,71 +1,34 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.msi.hubble &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../../index.html" class="icon icon-home"> AnaCore
-          
-
-          
-            
             <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,85 +36,35 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.msi.hubble</li>
-    
-    
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.msi.hubble</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.msi.hubble</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing Hubble&#39;s outputs.&quot;&quot;&quot;</span>
@@ -159,7 +72,7 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2022 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.2&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.1.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
@@ -174,10 +87,10 @@
 
 
 <div class="viewcode-block" id="HubbleDiff"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.HubbleDiff">[docs]</a><span class="k">class</span> <span class="nc">HubbleDiff</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Manage differential analysis results file coming from Hubble.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manage differential analysis results file coming from Hubble.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">ref_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the new instance of HubbleDiff.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -198,7 +111,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">IdxFastaIO</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record described by the current line.</span>
@@ -208,6 +121,7 @@
         <span class="n">microsat_length</span> <span class="o">=</span> <span class="n">nbRepeatFromStart</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Chromosome&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;Start&quot;</span><span class="p">]),</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;RepeatUnit&quot;</span><span class="p">]</span>
         <span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;RepeatUnit&quot;</span><span class="p">])</span>
+        <span class="n">is_assessed</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
         <span class="k">return</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
             <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Chromosome&quot;</span><span class="p">],</span>
@@ -216,19 +130,19 @@
             <span class="p">),</span>
             <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;Hubble&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span><span class="p">,</span>
-                    <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span> <span class="k">else</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;PValue&quot;</span><span class="p">]),</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span> <span class="k">if</span> <span class="n">is_assessed</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
+                    <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;PValue&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">is_assessed</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;nt&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;RepeatUnit&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;Distance&quot;</span><span class="p">]),</span>
-                        <span class="s2">&quot;p_value&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;Assessed&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;False&quot;</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;PValue&quot;</span><span class="p">])</span>
+                        <span class="s2">&quot;distance&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;Distance&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">is_assessed</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="s2">&quot;p_value&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;PValue&quot;</span><span class="p">])</span> <span class="k">if</span> <span class="n">is_assessed</span> <span class="k">else</span> <span class="kc">None</span>
                     <span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span>
         <span class="p">})</span>
 
 <div class="viewcode-block" id="HubbleDiff.recordToLine"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.HubbleDiff.recordToLine">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the record in SV format.</span>
 
 <span class="sd">        :param record: Record containing differential analysis results coming from Hubble.</span>
@@ -249,10 +163,10 @@
 
 
 <div class="viewcode-block" id="HubbleDist"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.HubbleDist">[docs]</a><span class="k">class</span> <span class="nc">HubbleDist</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Manage distributions file coming from hubble.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manage distributions file coming from hubble.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">ref_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">len_limit</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the new instance of HubbleDist.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -276,7 +190,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">IdxFastaIO</span><span class="p">(</span><span class="n">ref_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record described by the current line.</span>
@@ -293,6 +207,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;location&quot;</span><span class="p">]),</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">]</span>
         <span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">])</span>
         <span class="c1"># Locus</span>
+        <span class="n">is_covered</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;covered&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
         <span class="k">return</span> <span class="n">Locus</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
             <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">-</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">record</span><span class="p">[</span><span class="s2">&quot;chromosome&quot;</span><span class="p">],</span>
@@ -301,7 +216,7 @@
             <span class="p">),</span>
             <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;Hubble&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;covered&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;True&quot;</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
+                    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="n">Status</span><span class="o">.</span><span class="n">none</span> <span class="k">if</span> <span class="n">is_covered</span> <span class="k">else</span> <span class="n">Status</span><span class="o">.</span><span class="n">undetermined</span><span class="p">,</span>
                     <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s2">&quot;nt&quot;</span><span class="p">:</span> <span class="n">record</span><span class="p">[</span><span class="s2">&quot;repeat_unit_bases&quot;</span><span class="p">],</span>
                         <span class="s2">&quot;lengths&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;ct_by_len&quot;</span><span class="p">:</span> <span class="n">nb_by_length</span><span class="p">}</span>
@@ -311,7 +226,7 @@
         <span class="p">})</span>
 
 <div class="viewcode-block" id="HubbleDist.recordToLine"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.HubbleDist.recordToLine">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the record in SV format.</span>
 
 <span class="sd">        :param record: Record containing distributions coming from Hubble.</span>
@@ -333,7 +248,7 @@
 
 
 <div class="viewcode-block" id="nbRepeatFromStart"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.nbRepeatFromStart">[docs]</a><span class="k">def</span> <span class="nf">nbRepeatFromStart</span><span class="p">(</span><span class="n">ref_reader</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">motif</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return number of occurrences of the pattern at the beginning of the sequence.</span>
 
 <span class="sd">    :param ref_reader: File handle to reference sequences file.</span>
@@ -369,7 +284,7 @@
 
 
 <div class="viewcode-block" id="parseHubbleResults"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.hubble.parseHubbleResults">[docs]</a><span class="k">def</span> <span class="nf">parseHubbleResults</span><span class="p">(</span><span class="n">sequences_path</span><span class="p">,</span> <span class="n">summary_path</span><span class="p">,</span> <span class="n">differential_path</span><span class="p">,</span> <span class="n">distributions_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unstable_rate_threshold</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return information on loci and analyses about microsatellites for sample.</span>
 
 <span class="sd">    :param sequences_path: Path to reference sequences file used in analysis (format: fasta with index).</span>
@@ -422,7 +337,7 @@
     <span class="c1"># Check parsing</span>
     <span class="k">if</span> <span class="n">sum_data</span><span class="p">[</span><span class="s2">&quot;TotalMicrosatelliteSitesAssessed&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">msi_spl</span><span class="o">.</span><span class="n">getNbDetermined</span><span class="p">(</span><span class="s2">&quot;Hubble&quot;</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s2">&quot;Assessed microsat number is discordant betseen </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">) and </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;Assessed microsat number is discordant between </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">) and </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">summary_path</span><span class="p">,</span>
                 <span class="n">sum_data</span><span class="p">[</span><span class="s2">&quot;TotalMicrosatelliteSitesAssessed&quot;</span><span class="p">],</span>
                 <span class="n">differential_path</span><span class="p">,</span>
@@ -431,7 +346,7 @@
         <span class="p">)</span>
     <span class="k">if</span> <span class="n">sum_data</span><span class="p">[</span><span class="s2">&quot;TotalMicrosatelliteSitesUnstable&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">msi_spl</span><span class="o">.</span><span class="n">getNbUnstable</span><span class="p">(</span><span class="s2">&quot;Hubble&quot;</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s2">&quot;Unstable microsat number is discordant betseen </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">) and </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="s2">&quot;Unstable microsat number is discordant between </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">) and </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">summary_path</span><span class="p">,</span>
                 <span class="n">sum_data</span><span class="p">[</span><span class="s2">&quot;TotalMicrosatelliteSitesUnstable&quot;</span><span class="p">],</span>
                 <span class="n">differential_path</span><span class="p">,</span>
@@ -451,46 +366,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

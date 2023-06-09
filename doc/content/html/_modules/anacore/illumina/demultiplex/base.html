@@ -121,9 +121,9 @@
 
 <div class="viewcode-block" id="AbstractDemultStat.samplesCounts"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.base.AbstractDemultStat.samplesCounts">[docs]</a>    <span class="k">def</span> <span class="nf">samplesCounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return number of reads by samples ID.</span>
+<span class="sd">        Return number of clusters by samples ID.</span>
 
-<span class="sd">        :return: Number of reads by samples ID.</span>
+<span class="sd">        :return: Number of clusters by samples ID.</span>
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ct_by_spl</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -146,9 +146,9 @@
 
 <div class="viewcode-block" id="AbstractDemultStat.undeterminedCounts"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.base.AbstractDemultStat.undeterminedCounts">[docs]</a>    <span class="k">def</span> <span class="nf">undeterminedCounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return number of reads by undetermined UDI.</span>
+<span class="sd">        Return number of clusters by undetermined UDI.</span>
 
-<span class="sd">        :return: Number of reads by undetermined UDI.</span>
+<span class="sd">        :return: Number of clusters by undetermined UDI.</span>
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ct_by_barcode</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -158,11 +158,11 @@
 
 <div class="viewcode-block" id="AbstractDemultStat.unexpectedBarcodes"><a class="viewcode-back" href="../../../../anacore.html#anacore.illumina.demultiplex.base.AbstractDemultStat.unexpectedBarcodes">[docs]</a>    <span class="k">def</span> <span class="nf">unexpectedBarcodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skipped_spl</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return UDI with a number of reads greate than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).</span>
+<span class="sd">        Return UDI with a number of clusters greater than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).</span>
 
 <span class="sd">        :param skipped_spl: List of samples excluded from the smallest sample finding. This can be used to exclude negative controls without reads.</span>
 <span class="sd">        :type skipped_spl: set</span>
-<span class="sd">        :return: UDI with a number of reads greate than or equal to the smallest sample: {&quot;udi&quot;: count, ...}.</span>
+<span class="sd">        :return: UDI with a number of clusters greater than or equal to the smallest sample: {&quot;udi&quot;: count, ...}.</span>
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">unexpected_barcodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>

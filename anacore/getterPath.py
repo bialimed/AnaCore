@@ -69,7 +69,7 @@ path (as dict or string).
             {"kind": "key", "key": "class"},
             {"kind": "key", "key": "status"}
         ]
-        getter = GetterPath.fromStr(path)
+        getter = GetterPath.fromDict(path)
         getter.get(object)  # Return: "pathogen"
 
     Case 2:
@@ -85,7 +85,7 @@ path (as dict or string).
             {"kind": "iterate"},
             {"kind": "method", "name": "scaleUp", "arguments": [2]},
         ]
-        getter = GetterPath.fromStr(path)
+        getter = GetterPath.fromDict(path)
         getter.get(object)  # Return: [<Square (l:4, w:4)>, <Rectange (l:4, w:10)>]
 
     Case 3:
@@ -101,7 +101,7 @@ path (as dict or string).
             {"kind": "key", "key": "scores"},
             {"kind": "key", "key": 0},
         ]
-        getter = GetterPath.fromStr(path)
+        getter = GetterPath.fromDict(path)
         getter.get(object)  # Return: [0.9, 0.7]
 """
 
@@ -136,24 +136,7 @@ class GetterPath:
         :return: True if self and other have same path.
         :rtype: bool
         """
-        return self.dict == other.dict
-
-    @property
-    def dict(self):
-        """
-        Return getter path as dict path.
-
-        :return: Getter path as dictpath.
-        :rtype: str
-        """
-        hash = list()
-        for curr_token in self.tokens_chain:
-            if isinstance(curr_token, IterableToken):
-                for sub_token_dict in curr_token.dict:
-                    hash.append(sub_token_dict)
-            else:
-                hash.append(curr_token.dict)
-        return hash
+        return self.toDict() == other.toDict()
 
     @staticmethod
     def fromDict(array):
@@ -228,15 +211,30 @@ class GetterPath:
                 return None
         return val
 
-    @property
-    def str(self):
+    def toDict(self):
+        """
+        Return getter path as dict path.
+
+        :return: Getter path as dict path.
+        :rtype: str
+        """
+        hash = list()
+        for curr_token in self.tokens_chain:
+            if isinstance(curr_token, IterableToken):
+                for sub_token_dict in curr_token.toDict():
+                    hash.append(sub_token_dict)
+            else:
+                hash.append(curr_token.toDict())
+        return hash
+
+    def toStr(self):
         """
         Return getter path as str path.
 
         :return: Getter path as str path.
         :rtype: str
         """
-        return ".".join([curr_token.str for curr_token in self.tokens_chain])
+        return ".".join([curr_token.toStr() for curr_token in self.tokens_chain])
 
 
 class IterableToken:
@@ -262,20 +260,7 @@ class IterableToken:
         :return: True if self and other have same path.
         :rtype: bool
         """
-        return self.dict == other.dict
-
-    @property
-    def dict(self):
-        """
-        Return getter token and sub-token as dict path.
-
-        :return: Getter token and sub-token as dict path.
-        :rtype: str
-        """
-        hash = [{"kind": "iterable"}]
-        for curr_token_dict in self.sub_getter.dict:
-            hash.append(curr_token_dict)
-        return hash
+        return self.toDict() == other.toDict()
 
     def get(self, item):
         """
@@ -283,18 +268,41 @@ class IterableToken:
 
         :param item: Object on wich getter is apply.
         :type item: *
-        :return: Values corresponding to getter from item or None if element is undefined.
-        :rtype: list | None
+        :return: Values corresponding to getter from item.
+        :rtype: list
         """
+        if item is None:
+            return list()
         if issubclass(item.__class__, dict):
-            return [self.sub_getter.get(elt_value) for elt_key, elt_value in item.items()]
+            item = [elt_value for elt_key, elt_value in item.items()]
         elif issubclass(item.__class__, list):
-            return [self.sub_getter.get(elt) for elt in item]
+            pass
         else:
             raise Exception("Iteration cannot be used on {}.".format(item))
+        values = list()
+        for elt in item:
+            sub_value = self.sub_getter.get(elt)
+            if isinstance(sub_value, list):
+                # Flatten list and sub list
+                for sub_elt in sub_value:
+                    values.append(sub_elt)
+            else:
+                values.append(sub_value)
+        return values
 
-    @property
-    def str(self):
+    def toDict(self):
+        """
+        Return getter token and sub-token as dict path.
+
+        :return: Getter token and sub-token as dict path.
+        :rtype: str
+        """
+        hash = [{"kind": "iterable"}]
+        for curr_token_dict in self.sub_getter.toDict():
+            hash.append(curr_token_dict)
+        return hash
+
+    def toStr(self):
         """
         Return getter token and sub-token as str path.
 
@@ -302,7 +310,7 @@ class IterableToken:
         :rtype: str
         """
         if len(self.sub_getter.tokens_chain) > 0:
-            return "*.{}".format(self.sub_getter.str)
+            return "*.{}".format(self.sub_getter.toStr())
         return "*"
 
 
@@ -329,17 +337,7 @@ class KeyToken:
         :return: True if self and other have same path.
         :rtype: bool
         """
-        return self.dict == other.dict
-
-    @property
-    def dict(self):
-        """
-        Return getter token as dict.
-
-        :return: Getter token as dict.
-        :rtype: str
-        """
-        return {"kind": "key", "key": self.key}
+        return self.toDict() == other.toDict()
 
     def get(self, item):
         """
@@ -350,6 +348,8 @@ class KeyToken:
         :return: Value corresponding to getter from item or None if element is undefined.
         :rtype: * | None
         """
+        if item is None:
+            return None
         if issubclass(item.__class__, dict):
             return item.get(self.key, None)
         if issubclass(item.__class__, list):
@@ -358,8 +358,16 @@ class KeyToken:
             return getattr(item, self.key, None)
         raise Exception("The key {} cannot be used on item {}.".format(self.key, item))
 
-    @property
-    def str(self):
+    def toDict(self):
+        """
+        Return getter token as dict.
+
+        :return: Getter token as dict.
+        :rtype: str
+        """
+        return {"kind": "key", "key": self.key}
+
+    def toStr(self):
         """
         Return getter token as str.
 
@@ -395,17 +403,7 @@ class MethodToken:
         :return: True if self and other have same path.
         :rtype: bool
         """
-        return self.dict == other.dict
-
-    @property
-    def dict(self):
-        """
-        Return getter token as dict.
-
-        :return: Getter token as dict.
-        :rtype: str
-        """
-        return {"kind": "method", "name": self.name, "arguments": self.args}
+        return self.toDict() == other.toDict()
 
     def get(self, item):
         """
@@ -423,8 +421,19 @@ class MethodToken:
             return method()
         return method(*self.args)
 
-    @property
-    def str(self):
+    def toDict(self):
+        """
+        Return getter token as dict.
+
+        :return: Getter token as dict.
+        :rtype: str
+        """
+        hash = {"kind": "method", "name": self.name}
+        if self.args:
+            hash["arguments"] = self.args
+        return hash
+
+    def toStr(self):
         """
         Return getter token as str.
 

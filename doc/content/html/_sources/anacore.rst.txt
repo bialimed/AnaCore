@@ -73,9 +73,16 @@ anacore.genomicRegion
    :undoc-members:
    :show-inheritance:
 
-anacore.gff
+anacore.getterPath
 ------------------
 
+.. automodule:: anacore.getterPath
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+anacore.gff
+------------------
 .. automodule:: anacore.gff
    :members:
    :undoc-members:

@@ -89,15 +89,24 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-anacore.filters">anacore.filters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#anacore.filters.AbstractAtomicFilter"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.AbstractAtomicFilter.eval"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter.eval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.AbstractAtomicFilter.setGetter"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter.setGetter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.AbstractAtomicFilter.toDict"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter.toDict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#anacore.filters.EmptyIterFilter"><code class="docutils literal notranslate"><span class="pre">EmptyIterFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.EmptyIterFilter.eval"><code class="docutils literal notranslate"><span class="pre">EmptyIterFilter.eval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.EmptyIterFilter.fromDict"><code class="docutils literal notranslate"><span class="pre">EmptyIterFilter.fromDict()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#anacore.filters.Filter"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.aggregator"><code class="docutils literal notranslate"><span class="pre">Filter.aggregator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.eval"><code class="docutils literal notranslate"><span class="pre">Filter.eval()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.fromDict"><code class="docutils literal notranslate"><span class="pre">Filter.fromDict()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.getRecordValue"><code class="docutils literal notranslate"><span class="pre">Filter.getRecordValue()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.setAggregator"><code class="docutils literal notranslate"><span class="pre">Filter.setAggregator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.operator"><code class="docutils literal notranslate"><span class="pre">Filter.operator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.setFct"><code class="docutils literal notranslate"><span class="pre">Filter.setFct()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.setGetter"><code class="docutils literal notranslate"><span class="pre">Filter.setGetter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.setOperator"><code class="docutils literal notranslate"><span class="pre">Filter.setOperator()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.toDict"><code class="docutils literal notranslate"><span class="pre">Filter.toDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.filters.Filter.values"><code class="docutils literal notranslate"><span class="pre">Filter.values</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#anacore.filters.FiltersCombiner"><code class="docutils literal notranslate"><span class="pre">FiltersCombiner</span></code></a><ul>
@@ -181,6 +190,35 @@
 <li class="toctree-l4"><a class="reference internal" href="#anacore.genomicRegion.Transcript.getSubFromRegionPos"><code class="docutils literal notranslate"><span class="pre">Transcript.getSubFromRegionPos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.genomicRegion.Transcript.length"><code class="docutils literal notranslate"><span class="pre">Transcript.length()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.genomicRegion.Transcript.proteins"><code class="docutils literal notranslate"><span class="pre">Transcript.proteins</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-anacore.getterPath">anacore.getterPath</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.GetterPath"><code class="docutils literal notranslate"><span class="pre">GetterPath</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.dict"><code class="docutils literal notranslate"><span class="pre">GetterPath.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.fromDict"><code class="docutils literal notranslate"><span class="pre">GetterPath.fromDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.fromStr"><code class="docutils literal notranslate"><span class="pre">GetterPath.fromStr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.get"><code class="docutils literal notranslate"><span class="pre">GetterPath.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.GetterPath.str"><code class="docutils literal notranslate"><span class="pre">GetterPath.str</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.IterableToken"><code class="docutils literal notranslate"><span class="pre">IterableToken</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.dict"><code class="docutils literal notranslate"><span class="pre">IterableToken.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.get"><code class="docutils literal notranslate"><span class="pre">IterableToken.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.IterableToken.str"><code class="docutils literal notranslate"><span class="pre">IterableToken.str</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.KeyToken"><code class="docutils literal notranslate"><span class="pre">KeyToken</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.dict"><code class="docutils literal notranslate"><span class="pre">KeyToken.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.get"><code class="docutils literal notranslate"><span class="pre">KeyToken.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.KeyToken.str"><code class="docutils literal notranslate"><span class="pre">KeyToken.str</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#anacore.getterPath.MethodToken"><code class="docutils literal notranslate"><span class="pre">MethodToken</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.dict"><code class="docutils literal notranslate"><span class="pre">MethodToken.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.get"><code class="docutils literal notranslate"><span class="pre">MethodToken.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.getterPath.MethodToken.str"><code class="docutils literal notranslate"><span class="pre">MethodToken.str</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -275,6 +313,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#module-anacore.illumina.samplesheet">anacore.illumina.samplesheet</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.illumina.samplesheet.AbstractSampleSheet"><code class="docutils literal notranslate"><span class="pre">AbstractSampleSheet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.illumina.samplesheet.Sample"><code class="docutils literal notranslate"><span class="pre">Sample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.illumina.samplesheet.SampleADS"><code class="docutils literal notranslate"><span class="pre">SampleADS</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.illumina.samplesheet.SampleSheetADS"><code class="docutils literal notranslate"><span class="pre">SampleSheetADS</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.illumina.samplesheet.SampleSheetFactory"><code class="docutils literal notranslate"><span class="pre">SampleSheetFactory</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.illumina.samplesheet.SampleSheetV1"><code class="docutils literal notranslate"><span class="pre">SampleSheetV1</span></code></a></li>
@@ -561,6 +601,27 @@
 <li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFRecord.refEnd"><code class="docutils literal notranslate"><span class="pre">VCFRecord.refEnd()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFRecord.refStart"><code class="docutils literal notranslate"><span class="pre">VCFRecord.refStart()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFRecord.type"><code class="docutils literal notranslate"><span class="pre">VCFRecord.type()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.containsIndel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.containsIndel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.end"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.fastDownstreamed"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fastDownstreamed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.fastStandardize"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fastStandardize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.fromStdRecord"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fromStdRecord()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.getMostDownstream"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getMostDownstream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.getMostUpstream"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getMostUpstream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.getName"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getName()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.isDeletion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isDeletion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.isIndel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isIndel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.isInsAndDel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInsAndDel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.isInsertion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInsertion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.isInversion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInversion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.normalizeSingleAllele"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.normalizeSingleAllele()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.refEnd"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.refEnd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.refStart"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.refStart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.sv_len"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.sv_len</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord.type"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.type()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#anacore.vcf.decodeInfoValue"><code class="docutils literal notranslate"><span class="pre">decodeInfoValue()</span></code></a></li>
@@ -1297,11 +1358,323 @@
 </section>
 <section id="module-anacore.filters">
 <span id="anacore-filters"></span><h2>anacore.filters<a class="headerlink" href="#module-anacore.filters" title="Permalink to this heading"></a></h2>
-<p>Classes and functions for managing and processing complex filters like included filters and combined filters with differents operators.</p>
+<p>Classes and functions for managing and processing complex filters like included
+filters and combined filters with differents operators.</p>
+<dl>
+<dt>Filters can be:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">EmptyIterfilter</span></code>: Filter class to select or exclude empty iterable value
+(see example above: “Filter patients with empty list of group”).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Filter</span></code>: Filter class to select or exclude based on comparison operator
+and reference/threshold value (see example above: “Filter on age”). Operator
+attribute defines the comparison to process bewteen a reference/threshold
+value and the item value (see Filters.setFct).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FiltersCombiner</span></code>: Filter class to manage a combination of filters
+(EmptyIterfilter, Filter and FiltersCombiner). These filters can be combined
+by “and”, “or” or “xor” combination (see example above: ilter patients with
+(group with at least C or age lower than 20) and age != None).</p></li>
+</ul>
+</dd>
+<dt>Get value from object when eval filter:</dt><dd><p>Evaluated value from evaluated object is accessed with a GetterPath as string
+(see <cite>anacore.getterPath.GetterPath</cite>). Briefely, GetterPath describes the
+attributes/key/method to apply on object to get value. This GetterPath is
+provide in <code class="docutils literal notranslate"><span class="pre">getter</span></code> attribute in <code class="docutils literal notranslate"><span class="pre">EmptyIterfilter</span></code> and <code class="docutils literal notranslate"><span class="pre">Filter</span></code>.
+Otherwise all the object is evaluated.</p>
+<dl>
+<dt>Example:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">patient</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;classification&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;clinvar&quot;</span><span class="p">:</span> <span class="s2">&quot;pathogenic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cosmic&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown_significance&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nb">filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="s2">&quot;pathogenic&quot;</span><span class="p">,</span> <span class="s2">&quot;classification.clinvar&quot;</span><span class="p">)</span>
+<span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">patient</span><span class="p">)</span>  <span class="c1"># Return True</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+<dt>Examples:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">patients</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;drug A&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">]},</span>
+    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]},</span>
+    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;drug B&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="p">[]},</span>
+    <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;placebo&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Filter on simple value</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<ul>
+<li><p>Simple filter on age:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [1]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Simple filter select patients where treatment contains drug:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;contains&quot;</span><span class="p">,</span> <span class="s2">&quot;drug&quot;</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [1, 3]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Simple filter exclude patients where treatment contains drug:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;contains&quot;</span><span class="p">,</span> <span class="s2">&quot;drug&quot;</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;exclude&quot;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [2, 4]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Filter on list</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<ul>
+<li><p>Filter patients with empty list of group:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">EmptyIterFilter</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [3, 4]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Filter patients with at least one group equal to B:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">aggregator</span><span class="o">=</span><span class="s2">&quot;nb:1&quot;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [1]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Filter patients with at least one group different to B:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;&lt;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">aggregator</span><span class="o">=</span><span class="s2">&quot;nb:1&quot;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [1, 2]</span>
+</pre></div>
+</div>
+</li>
+<li><p>Filter patients with at all groups different to B:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;&lt;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">aggregator</span><span class="o">=</span><span class="s2">&quot;ratio:1&quot;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [2, 3, 4]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Combine filters</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+<ul>
+<li><p>Filter patients with (group with at least C or age lower than 20) and age != None:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">filter</span> <span class="o">=</span> <span class="n">FiltersCombiner</span><span class="p">(</span>
+  <span class="p">[</span>
+      <span class="n">FiltersCombiner</span><span class="p">(</span>
+          <span class="p">[</span>
+              <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;==&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">,</span> <span class="n">aggregator</span><span class="o">=</span><span class="s2">&quot;nb:1&quot;</span><span class="p">),</span>
+              <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">)</span>
+          <span class="p">],</span>
+          <span class="s2">&quot;or&quot;</span>
+      <span class="p">),</span>
+      <span class="n">Filter</span><span class="p">(</span><span class="s2">&quot;&lt;&gt;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;age&quot;</span><span class="p">)</span>
+  <span class="p">],</span>
+  <span class="s2">&quot;and&quot;</span>
+<span class="p">)</span>
+<span class="p">[</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">patients</span> <span class="k">if</span> <span class="nb">filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">elt</span><span class="p">)]</span>  <span class="c1"># Return: [1, 2]</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</dd>
+<dt>Define filter in JSON file:</dt><dd><p>Filters can be defined in JSON file and load from it.</p>
+<dl>
+<dt>Example of JSON:</dt><dd><div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FiltersCombiner&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FiltersCombiner&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;filters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;aggregator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nb:1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filter&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;getter&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;group&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;operator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;=&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;C&quot;</span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span><span class="nt">&quot;class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filter&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;getter&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;operator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">}</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;operator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;and&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;class&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Filter&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;getter&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;operator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;&gt;&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;operator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;or&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+<dt>Load filters:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">anacore.filters</span> <span class="kn">import</span> <span class="n">filtersFromDict</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;filters.json&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="n">rules</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+    <span class="nb">filter</span> <span class="o">=</span> <span class="n">filtersFromDict</span><span class="p">(</span><span class="n">rules</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.filters.AbstractAtomicFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.filters.</span></span><span class="sig-name descname"><span class="pre">AbstractAtomicFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">getter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'select'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#AbstractAtomicFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.AbstractAtomicFilter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Build and return an instance of AbstractAtomicFilter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>getter</strong> (<em>str</em><em> or </em><em>callable</em>) – The property or the function applied on evaluated item to get the evaluated value. See Filter.setGetter().</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the filter.</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – The description of the filter.</p></li>
+<li><p><strong>action</strong> (<em>str</em>) – Determines if the item fitting the filter are kept (“select”) or rejected (“exclude”) by filter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.filters.AbstractAtomicFilter" title="anacore.filters.AbstractAtomicFilter">filters.AbstractAtomicFilter</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.filters.AbstractAtomicFilter.eval">
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#AbstractAtomicFilter.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.AbstractAtomicFilter.eval" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – The evaluated element.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.filters.AbstractAtomicFilter.setGetter">
+<span class="sig-name descname"><span class="pre">setGetter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#AbstractAtomicFilter.setGetter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.AbstractAtomicFilter.setGetter" title="Permalink to this definition"></a></dt>
+<dd><p>Change the getter used to retrieve evaluated value from evaluated item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new</strong> (<em>str</em>) – [str|callable] The new value of the getter. This value can take 3 forms:
+(1) If the getter is None: the evaluated item himself is used in evaluation.
+(2) If the getter is callable: this is the result of this call applied on item that is evaluated. Use a callable is not compatible with Filter.toDict().
+(3) If the getter is a string: An instance of  GetterPath is created from getter an it is used to get a specific property.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.filters.AbstractAtomicFilter.toDict">
+<span class="sig-name descname"><span class="pre">toDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#AbstractAtomicFilter.toDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.AbstractAtomicFilter.toDict" title="Permalink to this definition"></a></dt>
+<dd><p>Return the dictionary corresponding to the instance of Filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The dictionary corresponding to the instance of Filter.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.filters.EmptyIterFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.filters.</span></span><span class="sig-name descname"><span class="pre">EmptyIterFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">getter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'select'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#EmptyIterFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.EmptyIterFilter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.filters.AbstractAtomicFilter" title="anacore.filters.AbstractAtomicFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractAtomicFilter</span></code></a></p>
+<p>Special filter on empty iterable.</p>
+<dl class="field-list">
+<dt class="field-odd">Code example</dt>
+<dd class="field-odd"><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">patients</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;placebo&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">]},</span>
+    <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;20ng ip&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">]},</span>
+    <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;placebo&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="p">[]},</span>
+    <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;placebo&quot;</span><span class="p">,</span> <span class="s2">&quot;group&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s2">&quot;treatment&quot;</span><span class="p">:</span> <span class="s2">&quot;20ng ip&quot;</span><span class="p">}</span>
+<span class="p">]</span>
+<span class="c1"># Select patient in no group</span>
+<span class="n">wout_gp_filter</span> <span class="o">=</span> <span class="n">EmptyIterFilter</span><span class="p">(</span><span class="s2">&quot;group&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">curr</span> <span class="ow">in</span> <span class="n">patients</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">wout_gp_filter</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">curr</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
+
+<span class="c1"># Result&gt;</span>
+<span class="c1"># {&quot;age&quot;: 11, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;:[]}</span>
+<span class="c1"># {&quot;age&quot;: 18, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;: None}</span>
+<span class="c1"># {&quot;age&quot;: 25, &quot;treatment&quot;: &quot;20ng ip&quot;}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Build and return an instance of AbstractAtomicFilter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>getter</strong> (<em>str</em><em> or </em><em>callable</em>) – The property or the function applied on evaluated item to get the evaluated value. See Filter.setGetter().</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – The name of the filter.</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – The description of the filter.</p></li>
+<li><p><strong>action</strong> (<em>str</em>) – Determines if the item fitting the filter are kept (“select”) or rejected (“exclude”) by filter.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.filters.AbstractAtomicFilter" title="anacore.filters.AbstractAtomicFilter">filters.AbstractAtomicFilter</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.filters.EmptyIterFilter.eval">
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#EmptyIterFilter.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.EmptyIterFilter.eval" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – The evaluated element.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.filters.EmptyIterFilter.fromDict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filter_desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#EmptyIterFilter.fromDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.EmptyIterFilter.fromDict" title="Permalink to this definition"></a></dt>
+<dd><p>Return an instance of EmptyIterFilter corresponding to the parameters in dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filter_desc</strong> – The parameters.</p>
+</dd>
+<dt class="field-even">Type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An instance of Filter corresponding to the parameters in dictionary.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#anacore.filters.EmptyIterFilter" title="anacore.filters.EmptyIterFilter">filters.EmptyIterFilter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="anacore.filters.Filter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.filters.</span></span><span class="sig-name descname"><span class="pre">Filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">getter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ratio:1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'select'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.filters.</span></span><span class="sig-name descname"><span class="pre">Filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">getter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'select'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.filters.AbstractAtomicFilter" title="anacore.filters.AbstractAtomicFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractAtomicFilter</span></code></a></p>
 <p>Manage one filter.</p>
 <dl class="field-list">
 <dt class="field-odd">Code example</dt>
@@ -1338,7 +1711,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> – The value(s) used as threshold/reference in item evaluation.</p></li>
-<li><p><strong>operator</strong> (<em>str</em>) – The operator used in evaluation.</p></li>
+<li><p><strong>operator</strong> (<em>str</em>) – The operator used in evaluation. For authorized values see doctring of Filters.setFct.</p></li>
 <li><p><strong>getter</strong> (<em>str</em><em> or </em><em>callable</em>) – The property or the function applied on evaluated item to get the evaluated value. See Filter.setGetter().</p></li>
 <li><p><strong>aggregator</strong> (<em>str</em>) – The rule used when evaluated value is a list. It determines the number of element in list that must fit the filter.</p></li>
 <li><p><strong>name</strong> (<em>str</em>) – The name of the filter.</p></li>
@@ -1353,6 +1726,20 @@
 <dd class="field-odd"><p><a class="reference internal" href="#anacore.filters.FiltersCombiner" title="anacore.filters.FiltersCombiner">filters.FiltersCombiner</a></p>
 </dd>
 </dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.filters.Filter.aggregator">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aggregator</span></span><a class="headerlink" href="#anacore.filters.Filter.aggregator" title="Permalink to this definition"></a></dt>
+<dd><p>Return rule used when evaluated value is a list. It determines the number of element in list that must fit the filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Return rule used when evaluated value is a list.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.filters.Filter.eval">
 <span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter.eval" title="Permalink to this definition"></a></dt>
@@ -1390,20 +1777,16 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="anacore.filters.Filter.getRecordValue">
-<span class="sig-name descname"><span class="pre">getRecordValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_getter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter.getRecordValue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter.getRecordValue" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="anacore.filters.Filter.setAggregator">
-<span class="sig-name descname"><span class="pre">setAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter.setAggregator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter.setAggregator" title="Permalink to this definition"></a></dt>
-<dd><p>Change the aggregator used to evaluate a list of values.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.filters.Filter.operator">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">operator</span></span><a class="headerlink" href="#anacore.filters.Filter.operator" title="Permalink to this definition"></a></dt>
+<dd><p>Return operator used in evaluation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new</strong> (<em>str</em>) – [str] The new value of the aggregator. The aggregator must have one of the following form: “nb:INT” or “ratio:FLOAT”. The filter is ok if the evaluated list returned by getter has:
-(1) a number of values fitting the Filter superior than INT if aggregator is nb:INT.
-(2) a ratio of values fitting the Filter superior than FLOAT if aggregator is ratio:FLOAT.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Operator used in evaluation.</p>
+</dd>
+<dt class="field-even">Type</dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1412,43 +1795,37 @@
 <dt class="sig sig-object py" id="anacore.filters.Filter.setFct">
 <span class="sig-name descname"><span class="pre">setFct</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter.setFct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter.setFct" title="Permalink to this definition"></a></dt>
 <dd><p>Set the evaluation function according to the operator.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="anacore.filters.Filter.setGetter">
-<span class="sig-name descname"><span class="pre">setGetter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter.setGetter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter.setGetter" title="Permalink to this definition"></a></dt>
-<dd><p>Change the getter used to retrieve evaluated value from evaluated item.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new</strong> (<em>str</em>) – [str|callable] The new value of the getter. This value can take 3 forms:
-(1) If the getter is None: the evaluated item himself is used in evaluation.
-(2) If the getter is callable: this is the result of this call applied on item that is evaluated. Use a callable is not compatible with Filter.toDict().
-(3) If the getter is a string: the getter is parsed by getRecordValue to retrieve a specific property.</p>
+<dl class="simple">
+<dt>Authorized operators:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">=</span></code>, <code class="docutils literal notranslate"><span class="pre">==</span></code>, <code class="docutils literal notranslate"><span class="pre">eq</span></code>: Equality on reference/threshold and value return by evaluated item.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">!=</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">ne</span></code>: Inequality on reference/threshold and value return by evaluated item.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">le</span></code>: Value is lower or equal than reference/threshold. Return False if value is None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">ge</span></code>: Value is greater or equal than reference/threshold. Return False if value is None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">lt</span></code>:  Value is lower than reference/threshold. Return False if value is None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">gt</span></code>:  Value is greater than reference/threshold. Return False if value is None.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">in</span></code>: Value is in list of authorized values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">in</span></code>: Value is not in list of excluded values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">contains</span></code>: Value to string contains the reference.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">substring</span> <span class="pre">of</span></code>: Value to string is a substring of the reference.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">empty</span></code>: Value is None or is an empty string.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="anacore.filters.Filter.setOperator">
-<span class="sig-name descname"><span class="pre">setOperator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter.setOperator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter.setOperator" title="Permalink to this definition"></a></dt>
-<dd><p>Change the operator used in evaluation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>new</strong> (<em>str</em>) – The new value of the operator.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="anacore.filters.Filter.toDict">
-<span class="sig-name descname"><span class="pre">toDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/filters.html#Filter.toDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.filters.Filter.toDict" title="Permalink to this definition"></a></dt>
-<dd><p>Return the dictionary corresponding to the instance of Filter.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.filters.Filter.values">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#anacore.filters.Filter.values" title="Permalink to this definition"></a></dt>
+<dd><p>Return value(s) used as threshold/reference in item evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The dictionary corresponding to the instance of Filter.</p>
+<dd class="field-odd"><p>Value(s) used as threshold/reference in item evaluation.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
+<dd class="field-even"><p><ul class="simple">
+<li></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1493,9 +1870,6 @@
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><a class="reference internal" href="#anacore.filters.FiltersCombiner" title="anacore.filters.FiltersCombiner">filters.FiltersCombiner</a></p>
 </dd>
-<dt class="field-even">Todo</dt>
-<dd class="field-even"><p>xor.</p>
-</dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.filters.FiltersCombiner.eval">
@@ -1536,7 +1910,7 @@
 <dd class="field-even"><p>The filter corresponding to descriptor.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#anacore.filters.Filter" title="anacore.filters.Filter">filters.Filter</a> or <a class="reference internal" href="#anacore.filters.FiltersCombiner" title="anacore.filters.FiltersCombiner">filters.FiltersCombiner</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.filters.EmptyIterFilter" title="anacore.filters.EmptyIterFilter">filters.EmptyIterFilter</a> or <a class="reference internal" href="#anacore.filters.Filter" title="anacore.filters.Filter">filters.Filter</a> or <a class="reference internal" href="#anacore.filters.FiltersCombiner" title="anacore.filters.FiltersCombiner">filters.FiltersCombiner</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1556,15 +1930,15 @@
 
 <span class="n">spl_name</span> <span class="o">=</span> <span class="s2">&quot;spl1&quot;</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Breakpoint_1</span><span class="se">\t</span><span class="s2">Gene_brkpt_1</span><span class="se">\t</span><span class="s2">Breakpoint_2</span><span class="se">\t</span><span class="s2">Gene_brkpt_2</span><span class="se">\t</span><span class="s2">Spanning_pair</span><span class="se">\t</span><span class="s2">Split_read&quot;</span><span class="p">)</span>
-<span class="k">with</span> <span class="n">FusionFileReader</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;test.tsv&quot;</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="n">spl_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+<span class="k">with</span> <span class="n">FusionFileReader</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="s2">&quot;test.tsv&quot;</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="n">spl_name</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="s2">&quot;ANN&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">frist</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
             <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;SYMBOL&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">first</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;ANN&quot;</span><span class="p">]]),</span>
             <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
             <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">elt</span><span class="p">[</span><span class="s2">&quot;SYMBOL&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">second</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;ANN&quot;</span><span class="p">]]),</span>
-            <span class="n">first</span><span class="o">.</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;spl_name&quot;</span><span class="p">][</span><span class="s2">&quot;PR&quot;</span><span class="p">],</span>
-            <span class="n">first</span><span class="o">.</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;spl_name&quot;</span><span class="p">][</span><span class="s2">&quot;SR&quot;</span><span class="p">],</span>
+            <span class="n">first</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">spl_name</span><span class="p">][</span><span class="s2">&quot;PR&quot;</span><span class="p">],</span>
+            <span class="n">first</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">spl_name</span><span class="p">][</span><span class="s2">&quot;SR&quot;</span><span class="p">],</span>
             <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
@@ -1591,9 +1965,9 @@
     <span class="k">for</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span>
             <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">frist</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
-            <span class="n">first</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">first</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">pos</span><span class="p">),</span>
-            <span class="n">second</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">second</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
             <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
@@ -2589,6 +2963,425 @@ with mode “i”.</p>
 </dd></dl>
 
 </section>
+<section id="module-anacore.getterPath">
+<span id="anacore-getterpath"></span><h2>anacore.getterPath<a class="headerlink" href="#module-anacore.getterPath" title="Permalink to this heading"></a></h2>
+<p>Classes to get specific deep property value from complex objects based on
+path (as dict or string).</p>
+<p><strong>GetterPath as string:</strong></p>
+<blockquote>
+<div><p>It is composed of accessors and level separators. Levels are separated by <code class="docutils literal notranslate"><span class="pre">.</span></code>. Accessors can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">attr_name</span></code> for property in object or key in dict or index in list.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">method_name()</span></code> for method in object. If you need arguments in method use GetterPath as dict.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> for iteration in each item of an iterable.</p></li>
+</ul>
+</div></blockquote>
+<dl>
+<dt>Examples:</dt><dd><dl>
+<dt>Case 1:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">object</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;pathogen&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">}</span>
+<span class="p">}</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;class.status&quot;</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: &quot;pathogen&quot;</span>
+</pre></div>
+</div>
+</dd>
+<dt>Case 2:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">object</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;shapes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">Square</span> <span class="p">(</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">Rectange</span> <span class="p">(</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span><span class="mi">5</span><span class="p">)</span><span class="o">&gt;</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;shapes.*.getArea()&quot;</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: [4, 10]</span>
+</pre></div>
+</div>
+</dd>
+<dt>Case 3:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">object</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;stable&quot;</span><span class="p">,</span> <span class="s2">&quot;scores&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]},</span>
+    <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;stable&quot;</span><span class="p">,</span> <span class="s2">&quot;scores&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]}</span>
+<span class="p">]</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;*.scores.0&quot;</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: [0.9, 0.7]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>GetterPath as dict:</strong></p>
+<blockquote>
+<div><p>Is a list of accessors ordered by increasing depth. Accessors can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>{“kind”: “key”, “key”: attr_name}</cite> for property in object or key in dict or index in list.</p></li>
+<li><p><cite>{“kind”: “method”, “name”: method_name, “arguments”: args_list}</cite> for method in object.</p></li>
+<li><p><cite>{“kind”: “iterable”}</cite> for iteration in each item of an iterable.</p></li>
+</ul>
+</div></blockquote>
+<dl>
+<dt>Examples:</dt><dd><dl>
+<dt>Case 1:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">object</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;pathogen&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">}</span>
+<span class="p">}</span>
+<span class="n">path</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;class&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;status&quot;</span><span class="p">}</span>
+<span class="p">]</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: &quot;pathogen&quot;</span>
+</pre></div>
+</div>
+</dd>
+<dt>Case 2:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">object</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;layer&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">&quot;shapes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">Square</span> <span class="p">(</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">Rectange</span> <span class="p">(</span><span class="n">l</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="n">w</span><span class="p">:</span><span class="mi">5</span><span class="p">)</span><span class="o">&gt;</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">path</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;shapes&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;iterate&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;scaleUp&quot;</span><span class="p">,</span> <span class="s2">&quot;arguments&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">]},</span>
+<span class="p">]</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: [&lt;Square (l:4, w:4)&gt;, &lt;Rectange (l:4, w:10)&gt;]</span>
+</pre></div>
+</div>
+</dd>
+<dt>Case 3:</dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">object</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;stable&quot;</span><span class="p">,</span> <span class="s2">&quot;scores&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]},</span>
+    <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;stable&quot;</span><span class="p">,</span> <span class="s2">&quot;scores&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]}</span>
+<span class="p">]</span>
+<span class="n">path</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;iterate&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;scores&quot;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;key&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+<span class="p">]</span>
+<span class="n">getter</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">getter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>  <span class="c1"># Return: [0.9, 0.7]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.getterPath.</span></span><span class="sig-name descname"><span class="pre">GetterPath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokens_chain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#GetterPath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.GetterPath" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to manage an accessor on deep property value from complex objects based on a path (as dict or string).</p>
+<p>Build and return an instance of GetterPath.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>tokens_chain</strong> (<em>list</em>) – Accessors tokens for sub-levels.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.GetterPath" title="anacore.getterPath.GetterPath">getterPath.GetterPath</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.GetterPath.dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter path as dict path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter path as dictpath.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.fromDict">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#GetterPath.fromDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.GetterPath.fromDict" title="Permalink to this definition"></a></dt>
+<dd><p>Return GetterPath instance corresponding to path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>list</em>) – List to define accessor on deep property value from complex objects.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>GetterPath instance corresponding to path.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.GetterPath" title="anacore.getterPath.GetterPath">GetterPath</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.fromStr">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromStr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#GetterPath.fromStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.GetterPath.fromStr" title="Permalink to this definition"></a></dt>
+<dd><p>Return GetterPath instance corresponding to path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – String to define accessor on deep property value from complex objects.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>GetterPath instance corresponding to path.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.GetterPath" title="anacore.getterPath.GetterPath">GetterPath</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#GetterPath.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.GetterPath.get" title="Permalink to this definition"></a></dt>
+<dd><p>Return value corresponding to getter from item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – Object on wich getter is apply.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value corresponding to getter from item or None if element is undefined.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul>
+<li><div class="line-block">
+<div class="line">None</div>
+</div>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.GetterPath.str">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.GetterPath.str" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter path as str path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter path as str path.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.getterPath.IterableToken">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.getterPath.</span></span><span class="sig-name descname"><span class="pre">IterableToken</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sub_getter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#IterableToken"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.IterableToken" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Getter to manage sub-level getters on each item of an iterable.</p>
+<p>Build and return an instance of IterableToken.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sub_getter</strong> (<a class="reference internal" href="#anacore.getterPath.GetterPath" title="anacore.getterPath.GetterPath"><em>GetterPath</em></a>) – Sub-levels accessors from iteation point to deeper accessor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.IterableToken" title="anacore.getterPath.IterableToken">getterPath.IterableToken</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.IterableToken.dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token and sub-token as dict path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token and sub-token as dict path.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#IterableToken.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.IterableToken.get" title="Permalink to this definition"></a></dt>
+<dd><p>Return value corresponding to getter from item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – Object on wich getter is apply.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values corresponding to getter from item or None if element is undefined.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.IterableToken.str">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.IterableToken.str" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token and sub-token as str path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token and sub-token as str path.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.getterPath.KeyToken">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.getterPath.</span></span><span class="sig-name descname"><span class="pre">KeyToken</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#KeyToken"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.KeyToken" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Getter to manage get by property in object or key in dict or index in list.</p>
+<p>Build and return an instance of KeyToken.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – Property name or key name or index.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.KeyToken" title="anacore.getterPath.KeyToken">getterPath.KeyToken</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.KeyToken.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.KeyToken.dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token as dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token as dict.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.KeyToken.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#KeyToken.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.KeyToken.get" title="Permalink to this definition"></a></dt>
+<dd><p>Return value corresponding to getter from item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – Object on wich getter is apply.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value corresponding to getter from item or None if element is undefined.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul>
+<li><div class="line-block">
+<div class="line">None</div>
+</div>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.KeyToken.str">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.KeyToken.str" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token as str.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token as str.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.getterPath.MethodToken">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.getterPath.</span></span><span class="sig-name descname"><span class="pre">MethodToken</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#MethodToken"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.MethodToken" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Getter to manage get by method in object.</p>
+<p>Build and return an instance of MethodToken.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – method name.</p></li>
+<li><p><strong>args</strong> (<em>list</em>) – List of values for method arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.getterPath.MethodToken" title="anacore.getterPath.MethodToken">getterPath.MethodToken</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.MethodToken.dict">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#anacore.getterPath.MethodToken.dict" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token as dict.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token as dict.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.getterPath.MethodToken.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/getterPath.html#MethodToken.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.getterPath.MethodToken.get" title="Permalink to this definition"></a></dt>
+<dd><p>Return value corresponding to getter from item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> – Object on wich getter is apply.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value corresponding to getter from item or None if element is undefined.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul>
+<li><div class="line-block">
+<div class="line">None</div>
+</div>
+</li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.getterPath.MethodToken.str">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">str</span></span><a class="headerlink" href="#anacore.getterPath.MethodToken.str" title="Permalink to this definition"></a></dt>
+<dd><p>Return getter token as str.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Getter token as str.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-anacore.gff">
 <span id="anacore-gff"></span><h2>anacore.gff<a class="headerlink" href="#module-anacore.gff" title="Permalink to this heading"></a></h2>
 <p>Classes and functions for reading/writing/processing GFF files.</p>
@@ -3437,10 +4230,10 @@ mismatches.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.illumina.demultiplex.base.AbstractDemultStat.samplesCounts">
 <span class="sig-name descname"><span class="pre">samplesCounts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/demultiplex/base.html#AbstractDemultStat.samplesCounts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.demultiplex.base.AbstractDemultStat.samplesCounts" title="Permalink to this definition"></a></dt>
-<dd><p>Return number of reads by samples ID.</p>
+<dd><p>Return number of clusters by samples ID.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Number of reads by samples ID.</p>
+<dd class="field-odd"><p>Number of clusters by samples ID.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>dict</p>
@@ -3465,10 +4258,10 @@ mismatches.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.illumina.demultiplex.base.AbstractDemultStat.undeterminedCounts">
 <span class="sig-name descname"><span class="pre">undeterminedCounts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/demultiplex/base.html#AbstractDemultStat.undeterminedCounts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.demultiplex.base.AbstractDemultStat.undeterminedCounts" title="Permalink to this definition"></a></dt>
-<dd><p>Return number of reads by undetermined UDI.</p>
+<dd><p>Return number of clusters by undetermined UDI.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Number of reads by undetermined UDI.</p>
+<dd class="field-odd"><p>Number of clusters by undetermined UDI.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>dict</p>
@@ -3479,13 +4272,13 @@ mismatches.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="anacore.illumina.demultiplex.base.AbstractDemultStat.unexpectedBarcodes">
 <span class="sig-name descname"><span class="pre">unexpectedBarcodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skipped_spl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/demultiplex/base.html#AbstractDemultStat.unexpectedBarcodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.demultiplex.base.AbstractDemultStat.unexpectedBarcodes" title="Permalink to this definition"></a></dt>
-<dd><p>Return UDI with a number of reads greate than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).</p>
+<dd><p>Return UDI with a number of clusters greater than or equal to the smallest sample. Cluster without UDI are excluded (detected by repeat of only A or G in index).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>skipped_spl</strong> (<em>set</em>) – List of samples excluded from the smallest sample finding. This can be used to exclude negative controls without reads.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>UDI with a number of reads greate than or equal to the smallest sample: {“udi”: count, …}.</p>
+<dd class="field-even"><p>UDI with a number of clusters greater than or equal to the smallest sample: {“udi”: count, …}.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>dict</p>
@@ -3853,19 +4646,19 @@ mismatches.</p>
 <p>Classes and functions for reading Illumina’s samplesheet.</p>
 <dl class="field-list">
 <dt class="field-odd">Code example</dt>
-<dd class="field-odd"><p>List samples from the samplesheet</p>
+<dd class="field-odd"><p>List samples and index from the samplesheet</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.illumina.samplesheet</span> <span class="kn">import</span> <span class="n">SampleSheetFactory</span>
 
 <span class="n">samplesheet</span> <span class="o">=</span> <span class="n">SampleSheetFactory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;my_run/SampleSheet.csv&quot;</span><span class="p">):</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Samples:&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">samplesheet</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Library_Basename&quot;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">spl</span><span class="o">.</span><span class="n">library_basename</span><span class="p">,</span> <span class="n">spl</span><span class="o">.</span><span class="n">barcodes</span><span class="p">)</span>
 
 <span class="c1"># Result&gt;</span>
 <span class="c1"># Samples:</span>
-<span class="c1">#   sapmleA_S1</span>
-<span class="c1">#   sampleB_S2</span>
-<span class="c1">#   sampleC_S3</span>
+<span class="c1">#  sapmleA_S1 {&quot;index&quot;: &quot;TATCTTCAGC&quot;, &quot;index2&quot;: &quot;CGAATATTGG&quot;}</span>
+<span class="c1">#  sampleB_S2 {&quot;index&quot;: &quot;TGCACGGATA&quot;, &quot;index2&quot;: &quot;GTTGTCTGCG&quot;}</span>
+<span class="c1">#  sampleC_S3 {&quot;index&quot;: &quot;GGTTGATAGA&quot;, &quot;index2&quot;: &quot;TCTGCTCCGA&quot;}</span>
 </pre></div>
 </div>
 </dd>
@@ -3907,6 +4700,155 @@ mismatches.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.Sample">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.illumina.samplesheet.</span></span><span class="sig-name descname"><span class="pre">Sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sheet_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">barcodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#Sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.Sample" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class to manage a sample from sample sheet. One sample could represent several libraries if they are the same sample ID.</p>
+<p>Build and return an instance of Sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sheet_index</strong> (<em>int</em>) – Index of sample in samplesheet (start from 1). This element is used for library name: &lt;splID&gt;_S&lt;splSheetIndex&gt;.</p></li>
+<li><p><strong>id</strong> (<em>str</em>) – Sample ID (example: splA).</p></li>
+<li><p><strong>barcodes</strong> (<em>dict</em>) – Sample molecular index used in demultiplex. Example:
+* For single-end: {“index”: “ATGC”}
+* For paired-end: {“index”: “ATGC”, “index2”: “CGCA”}
+* For paired-end with skipped index 1: {“index”: “”, “index2”: “CGCA”}</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – Sample description.</p></li>
+<li><p><strong>metadata</strong> (<em>dict</em>) – Additional data on sample (example: {“panel”: “Enrich_Soli-Tumor_V3”, “project”: “Rimo”}). These data come from additional column in section Data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.illumina.samplesheet.Sample" title="anacore.illumina.samplesheet.Sample">Sample</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.Sample.basename">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">basename</span></span><a class="headerlink" href="#anacore.illumina.samplesheet.Sample.basename" title="Permalink to this definition"></a></dt>
+<dd><p>Return the start of file basename corresponding to the sample (example: splA).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Sample basename.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.Sample.library_basename">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">library_basename</span></span><a class="headerlink" href="#anacore.illumina.samplesheet.Sample.library_basename" title="Permalink to this definition"></a></dt>
+<dd><p>Return the start of file basename corresponding to the library (example: splA_S3).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Library basename.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.Sample.toDict">
+<span class="sig-name descname"><span class="pre">toDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#Sample.toDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.Sample.toDict" title="Permalink to this definition"></a></dt>
+<dd><p>Return dict representation of the instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dict representation of the instance.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleADS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.illumina.samplesheet.</span></span><span class="sig-name descname"><span class="pre">SampleADS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sheet_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">barcodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#SampleADS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.SampleADS" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.illumina.samplesheet.Sample" title="anacore.illumina.samplesheet.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sample</span></code></a></p>
+<p>Class to manage an amplicon double strand sample from sample sheet. One sample could represent several libraries if they are the same sample ID.</p>
+<p>Build and return an instance of Sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sheet_index</strong> (<em>int</em>) – Index of sample in samplesheet (start from 1). This element is used for library name: &lt;splID&gt;_S&lt;splSheetIndex&gt;.</p></li>
+<li><p><strong>id</strong> (<em>str</em>) – Sample ID (example: splA).</p></li>
+<li><p><strong>barcodes</strong> (<em>dict</em>) – Sample molecular index used in demultiplex. Example:
+* For single-end: {“index”: “ATGC”}
+* For paired-end: {“index”: “ATGC”, “index2”: “CGCA”}
+* For paired-end with skipped index 1: {“index”: “”, “index2”: “CGCA”}</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – Sample description.</p></li>
+<li><p><strong>metadata</strong> (<em>dict</em>) – Additional data on sample (example: {“panel”: “Enrich_Soli-Tumor_V3”, “project”: “Rimo”}). These data come from additional column in section Data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.illumina.samplesheet.Sample" title="anacore.illumina.samplesheet.Sample">Sample</a></p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleADS.basename">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">basename</span></span><a class="headerlink" href="#anacore.illumina.samplesheet.SampleADS.basename" title="Permalink to this definition"></a></dt>
+<dd><p>Return the start of file basename corresponding to the sample (example: splA).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Sample basename.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleADS.findSplFiles">
+<span class="sig-name descname"><span class="pre">findSplFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'library'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#SampleADS.findSplFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.SampleADS.findSplFiles" title="Permalink to this definition"></a></dt>
+<dd><p>Return paths to files in directory corresponding to the subject.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The path to the directory where the files names are evaluated.</p></li>
+<li><p><strong>end_pattern</strong> (<em>str</em>) – File pattern added at the end of sample basename or library basename to select files.</p></li>
+<li><p><strong>subject</strong> (<em>str</em>) – “library” or “sample” to select files corresponding to libraries or corresponding to samples.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Paths of the corresponding files.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleADS.setSplFiles">
+<span class="sig-name descname"><span class="pre">setSplFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'library'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#SampleADS.setSplFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.SampleADS.setSplFiles" title="Permalink to this definition"></a></dt>
+<dd><p>Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag</strong> (<em>str</em>) – The attribute used in self.sample to store the files paths.</p></li>
+<li><p><strong>directory</strong> (<em>str</em>) – The path to the directory where the files names are evaluated.</p></li>
+<li><p><strong>end_pattern</strong> (<em>str</em>) – File pattern added at the end of each sample basename or library basename to select files.</p></li>
+<li><p><strong>subject</strong> (<em>str</em>) – “library” or “sample” to select files corresponding to libraries or corresponding to samples.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleSheetADS">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.illumina.samplesheet.</span></span><span class="sig-name descname"><span class="pre">SampleSheetADS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#SampleSheetADS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.SampleSheetADS" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#anacore.illumina.samplesheet.SampleSheetV1" title="anacore.illumina.samplesheet.SampleSheetV1"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleSheetV1</span></code></a></p>
@@ -3935,38 +4877,18 @@ mismatches.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleSheetADS.findSplFiles">
-<span class="sig-name descname"><span class="pre">findSplFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'library'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#SampleSheetADS.findSplFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.SampleSheetADS.findSplFiles" title="Permalink to this definition"></a></dt>
-<dd><p>Return by sample name or library name all the files in directory corresponding to the subject.</p>
+<dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleSheetADS.isValid">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isValid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#SampleSheetADS.isValid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.SampleSheetADS.isValid" title="Permalink to this definition"></a></dt>
+<dd><p>Return true if the file is in SamplSheet Amplicon Double Strand format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<em>str</em>) – The path to the directory where the files names are evaluated.</p></li>
-<li><p><strong>end_pattern</strong> (<em>str</em>) – File pattern added at the end of each sample basename or library basename to select files.</p></li>
-<li><p><strong>subject</strong> (<em>str</em>) – “library” or “sample” to select files corresponding to libraries or corresponding to samples.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>filepath</strong> (<em>str</em>) – The file path.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>By subject the paths of the corresponding files.</p>
+<dd class="field-even"><p>True if the file is in SamplSheet Amplicon Double Strand format.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="anacore.illumina.samplesheet.SampleSheetADS.setSplFiles">
-<span class="sig-name descname"><span class="pre">setSplFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'library'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/illumina/samplesheet.html#SampleSheetADS.setSplFiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.illumina.samplesheet.SampleSheetADS.setSplFiles" title="Permalink to this definition"></a></dt>
-<dd><p>Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tag</strong> (<em>str</em>) – The attribute used in self.sample to store the files paths.</p></li>
-<li><p><strong>directory</strong> (<em>str</em>) – The path to the directory where the files names are evaluated.</p></li>
-<li><p><strong>end_pattern</strong> (<em>str</em>) – File pattern added at the end of each sample basename or library basename to select files.</p></li>
-<li><p><strong>subject</strong> (<em>str</em>) – “library” or “sample” to select files corresponding to libraries or corresponding to samples.</p></li>
-</ul>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -8228,6 +9150,339 @@ chr1  10  AAAT  TG =&gt; returns 10</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>‘snp’ or ‘indel’ or ‘variation’.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">anacore.vcf.</span></span><span class="sig-name descname"><span class="pre">VCFSymbAltRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">knownSNPId</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refAllele</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">altAlleles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qual</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pFilter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pFormat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">VCFRecord</span></code></a></p>
+<p>Class to manage a variant record with symbolic alternative like &lt;DUP&gt;, &lt;DEL&gt;, etc.</p>
+<p>Build and return an instance of VCFRecord.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>region</strong> (<em>str</em>) – Identifier of the reference region/contig/chromosome containing the variant (example: chr3).</p></li>
+<li><p><strong>position</strong> (<em>int</em>) – Start position for the variant (1-based).</p></li>
+<li><p><strong>knownSNPId</strong> (<em>str</em>) – Semi-colon separated list of unique identifiers where available (example rs numbers from dbSNP).</p></li>
+<li><p><strong>refAllele</strong> (<em>char</em>) – Reference allele.</p></li>
+<li><p><strong>altAlleles</strong> (<em>list</em>) – Alternatives alleles.</p></li>
+<li><p><strong>qual</strong> (<em>int</em>) – Variant quality.</p></li>
+<li><p><strong>pFilter</strong> (<em>list</em>) – List of filter tags. It can be in three possible states: (1) if no filter was applied, the field contains an empty list (“.” in VCF file); (2) if filters were applied but the record passes filters, the field should contain [“PASS”]; (3) if filters were applied and the record does not pass filters, the field should contain [“filter_name”, …].</p></li>
+<li><p><strong>info</strong> (<em>dict</em>) – Variant additionnal information.</p></li>
+<li><p><strong>pFormat</strong> (<em>list</em>) – List of format tags.</p></li>
+<li><p><strong>samples</strong> (<em>dict</em>) – Variant format information by sample.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord">VCFRecord</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.containsIndel">
+<span class="sig-name descname"><span class="pre">containsIndel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.containsIndel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.containsIndel" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the variant contains an allele corresponding to an insertion or a deletion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the variant contains an allele corresponding to an insertion or a deletion.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end</span></span><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.end" title="Permalink to this definition"></a></dt>
+<dd><p>Return end position of the variant (1-based).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>End position of the variant (1-based). This position correspond to the last reference nt implicated in variant. For example, in DUP, the position correspond to last duplicated nt on reference.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int | None</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.fastDownstreamed">
+<span class="sig-name descname"><span class="pre">fastDownstreamed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.fastDownstreamed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.fastDownstreamed" title="Permalink to this definition"></a></dt>
+<dd><p>Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq_handler</strong> (<a class="reference internal" href="#anacore.sequenceIO.IdxFastaIO" title="anacore.sequenceIO.IdxFastaIO"><em>anacore.sequenceIO.IdxFastaIO</em></a>) – File handle to the reference sequences file.</p></li>
+<li><p><strong>padding</strong> (<em>int</em>) – Number of nucleotids to inspect after variant. Upstream movement is limited to this number of nucleotids.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The simplified record moved to the most downstream postition.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord">anacore.vcf.VCFRecord</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.fastStandardize">
+<span class="sig-name descname"><span class="pre">fastStandardize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq_handler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.fastStandardize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.fastStandardize" title="Permalink to this definition"></a></dt>
+<dd><p>Standardize record (move to the most upstream position and remove unecessary nucleotids). This standardization concerns only POS, REF and ALT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq_handler</strong> (<a class="reference internal" href="#anacore.sequenceIO.IdxFastaIO" title="anacore.sequenceIO.IdxFastaIO"><em>anacore.sequenceIO.IdxFastaIO</em></a>) – File handle to the reference sequences file.</p></li>
+<li><p><strong>padding</strong> (<em>int</em>) – Number of nucleotids to inspect before variant. Upstream movement is limited to this number of nucleotids.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.fromStdRecord">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromStdRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.fromStdRecord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.fromStdRecord" title="Permalink to this definition"></a></dt>
+<dd><p>Build and return an instance of VCFSymbAltRecord from VCFRecord.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>record</strong> (<a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord"><em>VCFRecord</em></a>) – Initial VCFRecord.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The new instance.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.vcf.VCFSymbAltRecord" title="anacore.vcf.VCFSymbAltRecord">VCFSymbAltRecord</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.getMostDownstream">
+<span class="sig-name descname"><span class="pre">getMostDownstream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.getMostDownstream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.getMostDownstream" title="Permalink to this definition"></a></dt>
+<dd><p>Return the most downstream variant that can have the same alternative sequence of the instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ref_seq</strong> (<em>str</em>) – The reference sequence where the variant has been identified (example: the sequence of the chromosome).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The normalized most downstream variant (see normalizeSingleAllele).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord">VCFRecord</a></p>
+</dd>
+<dt class="field-even">Warnings</dt>
+<dd class="field-even"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.getMostUpstream">
+<span class="sig-name descname"><span class="pre">getMostUpstream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.getMostUpstream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.getMostUpstream" title="Permalink to this definition"></a></dt>
+<dd><p>Return the most upstream variant that can have the same alternative sequence of the instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ref_seq</strong> (<em>str</em>) – The reference sequence where the variant has been identified (example: the sequence of the chromosome).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The normalized most upstream variant (see normalizeSingleAllele).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#anacore.vcf.VCFRecord" title="anacore.vcf.VCFRecord">VCFRecord</a></p>
+</dd>
+<dt class="field-even">Warnings</dt>
+<dd class="field-even"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.getName">
+<span class="sig-name descname"><span class="pre">getName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.getName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.getName" title="Permalink to this definition"></a></dt>
+<dd><p>Return an unique name to identified the variant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The variant name.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This name can be not uniq for two insertions on same position and with same length.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.isDeletion">
+<span class="sig-name descname"><span class="pre">isDeletion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.isDeletion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.isDeletion" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the variant is a deletion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the variant is a deletion.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.isIndel">
+<span class="sig-name descname"><span class="pre">isIndel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.isIndel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.isIndel" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the variant is an insertion or a deletion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the variant is an insertion or a deletion.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.isInsAndDel">
+<span class="sig-name descname"><span class="pre">isInsAndDel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.isInsAndDel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.isInsAndDel" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the variant is an insertion and also a deletion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the variant is an insertion and also a deletion.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.isInsertion">
+<span class="sig-name descname"><span class="pre">isInsertion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.isInsertion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.isInsertion" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the variant is an insertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the variant is an insertion.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.isInversion">
+<span class="sig-name descname"><span class="pre">isInversion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.isInversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.isInversion" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the variant is a deletion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>True if the variant is a deletion.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.normalizeSingleAllele">
+<span class="sig-name descname"><span class="pre">normalizeSingleAllele</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.normalizeSingleAllele"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.normalizeSingleAllele" title="Permalink to this definition"></a></dt>
+<dd><p>Replace empty allele by the empty_marker and reduce the alternative and reference allele to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.refEnd">
+<span class="sig-name descname"><span class="pre">refEnd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.refEnd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.refEnd" title="Permalink to this definition"></a></dt>
+<dd><p>Return the last position on reference affected by the alternative allele (1-based).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The last position on reference affected by the alternative allele (1-based). For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float | None</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.refStart">
+<span class="sig-name descname"><span class="pre">refStart</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.refStart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.refStart" title="Permalink to this definition"></a></dt>
+<dd><p>Return the first position on reference affected by the alternative allele (1-based).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The first position on reference affected by the alternative allele (1-based). For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float | None</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.sv_len">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sv_len</span></span><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.sv_len" title="Permalink to this definition"></a></dt>
+<dd><p>Return difference in length between REF and ALT alleles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Difference in length between REF and ALT alleles. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int | None</p>
+</dd>
+<dt class="field-odd">Warnings</dt>
+<dd class="field-odd"><p>This method can only be used on record with only one alternative allele.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="anacore.vcf.VCFSymbAltRecord.type">
+<span class="sig-name descname"><span class="pre">type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/anacore/vcf.html#VCFSymbAltRecord.type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#anacore.vcf.VCFSymbAltRecord.type" title="Permalink to this definition"></a></dt>
+<dd><p>Return the variant type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>‘indel’ or ‘inv’.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>str</p>

@@ -1,71 +1,34 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.filters &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> AnaCore
-          
-
-          
-            
             <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,180 +36,373 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.filters</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.filters</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.filters</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Classes and functions for managing and processing complex filters like included filters and combined filters with differents operators.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;Classes and functions for managing and processing complex filters like included</span>
+<span class="sd">filters and combined filters with differents operators.</span>
+
+<span class="sd">Filters can be:</span>
+<span class="sd">  * ``EmptyIterfilter``: Filter class to select or exclude empty iterable value</span>
+<span class="sd">    (see example above: &quot;Filter patients with empty list of group&quot;).</span>
+<span class="sd">  * ``Filter``: Filter class to select or exclude based on comparison operator</span>
+<span class="sd">    and reference/threshold value (see example above: &quot;Filter on age&quot;). Operator</span>
+<span class="sd">    attribute defines the comparison to process bewteen a reference/threshold</span>
+<span class="sd">    value and the item value (see Filters.setFct).</span>
+<span class="sd">  * ``FiltersCombiner``: Filter class to manage a combination of filters</span>
+<span class="sd">    (EmptyIterfilter, Filter and FiltersCombiner). These filters can be combined</span>
+<span class="sd">    by &quot;and&quot;, &quot;or&quot; or &quot;xor&quot; combination (see example above: ilter patients with</span>
+<span class="sd">    (group with at least C or age lower than 20) and age != None).</span>
+
+<span class="sd">Get value from object when eval filter:</span>
+<span class="sd">  Evaluated value from evaluated object is accessed with a GetterPath as string</span>
+<span class="sd">  (see `anacore.getterPath.GetterPath`). Briefely, GetterPath describes the</span>
+<span class="sd">  attributes/key/method to apply on object to get value. This GetterPath is</span>
+<span class="sd">  provide in ``getter`` attribute in ``EmptyIterfilter`` and ``Filter``.</span>
+<span class="sd">  Otherwise all the object is evaluated.</span>
+<span class="sd">  </span>
+<span class="sd">  Example:</span>
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      patient = {</span>
+<span class="sd">          &quot;id&quot;: 1,</span>
+<span class="sd">          &quot;classification&quot;: {</span>
+<span class="sd">              &quot;clinvar&quot;: &quot;pathogenic&quot;,</span>
+<span class="sd">              &quot;cosmic&quot;: &quot;unknown_significance&quot;</span>
+<span class="sd">          }</span>
+<span class="sd">      }</span>
+<span class="sd">      </span>
+<span class="sd">      filter = Filter(&quot;=&quot;, &quot;pathogenic&quot;, &quot;classification.clinvar&quot;)</span>
+<span class="sd">      filter.eval(patient)  # Return True</span>
+
+<span class="sd">Examples:</span>
+<span class="sd">  .. highlight:: python</span>
+<span class="sd">  .. code-block:: python</span>
+
+<span class="sd">    patients = [</span>
+<span class="sd">        {&quot;id&quot;: 1, &quot;age&quot;: 12, &quot;treatment&quot;: &quot;drug A&quot;, &quot;group&quot;: [&quot;A&quot;, &quot;B&quot;]},</span>
+<span class="sd">        {&quot;id&quot;: 2, &quot;age&quot;: 32, &quot;treatment&quot;: None, &quot;group&quot;: [&quot;C&quot;]},</span>
+<span class="sd">        {&quot;id&quot;: 3, &quot;age&quot;: 64, &quot;treatment&quot;: &quot;drug B&quot;, &quot;group&quot;: []},</span>
+<span class="sd">        {&quot;id&quot;: 4, &quot;age&quot;: None, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;: None}</span>
+<span class="sd">    ]</span>
+
+<span class="sd">  :Filter on simple value:</span>
+
+<span class="sd">  * Simple filter on age:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = Filter(&quot;&lt;&quot;, 18, &quot;age&quot;)</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [1]</span>
+
+<span class="sd">  * Simple filter select patients where treatment contains drug:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = Filter(&quot;contains&quot;, &quot;drug&quot;, &quot;treatment&quot;)</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [1, 3]</span>
+
+<span class="sd">  * Simple filter exclude patients where treatment contains drug:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = Filter(&quot;contains&quot;, &quot;drug&quot;, &quot;treatment&quot;, action=&quot;exclude&quot;)</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [2, 4]</span>
+
+<span class="sd">  :Filter on list:</span>
+
+<span class="sd">  * Filter patients with empty list of group:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = EmptyIterFilter(&quot;group&quot;)</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [3, 4]</span>
+
+
+<span class="sd">  * Filter patients with at least one group equal to B:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = Filter(&quot;=&quot;, &quot;B&quot;, &quot;group&quot;, aggregator=&quot;nb:1&quot;)</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [1]</span>
+
+<span class="sd">  * Filter patients with at least one group different to B:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = Filter(&quot;&lt;&gt;&quot;, &quot;B&quot;, &quot;group&quot;, aggregator=&quot;nb:1&quot;)</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [1, 2]</span>
+
+<span class="sd">  * Filter patients with at all groups different to B:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = Filter(&quot;&lt;&gt;&quot;, &quot;B&quot;, &quot;group&quot;, aggregator=&quot;ratio:1&quot;)</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [2, 3, 4]</span>
+
+<span class="sd">  :Combine filters:</span>
+
+<span class="sd">  * Filter patients with (group with at least C or age lower than 20) and age != None:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      filter = FiltersCombiner(</span>
+<span class="sd">        [</span>
+<span class="sd">            FiltersCombiner(</span>
+<span class="sd">                [</span>
+<span class="sd">                    Filter(&quot;==&quot;, &quot;C&quot;, &quot;group&quot;, aggregator=&quot;nb:1&quot;),</span>
+<span class="sd">                    Filter(&quot;&lt;&quot;, 20, &quot;age&quot;)</span>
+<span class="sd">                ],</span>
+<span class="sd">                &quot;or&quot;</span>
+<span class="sd">            ),</span>
+<span class="sd">            Filter(&quot;&lt;&gt;&quot;, None, &quot;age&quot;)</span>
+<span class="sd">        ],</span>
+<span class="sd">        &quot;and&quot;</span>
+<span class="sd">      )</span>
+<span class="sd">      [elt[&quot;id&quot;] for elt in patients if filter.eval(elt)]  # Return: [1, 2]</span>
+
+<span class="sd">Define filter in JSON file:</span>
+<span class="sd">  Filters can be defined in JSON file and load from it.</span>
+
+<span class="sd">  Example of JSON:</span>
+<span class="sd">    .. highlight:: json</span>
+<span class="sd">    .. code-block:: json</span>
+
+<span class="sd">      {</span>
+<span class="sd">          &quot;class&quot;: &quot;FiltersCombiner&quot;,</span>
+<span class="sd">          &quot;filters&quot;: [</span>
+<span class="sd">              {</span>
+<span class="sd">                  &quot;class&quot;: &quot;FiltersCombiner&quot;,</span>
+<span class="sd">                  &quot;filters&quot;: [</span>
+<span class="sd">                      {&quot;aggregator&quot;: &quot;nb:1&quot;, &quot;class&quot;: &quot;Filter&quot;, &quot;getter&quot;: &quot;group&quot;, &quot;operator&quot;: &quot;=&quot;, &quot;values&quot;: &quot;C&quot;},</span>
+<span class="sd">                      {&quot;class&quot;: &quot;Filter&quot;, &quot;getter&quot;: &quot;age&quot;, &quot;operator&quot;: &quot;&lt;&quot;, &quot;values&quot;: 20}</span>
+<span class="sd">                  ],</span>
+<span class="sd">                  &quot;operator&quot;: &quot;and&quot;</span>
+<span class="sd">              },</span>
+<span class="sd">              {</span>
+<span class="sd">                  &quot;class&quot;: &quot;Filter&quot;,</span>
+<span class="sd">                  &quot;getter&quot;: &quot;age&quot;,</span>
+<span class="sd">                  &quot;operator&quot;: &quot;&lt;&gt;&quot;,</span>
+<span class="sd">                  &quot;values&quot;: null</span>
+<span class="sd">              },</span>
+<span class="sd">          ],</span>
+<span class="sd">          &quot;operator&quot;: &quot;or&quot;</span>
+<span class="sd">      }</span>
+
+<span class="sd">  Load filters:</span>
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">      import json</span>
+<span class="sd">      from anacore.filters import filtersFromDict</span>
+<span class="sd">    </span>
+<span class="sd">      with open(&quot;filters.json&quot;) as reader:</span>
+<span class="sd">          rules = json.load(reader)</span>
+<span class="sd">          filter = filtersFromDict(rules)</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.4.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
+<span class="kn">from</span> <span class="nn">anacore.getterPath</span> <span class="kn">import</span> <span class="n">GetterPath</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
 
-<div class="viewcode-block" id="FiltersCombiner"><a class="viewcode-back" href="../../anacore.html#anacore.filters.FiltersCombiner">[docs]</a><span class="k">class</span> <span class="nc">FiltersCombiner</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Wrap as an unique filter a combination of several Filter and FiltersCombiner.</span>
+<div class="viewcode-block" id="AbstractAtomicFilter"><a class="viewcode-back" href="../../anacore.html#anacore.filters.AbstractAtomicFilter">[docs]</a><span class="k">class</span> <span class="nc">AbstractAtomicFilter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;select&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of AbstractAtomicFilter.</span>
+
+<span class="sd">        :param getter: The property or the function applied on evaluated item to get the evaluated value. See Filter.setGetter().</span>
+<span class="sd">        :type getter: str or callable</span>
+<span class="sd">        :param name: The name of the filter.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param description: The description of the filter.</span>
+<span class="sd">        :type description: str</span>
+<span class="sd">        :param action: Determines if the item fitting the filter are kept (&quot;select&quot;) or rejected (&quot;exclude&quot;) by filter.</span>
+<span class="sd">        :type action: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: filters.AbstractAtomicFilter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="s2">&quot;exclude&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The action &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid. An action must be &quot;select&quot; or &quot;exclude&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGetter</span><span class="p">(</span><span class="n">getter</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if self and other have same filtering behaviour.</span>
+
+<span class="sd">        :param other: Filter compared to self.</span>
+<span class="sd">        :type other: AbstractAtomicFilter</span>
+<span class="sd">        :return: True if self and other have same filtering behaviour.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">self_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Fct&quot;</span><span class="p">))}</span>
+        <span class="n">other_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Fct&quot;</span><span class="p">))}</span>
+        <span class="k">return</span> <span class="n">self_dict</span> <span class="o">==</span> <span class="n">other_dict</span>
+
+<div class="viewcode-block" id="AbstractAtomicFilter.eval"><a class="viewcode-back" href="../../anacore.html#anacore.filters.AbstractAtomicFilter.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
+
+<span class="sd">        :param item: The evaluated element.</span>
+<span class="sd">        :type item: *</span>
+<span class="sd">        :return: True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="AbstractAtomicFilter.setGetter"><a class="viewcode-back" href="../../anacore.html#anacore.filters.AbstractAtomicFilter.setGetter">[docs]</a>    <span class="k">def</span> <span class="nf">setGetter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the getter used to retrieve evaluated value from evaluated item.</span>
+
+<span class="sd">        :param new: [str|callable] The new value of the getter. This value can take 3 forms:</span>
+<span class="sd">          (1) If the getter is None: the evaluated item himself is used in evaluation.</span>
+<span class="sd">          (2) If the getter is callable: this is the result of this call applied on item that is evaluated. Use a callable is not compatible with Filter.toDict().</span>
+<span class="sd">          (3) If the getter is a string: An instance of  GetterPath is created from getter an it is used to get a specific property.</span>
+<span class="sd">        :type new: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getter</span> <span class="o">=</span> <span class="n">new</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">new</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span> <span class="o">=</span> <span class="n">new</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span> <span class="o">=</span> <span class="n">GetterPath</span><span class="o">.</span><span class="n">fromStr</span><span class="p">(</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="n">get</span></div>
+
+<div class="viewcode-block" id="AbstractAtomicFilter.toDict"><a class="viewcode-back" href="../../anacore.html#anacore.filters.AbstractAtomicFilter.toDict">[docs]</a>    <span class="k">def</span> <span class="nf">toDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the dictionary corresponding to the instance of Filter.</span>
+
+<span class="sd">        :return: The dictionary corresponding to the instance of Filter.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+                <span class="n">attr_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">attr_value</span><span class="p">):</span>
+                    <span class="n">obj_dict</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_value</span>
+        <span class="k">return</span> <span class="n">obj_dict</span></div></div>
+
+
+<div class="viewcode-block" id="EmptyIterFilter"><a class="viewcode-back" href="../../anacore.html#anacore.filters.EmptyIterFilter">[docs]</a><span class="k">class</span> <span class="nc">EmptyIterFilter</span><span class="p">(</span><span class="n">AbstractAtomicFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Special filter on empty iterable.</span>
 
 <span class="sd">    :Code example:</span>
 <span class="sd">        .. highlight:: python</span>
 <span class="sd">        .. code-block:: python</span>
 
-<span class="sd">            ...</span>
-<span class="sd">            age_filter = Filter(&quot;&lt;&quot;, 10, &quot;age&quot;)</span>
-<span class="sd">            treatment_filter = filter(&quot;in&quot;, [&quot;20ng&quot;, &quot;20ng + pc&quot;], &quot;treatment&quot;)</span>
-<span class="sd">            filters = FiltersCombiner(</span>
-<span class="sd">                [age_filter, treatment_filter],</span>
-<span class="sd">                &quot;and&quot;,</span>
-<span class="sd">                &quot;young_with_treatment&quot;</span>
-<span class="sd">            )</span>
+<span class="sd">            patients = [</span>
+<span class="sd">                {&quot;age&quot;: 8, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;: [&quot;A&quot;, &quot;B&quot;]},</span>
+<span class="sd">                {&quot;age&quot;: 9, &quot;treatment&quot;: &quot;20ng ip&quot;, &quot;group&quot;: [&quot;C&quot;]},</span>
+<span class="sd">                {&quot;age&quot;: 11, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;: []},</span>
+<span class="sd">                {&quot;age&quot;: 18, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;: None},</span>
+<span class="sd">                {&quot;age&quot;: 25, &quot;treatment&quot;: &quot;20ng ip&quot;}</span>
+<span class="sd">            ]</span>
+<span class="sd">            # Select patient in no group</span>
+<span class="sd">            wout_gp_filter = EmptyIterFilter(&quot;group&quot;)</span>
 <span class="sd">            for curr in patients:</span>
-<span class="sd">                if filters.eval(curr):</span>
+<span class="sd">                if wout_gp_filter.eval(curr):</span>
 <span class="sd">                    print(curr)</span>
+
+<span class="sd">            # Result&gt;</span>
+<span class="sd">            # {&quot;age&quot;: 11, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;:[]}</span>
+<span class="sd">            # {&quot;age&quot;: 18, &quot;treatment&quot;: &quot;placebo&quot;, &quot;group&quot;: None}</span>
+<span class="sd">            # {&quot;age&quot;: 25, &quot;treatment&quot;: &quot;20ng ip&quot;}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">operator</span><span class="o">=</span><span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Build and return an instance of FiltersCombiner.</span>
-
-<span class="sd">        :param filters: List of Filter and FiltersCombiner evaluated by the instance.</span>
-<span class="sd">        :type filters: list</span>
-<span class="sd">        :param operator: The type of evaluation processed between filters. With &quot;and&quot; all the filters must have an valid evaluation, with &quot;or&quot; at least one filter must have an valid evaluation, with &quot;xor&quot; only one filter must have an valid evaluation.</span>
-<span class="sd">        :type operator: str</span>
-<span class="sd">        :param name: The name of the filter.</span>
-<span class="sd">        :type name: str</span>
-<span class="sd">        :param description: The description of the filter.</span>
-<span class="sd">        :type description: str</span>
-<span class="sd">        :return: The new instance.</span>
-<span class="sd">        :rtype: filters.FiltersCombiner</span>
-<span class="sd">        :todo: xor.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">operator</span>
-        <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="s2">&quot;or&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s1">&#39;The operator &quot;</span><span class="si">{}</span><span class="s1">&quot; is not valid for </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">operator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-
-<div class="viewcode-block" id="FiltersCombiner.eval"><a class="viewcode-back" href="../../anacore.html#anacore.filters.FiltersCombiner.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return True if the item fits the filters regarding to the operator.</span>
+<div class="viewcode-block" id="EmptyIterFilter.eval"><a class="viewcode-back" href="../../anacore.html#anacore.filters.EmptyIterFilter.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
 
 <span class="sd">        :param item: The evaluated element.</span>
-<span class="sd">        :type: *</span>
-<span class="sd">        :return: True if the item fits the filters regarding to the operator.</span>
+<span class="sd">        :type item: *</span>
+<span class="sd">        :return: True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
 <span class="sd">        :rtype: bool</span>
-<span class="sd">        :todo: xor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">nb_filters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">nb_filters</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">while</span><span class="p">(</span><span class="n">idx</span> <span class="o">&lt;</span> <span class="n">nb_filters</span> <span class="ow">and</span> <span class="n">is_valid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
-                        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;and&quot;</span><span class="p">:</span>
-                        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">is_valid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;and&quot;</span><span class="p">:</span>  <span class="c1"># The operator is AND and no false has been encountered</span>
-                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>  <span class="c1"># The operator is OR and no true has been encountered</span>
-                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">return</span> <span class="n">is_valid</span></div></div>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Get value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="c1"># Eval item</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Missing item is equivalent to empty</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">iter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Value inspected by filter is not iterable in item </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Value inspected by filter is string in item </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="c1"># Apply action</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;exclude&quot;</span><span class="p">:</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">is_valid</span>
+        <span class="c1"># Return</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="EmptyIterFilter.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.filters.EmptyIterFilter.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">filter_desc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an instance of EmptyIterFilter corresponding to the parameters in dictionary.</span>
+
+<span class="sd">        :param filter_desc: The parameters.</span>
+<span class="sd">        :type: dict</span>
+<span class="sd">        :return: An instance of Filter corresponding to the parameters in dictionary.</span>
+<span class="sd">        :rtype: filters.EmptyIterFilter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cleaned_desc</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">filter_desc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;class&quot;</span> <span class="ow">in</span> <span class="n">cleaned_desc</span><span class="p">:</span>
+            <span class="n">cleaned_desc</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EmptyIterFilter</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_desc</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="Filter"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter">[docs]</a><span class="k">class</span> <span class="nc">Filter</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Filter"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter">[docs]</a><span class="k">class</span> <span class="nc">Filter</span><span class="p">(</span><span class="n">AbstractAtomicFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Manage one filter.</span>
 
 <span class="sd">    :Code example:</span>
@@ -279,13 +435,13 @@
 <span class="sd">                    print(curr)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">aggregator</span><span class="o">=</span><span class="s2">&quot;ratio:1&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;select&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">getter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">aggregator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;select&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of FiltersCombiner.</span>
 
 <span class="sd">        :param values: The value(s) used as threshold/reference in item evaluation.</span>
 <span class="sd">        :type values: *</span>
-<span class="sd">        :param operator: The operator used in evaluation.</span>
+<span class="sd">        :param operator: The operator used in evaluation. For authorized values see doctring of Filters.setFct.</span>
 <span class="sd">        :type operator: str</span>
 <span class="sd">        :param getter: The property or the function applied on evaluated item to get the evaluated value. See Filter.setGetter().</span>
 <span class="sd">        :type getter: str or callable</span>
@@ -300,19 +456,83 @@
 <span class="sd">        :return: The new instance.</span>
 <span class="sd">        :rtype: filters.FiltersCombiner</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">action</span>
-        <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="s2">&quot;exclude&quot;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The action &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid. An action must be &quot;select&quot; or &quot;exclude&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setAggregator</span><span class="p">(</span><span class="n">aggregator</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setGetter</span><span class="p">(</span><span class="n">getter</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setOperator</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aggregator</span> <span class="o">=</span> <span class="n">aggregator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">operator</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">aggregator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return rule used when evaluated value is a list. It determines the number of element in list that must fit the filter.</span>
+
+<span class="sd">        :return: Return rule used when evaluated value is a list.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregator</span>
+
+    <span class="nd">@aggregator</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">aggregator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the aggregator used to evaluate a list of values.</span>
+
+<span class="sd">        :param new: [str] The new value of the aggregator. The aggregator must have one of the following form: &quot;nb:INT&quot; or &quot;ratio:FLOAT&quot;. The filter is ok if the evaluated list returned by getter has:</span>
+<span class="sd">          (1) a number of values fitting the Filter superior than INT if aggregator is nb:INT.</span>
+<span class="sd">          (2) a ratio of values fitting the Filter superior than FLOAT if aggregator is ratio:FLOAT.</span>
+<span class="sd">        :type new: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_aggregator</span> <span class="o">=</span> <span class="n">new</span>  <span class="c1"># nb:X, ratio:X.X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatorEvalFct</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">agg_type</span><span class="p">,</span> <span class="n">agg_threshold</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s2">&quot;nb&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">agg_threshold</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value </span><span class="si">{}</span><span class="s2"> in aggregator </span><span class="si">{}</span><span class="s2"> is not a positive integer.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">agg_threshold</span><span class="p">,</span> <span class="n">new</span><span class="p">))</span>
+                <span class="n">int_agg_threshold</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">agg_threshold</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatorEvalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">nb</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="n">nb</span> <span class="o">&gt;=</span> <span class="n">int_agg_threshold</span>
+            <span class="k">elif</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s2">&quot;ratio&quot;</span><span class="p">:</span>
+                <span class="n">float_agg_threshold</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">float_agg_threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">agg_threshold</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value </span><span class="si">{}</span><span class="s2"> in aggregator </span><span class="si">{}</span><span class="s2"> is not a float.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">agg_threshold</span><span class="p">,</span> <span class="n">new</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">float_agg_threshold</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">float_agg_threshold</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The value </span><span class="si">{}</span><span class="s2"> in aggregator </span><span class="si">{}</span><span class="s2"> is not between 0.0 and 1.0.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">agg_threshold</span><span class="p">,</span> <span class="n">new</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatorEvalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">nb</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="n">nb</span> <span class="o">&gt;=</span> <span class="n">float_agg_threshold</span> <span class="o">*</span> <span class="n">length</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;The aggregator &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid. An aggregator must start with &quot;nb&quot; or &quot;ratio&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">new</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Filter.eval"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
+
+<span class="sd">        :param item: The evaluated element.</span>
+<span class="sd">        :type item: *</span>
+<span class="sd">        :return: True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Eval item</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># None is like empty</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">is_valid_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span><span class="p">(</span><span class="n">curr_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">curr_val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatorEvalFct</span><span class="p">(</span><span class="n">is_valid_list</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)):</span>
+                <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="c1"># Apply action</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;exclude&quot;</span><span class="p">:</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">is_valid</span>
+        <span class="c1"># Return</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
 
 <div class="viewcode-block" id="Filter.fromDict"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="n">filter_desc</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an instance of Filter corresponding to the parameters in dictionary.</span>
 
 <span class="sd">        :param filter_desc: The parameters.</span>
@@ -325,190 +545,236 @@
             <span class="n">cleaned_desc</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Filter</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_desc</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Filter.toDict"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.toDict">[docs]</a>    <span class="k">def</span> <span class="nf">toDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the dictionary corresponding to the instance of Filter.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">operator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return operator used in evaluation.</span>
 
-<span class="sd">        :return: The dictionary corresponding to the instance of Filter.</span>
-<span class="sd">        :rtype: dict</span>
+<span class="sd">        :return: Operator used in evaluation.</span>
+<span class="sd">        :type: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">obj_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;Filter&quot;</span><span class="p">}</span>
-        <span class="k">for</span> <span class="n">attr_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
-                <span class="n">attr_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">attr_name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">attr_value</span><span class="p">):</span>
-                    <span class="n">obj_dict</span><span class="p">[</span><span class="n">attr_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_value</span>
-        <span class="k">return</span> <span class="n">obj_dict</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="n">self_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Fct&quot;</span><span class="p">))}</span>
-        <span class="n">other_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Fct&quot;</span><span class="p">))}</span>
-        <span class="k">return</span> <span class="n">self_dict</span> <span class="o">==</span> <span class="n">other_dict</span>
-
-<div class="viewcode-block" id="Filter.setOperator"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.setOperator">[docs]</a>    <span class="k">def</span> <span class="nf">setOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+    <span class="nd">@operator</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">operator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Change the operator used in evaluation.</span>
 
 <span class="sd">        :param new: The new value of the operator.</span>
 <span class="sd">        :type new: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">new</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setFct</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="Filter.setAggregator"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.setAggregator">[docs]</a>    <span class="k">def</span> <span class="nf">setAggregator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Change the aggregator used to evaluate a list of values.</span>
-
-<span class="sd">        :param new: [str] The new value of the aggregator. The aggregator must have one of the following form: &quot;nb:INT&quot; or &quot;ratio:FLOAT&quot;. The filter is ok if the evaluated list returned by getter has:</span>
-<span class="sd">          (1) a number of values fitting the Filter superior than INT if aggregator is nb:INT.</span>
-<span class="sd">          (2) a ratio of values fitting the Filter superior than FLOAT if aggregator is ratio:FLOAT.</span>
-<span class="sd">        :type new: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">aggregator</span> <span class="o">=</span> <span class="n">new</span>  <span class="c1"># nb:X, ratio:X.X</span>
-        <span class="n">agg_type</span><span class="p">,</span> <span class="n">agg_threshold</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s2">&quot;nb&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatorEvalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">nb</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="n">nb</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">agg_threshold</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s2">&quot;ratio&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatorEvalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">nb</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="n">nb</span> <span class="o">&gt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">agg_threshold</span><span class="p">)</span> <span class="o">*</span> <span class="n">length</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;The aggregator &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid. An aggregator must start with &quot;nb&quot; or &quot;ratio&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">new</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="Filter.setGetter"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.setGetter">[docs]</a>    <span class="k">def</span> <span class="nf">setGetter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Change the getter used to retrieve evaluated value from evaluated item.</span>
-
-<span class="sd">        :param new: [str|callable] The new value of the getter. This value can take 3 forms:</span>
-<span class="sd">          (1) If the getter is None: the evaluated item himself is used in evaluation.</span>
-<span class="sd">          (2) If the getter is callable: this is the result of this call applied on item that is evaluated. Use a callable is not compatible with Filter.toDict().</span>
-<span class="sd">          (3) If the getter is a string: the getter is parsed by getRecordValue to retrieve a specific property.</span>
-<span class="sd">        :type new: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">getter</span> <span class="o">=</span> <span class="n">new</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">def</span> <span class="nf">returnItem</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">item</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span> <span class="o">=</span> <span class="n">returnItem</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">new</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span> <span class="o">=</span> <span class="n">new</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRecordValue</span></div>
-
-<div class="viewcode-block" id="Filter.getRecordValue"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.getRecordValue">[docs]</a>    <span class="k">def</span> <span class="nf">getRecordValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">,</span> <span class="n">_getter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="n">_getter</span>
-        <span class="k">if</span> <span class="n">_getter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getter</span>
-        <span class="n">sub_key</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
-            <span class="n">key</span><span class="p">,</span> <span class="n">sub_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># Get value from current key</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">record</span>
-        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;m:&quot;</span><span class="p">):</span>
-            <span class="n">method_name</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
-            <span class="n">method_param</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="s2">&quot;(&quot;</span> <span class="ow">in</span> <span class="n">method_name</span><span class="p">:</span>  <span class="c1"># Parameters must be numeric or string</span>
-                <span class="k">if</span> <span class="n">method_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;()&quot;</span><span class="p">):</span>
-                    <span class="n">method_name</span> <span class="o">=</span> <span class="n">method_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">method_name</span><span class="p">,</span> <span class="n">method_param</span> <span class="o">=</span> <span class="n">method_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">method_param</span> <span class="o">=</span> <span class="p">[</span><span class="n">elt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">method_param</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)]</span>
-            <span class="n">method</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">method_param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">method</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">method_param</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;i:&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;i:&quot;</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
-                <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                    <span class="n">new_value</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">elt_key</span><span class="p">,</span> <span class="n">elt_value</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="n">new_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elt_value</span><span class="p">)</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">new_value</span>
-                <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                    <span class="n">new_value</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">curr_elt</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                        <span class="n">new_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_elt</span><span class="p">)</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">new_value</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The iteration has been ask on non iterable object </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">2</span><span class="p">:]))</span>
-        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
-        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="c1"># Get value from current sub-key</span>
-        <span class="k">if</span> <span class="n">sub_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;i:&quot;</span><span class="p">):</span>
-                <span class="n">new_value</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                <span class="k">for</span> <span class="n">curr_elt</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                    <span class="n">new_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getRecordValue</span><span class="p">(</span><span class="n">curr_elt</span><span class="p">,</span> <span class="n">sub_key</span><span class="p">))</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">new_value</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRecordValue</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sub_key</span><span class="p">)</span>
-        <span class="c1"># return</span>
-        <span class="k">return</span> <span class="n">value</span></div>
-
-<div class="viewcode-block" id="Filter.eval"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
-
-<span class="sd">        :param item: The evaluated element.</span>
-<span class="sd">        :type item: *</span>
-<span class="sd">        :return: True if the item fits the filter and action is select or if the item does not fit the filter and action is exclude.</span>
-<span class="sd">        :rtype: bool</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="c1"># Eval item</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getterFct</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">is_valid_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span><span class="p">(</span><span class="n">curr_val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">curr_val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregatorEvalFct</span><span class="p">(</span><span class="n">is_valid_list</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)):</span>
-                <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">is_valid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-        <span class="c1"># Apply action</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;exclude&quot;</span><span class="p">:</span>
-            <span class="n">is_valid</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">is_valid</span>
-        <span class="c1"># Return</span>
-        <span class="k">return</span> <span class="n">is_valid</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span> <span class="o">=</span> <span class="n">new</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFct</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Filter.setFct"><a class="viewcode-back" href="../../anacore.html#anacore.filters.Filter.setFct">[docs]</a>    <span class="k">def</span> <span class="nf">setFct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set the evaluation function according to the operator.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the evaluation function according to the operator.</span>
+
+<span class="sd">        Authorized operators:</span>
+<span class="sd">            * ``=``, ``==``, ``eq``: Equality on reference/threshold and value return by evaluated item.</span>
+<span class="sd">            * ``!=``, ``&lt;&gt;``, ``ne``: Inequality on reference/threshold and value return by evaluated item.</span>
+<span class="sd">            * ``&lt;=``, ``le``: Value is lower or equal than reference/threshold. Return False if value is None.</span>
+<span class="sd">            * ``&gt;=``, ``ge``: Value is greater or equal than reference/threshold. Return False if value is None.</span>
+<span class="sd">            * ``&lt;``, ``lt``:  Value is lower than reference/threshold. Return False if value is None.</span>
+<span class="sd">            * ``&gt;``, ``gt``:  Value is greater than reference/threshold. Return False if value is None.</span>
+<span class="sd">            * ``in``: Value is in list of authorized values.</span>
+<span class="sd">            * ``not in``: Value is not in list of excluded values.</span>
+<span class="sd">            * ``contains``: Value to string contains the reference.</span>
+<span class="sd">            * ``substring of``: Value to string is a substring of the reference.</span>
+<span class="sd">            * ``empty``: Value is None or is an empty string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="s2">&quot;==&quot;</span><span class="p">,</span> <span class="s2">&quot;eq&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="o">==</span> <span class="n">ref</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="o">==</span> <span class="n">ref</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="o">==</span> <span class="n">ref</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">bool</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;!=&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;ne&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">ref</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">ref</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">bool</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">ref</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&lt;=&quot;</span><span class="p">,</span> <span class="s2">&quot;le&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">val</span> <span class="o">&lt;=</span> <span class="n">ref</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span> <span class="s2">&quot;ge&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">val</span> <span class="o">&gt;=</span> <span class="n">ref</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;lt&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="n">ref</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;gt&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">val</span> <span class="o">&gt;</span> <span class="n">ref</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span>  <span class="c1"># Compare to list of accepted values. Filter group in [&quot;A&quot;, &quot;B&quot;] with data={&quot;group&quot;: &quot;A&quot;}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;__contains__&quot;</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be empty in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">ref</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;contains&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;contains&quot;</span><span class="p">:</span>  <span class="c1"># Value as string contains reference</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;The reference value in filter must be a string for contains operator. If you want to apply &quot;contains&quot; with several possibility you must declare n filters and combine them with FiltersCombiner.&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">val</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;not in&quot;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Reference value in filter must be a string for &quot;contains&quot; operator. If you want to apply &quot;contains&quot; with several possibility you must declare n filters and combine them with FiltersCombiner.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ref</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;substring of&quot;</span><span class="p">:</span>  <span class="c1"># Value as string is substring of reference</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Reference value in filter must be a string for &quot;substring of&quot; operator.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ref</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;not in&quot;</span><span class="p">:</span>  <span class="c1"># Compare to list of rejected values. Filter group not in [&quot;A&quot;, &quot;B&quot;] with data={&quot;group&quot;: &quot;C&quot;}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="s2">&quot;__contains__&quot;</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be &#39;</span><span class="si">{}</span><span class="s2">&#39; in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter cannot be empty in &#39;</span><span class="si">{}</span><span class="s2">&#39; comparison.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ref</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;empty&quot;</span><span class="p">:</span>  <span class="c1"># Values is missing or is an empty string</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Reference value in filter with operator &#39;empty&#39; must be None.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evalFct</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;The operator &quot;</span><span class="si">{}</span><span class="s1">&quot; is not implemented.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span></div></div>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;The operator &quot;</span><span class="si">{}</span><span class="s1">&quot; is not implemented.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return value(s) used as threshold/reference in item evaluation.</span>
+
+<span class="sd">        :return: Value(s) used as threshold/reference in item evaluation.</span>
+<span class="sd">        :rtype: *</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span>
+
+    <span class="nd">@values</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change reference values used in evaluation.</span>
+
+<span class="sd">        :param new: The new value for values.</span>
+<span class="sd">        :type new: *</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">new</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFct</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FiltersCombiner"><a class="viewcode-back" href="../../anacore.html#anacore.filters.FiltersCombiner">[docs]</a><span class="k">class</span> <span class="nc">FiltersCombiner</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrap as an unique filter a combination of several Filter and FiltersCombiner.</span>
+
+<span class="sd">    :Code example:</span>
+<span class="sd">        .. highlight:: python</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            ...</span>
+<span class="sd">            age_filter = Filter(&quot;&lt;&quot;, 10, &quot;age&quot;)</span>
+<span class="sd">            treatment_filter = filter(&quot;in&quot;, [&quot;20ng&quot;, &quot;20ng + pc&quot;], &quot;treatment&quot;)</span>
+<span class="sd">            filters = FiltersCombiner(</span>
+<span class="sd">                [age_filter, treatment_filter],</span>
+<span class="sd">                &quot;and&quot;,</span>
+<span class="sd">                &quot;young_with_treatment&quot;</span>
+<span class="sd">            )</span>
+<span class="sd">            for curr in patients:</span>
+<span class="sd">                if filters.eval(curr):</span>
+<span class="sd">                    print(curr)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">operator</span><span class="o">=</span><span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of FiltersCombiner.</span>
+
+<span class="sd">        :param filters: List of Filter and FiltersCombiner evaluated by the instance.</span>
+<span class="sd">        :type filters: list</span>
+<span class="sd">        :param operator: The type of evaluation processed between filters. With &quot;and&quot; all the filters must have an valid evaluation, with &quot;or&quot; at least one filter must have an valid evaluation, with &quot;xor&quot; only one filter must have an valid evaluation.</span>
+<span class="sd">        :type operator: str</span>
+<span class="sd">        :param name: The name of the filter.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param description: The description of the filter.</span>
+<span class="sd">        :type description: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: filters.FiltersCombiner</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="n">operator</span>
+        <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;and&quot;</span><span class="p">,</span> <span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;xor&quot;</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;The operator &quot;</span><span class="si">{}</span><span class="s1">&quot; is not valid for </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">operator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if self and other have same filtering behaviour and name and description.</span>
+
+<span class="sd">        :param other: Filter compared to self.</span>
+<span class="sd">        :type other: ComplexFilters</span>
+<span class="sd">        :return: True if self and other have same filtering behaviour and name and description.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">self_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">elt</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">FiltersCombiner</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">elt</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+        <span class="p">}</span>
+        <span class="n">other_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">filters</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">elt</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">FiltersCombiner</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">elt</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="n">other</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">other</span><span class="o">.</span><span class="n">description</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">self_dict</span> <span class="o">==</span> <span class="n">other_dict</span>
+
+<div class="viewcode-block" id="FiltersCombiner.eval"><a class="viewcode-back" href="../../anacore.html#anacore.filters.FiltersCombiner.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the item fits the filters regarding to the operator.</span>
+
+<span class="sd">        :param item: The evaluated element.</span>
+<span class="sd">        :type: *</span>
+<span class="sd">        :return: True if the item fits the filters regarding to the operator.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :todo: xor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">nb_filters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nb_filters</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">nb_true</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span><span class="p">(</span><span class="n">idx</span> <span class="o">&lt;</span> <span class="n">nb_filters</span> <span class="ow">and</span> <span class="n">is_valid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>  <span class="c1"># Is valid</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;or&quot;</span><span class="p">:</span>
+                        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">nb_true</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># Is invalid</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;and&quot;</span><span class="p">:</span>
+                        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;xor&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nb_true</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">is_valid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Without value to test</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;and&quot;</span><span class="p">:</span>  <span class="c1"># The operator is AND and no false has been encountered</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># The operator is OR or XOR and no true has been encountered</span>
+                    <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div></div>
 
 
 <div class="viewcode-block" id="filtersFromDict"><a class="viewcode-back" href="../../anacore.html#anacore.filters.filtersFromDict">[docs]</a><span class="k">def</span> <span class="nf">filtersFromDict</span><span class="p">(</span><span class="n">filters</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return filter from filters descriptor.</span>
 
 <span class="sd">    :param filters: Filters parameters.</span>
 <span class="sd">    :type filters: dict</span>
 <span class="sd">    :return: The filter corresponding to descriptor.</span>
-<span class="sd">    :rtype: filters.Filter or filters.FiltersCombiner</span>
+<span class="sd">    :rtype: filters.EmptyIterFilter or filters.Filter or filters.FiltersCombiner</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;class&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">filters</span> <span class="ow">or</span> <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Filter&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Filter</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
@@ -517,51 +783,37 @@
         <span class="n">cleaned_desc</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">cleaned_desc</span><span class="p">[</span><span class="s2">&quot;filters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">filtersFromDict</span><span class="p">(</span><span class="n">sub_filter</span><span class="p">)</span> <span class="k">for</span> <span class="n">sub_filter</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;filters&quot;</span><span class="p">]]</span>
         <span class="k">return</span> <span class="n">FiltersCombiner</span><span class="p">(</span><span class="o">**</span><span class="n">cleaned_desc</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;EmptyIterFilter&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EmptyIterFilter</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The class &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid for filters dictionary. The value must be &quot;Filter&quot; or &quot;FiltersCombiner&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]))</span></div>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The class &quot;</span><span class="si">{}</span><span class="s1">&quot; is invalid for filters dictionary. The value must be &quot;EmptyIterFiler&quot;, &quot;Filter&quot; or &quot;FiltersCombiner&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]))</span></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -39,24 +39,24 @@ class TestEmptyIterFilter(unittest.TestCase):
         filter_obj = EmptyIterFilter("treatment_duration")
         expected = [False, False, True, True, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         # Exclude
         filter_obj = EmptyIterFilter("treatment_duration", action="exclude")
         expected = [True, True, False, False, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
     def testEvalList(self):
         # Select
         filter_obj = EmptyIterFilter("group")
         expected = [False, False, True, True, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         # Exclude
         filter_obj = EmptyIterFilter("group", action="exclude")
         expected = [True, True, False, False, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
     def testFromDict(self):
         # Only required attributes are provided
@@ -175,7 +175,7 @@ class TestFilter(unittest.TestCase):
         # All attributes are provided
         filter_obj = Filter.fromDict({
             "action": "exclude",
-            "aggregator": "nb:1",
+            "aggregator": "nb:1",  # No sense in this context it is only for test
             "class": "Filter",
             "description": "Select patients with age lower than 25 years",
             "getter": "age",
@@ -191,7 +191,7 @@ class TestFilter(unittest.TestCase):
         filter_obj = Filter("<", 25)
         expected = {
             "action": "select",
-            "aggregator": "nb:1",
+            "aggregator": None,
             "class": "Filter",
             "description": None,
             "getter": None,
@@ -227,154 +227,162 @@ class TestFilter(unittest.TestCase):
         filter_obj = Filter("<", 13, "age")  # Select patients with age not < 13
         expected = [True, True, True, False, False, False, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test action: exclude AND numeric threshold
         filter_obj = Filter("<", 25, "age", action="exclude")  # Select patients with age not < 25 (>=25)
         expected = [False, False, False, True, True, True, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test action: select AND string threshold
         filter_obj = Filter("!=", "placebo", "treatment")  # Select patients with treatment different of placebo
         expected = [False, True, False, True, True, True, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test action: exclude AND string threshold
         filter_obj = Filter("=", "20ng pc", "treatment", action="exclude")  # Select patients with treatment different of 20ng pc
         expected = [True, True, True, True, False, False, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test operator: contains AND string threshold
         filter_obj = Filter("contains", "20ng", "treatment")  # Select patients with 20ng in treatment text
         expected = [False, True, False, True, True, True, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test operator: contains AND string threshold for int value
         filter_obj = Filter("contains", "1", "age")  # Select patients with 1 in age
         expected = [False, False, True, False, False, False, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test operator: substring of AND string threshold
         filter_obj = Filter("substring of", "large placebo", "treatment")  # Select patients where treatment text is substring of "large placebo"
         expected = [True, False, True, False, False, False, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test operator: substring of AND string threshold
         filter_obj = Filter("substring of", "3087", "age")  # Select patients where age is substring of "3087"
         expected = [True, False, False, False, True, False, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test operator: in AND list threshold
         filter_obj = Filter("in", ["20ng pc", "placebo"], "treatment")  # Select patients with "20ng pc" or "placebo" as treatment
         expected = [True, False, True, False, True, True, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test aggregator: nb:1
         filter_obj = Filter("=", "A", "group", aggregator="nb:1")  # Select patients with at least the group A
         expected = [True, False, True, False, False, True, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test aggregator: ratio:1
         filter_obj = Filter("=", "C", "group", aggregator="ratio:1")  # Select patients with 100% of grooups are equals to C
         expected = [False, True, False, False, False, False, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test aggregator: ratio:0.5
         filter_obj = Filter("=", "C", "group", aggregator="ratio:0.5")  # Select patients with 50% of grooups are equals to C
         expected = [False, True, False, False, True, False, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test list threshold AND operator: in AND aggregator: nb:1
         filter_obj = Filter("in", ["A", "C"], "group", aggregator="nb:1")  # Select patients with at least A or C in groups
         expected = [True, True, True, False, True, True, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test list threshold AND operator: not in AND aggregator: nb:1
         filter_obj = Filter("not in", ["B", "C"], "group", aggregator="nb:1")  # Select patients with at least one group not in B and C
         expected = [True, False, True, False, False, True, True]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test list threshold AND aggregator: ratio:1
         filter_obj = Filter("in", ["B", "C"], "group", aggregator="ratio:1")  # Select patients where groups are B and/or C
         expected = [False, True, False, True, True, False, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         filter_obj = Filter("not in", ["B", "C"], "group", aggregator="ratio:1")  # Select patients where neither group is B or C
         expected = [False, False, True, False, False, True, False]
         observed = [filter_obj.eval(curr) for curr in self.data]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test None behavior in simple filter
         data_age = [{"age": None}, {"age": 10}, {"age": 1}]
         filter_obj = Filter("<", 5, "age")
         expected = [False, False, True]
         observed = [filter_obj.eval(curr) for curr in data_age]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter(">", 5, "age")
         expected = [False, True, False]
         observed = [filter_obj.eval(curr) for curr in data_age]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter("==", None, "age")
         expected = [True, False, False]
         observed = [filter_obj.eval(curr) for curr in data_age]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter("<>", None, "age")
         expected = [False, True, True]
         observed = [filter_obj.eval(curr) for curr in data_age]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter("in", [10, 1], "age")
         expected = [False, True, True]
         observed = [filter_obj.eval(curr) for curr in data_age]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter("not in", [10, 1], "age")
         expected = [True, False, False]
         observed = [filter_obj.eval(curr) for curr in data_age]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
         # Test None behavior in aggregated
-        data_class = [{"class": None}, {"class": [None, "A"]}, {"class": ["B"]}]
+        data_class = [{"class": None}, {"class": []}, {"class": [None, "A"]}, {"class": ["B"]}]
         filter_obj = Filter("==", "A", "class", "nb:1")
-        expected = [False, True, False]
+        expected = [False, False, True, False]
         observed = [filter_obj.eval(curr) for curr in data_class]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
+        filter_obj = Filter("<>", "A", "class", "nb:1")
+        expected = [False, False, True, True]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(observed, expected)
+        filter_obj = Filter("==", "A", "class", "ratio:1")
+        expected = [True, True, False, False]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(observed, expected)
         filter_obj = Filter("<>", "A", "class", "ratio:1")
-        expected = [True, False, True]
+        expected = [True, True, False, True]
         observed = [filter_obj.eval(curr) for curr in data_class]
-        self.assertEqual(expected, observed)
-        # filter_obj = Filter("==", None, "class", "nb:1")
-        # expected = [False, True, False]
-        # observed = [filter_obj.eval(curr) for curr in data_class]
-        # self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
+        filter_obj = Filter("==", None, "class", "nb:1")
+        expected = [False, False, True, False]
+        observed = [filter_obj.eval(curr) for curr in data_class]
+        self.assertEqual(observed, expected)
         filter_obj = Filter("not in", ["A", "B"], "class", "nb:1")
-        expected = [True, True, False]
+        expected = [False, False, True, False]
         observed = [filter_obj.eval(curr) for curr in data_class]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter("not in", ["A", "B"], "class", "ratio:1")
-        expected = [True, False, False]
+        expected = [True, True, False, False]
         observed = [filter_obj.eval(curr) for curr in data_class]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter("in", [None, "B"], "class", "ratio:1")
-        expected = [True, False, True]
+        expected = [True, True, False, True]
         observed = [filter_obj.eval(curr) for curr in data_class]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
         filter_obj = Filter("in", [None, "B"], "class", "nb:1")
-        expected = [True, True, True]
+        expected = [False, False, True, True]
         observed = [filter_obj.eval(curr) for curr in data_class]
-        self.assertEqual(expected, observed)
+        self.assertEqual(observed, expected)
 
 
 class TestFiltersCombiner(unittest.TestCase):

@@ -1,71 +1,34 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.vcf &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> AnaCore
-          
-
-          
-            
             <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,85 +36,35 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.vcf</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.vcf</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.vcf</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -232,9 +145,9 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.32.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.34.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
@@ -246,7 +159,7 @@
 
 
 <div class="viewcode-block" id="decodeInfoValue"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.decodeInfoValue">[docs]</a><span class="k">def</span> <span class="nf">decodeInfoValue</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return text where special characters was unescaped. This method is used to read values coming from INFO or FORMAT.</span>
 
 <span class="sd">    :param val: A string value of an item of INFO or FORMAT.</span>
@@ -260,7 +173,7 @@
 
 
 <div class="viewcode-block" id="encodeInfoValue"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.encodeInfoValue">[docs]</a><span class="k">def</span> <span class="nf">encodeInfoValue</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return text where special characters was escaped. This method is used to write values coming from INFO or FORMAT.</span>
 
 <span class="sd">    :param val: A string value of an item of INFO or FORMAT.</span>
@@ -272,7 +185,7 @@
 
 
 <div class="viewcode-block" id="getHeaderAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.getHeaderAttr">[docs]</a><span class="k">def</span> <span class="nf">getHeaderAttr</span><span class="p">(</span><span class="n">header_line</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return an instance of HeaderAttr or a child corresponding to the VCF line.</span>
 
 <span class="sd">    :param header_line: Declaration line declaration of an VCF attributes from the VCF header.</span>
@@ -321,10 +234,10 @@
 
 
 <div class="viewcode-block" id="HeaderAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderAttr</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage a dict attribute of the VCF header: one tag FORMAT, one tag INFO, one tag FILTER ...&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a dict attribute of the VCF header: one tag FORMAT, one tag INFO, one tag FILTER ...&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HeaderAttr.</span>
 
 <span class="sd">        :param id: Identifier of the attribute.</span>
@@ -339,7 +252,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">case_by_attr</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Store case sensitive title for extra attributes if it is different of capitalized attribute name.</span>
 
 <div class="viewcode-block" id="HeaderAttr.keys"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderAttr.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of the attribute’s keys.</span>
 
 <span class="sd">        :return: list of the attribute’s keys.</span>
@@ -348,7 +261,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">datastore</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="HeaderAttr.items"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderAttr.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of the dictionary’s items ((key, value) pairs).</span>
 
 <span class="sd">        :return: List of the dictionary’s items.</span>
@@ -363,7 +276,7 @@
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
 <span class="sd">        :param name: The attribute name.</span>
@@ -405,10 +318,10 @@
 
 
 <div class="viewcode-block" id="HeaderDescAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderDescAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderDescAttr</span><span class="p">(</span><span class="n">HeaderAttr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage VCF header attribute where ID and Description are required.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage VCF header attribute where ID and Description are required.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HeaderDescAttr.</span>
 
 <span class="sd">        :param id: Identifier of the attribute.</span>
@@ -423,7 +336,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_required_attr</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Description&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
 <span class="sd">        :param name: The attribute name.</span>
@@ -435,10 +348,10 @@
 
 
 <div class="viewcode-block" id="HeaderTypedAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderTypedAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderTypedAttr</span><span class="p">(</span><span class="n">HeaderDescAttr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage VCF header attribute where ID, Description, Type and Number are required.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage VCF header attribute where ID, Description, Type and Number are required.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;String&quot;</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of HeaderTypedAttr.</span>
 
 <span class="sd">        :param id: Identifier of the attribute.</span>
@@ -459,7 +372,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_without_quote</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Number&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">}</span>  <span class="c1"># List of required attributes without quote in str value.</span>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
 <span class="sd">        :param name: The attribute name.</span>
@@ -484,37 +397,37 @@
 
 
 <div class="viewcode-block" id="HeaderFilterAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderFilterAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderFilterAttr</span><span class="p">(</span><span class="n">HeaderDescAttr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage a FILTER attribute of VCF header.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a FILTER attribute of VCF header.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="HeaderFormatAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderFormatAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderFormatAttr</span><span class="p">(</span><span class="n">HeaderTypedAttr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage a FORMAT attribute of VCF header.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a FORMAT attribute of VCF header.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="HeaderInfoAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderInfoAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderInfoAttr</span><span class="p">(</span><span class="n">HeaderTypedAttr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage an INFO attribute of VCF header.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage an INFO attribute of VCF header.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="HeaderSampleAttr"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.HeaderSampleAttr">[docs]</a><span class="k">class</span> <span class="nc">HeaderSampleAttr</span><span class="p">(</span><span class="n">HeaderAttr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage an SAMPLE attribute of VCF header.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage an SAMPLE attribute of VCF header.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="VCFRecord"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord">[docs]</a><span class="k">class</span> <span class="nc">VCFRecord</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage a variant record.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a variant record.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
           <span class="bp">self</span><span class="p">,</span> <span class="n">region</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">knownSNPId</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refAllele</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
           <span class="n">altAlleles</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qual</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pFilter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pFormat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
           <span class="n">samples</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of VCFRecord.</span>
 
 <span class="sd">        :param region: Identifier of the reference region/contig/chromosome containing the variant (example: chr3).</span>
@@ -554,7 +467,7 @@
 
 <div class="viewcode-block" id="VCFRecord.getEmptyAlleleMarker"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getEmptyAlleleMarker">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">getEmptyAlleleMarker</span><span class="p">():</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the marker internally used to represent an empty allele (reference allele in insertion and alternative allele in deletion).</span>
 
 <span class="sd">        :return: The marker.</span>
@@ -563,7 +476,7 @@
         <span class="k">return</span> <span class="s2">&quot;-&quot;</span></div>
 
     <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign value to the attribute.</span>
 
 <span class="sd">        :param name: The attribute name.</span>
@@ -583,7 +496,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">VCFRecord</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VCFRecord.containsIndel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.containsIndel">[docs]</a>    <span class="k">def</span> <span class="nf">containsIndel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the variant contains an allele corresponding to an insertion or a deletion.</span>
 
 <span class="sd">        :return: True if the variant contains an allele corresponding to an insertion or a deletion.</span>
@@ -599,7 +512,7 @@
         <span class="k">return</span> <span class="n">contains_indel</span></div>
 
 <div class="viewcode-block" id="VCFRecord.refStart"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.refStart">[docs]</a>    <span class="k">def</span> <span class="nf">refStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the first position on reference affected by the alternative allele.</span>
 
 <span class="sd">        :return: The first position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.</span>
@@ -636,7 +549,7 @@
         <span class="k">return</span> <span class="n">start</span></div>
 
 <div class="viewcode-block" id="VCFRecord.refEnd"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.refEnd">[docs]</a>    <span class="k">def</span> <span class="nf">refEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the last position on reference affected by the alternative allele.</span>
 
 <span class="sd">        :return: The last position on reference affected by the alternative allele. For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.</span>
@@ -675,7 +588,7 @@
         <span class="k">return</span> <span class="n">end</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getName"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getName">[docs]</a>    <span class="k">def</span> <span class="nf">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an unique name to identified the variant.</span>
 
 <span class="sd">        :return: The variant name.</span>
@@ -689,7 +602,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="VCFRecord.isDeletion"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.isDeletion">[docs]</a>    <span class="k">def</span> <span class="nf">isDeletion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the variant is a deletion.</span>
 
 <span class="sd">        :return: True if the variant is a deletion.</span>
@@ -707,7 +620,7 @@
         <span class="k">return</span> <span class="n">is_deletion</span></div>
 
 <div class="viewcode-block" id="VCFRecord.isInsAndDel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.isInsAndDel">[docs]</a>    <span class="k">def</span> <span class="nf">isInsAndDel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the variant is an insertion and also a deletion.</span>
 
 <span class="sd">        :return: True if the variant is an insertion and also a deletion.</span>
@@ -734,7 +647,7 @@
         <span class="k">return</span> <span class="n">is_ins_and_del</span></div>
 
 <div class="viewcode-block" id="VCFRecord.isIndel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.isIndel">[docs]</a>    <span class="k">def</span> <span class="nf">isIndel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the variant is an insertion or a deletion.</span>
 
 <span class="sd">        :return: True if the variant is an insertion or a deletion.</span>
@@ -752,7 +665,7 @@
         <span class="k">return</span> <span class="n">is_indel</span></div>
 
 <div class="viewcode-block" id="VCFRecord.isInsertion"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.isInsertion">[docs]</a>    <span class="k">def</span> <span class="nf">isInsertion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the variant is an insertion.</span>
 
 <span class="sd">        :return: True if the variant is an insertion.</span>
@@ -770,7 +683,7 @@
         <span class="k">return</span> <span class="n">is_insertion</span></div>
 
 <div class="viewcode-block" id="VCFRecord.type"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.type">[docs]</a>    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the variant type.</span>
 
 <span class="sd">        :return: &#39;snp&#39; or &#39;indel&#39; or &#39;variation&#39;.</span>
@@ -785,7 +698,7 @@
         <span class="k">return</span> <span class="n">record_type</span></div>
 
 <div class="viewcode-block" id="VCFRecord.fastDownstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastDownstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">fastDownstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition.</span>
 
 <span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
@@ -822,7 +735,7 @@
         <span class="k">return</span> <span class="n">downstream_rec</span></div>
 
 <div class="viewcode-block" id="VCFRecord.fastStandardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastStandardize">[docs]</a>    <span class="k">def</span> <span class="nf">fastStandardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Standardize record (move to the most upstream position and remove unecessary nucleotids). This standardization concerns only POS, REF and ALT.</span>
 
 <span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
@@ -852,13 +765,13 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="VCFRecord.normalizeSingleAllele"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.normalizeSingleAllele">[docs]</a>    <span class="k">def</span> <span class="nf">normalizeSingleAllele</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Replace empty allele by the empty_marker and reduce the alternative and reference allele to the minimal string. The position of record is also updated. Example: ATG/A becomes TG/. ; AAGC/ATAC becomes AG/TA.</span>
 
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">twoSideTrimming</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-            <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Remove identical end and start between reference allele and alternative allele (example: ATGACT/ATCT becomes G/). The end is removed first to manage repeat cases.</span>
 
 <span class="sd">            :param record: The mono-alternative variant.</span>
@@ -916,7 +829,7 @@
             <span class="n">twoSideTrimming</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getMostUpstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getMostUpstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostUpstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the most upstream variant that can have the same alternative sequence of the instance.</span>
 
 <span class="sd">        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).</span>
@@ -958,7 +871,7 @@
         <span class="k">return</span> <span class="n">new_record</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getMostDownstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getMostDownstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostDownstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the most downstream variant that can have the same alternative sequence of the instance.</span>
 
 <span class="sd">        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).</span>
@@ -1004,7 +917,7 @@
         <span class="k">return</span> <span class="n">new_record</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getPopRefAD"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getPopRefAD">[docs]</a>    <span class="k">def</span> <span class="nf">getPopRefAD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the reference allele depth for the population (it is composed by all samples).</span>
 
 <span class="sd">        :return: The reference allele population depth.</span>
@@ -1012,25 +925,27 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="s2">&quot;AD&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># INFO.AD contains ref allele</span>
-            <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">]</span>
+            <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">elif</span> <span class="s2">&quot;AF&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># INFO.AF contains ref allele and INFO.DP exists</span>
             <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">])</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Must be processed by samples data</span>
-            <span class="n">first_spl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="s2">&quot;AD&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AD contains ref allele</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AD for all samples</span>
-                        <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">ref_pop_AD</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;AF&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AF contains ref allele</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AD for all samples</span>
-                        <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>  <span class="c1"># Counts are present by samples</span>
+                <span class="n">first_spl</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;AD&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AD contains ref allele</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AD for all samples</span>
+                            <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">ref_pop_AD</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;AF&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AF contains ref allele</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AD for all samples</span>
+                            <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
+                        <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ref_pop_AD</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">ref_pop_AD</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Erroneous when several variants exist on position and are line splitted</span>
             <span class="k">if</span> <span class="s2">&quot;AD&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>  <span class="c1"># INFO.AD does not contain ref</span>
                 <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPopDP</span><span class="p">()</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">])</span>
@@ -1042,7 +957,7 @@
         <span class="k">return</span> <span class="n">ref_pop_AD</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getPopAltAD"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getPopAltAD">[docs]</a>    <span class="k">def</span> <span class="nf">getPopAltAD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of alternative alleles depths for the population (it is composed by all samples). The reference depth is removed from the result if it exists.</span>
 
 <span class="sd">        :return: The list of alternative alleles depths.</span>
@@ -1086,7 +1001,7 @@
         <span class="k">return</span><span class="p">(</span><span class="n">AD</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getPopRefAF"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getPopRefAF">[docs]</a>    <span class="k">def</span> <span class="nf">getPopRefAF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the reference allele frequency for the population (it is composed by all samples).</span>
 
 <span class="sd">        :return: The reference allele population frequency.</span>
@@ -1094,31 +1009,32 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="s2">&quot;AF&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># INFO.AF contains ref allele</span>
-            <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">]</span>
+            <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">elif</span> <span class="s2">&quot;AD&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># INFO.AD contains ref allele and INFO.DP exists</span>
             <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Must be processed by samples data</span>
-            <span class="n">first_spl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="s2">&quot;AD&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AD contains ref allele</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="n">pop_DP</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AD for all samples</span>
-                        <span class="n">pop_DP</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
-                        <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="n">ref_pop_AD</span> <span class="o">/</span> <span class="n">pop_DP</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">ref_pop_AF</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;AF&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AF contains ref allele</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="n">pop_DP</span> <span class="o">=</span> <span class="mi">0</span>
-                    <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AF for all samples</span>
-                        <span class="n">pop_DP</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
-                        <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
-                    <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="n">ref_pop_AD</span> <span class="o">/</span> <span class="n">pop_DP</span>
-                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>  <span class="c1"># Counts are present by samples</span>
+                <span class="n">first_spl</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;AD&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AD contains ref allele</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">pop_DP</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AD for all samples</span>
+                            <span class="n">pop_DP</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
+                            <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AD&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="n">ref_pop_AD</span> <span class="o">/</span> <span class="n">pop_DP</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">ref_pop_AF</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;AF&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="s2">&quot;DP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">first_spl</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># AF contains ref allele</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ref_pop_AD</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">pop_DP</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">spl_name</span><span class="p">,</span> <span class="n">spl_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># Sum ref AF for all samples</span>
+                            <span class="n">pop_DP</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
+                            <span class="n">ref_pop_AD</span> <span class="o">+=</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">spl_data</span><span class="p">[</span><span class="s2">&quot;DP&quot;</span><span class="p">]</span>
+                        <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="n">ref_pop_AD</span> <span class="o">/</span> <span class="n">pop_DP</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">ref_pop_AF</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Erroneous when several variants exist on position and are line splitted</span>
             <span class="k">if</span> <span class="s2">&quot;AF&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>  <span class="c1"># INFO.AF does not contain ref</span>
                 <span class="n">ref_pop_AF</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;AF&quot;</span><span class="p">])</span>
@@ -1130,7 +1046,7 @@
         <span class="k">return</span> <span class="n">ref_pop_AF</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getPopAltAF"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getPopAltAF">[docs]</a>    <span class="k">def</span> <span class="nf">getPopAltAF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of alleles frequencies for the population (it is composed by all samples). The reference frequency is removed from the result if it exists.</span>
 
 <span class="sd">        :return: The list of alleles frequencies.</span>
@@ -1181,7 +1097,7 @@
         <span class="k">return</span> <span class="n">AF</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getPopDP"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getPopDP">[docs]</a>    <span class="k">def</span> <span class="nf">getPopDP</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the depth for the population (it is composed by all samples).</span>
 
 <span class="sd">        :return: The depth in population.</span>
@@ -1210,7 +1126,7 @@
         <span class="k">return</span> <span class="n">DP</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getAD"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getAD">[docs]</a>    <span class="k">def</span> <span class="nf">getAD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spl_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of alleles depths for the specified sample.</span>
 
 <span class="sd">        :param spl_name: The sample name.</span>
@@ -1238,7 +1154,7 @@
         <span class="k">return</span> <span class="n">AD</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getAltAD"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getAltAD">[docs]</a>    <span class="k">def</span> <span class="nf">getAltAD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spl_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of alternative alleles depths for the specified sample. The reference depth is removed from the result if it exists.</span>
 
 <span class="sd">        :param spl_name: The sample name.</span>
@@ -1254,7 +1170,7 @@
         <span class="k">return</span> <span class="n">AD</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getAFBySample"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getAFBySample">[docs]</a>    <span class="k">def</span> <span class="nf">getAFBySample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">missing_replacement</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of alleles frequencies by sample name. The reference frequency is removed from the result if it exists.</span>
 
 <span class="sd">        :param missing_replacement: Value used to replace missing AF.</span>
@@ -1272,7 +1188,7 @@
         <span class="k">return</span> <span class="n">AF</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getAF"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getAF">[docs]</a>    <span class="k">def</span> <span class="nf">getAF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spl_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of alleles frequencies for the specified sample.</span>
 
 <span class="sd">        :param spl_name: The sample name.</span>
@@ -1321,7 +1237,7 @@
         <span class="k">return</span> <span class="n">AF</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getAltAF"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getAltAF">[docs]</a>    <span class="k">def</span> <span class="nf">getAltAF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spl_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the list of alternative alleles frequencies for the specified sample. The reference frequency is removed from the result if it exists.</span>
 
 <span class="sd">        :param spl_name: The sample name.</span>
@@ -1337,7 +1253,7 @@
         <span class="k">return</span> <span class="n">AF</span></div>
 
 <div class="viewcode-block" id="VCFRecord.getDP"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getDP">[docs]</a>    <span class="k">def</span> <span class="nf">getDP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spl_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the depth for the specified sample.</span>
 
 <span class="sd">        :param spl_name: The sample name.</span>
@@ -1366,11 +1282,272 @@
         <span class="k">return</span> <span class="n">DP</span></div></div>
 
 
+<div class="viewcode-block" id="VCFSymbAltRecord"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord">[docs]</a><span class="k">class</span> <span class="nc">VCFSymbAltRecord</span><span class="p">(</span><span class="n">VCFRecord</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a variant record with symbolic alternative like &lt;DUP&gt;, &lt;DEL&gt;, etc.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign value to the attribute.</span>
+
+<span class="sd">        :param name: The attribute name.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param value: The value to be assigned to the attribute.</span>
+<span class="sd">        :type value: *</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;alt&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Alternative allele </span><span class="si">{}</span><span class="s2"> is not a symbolic allele.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alt</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;BND&quot;</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;BND are not managed by </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.containsIndel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.containsIndel">[docs]</a>    <span class="k">def</span> <span class="nf">containsIndel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the variant contains an allele corresponding to an insertion or a deletion.</span>
+
+<span class="sd">        :return: True if the variant contains an allele corresponding to an insertion or a deletion.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;containsIndel&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return end position of the variant (1-based).</span>
+
+<span class="sd">        :return: End position of the variant (1-based). This position correspond to the last reference nt implicated in variant. For example, in DUP, the position correspond to last duplicated nt on reference.</span>
+<span class="sd">        :rtype: int | None</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The attribute &#39;end&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>  <span class="c1"># INS</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+        <span class="k">elif</span> <span class="s2">&quot;SVLEN&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>  <span class="c1"># CNV or DEL or DUP or INV</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">end</span>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.fastDownstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.fastDownstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">fastDownstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;fastDownstreamed&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.fastStandardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.fastStandardize">[docs]</a>    <span class="k">def</span> <span class="nf">fastStandardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;fastStandardize&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.fromStdRecord"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.fromStdRecord">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromStdRecord</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of VCFSymbAltRecord from VCFRecord.</span>
+
+<span class="sd">        :param record: Initial VCFRecord.</span>
+<span class="sd">        :type record: VCFRecord</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: VCFSymbAltRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">VCFSymbAltRecord</span><span class="p">(</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">qual</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
+            <span class="n">record</span><span class="o">.</span><span class="n">samples</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.getMostUpstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getMostUpstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostUpstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;getMostUpstream&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.getMostDownstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getMostDownstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostDownstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;getMostDownstream&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.getName"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getName">[docs]</a>    <span class="k">def</span> <span class="nf">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an unique name to identified the variant.</span>
+
+<span class="sd">        :return: The variant name.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        :warnings: This name can be not uniq for two insertions on same position and with same length.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">:</span><span class="si">{}</span><span class="s2">[</span><span class="si">{}</span><span class="s2">]=</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span>
+            <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.isDeletion"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isDeletion">[docs]</a>    <span class="k">def</span> <span class="nf">isDeletion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the variant is a deletion.</span>
+
+<span class="sd">        :return: True if the variant is a deletion.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isDeletion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DEL&quot;</span><span class="p">):</span>
+            <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;SVLEN&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                <span class="n">sv_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;SVLEN&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv_len</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                    <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">sv_len</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CNV can be deletion or insertion on variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">is_deletion</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.isIndel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isIndel">[docs]</a>    <span class="k">def</span> <span class="nf">isIndel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the variant is an insertion or a deletion.</span>
+
+<span class="sd">        :return: True if the variant is an insertion or a deletion.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isIndel&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">)</span>  <span class="c1"># CNV may be both deletion and duplication</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.isInsAndDel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isInsAndDel">[docs]</a>    <span class="k">def</span> <span class="nf">isInsAndDel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the variant is an insertion and also a deletion.</span>
+
+<span class="sd">        :return: True if the variant is an insertion and also a deletion.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isInsAndDel&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.isInsertion"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isInsertion">[docs]</a>    <span class="k">def</span> <span class="nf">isInsertion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the variant is an insertion.</span>
+
+<span class="sd">        :return: True if the variant is an insertion.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isInsertion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="n">is_insertion</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DUP&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>
+            <span class="n">is_insertion</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;SVLEN&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                <span class="n">sv_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;SVLEN&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv_len</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                    <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">sv_len</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">is_insertion</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># else: is_insertion = False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CNV can be deletion or insertion on variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">is_insertion</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.isInversion"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isInversion">[docs]</a>    <span class="k">def</span> <span class="nf">isInversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the variant is a deletion.</span>
+
+<span class="sd">        :return: True if the variant is a deletion.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isInversion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="n">is_inversion</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>
+            <span class="n">is_inversion</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">is_inversion</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.normalizeSingleAllele"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.normalizeSingleAllele">[docs]</a>    <span class="k">def</span> <span class="nf">normalizeSingleAllele</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;normalizeSingleAllele&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.refEnd"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.refEnd">[docs]</a>    <span class="k">def</span> <span class="nf">refEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the last position on reference affected by the alternative allele (1-based).</span>
+
+<span class="sd">        :return: The last position on reference affected by the alternative allele (1-based). For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.</span>
+<span class="sd">        :rtype: float | None</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">():</span>  <span class="c1"># DUP or INS or CNV representing INS</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mf">0.5</span>
+        <span class="k">return</span> <span class="n">end</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.refStart"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.refStart">[docs]</a>    <span class="k">def</span> <span class="nf">refStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the first position on reference affected by the alternative allele (1-based).</span>
+
+<span class="sd">        :return: The first position on reference affected by the alternative allele (1-based). For an insertion between two nucleotids the value will be: first nucleotids pos + 0.5.</span>
+<span class="sd">        :rtype: float | None</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># CNV</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">():</span>  <span class="c1"># DUP or INS or CNV representing INS</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mf">0.5</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># DEL or INV</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">start</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sv_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return difference in length between REF and ALT alleles.</span>
+
+<span class="sd">        :return: Difference in length between REF and ALT alleles. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.</span>
+<span class="sd">        :rtype: int | None</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The attribute &#39;sv_len&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="n">sv_len</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;SVLEN&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="n">sv_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;SVLEN&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv_len</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">():</span>  <span class="c1"># DEL</span>
+                    <span class="n">sv_len</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>  <span class="c1"># CNV or DUP or INV (Exclude INS because length is unknown)</span>
+                    <span class="n">sv_len</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># CNV with unknown type del or ins</span>
+        <span class="k">return</span> <span class="n">sv_len</span>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.type"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.type">[docs]</a>    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the variant type.</span>
+
+<span class="sd">        :return: &#39;indel&#39; or &#39;inv&#39;.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">record_type</span> <span class="o">=</span> <span class="s2">&quot;indel&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>
+            <span class="n">record_type</span> <span class="o">=</span> <span class="s2">&quot;inv&quot;</span>
+        <span class="k">return</span> <span class="n">record_type</span></div></div>
+
+
 <div class="viewcode-block" id="VCFIO"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO">[docs]</a><span class="k">class</span> <span class="nc">VCFIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Manage VCF file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manage VCF file.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return instance of VCFIO.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -1398,7 +1575,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">TabixFile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
 
 <div class="viewcode-block" id="VCFIO.getSub"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.getSub">[docs]</a>    <span class="k">def</span> <span class="nf">getSub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">chr</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return generator on records overlapping the specified region.</span>
 
 <span class="sd">        .. warning::</span>
@@ -1430,7 +1607,7 @@
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parseLine</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="VCFIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the line corresponds to a record (it is not a comment or an header line).</span>
 
 <span class="sd">        :param line: The evaluated line.</span>
@@ -1444,7 +1621,7 @@
         <span class="k">return</span> <span class="n">is_record</span></div>
 
     <span class="k">def</span> <span class="nf">_parseHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Parse VCF header to set info, format and samples attributes.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse VCF header to set info, format and samples attributes.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
         <span class="n">is_header</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1459,7 +1636,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_parseHeaderLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Parse one VCF header line to update info, filter, format or samples attributes.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse one VCF header line to update info, filter, format or samples attributes.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;##INFO&quot;</span><span class="p">):</span>
             <span class="n">curr_attr</span> <span class="o">=</span> <span class="n">getHeaderAttr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="n">curr_attr</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_attr</span>
@@ -1478,7 +1655,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">extra_header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the VCF current line.</span>
 
 <span class="sd">        :return: The variant described by the current line.</span>
@@ -1563,10 +1740,13 @@
                     <span class="n">data_by_spl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">spl_idx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">spl_data</span>
                 <span class="n">variation</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">data_by_spl</span>
 
+        <span class="k">if</span> <span class="n">variation</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
+            <span class="n">variation</span> <span class="o">=</span> <span class="n">VCFSymbAltRecord</span><span class="o">.</span><span class="n">fromStdRecord</span><span class="p">(</span><span class="n">variation</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">variation</span>
 
 <div class="viewcode-block" id="VCFIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write variant record in VCF.</span>
 
 <span class="sd">        :param record: The variant record.</span>
@@ -1575,7 +1755,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recToVCFLine</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VCFIO.recToVCFLine"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.recToVCFLine">[docs]</a>    <span class="k">def</span> <span class="nf">recToVCFLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the record in VCF format.</span>
 
 <span class="sd">        :param record: The record to process.</span>
@@ -1645,7 +1825,7 @@
         <span class="k">return</span> <span class="n">line</span></div>
 
 <div class="viewcode-block" id="VCFIO.copyHeader"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.copyHeader">[docs]</a>    <span class="k">def</span> <span class="nf">copyHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copy header fields from the specified VCF.</span>
 
 <span class="sd">        :param model: The VCF source.</span>
@@ -1659,7 +1839,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">extra_header</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">extra_header</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VCFIO.writeHeader"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO.writeHeader">[docs]</a>    <span class="k">def</span> <span class="nf">writeHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Write VCF header.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write VCF header.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;##fileformat=VCFv4.3</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">curr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra_header</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">curr</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1678,7 +1858,7 @@
 
 
 <div class="viewcode-block" id="getAlleleRecord"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.getAlleleRecord">[docs]</a><span class="k">def</span> <span class="nf">getAlleleRecord</span><span class="p">(</span><span class="n">FH_vcf</span><span class="p">,</span> <span class="n">record</span><span class="p">,</span> <span class="n">idx_alt</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the record corresponding to the specified allele in variant.</span>
 
 <span class="sd">    :param FH_vcf: Handler on record source file.</span>
@@ -1690,7 +1870,10 @@
 <span class="sd">    :return: The record corresponding to the specified allele in variant.</span>
 <span class="sd">    :rtype: anacore.vcf.VCFRecord</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">new_record</span> <span class="o">=</span> <span class="n">VCFRecord</span><span class="p">(</span>
+    <span class="n">new_class</span> <span class="o">=</span> <span class="n">VCFRecord</span>
+    <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="n">idx_alt</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
+        <span class="n">new_class</span> <span class="o">=</span> <span class="n">VCFSymbAltRecord</span>
+    <span class="n">new_record</span> <span class="o">=</span> <span class="n">new_class</span><span class="p">(</span>
         <span class="n">region</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
         <span class="n">position</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span>
         <span class="n">knownSNPId</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
@@ -1727,7 +1910,7 @@
 
 
 <div class="viewcode-block" id="getFreqMatrix"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.getFreqMatrix">[docs]</a><span class="k">def</span> <span class="nf">getFreqMatrix</span><span class="p">(</span><span class="n">vcf_path</span><span class="p">,</span> <span class="n">missing_replacement</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">accept_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a 2D matrix representing variants frequencies by sample.</span>
 
 <span class="sd">    :param vcf_path: The pass to the VCF processed.</span>
@@ -1761,46 +1944,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

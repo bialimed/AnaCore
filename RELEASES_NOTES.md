@@ -1,24 +1,30 @@
 # Release 3.0.0 [DEV]
 
-### Changes
-  * `anacore.illumina.SampleSheetV[1|2].samples` return a list of Sample object
-  instead of the previous list of dict.
-  * `anacore.illumina.DemultStat(demult_stats_path)` replaced by
-  `anacore.illumina.demultiplex.DemultStatFactory.get(demult_folder_path)`.
-  * `anacore.illumina.SampleSheetIO(path)` replaced by
-  `anacore.illumina.samplesheet.SampleSheetFactory.get(path)`.
-  * Split `illumina` library in new sub-packages:
-    * `anacore.illumina.base`
-    * `anacore.illumina.demultiplex`
-      * `anacore.illumina.demultiplex.base`
-      * `anacore.illumina.demultiplex.bcl2fastq`
-      * `anacore.illumina.demultiplex.bclconvert`
-    * `anacore.illumina.run`
-    * `anacore.illumina.samplesheet`
+### Break changes
+  * `anacore.filters`:
+    * The operator contains is rectrict to strings instead of strings and lists.
+    * Default aggregator become None to manage non iterable value. For iterable, aggregator must be set.
+    * Missing keys/attributes return None for in getter function. 
+    * Add `EmptyIterFilter` to select or exclude item with empty list in get value.    
+  * `anacore.illumina`:
+    * `SampleSheetV[1|2].samples` return a list of Sample object
+    instead of the previous list of dict.
+    * `DemultStat(demult_stats_path)` replaced by
+    `demultiplex.DemultStatFactory.get(demult_folder_path)`.
+    * `SampleSheetIO(path)` replaced by
+    `samplesheet.SampleSheetFactory.get(path)`.
+    * Split `illumina` library in new sub-packages:
+      * `anacore.illumina.base`
+      * `anacore.illumina.demultiplex`
+        * `anacore.illumina.demultiplex.base`
+        * `anacore.illumina.demultiplex.bcl2fastq`
+        * `anacore.illumina.demultiplex.bclconvert`
+      * `anacore.illumina.run`
+      * `anacore.illumina.samplesheet`
 
 ### Improvements
   * Add `anacore.vcf.VCFSymbAltRecord` to handle structural variants with
-  symbolic alternative like <DUP>, <DEL>, etc. `anacore.vcf.VCFIO` can now reads
+  symbolic alternative like \<DUP\>, \<DEL\>, etc. `anacore.vcf.VCFIO` can now reads
   VCF containing standard variants and structural variants except BND. BND keep
   currently manage in `anacore.fusion`.
   * Add log and statistics reader for bcl-convert:

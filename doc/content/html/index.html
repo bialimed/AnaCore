@@ -135,15 +135,24 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="anacore.html#module-anacore.filters">anacore.filters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.filters.AbstractAtomicFilter"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.AbstractAtomicFilter.eval"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter.eval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.AbstractAtomicFilter.setGetter"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter.setGetter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.AbstractAtomicFilter.toDict"><code class="docutils literal notranslate"><span class="pre">AbstractAtomicFilter.toDict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.filters.EmptyIterFilter"><code class="docutils literal notranslate"><span class="pre">EmptyIterFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.EmptyIterFilter.eval"><code class="docutils literal notranslate"><span class="pre">EmptyIterFilter.eval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.EmptyIterFilter.fromDict"><code class="docutils literal notranslate"><span class="pre">EmptyIterFilter.fromDict()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.filters.Filter"><code class="docutils literal notranslate"><span class="pre">Filter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.aggregator"><code class="docutils literal notranslate"><span class="pre">Filter.aggregator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.eval"><code class="docutils literal notranslate"><span class="pre">Filter.eval()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.fromDict"><code class="docutils literal notranslate"><span class="pre">Filter.fromDict()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.getRecordValue"><code class="docutils literal notranslate"><span class="pre">Filter.getRecordValue()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.setAggregator"><code class="docutils literal notranslate"><span class="pre">Filter.setAggregator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.operator"><code class="docutils literal notranslate"><span class="pre">Filter.operator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.setFct"><code class="docutils literal notranslate"><span class="pre">Filter.setFct()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.setGetter"><code class="docutils literal notranslate"><span class="pre">Filter.setGetter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.setOperator"><code class="docutils literal notranslate"><span class="pre">Filter.setOperator()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.toDict"><code class="docutils literal notranslate"><span class="pre">Filter.toDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.filters.Filter.values"><code class="docutils literal notranslate"><span class="pre">Filter.values</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.filters.FiltersCombiner"><code class="docutils literal notranslate"><span class="pre">FiltersCombiner</span></code></a><ul>
@@ -227,6 +236,35 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.genomicRegion.Transcript.getSubFromRegionPos"><code class="docutils literal notranslate"><span class="pre">Transcript.getSubFromRegionPos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.genomicRegion.Transcript.length"><code class="docutils literal notranslate"><span class="pre">Transcript.length()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.genomicRegion.Transcript.proteins"><code class="docutils literal notranslate"><span class="pre">Transcript.proteins</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="anacore.html#module-anacore.getterPath">anacore.getterPath</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.getterPath.GetterPath"><code class="docutils literal notranslate"><span class="pre">GetterPath</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.GetterPath.dict"><code class="docutils literal notranslate"><span class="pre">GetterPath.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.GetterPath.fromDict"><code class="docutils literal notranslate"><span class="pre">GetterPath.fromDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.GetterPath.fromStr"><code class="docutils literal notranslate"><span class="pre">GetterPath.fromStr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.GetterPath.get"><code class="docutils literal notranslate"><span class="pre">GetterPath.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.GetterPath.str"><code class="docutils literal notranslate"><span class="pre">GetterPath.str</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.getterPath.IterableToken"><code class="docutils literal notranslate"><span class="pre">IterableToken</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.IterableToken.dict"><code class="docutils literal notranslate"><span class="pre">IterableToken.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.IterableToken.get"><code class="docutils literal notranslate"><span class="pre">IterableToken.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.IterableToken.str"><code class="docutils literal notranslate"><span class="pre">IterableToken.str</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.getterPath.KeyToken"><code class="docutils literal notranslate"><span class="pre">KeyToken</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.KeyToken.dict"><code class="docutils literal notranslate"><span class="pre">KeyToken.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.KeyToken.get"><code class="docutils literal notranslate"><span class="pre">KeyToken.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.KeyToken.str"><code class="docutils literal notranslate"><span class="pre">KeyToken.str</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.getterPath.MethodToken"><code class="docutils literal notranslate"><span class="pre">MethodToken</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.MethodToken.dict"><code class="docutils literal notranslate"><span class="pre">MethodToken.dict</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.MethodToken.get"><code class="docutils literal notranslate"><span class="pre">MethodToken.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.getterPath.MethodToken.str"><code class="docutils literal notranslate"><span class="pre">MethodToken.str</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -321,6 +359,8 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#module-anacore.illumina.samplesheet">anacore.illumina.samplesheet</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.samplesheet.AbstractSampleSheet"><code class="docutils literal notranslate"><span class="pre">AbstractSampleSheet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.samplesheet.Sample"><code class="docutils literal notranslate"><span class="pre">Sample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.samplesheet.SampleADS"><code class="docutils literal notranslate"><span class="pre">SampleADS</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.samplesheet.SampleSheetADS"><code class="docutils literal notranslate"><span class="pre">SampleSheetADS</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.samplesheet.SampleSheetFactory"><code class="docutils literal notranslate"><span class="pre">SampleSheetFactory</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.samplesheet.SampleSheetV1"><code class="docutils literal notranslate"><span class="pre">SampleSheetV1</span></code></a></li>
@@ -607,6 +647,27 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.refEnd"><code class="docutils literal notranslate"><span class="pre">VCFRecord.refEnd()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.refStart"><code class="docutils literal notranslate"><span class="pre">VCFRecord.refStart()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.type"><code class="docutils literal notranslate"><span class="pre">VCFRecord.type()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.containsIndel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.containsIndel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.end"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.end</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.fastDownstreamed"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fastDownstreamed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.fastStandardize"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fastStandardize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.fromStdRecord"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fromStdRecord()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.getMostDownstream"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getMostDownstream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.getMostUpstream"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getMostUpstream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.getName"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getName()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isDeletion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isDeletion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isIndel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isIndel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isInsAndDel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInsAndDel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isInsertion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInsertion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isInversion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInversion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.normalizeSingleAllele"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.normalizeSingleAllele()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.refEnd"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.refEnd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.refStart"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.refStart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.sv_len"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.sv_len</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.type"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.type()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.decodeInfoValue"><code class="docutils literal notranslate"><span class="pre">decodeInfoValue()</span></code></a></li>

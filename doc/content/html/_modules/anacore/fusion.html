@@ -1,71 +1,34 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.fusion &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> AnaCore
-          
-
-          
-            
             <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,85 +36,35 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.fusion</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.fusion</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.fusion</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -172,15 +85,15 @@
 
 <span class="sd">        spl_name = &quot;spl1&quot;</span>
 <span class="sd">        print(&quot;Breakpoint_1\\tGene_brkpt_1\\tBreakpoint_2\\tGene_brkpt_2\\tSpanning_pair\\tSplit_read&quot;)</span>
-<span class="sd">        with FusionFileReader.factory(&quot;test.tsv&quot;, sample_name=spl_name) as reader:</span>
+<span class="sd">        with FusionFileReader.factory(&quot;test.tsv&quot;, sample_name=spl_name, annot_field=&quot;ANN&quot;) as reader:</span>
 <span class="sd">            for first, second in reader:</span>
 <span class="sd">                print(</span>
 <span class="sd">                    &quot;{}:{}&quot;.format(first.chrom, frist.pos),</span>
 <span class="sd">                    &quot;,&quot;.join([elt[&quot;SYMBOL&quot;] for elt in first.info[&quot;ANN&quot;]]),</span>
 <span class="sd">                    &quot;{}:{}&quot;.format(second.chrom, second.pos),</span>
 <span class="sd">                    &quot;,&quot;.join([elt[&quot;SYMBOL&quot;] for elt in second.info[&quot;ANN&quot;]]),</span>
-<span class="sd">                    first.sample[&quot;spl_name&quot;][&quot;PR&quot;],</span>
-<span class="sd">                    first.sample[&quot;spl_name&quot;][&quot;SR&quot;],</span>
+<span class="sd">                    first.samples[spl_name][&quot;PR&quot;],</span>
+<span class="sd">                    first.samples[spl_name][&quot;SR&quot;],</span>
 <span class="sd">                    sep=&quot;\\t&quot;</span>
 <span class="sd">                )</span>
 
@@ -210,9 +123,9 @@
 <span class="sd">            for first, second in reader:</span>
 <span class="sd">                print(</span>
 <span class="sd">                    &quot;{}:{}&quot;.format(first.chrom, frist.pos),</span>
-<span class="sd">                    first.id</span>
+<span class="sd">                    first.id,</span>
 <span class="sd">                    &quot;{}:{}&quot;.format(second.chrom, second.pos),</span>
-<span class="sd">                    second.id</span>
+<span class="sd">                    second.id,</span>
 <span class="sd">                    sep=&quot;\\t&quot;</span>
 <span class="sd">                )</span>
 
@@ -287,7 +200,7 @@
 
 
 <div class="viewcode-block" id="getBNDInterval"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.getBNDInterval">[docs]</a><span class="k">def</span> <span class="nf">getBNDInterval</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the start and end for BND record (CIPOS is taken into account).</span>
 
 <span class="sd">    :param record: The breakend record.</span>
@@ -306,7 +219,7 @@
 
 
 <div class="viewcode-block" id="getCoordDictFromCoordStr"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.getCoordDictFromCoordStr">[docs]</a><span class="k">def</span> <span class="nf">getCoordDictFromCoordStr</span><span class="p">(</span><span class="n">coord</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return elements from coordinates defined by a fusion caller (&quot;CHROM:POS:STRAND&quot;).</span>
 
 <span class="sd">    :param coord: Coordinates defined by fusion caller in format &quot;CHROM:POS:STRAND&quot;.</span>
@@ -325,7 +238,7 @@
 
 
 <div class="viewcode-block" id="getAltFromCoord"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.getAltFromCoord">[docs]</a><span class="k">def</span> <span class="nf">getAltFromCoord</span><span class="p">(</span><span class="n">first_coord</span><span class="p">,</span> <span class="n">second_coord</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return VCF alternative field value for the breakends from the 5&#39; and 3&#39; shard of fusion.</span>
 
 <span class="sd">    :param first_coord: Coordinates of the breakend for the first 5&#39; shard in fusion.</span>
@@ -357,7 +270,7 @@
 
 
 <div class="viewcode-block" id="getStrand"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.getStrand">[docs]</a><span class="k">def</span> <span class="nf">getStrand</span><span class="p">(</span><span class="n">breakend</span><span class="p">,</span> <span class="n">is_first</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return strand from breakend record.</span>
 
 <span class="sd">    :param breakend: Breakend defining a part of an RNA fusion.</span>
@@ -378,7 +291,7 @@
 
 
 <div class="viewcode-block" id="getCoordStr"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.getCoordStr">[docs]</a><span class="k">def</span> <span class="nf">getCoordStr</span><span class="p">(</span><span class="n">breakend</span><span class="p">,</span> <span class="n">is_first</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return coordinates elements (chrom, pos and strand) a from breakend record.</span>
 
 <span class="sd">    :param breakend: Breakend defining a part of an RNA fusion.</span>
@@ -392,11 +305,11 @@
 
 
 <div class="viewcode-block" id="FusionFileReader"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.FusionFileReader">[docs]</a><span class="k">class</span> <span class="nc">FusionFileReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Factory to identify and return the dedicated to the software used to produce the fusions file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory to identify and return the dedicated to the software used to produce the fusions file.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="FusionFileReader.factory"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.FusionFileReader.factory">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">factory</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the parser dedicated to the software used to produce the fusions file.</span>
 
 <span class="sd">        :param filepath: Path to the file (format: TSV).</span>
@@ -421,7 +334,7 @@
 
 
 <div class="viewcode-block" id="FusionCatcherIO"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.FusionCatcherIO">[docs]</a><span class="k">class</span> <span class="nc">FusionCatcherIO</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write fusions in fusionCatcher TSV output format (see https://github.com/ndaniel/fusioncatcher/blob/master/doc/manual.md#output-data). The records are in anacore.vcf.VCFRecord format and a fusion is represented by 2 records (breakend for the 5&#39; shard and breakend for the 3&#39; shard).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write fusions in fusionCatcher TSV output format (see https://github.com/ndaniel/fusioncatcher/blob/master/doc/manual.md#output-data). The records are in anacore.vcf.VCFRecord format and a fusion is represented by 2 records (breakend for the 5&#39; shard and breakend for the 3&#39; shard).&quot;&quot;&quot;</span>
 
     <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;Gene_1_symbol(5end_fusion_partner)&quot;</span><span class="p">,</span>
@@ -443,7 +356,7 @@
     <span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="s2">&quot;FCANN&quot;</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of FusionCatcherIO.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -464,7 +377,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="n">FusionCatcherIO</span><span class="o">.</span><span class="n">titles</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record defined by the current line.</span>
@@ -474,7 +387,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictToBNDRecords</span><span class="p">(</span><span class="n">fusion_record</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_dictToBNDRecords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fusion_record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the two breakends records from the fusion record.</span>
 
 <span class="sd">        :param fusion_record: The fusion record.</span>
@@ -552,7 +465,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">first_bnd</span><span class="p">,</span> <span class="n">second_bnd</span><span class="p">]</span>
 
 <div class="viewcode-block" id="FusionCatcherIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.FusionCatcherIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breakends</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write record line in file.</span>
 
 <span class="sd">        :param record: The first breakend and the second breakend in pair.</span>
@@ -561,7 +474,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_BNDRecordsToDict</span><span class="p">(</span><span class="n">breakends</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="nf">_BNDRecordsToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breakends</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the FusionCatcher dict from the two breakends of a fusion.</span>
 
 <span class="sd">        :param breakends: The two breakends of a fusion.</span>
@@ -601,7 +514,7 @@
 
 <div class="viewcode-block" id="FusionCatcherIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.FusionCatcherIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if the file is in FusionCatcher output format.</span>
 
 <span class="sd">        :param filepath: The file path.</span>
@@ -623,7 +536,7 @@
 
 <div class="viewcode-block" id="FusionCatcherIO.setVCFHeader"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.FusionCatcherIO.setVCFHeader">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">setVCFHeader</span><span class="p">(</span><span class="n">vcf_io</span><span class="p">,</span> <span class="n">annotation_field</span><span class="o">=</span><span class="s2">&quot;FCANN&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set header of an AnnotVCFIO to write FusionCatcher records in VCF output. This function pre-set ANN_titles, info and format used by FusionCatcherIO records.</span>
 
 <span class="sd">        :param vcf_io: The VCF used to write FusionCatcher records.</span>
@@ -688,7 +601,7 @@
 
 
 <div class="viewcode-block" id="STARFusionIO"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.STARFusionIO">[docs]</a><span class="k">class</span> <span class="nc">STARFusionIO</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write fusions in STAR-Fusion TSV output format (see https://github.com/STAR-Fusion/STAR-Fusion/wiki#Outputs). The records are in anacore.vcf.VCFRecord format and a fusion is represented by 2 records (breakend for the 5&#39; shard and breakend for the 3&#39; shard).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write fusions in STAR-Fusion TSV output format (see https://github.com/STAR-Fusion/STAR-Fusion/wiki#Outputs). The records are in anacore.vcf.VCFRecord format and a fusion is represented by 2 records (breakend for the 5&#39; shard and breakend for the 3&#39; shard).&quot;&quot;&quot;</span>
 
     <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;FusionName&quot;</span><span class="p">,</span>
@@ -711,7 +624,7 @@
     <span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="s2">&quot;FCANN&quot;</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of STARFusionIO.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -732,7 +645,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="n">STARFusionIO</span><span class="o">.</span><span class="n">titles</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record defined by the current line.</span>
@@ -742,7 +655,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictToBNDRecords</span><span class="p">(</span><span class="n">fusion_record</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_dictToBNDRecords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fusion_record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the two breakends records from the fusion record.</span>
 
 <span class="sd">        :param fusion_record: The fusion record.</span>
@@ -814,7 +727,7 @@
         <span class="k">return</span> <span class="n">breakends</span>
 
 <div class="viewcode-block" id="STARFusionIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.STARFusionIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breakends</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write record line in file.</span>
 
 <span class="sd">        :param record: The first breakend and the second breakend in pair.</span>
@@ -823,7 +736,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_BNDRecordsToDict</span><span class="p">(</span><span class="n">breakends</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="nf">_BNDRecordsToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breakends</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the STAR-fusion dict from the two breakends of a fusion.</span>
 
 <span class="sd">        :param breakends: The two breakends of a fusion.</span>
@@ -873,7 +786,7 @@
 
 <div class="viewcode-block" id="STARFusionIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.STARFusionIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if the file is in STAR-Fusion output format.</span>
 
 <span class="sd">        :param filepath: The file path.</span>
@@ -895,7 +808,7 @@
 
 <div class="viewcode-block" id="STARFusionIO.setVCFHeader"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.STARFusionIO.setVCFHeader">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">setVCFHeader</span><span class="p">(</span><span class="n">vcf_io</span><span class="p">,</span> <span class="n">annotation_field</span><span class="o">=</span><span class="s2">&quot;FCANN&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set header of an AnnotVCFIO to write STAR-Fusion records in VCF output. This function pre-set ANN_titles, info and format used by STARFusionIO records.</span>
 
 <span class="sd">        :param vcf_io: The VCF used to write STAR-Fusion records.</span>
@@ -1021,7 +934,7 @@
 
 
 <div class="viewcode-block" id="ArribaIO"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.ArribaIO">[docs]</a><span class="k">class</span> <span class="nc">ArribaIO</span><span class="p">(</span><span class="n">HashedSVIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write fusions in Arriba TSV output format (see https://github.com/suhrig/arriba/blob/master/documentation/output-files.md). The records are in anacore.vcf.VCFRecord format and a fusion is represented by 2 records (breakend for the 5&#39; shard and breakend for the 3&#39; shard).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write fusions in Arriba TSV output format (see https://github.com/suhrig/arriba/blob/master/documentation/output-files.md). The records are in anacore.vcf.VCFRecord format and a fusion is represented by 2 records (breakend for the 5&#39; shard and breakend for the 3&#39; shard).&quot;&quot;&quot;</span>
 
     <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s2">&quot;gene1&quot;</span><span class="p">,</span>
@@ -1051,7 +964,7 @@
     <span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="s2">&quot;FCANN&quot;</span><span class="p">,</span> <span class="n">sample_name</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of ArribaIO.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -1072,7 +985,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">titles</span> <span class="o">=</span> <span class="n">ArribaIO</span><span class="o">.</span><span class="n">titles</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record defined by the current line.</span>
@@ -1082,7 +995,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dictToBNDRecords</span><span class="p">(</span><span class="n">fusion_record</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_dictToBNDRecords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fusion_record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the two breakends records from the fusion record.</span>
 
 <span class="sd">        :param fusion_record: The fusion record.</span>
@@ -1180,7 +1093,7 @@
         <span class="k">return</span> <span class="n">breakends</span>
 
 <div class="viewcode-block" id="ArribaIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.ArribaIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breakends</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write record line in file.</span>
 
 <span class="sd">        :param record: The first breakend and the second breakend in pair.</span>
@@ -1189,7 +1102,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_BNDRecordsToDict</span><span class="p">(</span><span class="n">breakends</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="nf">_BNDRecordsToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">breakends</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the Arriba dict from the two breakends of a fusion.</span>
 
 <span class="sd">        :param breakends: The two breakends of a fusion.</span>
@@ -1242,7 +1155,7 @@
 
 <div class="viewcode-block" id="ArribaIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.ArribaIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if the file is in Arriba output format.</span>
 
 <span class="sd">        :param filepath: The file path.</span>
@@ -1263,7 +1176,7 @@
 
 <div class="viewcode-block" id="ArribaIO.setVCFHeader"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.ArribaIO.setVCFHeader">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">setVCFHeader</span><span class="p">(</span><span class="n">vcf_io</span><span class="p">,</span> <span class="n">annotation_field</span><span class="o">=</span><span class="s2">&quot;FCANN&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set header of an AnnotVCFIO to write Arriba records in VCF output. This function pre-set ANN_titles, info and format used by ArribaIO records.</span>
 
 <span class="sd">        :param vcf_io: The VCF used to write Arriba records.</span>
@@ -1300,10 +1213,10 @@
 
 
 <div class="viewcode-block" id="BreakendVCFIO"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO">[docs]</a><span class="k">class</span> <span class="nc">BreakendVCFIO</span><span class="p">(</span><span class="n">AnnotVCFIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read and write VCF file containing breakends. Each iteration return a couple of breakends (the first and the second in fusion).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read and write VCF file containing breakends. Each iteration return a couple of breakends (the first and the second in fusion).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">annot_field</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return instance of BreakendVCFIO.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -1325,7 +1238,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">annot_field</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BreakendVCFIO.loadIndex"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.loadIndex">[docs]</a>    <span class="k">def</span> <span class="nf">loadIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Parse file and store in index the byte positions (start and end) of each record by record ID.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse file and store in index the byte positions (start and end) of each record by record ID.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sv_rec_by_id</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">next_start</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">line_nb</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1341,13 +1254,13 @@
             <span class="n">line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="BreakendVCFIO.close"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Close file handle.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close file handle.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pick_reader</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pick_reader</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BreakendVCFIO.get"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return record with provided ID.</span>
 
 <span class="sd">        :param id: record ID.</span>
@@ -1373,7 +1286,7 @@
         <span class="k">return</span> <span class="n">record</span></div>
 
 <div class="viewcode-block" id="BreakendVCFIO.getSub"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.getSub">[docs]</a>    <span class="k">def</span> <span class="nf">getSub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">chr</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return generator on records overlapping the specified region.</span>
 
 <span class="sd">        .. warning::</span>
@@ -1396,7 +1309,7 @@
             <span class="k">yield</span> <span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">mates</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BreakendVCFIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the line corresponds to a new record (it is not a comment, an header line or an already processed fusion).</span>
 
 <span class="sd">        :param line: The evaluated line.</span>
@@ -1454,7 +1367,7 @@
 
 <div class="viewcode-block" id="BreakendVCFIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if the file is in VCF output format.</span>
 
 <span class="sd">        :param filepath: The file path.</span>
@@ -1474,7 +1387,7 @@
         <span class="k">return</span> <span class="n">is_valid</span></div>
 
 <div class="viewcode-block" id="BreakendVCFIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.fusion.BreakendVCFIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write fusion record in VCF.</span>
 
 <span class="sd">        :param first: The fisrt breakend.</span>
@@ -1487,46 +1400,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

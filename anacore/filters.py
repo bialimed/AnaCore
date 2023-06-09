@@ -1,5 +1,174 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for managing and processing complex filters like included filters and combined filters with differents operators."""
+"""Classes and functions for managing and processing complex filters like included
+filters and combined filters with differents operators.
+
+Filters can be:
+  * ``EmptyIterfilter``: Filter class to select or exclude empty iterable value
+    (see example above: "Filter patients with empty list of group").
+  * ``Filter``: Filter class to select or exclude based on comparison operator
+    and reference/threshold value (see example above: "Filter on age"). Operator
+    attribute defines the comparison to process bewteen a reference/threshold
+    value and the item value (see Filters.setFct).
+  * ``FiltersCombiner``: Filter class to manage a combination of filters
+    (EmptyIterfilter, Filter and FiltersCombiner). These filters can be combined
+    by "and", "or" or "xor" combination (see example above: ilter patients with
+    (group with at least C or age lower than 20) and age != None).
+
+Get value from object when eval filter:
+  Evaluated value from evaluated object is accessed with a GetterPath as string
+  (see `anacore.getterPath.GetterPath`). Briefely, GetterPath describes the
+  attributes/key/method to apply on object to get value. This GetterPath is
+  provide in ``getter`` attribute in ``EmptyIterfilter`` and ``Filter``.
+  Otherwise all the object is evaluated.
+  
+  Example:
+    .. highlight:: python
+    .. code-block:: python
+
+      patient = {
+          "id": 1,
+          "classification": {
+              "clinvar": "pathogenic",
+              "cosmic": "unknown_significance"
+          }
+      }
+      
+      filter = Filter("=", "pathogenic", "classification.clinvar")
+      filter.eval(patient)  # Return True
+
+Examples:
+  .. highlight:: python
+  .. code-block:: python
+
+    patients = [
+        {"id": 1, "age": 12, "treatment": "drug A", "group": ["A", "B"]},
+        {"id": 2, "age": 32, "treatment": None, "group": ["C"]},
+        {"id": 3, "age": 64, "treatment": "drug B", "group": []},
+        {"id": 4, "age": None, "treatment": "placebo", "group": None}
+    ]
+
+  :Filter on simple value:
+
+  * Simple filter on age:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = Filter("<", 18, "age")
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [1]
+
+  * Simple filter select patients where treatment contains drug:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = Filter("contains", "drug", "treatment")
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [1, 3]
+
+  * Simple filter exclude patients where treatment contains drug:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = Filter("contains", "drug", "treatment", action="exclude")
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [2, 4]
+
+  :Filter on list:
+
+  * Filter patients with empty list of group:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = EmptyIterFilter("group")
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [3, 4]
+
+
+  * Filter patients with at least one group equal to B:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = Filter("=", "B", "group", aggregator="nb:1")
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [1]
+
+  * Filter patients with at least one group different to B:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = Filter("<>", "B", "group", aggregator="nb:1")
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [1, 2]
+
+  * Filter patients with at all groups different to B:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = Filter("<>", "B", "group", aggregator="ratio:1")
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [2, 3, 4]
+
+  :Combine filters:
+
+  * Filter patients with (group with at least C or age lower than 20) and age != None:
+
+    .. highlight:: python
+    .. code-block:: python
+
+      filter = FiltersCombiner(
+        [
+            FiltersCombiner(
+                [
+                    Filter("==", "C", "group", aggregator="nb:1"),
+                    Filter("<", 20, "age")
+                ],
+                "or"
+            ),
+            Filter("<>", None, "age")
+        ],
+        "and"
+      )
+      [elt["id"] for elt in patients if filter.eval(elt)]  # Return: [1, 2]
+
+Define filter in JSON file:
+  Filters can be defined in JSON file and load from it.
+
+  Example of JSON:
+    .. highlight:: json
+    .. code-block:: json
+
+      {
+          "class": "FiltersCombiner",
+          "filters": [
+              {
+                  "class": "FiltersCombiner",
+                  "filters": [
+                      {"aggregator": "nb:1", "class": "Filter", "getter": "group", "operator": "=", "values": "C"},
+                      {"class": "Filter", "getter": "age", "operator": "<", "values": 20}
+                  ],
+                  "operator": "and"
+              },
+              {
+                  "class": "Filter",
+                  "getter": "age",
+                  "operator": "<>",
+                  "values": null
+              },
+          ],
+          "operator": "or"
+      }
+
+  Load filters:
+    .. highlight:: python
+    .. code-block:: python
+
+      import json
+      from anacore.filters import filtersFromDict
+    
+      with open("filters.json") as reader:
+          rules = json.load(reader)
+          filter = filtersFromDict(rules)
+"""
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
@@ -138,7 +307,9 @@ class EmptyIterFilter(AbstractAtomicFilter):
             try:
                 iter(value)
             except Exception:
-                raise ValueError("Value inspect to filter is not iterable in item {}.".format(item))
+                raise ValueError("Value inspected by filter is not iterable in item {}.".format(item))
+            if isinstance(value, str):
+                raise ValueError("Value inspected by filter is string in item {}.".format(item))
             is_valid = len(value) == 0
         # Apply action
         if self.action == "exclude":
@@ -196,13 +367,13 @@ class Filter(AbstractAtomicFilter):
                     print(curr)
     """
 
-    def __init__(self, operator, values, getter=None, aggregator="nb:1", name=None, description=None, action="select"):
+    def __init__(self, operator, values, getter=None, aggregator=None, name=None, description=None, action="select"):
         """
         Build and return an instance of FiltersCombiner.
 
         :param values: The value(s) used as threshold/reference in item evaluation.
         :type values: *
-        :param operator: The operator used in evaluation.
+        :param operator: The operator used in evaluation. For authorized values see doctring of Filters.setFct.
         :type operator: str
         :param getter: The property or the function applied on evaluated item to get the evaluated value. See Filter.setGetter().
         :type getter: str or callable
@@ -245,23 +416,25 @@ class Filter(AbstractAtomicFilter):
         :type new: str
         """
         self._aggregator = new  # nb:X, ratio:X.X
-        agg_type, agg_threshold = new.split(":")
-        if agg_type == "nb":
-            if not agg_threshold.isdigit():
-                raise ValueError("The value {} in aggregator {} is not a positive integer.".format(agg_threshold, new))
-            int_agg_threshold = int(agg_threshold)
-            self._aggregatorEvalFct = lambda nb, length: nb >= int_agg_threshold
-        elif agg_type == "ratio":
-            float_agg_threshold = None
-            try:
-                float_agg_threshold = float(agg_threshold)
-            except Exception:
-                raise ValueError("The value {} in aggregator {} is not a float.".format(agg_threshold, new))
-            if float_agg_threshold < 0 or float_agg_threshold > 1:
-                raise ValueError("The value {} in aggregator {} is not between 0.0 and 1.0.".format(agg_threshold, new))
-            self._aggregatorEvalFct = lambda nb, length: nb >= float_agg_threshold * length
-        else:
-            raise AttributeError('The aggregator "{}" is invalid. An aggregator must start with "nb" or "ratio".'.format(new))
+        self._aggregatorEvalFct = None
+        if new is not None:
+            agg_type, agg_threshold = new.split(":")
+            if agg_type == "nb":
+                if not agg_threshold.isdigit():
+                    raise ValueError("The value {} in aggregator {} is not a positive integer.".format(agg_threshold, new))
+                int_agg_threshold = int(agg_threshold)
+                self._aggregatorEvalFct = lambda nb, length: nb >= int_agg_threshold
+            elif agg_type == "ratio":
+                float_agg_threshold = None
+                try:
+                    float_agg_threshold = float(agg_threshold)
+                except Exception:
+                    raise ValueError("The value {} in aggregator {} is not a float.".format(agg_threshold, new))
+                if float_agg_threshold < 0 or float_agg_threshold > 1:
+                    raise ValueError("The value {} in aggregator {} is not between 0.0 and 1.0.".format(agg_threshold, new))
+                self._aggregatorEvalFct = lambda nb, length: nb >= float_agg_threshold * length
+            else:
+                raise AttributeError('The aggregator "{}" is invalid. An aggregator must start with "nb" or "ratio".'.format(new))
 
     def eval(self, item):
         """
@@ -275,7 +448,9 @@ class Filter(AbstractAtomicFilter):
         is_valid = False
         # Eval item
         value = self._getterFct(item)
-        if issubclass(value.__class__, list):
+        if self.aggregator is not None:
+            if value is None:  # None is like empty
+                value = list()
             is_valid_list = [self._evalFct(curr_val, self.values) for curr_val in value]
             if self._aggregatorEvalFct(is_valid_list.count(True), len(value)):
                 is_valid = True
@@ -288,7 +463,7 @@ class Filter(AbstractAtomicFilter):
         return is_valid
 
     @staticmethod
-    def fromDict(filter_desc):################################ safe
+    def fromDict(filter_desc):
         """
         Return an instance of Filter corresponding to the parameters in dictionary.
 
@@ -324,7 +499,22 @@ class Filter(AbstractAtomicFilter):
         self.setFct()
 
     def setFct(self):
-        """Set the evaluation function according to the operator."""
+        """
+        Set the evaluation function according to the operator.
+
+        Authorized operators:
+            * ``=``, ``==``, ``eq``: Equality on reference/threshold and value return by evaluated item.
+            * ``!=``, ``<>``, ``ne``: Inequality on reference/threshold and value return by evaluated item.
+            * ``<=``, ``le``: Value is lower or equal than reference/threshold. Return False if value is None.
+            * ``>=``, ``ge``: Value is greater or equal than reference/threshold. Return False if value is None.
+            * ``<``, ``lt``:  Value is lower than reference/threshold. Return False if value is None.
+            * ``>``, ``gt``:  Value is greater than reference/threshold. Return False if value is None.
+            * ``in``: Value is in list of authorized values.
+            * ``not in``: Value is not in list of excluded values.
+            * ``contains``: Value to string contains the reference.
+            * ``substring of``: Value to string is a substring of the reference.
+            * ``empty``: Value is None or is an empty string.
+        """
         if self.operator in ["=", "==", "eq"]:
             if type(self.values) == bool:
                 self._evalFct = lambda val, ref: val == ref and type(val) == bool
@@ -371,7 +561,7 @@ class Filter(AbstractAtomicFilter):
             if len(self.values) == 0:
                 raise AttributeError("Reference value in filter cannot be empty in '{}' comparison.".format(self.operator))
             self._evalFct = lambda val, ref: val not in ref
-        elif self.operator == "empty":
+        elif self.operator == "empty":  # Values is missing or is an empty string
             if self.values is not None:
                 raise AttributeError("Reference value in filter with operator 'empty' must be None.")
             self._evalFct = lambda val, ref: val is None or (issubclass(val.__class__, str) and val == "")
@@ -441,7 +631,7 @@ class FiltersCombiner:
         self.filters = filters
         self.name = name
         self.operator = operator
-        if operator not in ["and", "or", "xor"]:
+        if operator not in {"and", "or", "xor"}:
             raise Exception(
                 'The operator "{}" is not valid for {}.'.format(
                     operator, self.__class__.__name__
@@ -509,7 +699,7 @@ class FiltersCombiner:
         return is_valid
 
 
-def filtersFromDict(filters):################### safe
+def filtersFromDict(filters):
     """
     Return filter from filters descriptor.
 
@@ -519,7 +709,7 @@ def filtersFromDict(filters):################### safe
     :rtype: filters.EmptyIterFilter or filters.Filter or filters.FiltersCombiner
     """
     if "class" not in filters or filters["class"] == "Filter":
-        return Filter.fromDict(filters)################### safe
+        return Filter.fromDict(filters)
     elif filters["class"] == "FiltersCombiner":
         cleaned_desc = deepcopy(filters)
         cleaned_desc.pop('class', None)

@@ -9,20 +9,27 @@ __status__ = 'prod'
 import os
 import sys
 import unittest
-from dict_util import flattenDict
 
-TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FILTERS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(FILTERS_DIR)
+TEST_DIR = os.path.dirname(FILTERS_DIR)
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
+from anacore.filters import Filter
+from dict_util import flattenDict
 
+
+########################################################################
 #
-# Temporay class (must be implemented)
+# FUNCTIONS
 #
+########################################################################
 class AggregatorFunction:
     @staticmethod
-    def build(input):
-        return lambda positive, total: True
+    def build(aggreg_str):
+        f = Filter("==", None, aggregator=aggreg_str)
+        return f._aggregatorEvalFct
 
 
 ########################################################################

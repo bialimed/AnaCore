@@ -49,7 +49,7 @@ class TestGetterPath(unittest.TestCase):
                 ]),
                 "expected": [
                     {"kind": "key", "key": "obj"},
-                    {"kind": "method", "name": "getInfo", "arguments": []},
+                    {"kind": "method", "name": "getInfo"},
                     {"kind": "key", "key": "B"}
                 ]
             },
@@ -87,13 +87,13 @@ class TestGetterPath(unittest.TestCase):
                 ]),
                 "expected": [
                     {"kind": "key", "key": "obj"},
-                    {"kind": "method", "name": "getAD", "arguments": []}
+                    {"kind": "method", "name": "getAD"}
                 ]
             }
         ]
         for curr_test in test_cases:
             self.assertEqual(
-                curr_test["getter"].dict, curr_test["expected"]
+                curr_test["getter"].toDict(), curr_test["expected"]
             )
 
     def testFromDict(self):
@@ -446,7 +446,7 @@ class TestGetterPath(unittest.TestCase):
         ]
         for curr_test in test_cases:
             self.assertEqual(
-                curr_test["getter"].str, curr_test["expected"]
+                curr_test["getter"].toStr(), curr_test["expected"]
             )
 
 

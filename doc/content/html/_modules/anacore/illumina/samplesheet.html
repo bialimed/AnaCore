@@ -72,7 +72,7 @@
 
 <span class="sd">:Code example:</span>
 
-<span class="sd">    List samples from the samplesheet</span>
+<span class="sd">    List samples and index from the samplesheet</span>
 
 <span class="sd">    .. highlight:: python</span>
 <span class="sd">    .. code-block:: python</span>
@@ -82,13 +82,13 @@
 <span class="sd">        samplesheet = SampleSheetFactory.get(&quot;my_run/SampleSheet.csv&quot;):</span>
 <span class="sd">        print(&quot;Samples:&quot;)</span>
 <span class="sd">        for spl in samplesheet.samples:</span>
-<span class="sd">            print(&quot;&quot;, spl[&quot;Library_Basename&quot;])</span>
+<span class="sd">            print(&quot;&quot;, spl.library_basename, spl.barcodes)</span>
 
 <span class="sd">        # Result&gt;</span>
 <span class="sd">        # Samples:</span>
-<span class="sd">        #   sapmleA_S1</span>
-<span class="sd">        #   sampleB_S2</span>
-<span class="sd">        #   sampleC_S3</span>
+<span class="sd">        #  sapmleA_S1 {&quot;index&quot;: &quot;TATCTTCAGC&quot;, &quot;index2&quot;: &quot;CGAATATTGG&quot;}</span>
+<span class="sd">        #  sampleB_S2 {&quot;index&quot;: &quot;TGCACGGATA&quot;, &quot;index2&quot;: &quot;GTTGTCTGCG&quot;}</span>
+<span class="sd">        #  sampleC_S3 {&quot;index&quot;: &quot;GGTTGATAGA&quot;, &quot;index2&quot;: &quot;TCTGCTCCGA&quot;}</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
@@ -197,16 +197,54 @@
 
 <span class="sd">        :param section: Lines from section with a titles row. Each row contains one entry where columns correspond to key and cells to values.</span>
 <span class="sd">        :type section: list</span>
-<span class="sd">        :return: Samples list containing for each: keys and values from data section as dict.</span>
+<span class="sd">        :return: Samples list as anacore.illumina.samplesheet.Sample.</span>
 <span class="sd">        :rtype: list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">samples_obj</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">titles</span><span class="p">,</span> <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromTitledSection</span><span class="p">(</span><span class="n">data_section</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">spl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
-            <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">getIlluminaName</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_ID&quot;</span><span class="p">])</span>
-            <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Library_Basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Basename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_S&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="s2">&quot;Sample_Description&quot;</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">:</span>
-                <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Description&quot;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">samples</span>
+        <span class="n">protected_fields</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;sample_id&quot;</span><span class="p">,</span> <span class="s2">&quot;sample_description&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">,</span> <span class="s2">&quot;index2&quot;</span><span class="p">}</span>
+        <span class="n">spl_idx</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Index come from position in Data (for V1) or BCLConvert_Data (for V3) list afterremove same Sample_ID</span>
+        <span class="n">spl_idx_by_id</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">lib_by_barcode</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+            <span class="n">spl_id</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_ID&quot;</span><span class="p">]</span>
+            <span class="n">barcodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s2">&quot;index&quot;</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">:</span>
+                <span class="n">barcodes</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">&quot;index2&quot;</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;index&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">:</span>
+                    <span class="n">barcodes</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">barcodes</span><span class="p">[</span><span class="s2">&quot;index2&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;index2&quot;</span><span class="p">]</span>
+            <span class="n">barcodes_str</span> <span class="o">=</span> <span class="s2">&quot;+&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">barcodes</span><span class="o">.</span><span class="n">items</span><span class="p">())])</span>
+            <span class="k">if</span> <span class="n">barcodes_str</span> <span class="ow">in</span> <span class="n">lib_by_barcode</span><span class="p">:</span>  <span class="c1"># Same lib on multiple lanes</span>
+                <span class="k">if</span> <span class="s2">&quot;Lane&quot;</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">:</span>
+                    <span class="n">lib_by_barcode</span><span class="p">[</span><span class="n">barcodes_str</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Lane&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;,&quot;</span> <span class="o">+</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Lane&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Sample </span><span class="si">{}</span><span class="s2"> is repeated with same barcodes: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">spl_id</span><span class="p">,</span> <span class="n">barcodes_str</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># New library</span>
+                <span class="c1"># Get description</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="s2">&quot;Sample_Description&quot;</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Description&quot;</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="s2">&quot;Description&quot;</span> <span class="ow">in</span> <span class="n">spl</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Description&quot;</span><span class="p">]</span>
+                <span class="c1"># Get metadata</span>
+                <span class="n">meta</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">spl</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">lower_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">lower_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">protected_fields</span><span class="p">:</span>
+                        <span class="n">meta</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="c1"># Store library</span>
+                <span class="n">lib_spl_idx</span> <span class="o">=</span> <span class="n">spl_idx</span>
+                <span class="k">if</span> <span class="n">spl_id</span> <span class="ow">in</span> <span class="n">spl_idx_by_id</span><span class="p">:</span>  <span class="c1"># Different libraries with same sample ID</span>
+                    <span class="n">lib_spl_idx</span> <span class="o">=</span> <span class="n">spl_idx_by_id</span><span class="p">[</span><span class="n">spl_id</span><span class="p">]</span>  <span class="c1"># Libraries with same sample ID keep the same S{idx}</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># New sample</span>
+                    <span class="n">spl_idx_by_id</span><span class="p">[</span><span class="n">spl_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">lib_spl_idx</span>
+                    <span class="n">spl_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">lib_obj</span> <span class="o">=</span> <span class="n">Sample</span><span class="p">(</span><span class="n">lib_spl_idx</span><span class="p">,</span> <span class="n">spl_id</span><span class="p">,</span> <span class="n">barcodes</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+                <span class="n">samples_obj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lib_obj</span><span class="p">)</span>
+                <span class="n">lib_by_barcode</span><span class="p">[</span><span class="n">barcodes_str</span><span class="p">]</span> <span class="o">=</span> <span class="n">lib_obj</span>
+        <span class="k">return</span> <span class="n">samples_obj</span>
 
     <span class="k">def</span> <span class="nf">_getSections</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -237,20 +275,6 @@
         <span class="n">sections_by_title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSections</span><span class="p">()</span>
         <span class="c1"># Process information</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">sections_by_title</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">title</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">REQUIRED_SECTIONS</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">title</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_Data&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">title</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_Settings&quot;</span><span class="p">):</span>
-                    <span class="n">title</span><span class="p">,</span> <span class="n">sub_title</span> <span class="o">=</span> <span class="n">title</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">sub_title</span> <span class="o">=</span> <span class="n">sub_title</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">title</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">sub_title</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">][</span><span class="n">sub_title</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromTitledSection</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">][</span><span class="n">sub_title</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromSection</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromSection</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromSection</span><span class="p">(</span>
             <span class="n">sections_by_title</span><span class="p">[</span><span class="s2">&quot;Header&quot;</span><span class="p">]</span>
         <span class="p">)</span>
@@ -263,9 +287,134 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReads</span><span class="p">(</span>
             <span class="n">sections_by_title</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">DEMULTIPLEX_SECTION</span><span class="p">]</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">sections_by_title</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">title</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">REQUIRED_SECTIONS</span> <span class="ow">and</span> <span class="n">title</span> <span class="o">!=</span> <span class="s2">&quot;Manifests&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">title</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_Data&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">title</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_Settings&quot;</span><span class="p">):</span>
+                    <span class="n">title</span><span class="p">,</span> <span class="n">sub_title</span> <span class="o">=</span> <span class="n">title</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">sub_title</span> <span class="o">=</span> <span class="n">sub_title</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">title</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">sub_title</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">][</span><span class="n">sub_title</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromTitledSection</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">][</span><span class="n">sub_title</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromSection</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">[</span><span class="n">title</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInfoFromSection</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="c1"># Post process</span>
         <span class="k">if</span> <span class="s2">&quot;Description&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;Description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Sample"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.Sample">[docs]</a><span class="k">class</span> <span class="nc">Sample</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a sample from sample sheet. One sample could represent several libraries if they are the same sample ID.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheet_index</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">barcodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Sample.</span>
+
+<span class="sd">        :param sheet_index: Index of sample in samplesheet (start from 1). This element is used for library name: &lt;splID&gt;_S&lt;splSheetIndex&gt;.</span>
+<span class="sd">        :type sheet_index: int</span>
+<span class="sd">        :param id: Sample ID (example: splA).</span>
+<span class="sd">        :type id: str</span>
+<span class="sd">        :param barcodes: Sample molecular index used in demultiplex. Example:</span>
+<span class="sd">            * For single-end: {&quot;index&quot;: &quot;ATGC&quot;}</span>
+<span class="sd">            * For paired-end: {&quot;index&quot;: &quot;ATGC&quot;, &quot;index2&quot;: &quot;CGCA&quot;}</span>
+<span class="sd">            * For paired-end with skipped index 1: {&quot;index&quot;: &quot;&quot;, &quot;index2&quot;: &quot;CGCA&quot;}</span>
+<span class="sd">        :type barcodes: dict</span>
+<span class="sd">        :param description: Sample description.</span>
+<span class="sd">        :type description: str</span>
+<span class="sd">        :param metadata: Additional data on sample (example: {&quot;panel&quot;: &quot;Enrich_Soli-Tumor_V3&quot;, &quot;project&quot;: &quot;Rimo&quot;}). These data come from additional column in section Data.</span>
+<span class="sd">        :type metadata: dict</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: Sample</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">barcodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">barcodes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">barcodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet_index</span> <span class="o">=</span> <span class="n">sheet_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">metadata</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the start of file basename corresponding to the sample (example: splA).</span>
+
+<span class="sd">        :return: Sample basename.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">getIlluminaName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">library_basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the start of file basename corresponding to the library (example: splA_S3).</span>
+
+<span class="sd">        :return: Library basename.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_S</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_index</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Sample.toDict"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.Sample.toDict">[docs]</a>    <span class="k">def</span> <span class="nf">toDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return dict representation of the instance.</span>
+
+<span class="sd">        :return: Dict representation of the instance.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="n">res</span><span class="p">[</span><span class="s2">&quot;basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basename</span>
+        <span class="n">res</span><span class="p">[</span><span class="s2">&quot;library_basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library_basename</span>
+        <span class="k">return</span> <span class="n">res</span></div></div>
+
+
+<div class="viewcode-block" id="SampleADS"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleADS">[docs]</a><span class="k">class</span> <span class="nc">SampleADS</span><span class="p">(</span><span class="n">Sample</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage an amplicon double strand sample from sample sheet. One sample could represent several libraries if they are the same sample ID.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the start of file basename corresponding to the sample (example: splA).</span>
+
+<span class="sd">        :return: Sample basename.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">getIlluminaName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Sample_Name&quot;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="SampleADS.findSplFiles"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleADS.findSplFiles">[docs]</a>    <span class="k">def</span> <span class="nf">findSplFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">end_pattern</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;library&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return paths to files in directory corresponding to the subject.</span>
+
+<span class="sd">        :param directory: The path to the directory where the files names are evaluated.</span>
+<span class="sd">        :type directory: str</span>
+<span class="sd">        :param end_pattern: File pattern added at the end of sample basename or library basename to select files.</span>
+<span class="sd">        :type end_pattern: str</span>
+<span class="sd">        :param subject: &quot;library&quot; or &quot;sample&quot; to select files corresponding to libraries or corresponding to samples.</span>
+<span class="sd">        :type subject: str</span>
+<span class="sd">        :return: Paths of the corresponding files.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">selector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">libray_basename</span> <span class="k">if</span> <span class="n">subject</span> <span class="o">==</span> <span class="s2">&quot;library&quot;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">basename</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">selector</span> <span class="o">+</span> <span class="n">end_pattern</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SampleADS.setSplFiles"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleADS.setSplFiles">[docs]</a>    <span class="k">def</span> <span class="nf">setSplFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">end_pattern</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;library&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.</span>
+
+<span class="sd">        :param tag: The attribute used in self.sample to store the files paths.</span>
+<span class="sd">        :type tag: str</span>
+<span class="sd">        :param directory: The path to the directory where the files names are evaluated.</span>
+<span class="sd">        :type directory: str</span>
+<span class="sd">        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.</span>
+<span class="sd">        :type end_pattern: str</span>
+<span class="sd">        :param subject: &quot;library&quot; or &quot;sample&quot; to select files corresponding to libraries or corresponding to samples.</span>
+<span class="sd">        :type subject: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findSplFiles</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">end_pattern</span><span class="p">,</span> <span class="n">subject</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="SampleSheetFactory"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleSheetFactory">[docs]</a><span class="k">class</span> <span class="nc">SampleSheetFactory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -283,6 +432,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">SampleSheetV2</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">SampleSheetV2</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">SampleSheetADS</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">SampleSheetADS</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">SampleSheetV1</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">SampleSheetV1</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -370,6 +521,32 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;phases&quot;</span><span class="p">:</span> <span class="n">reads_phases</span><span class="p">}</span>
 
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read file content and store information on the instance&#39;s attributes.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
+        <span class="c1"># Add samples data from software data to self.samples like in V1 format</span>
+        <span class="n">spl_by_id</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">spl</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">spl_by_id</span><span class="p">:</span>
+                <span class="n">spl_by_id</span><span class="p">[</span><span class="n">spl</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">spl_by_id</span><span class="p">[</span><span class="n">spl</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spl</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">title</span><span class="p">,</span> <span class="n">curr_extra</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;data&quot;</span> <span class="ow">in</span> <span class="n">curr_extra</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_extra</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">curr_extra</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">lower_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">curr_extra</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+                    <span class="k">if</span> <span class="s2">&quot;sample_id&quot;</span> <span class="ow">in</span> <span class="n">lower_keys</span><span class="p">:</span>  <span class="c1"># Section contains data by sample</span>
+                        <span class="k">for</span> <span class="n">spl_metadata</span> <span class="ow">in</span> <span class="n">curr_extra</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]:</span>
+                            <span class="n">spl_id</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">spl_metadata</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;sample_id&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">spl_metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                                <span class="n">lower_key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                                <span class="k">if</span> <span class="n">lower_key</span> <span class="o">!=</span> <span class="s2">&quot;sample_id&quot;</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">lower_key</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;sample_description&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">}:</span>
+                                        <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">spl_by_id</span><span class="p">[</span><span class="n">spl_id</span><span class="p">]:</span>
+                                            <span class="n">curr_spl</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">val</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="k">for</span> <span class="n">curr_spl</span> <span class="ow">in</span> <span class="n">spl_by_id</span><span class="p">[</span><span class="n">spl_id</span><span class="p">]:</span>
+                                            <span class="n">curr_spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
 <div class="viewcode-block" id="SampleSheetV2.isValid"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleSheetV2.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -411,11 +588,46 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader for SampleSheet.csv designed for AmpliconDS analysis.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_getSamplesFromData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_section</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return samples list containing for each: keys and values from data section as dict.</span>
+
+<span class="sd">        :param section: Lines from section with a titles row. Each row contains one entry where columns correspond to key and cells to values.</span>
+<span class="sd">        :type section: list</span>
+<span class="sd">        :return: Samples list as anacore.illumina.samplesheet.SampleADS.</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_getSamplesFromData</span><span class="p">(</span><span class="n">data_section</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">spl_idx</span><span class="p">,</span> <span class="n">spl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
-            <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">getIlluminaName</span><span class="p">(</span><span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Name&quot;</span><span class="p">])</span>
-            <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Library_Basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Basename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_S&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">spl_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">samples</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">SampleADS</span><span class="p">(</span><span class="n">spl</span><span class="o">.</span><span class="n">sheet_index</span><span class="p">,</span> <span class="n">spl</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">spl</span><span class="o">.</span><span class="n">barcodes</span><span class="p">,</span> <span class="n">spl</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="n">samples</span>
+        <span class="p">]</span>
+
+<div class="viewcode-block" id="SampleSheetADS.isValid"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleSheetADS.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return true if the file is in SamplSheet Amplicon Double Strand format.</span>
+
+<span class="sd">        :param filepath: The file path.</span>
+<span class="sd">        :type filepath: str</span>
+<span class="sd">        :return: True if the file is in SamplSheet Amplicon Double Strand format.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">SampleSheetV1</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">samplesheet</span> <span class="o">=</span> <span class="n">SampleSheetV1</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;Application&quot;</span> <span class="ow">in</span> <span class="n">samplesheet</span><span class="o">.</span><span class="n">header</span> <span class="ow">and</span> \
+                   <span class="n">samplesheet</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;Application&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Amplicon - DS&quot;</span> <span class="ow">and</span> \
+                   <span class="nb">len</span><span class="p">(</span><span class="n">samplesheet</span><span class="o">.</span><span class="n">manifests</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samplesheet</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">elif</span> <span class="s2">&quot;Manifest&quot;</span> <span class="ow">in</span> <span class="n">samplesheet</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+                        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
 
 <div class="viewcode-block" id="SampleSheetADS.filterPanels"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleSheetADS.filterPanels">[docs]</a>    <span class="k">def</span> <span class="nf">filterPanels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected_manifests</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -440,53 +652,13 @@
         <span class="c1"># Update samples</span>
         <span class="n">new_spl</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">new_by_old_id</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]):</span>
-                    <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_ID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_ID&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">new_by_old_id</span><span class="p">[</span><span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]]</span>
-                <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_by_old_id</span><span class="p">[</span><span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="n">spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">new_by_old_id</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">spl</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]):</span>
+                    <span class="n">spl</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">spl</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">spl</span><span class="o">.</span><span class="n">id</span> <span class="o">+=</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">new_by_old_id</span><span class="p">[</span><span class="n">spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]]</span>
+                <span class="n">spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_by_old_id</span><span class="p">[</span><span class="n">spl</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;Manifest&quot;</span><span class="p">]]</span>
                 <span class="n">new_spl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spl</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">new_spl</span></div>
-
-<div class="viewcode-block" id="SampleSheetADS.findSplFiles"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleSheetADS.findSplFiles">[docs]</a>    <span class="k">def</span> <span class="nf">findSplFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">end_pattern</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;library&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return by sample name or library name all the files in directory corresponding to the subject.</span>
-
-<span class="sd">        :param directory: The path to the directory where the files names are evaluated.</span>
-<span class="sd">        :type directory: str</span>
-<span class="sd">        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.</span>
-<span class="sd">        :type end_pattern: str</span>
-<span class="sd">        :param subject: &quot;library&quot; or &quot;sample&quot; to select files corresponding to libraries or corresponding to samples.</span>
-<span class="sd">        :type subject: str</span>
-<span class="sd">        :return: By subject the paths of the corresponding files.</span>
-<span class="sd">        :rtype: dict</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">subject_start_tag</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
-        <span class="n">files_by_elt</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">subject</span> <span class="o">==</span> <span class="s2">&quot;library&quot;</span> <span class="ow">or</span> <span class="n">spl</span><span class="p">[</span><span class="s2">&quot;Sample_Name&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files_by_elt</span><span class="p">:</span>  <span class="c1"># The subject is the library or the subject is the sample and no library has been already processed for this sample</span>
-                <span class="n">files_by_elt</span><span class="p">[</span><span class="n">spl</span><span class="p">[</span><span class="n">subject_start_tag</span> <span class="o">+</span> <span class="s2">&quot;_Name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">spl</span><span class="p">[</span><span class="n">subject_start_tag</span> <span class="o">+</span> <span class="s2">&quot;_Basename&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">end_pattern</span><span class="p">)</span>
-                <span class="p">))</span>
-        <span class="k">return</span> <span class="n">files_by_elt</span></div>
-
-<div class="viewcode-block" id="SampleSheetADS.setSplFiles"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleSheetADS.setSplFiles">[docs]</a>    <span class="k">def</span> <span class="nf">setSplFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">end_pattern</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">&quot;library&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add the files in directory corresponding to the subject. These information are keyed by provided tag for each element of self.samples.</span>
-
-<span class="sd">        :param tag: The attribute used in self.sample to store the files paths.</span>
-<span class="sd">        :type tag: str</span>
-<span class="sd">        :param directory: The path to the directory where the files names are evaluated.</span>
-<span class="sd">        :type directory: str</span>
-<span class="sd">        :param end_pattern: File pattern added at the end of each sample basename or library basename to select files.</span>
-<span class="sd">        :type end_pattern: str</span>
-<span class="sd">        :param subject: &quot;library&quot; or &quot;sample&quot; to select files corresponding to libraries or corresponding to samples.</span>
-<span class="sd">        :type subject: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">subject_tag</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;_Name&quot;</span>
-        <span class="n">files_by_spl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findSplFiles</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">end_pattern</span><span class="p">,</span> <span class="n">subject</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">spl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-            <span class="n">spl</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">files_by_spl</span><span class="p">[</span><span class="n">spl</span><span class="p">[</span><span class="n">subject_tag</span><span class="p">]]</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">new_spl</span></div></div>
 </pre></div>
 
            </div>
