@@ -1,11 +1,16 @@
-# Release 3.0.0 [DEV]
+# Release 3.0.0 [2023-06-13]
 
 ### Break changes
   * `anacore.filters`:
-    * The operator contains is rectrict to strings instead of strings and lists.
-    * Default aggregator become None to manage non iterable value. For iterable, aggregator must be set.
-    * Missing keys/attributes return None for in getter function. 
-    * Add `EmptyIterFilter` to select or exclude item with empty list in get value.    
+    * Default aggregator become None. Uniterable values must have aggregator
+    set to None and iterable must have aggregator set to nb:X or ratio:X.X.
+    Previous filters with explicit aggregator on uniterable value must be change
+    to work.
+    * Missing keys/attributes return None in getter function.
+    * The operator *contains* works on strings instead of strings and lists
+    previously.
+    * Add `EmptyIterFilter` to select/exclude item with empty list returned by
+    getter.
   * `anacore.illumina`:
     * `SampleSheetV[1|2].samples` return a list of Sample object
     instead of the previous list of dict.
@@ -24,9 +29,9 @@
 
 ### Improvements
   * Add `anacore.vcf.VCFSymbAltRecord` to handle structural variants with
-  symbolic alternative like \<DUP\>, \<DEL\>, etc. `anacore.vcf.VCFIO` can now reads
-  VCF containing standard variants and structural variants except BND. BND keep
-  currently manage in `anacore.fusion`.
+  symbolic alternative like \<DUP\>, \<DEL\>, etc. `anacore.vcf.VCFIO` can now
+  reads VCF containing standard variants and structural variants except BND. BND
+  keep currently manage in `anacore.fusion`.
   * Add log and statistics reader for bcl-convert:
   `anacore.illumina.demultiplex.bclconvert.DemultLog` and
   `anacore.illumina.demultiplex.bclconvert.DemultStat`.

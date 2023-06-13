@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2022 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -54,6 +54,7 @@ class HubbleDiff(HashedSVIO):
             self.ref, record["Chromosome"], int(record["Start"]), record["RepeatUnit"]
         ) * len(record["RepeatUnit"])
         is_assessed = record["Assessed"].lower() == "true"
+        pass_filter = record["PassFilter"].lower() == "true" if "PassFilter" in record else None
         return Locus.fromDict({
             "position": "{}:{}-{}".format(
                 record["Chromosome"],
@@ -67,7 +68,8 @@ class HubbleDiff(HashedSVIO):
                     "data": {
                         "nt": record["RepeatUnit"],
                         "distance": float(record["Distance"]) if is_assessed else None,
-                        "p_value": float(record["PValue"]) if is_assessed else None
+                        "p_value": float(record["PValue"]) if is_assessed else None,
+                        "pass_filter": pass_filter
                     }
                 }
             }

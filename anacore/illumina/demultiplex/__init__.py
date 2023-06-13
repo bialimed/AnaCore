@@ -52,4 +52,4 @@ class DemultStatFactory:
                 os.path.join(folder_path, "Reports", "Top_Unknown_Barcodes.csv"),
             )
         else:
-            raise IOError("The folder {} does not is not valid for DemultStat.".format(folder_path))
+            raise IOError("The folder {} is not valid for DemultStat.".format(folder_path))
