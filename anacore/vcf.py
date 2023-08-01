@@ -79,7 +79,7 @@ Classes and functions for reading/writing/processing VCF.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.34.0'
+__version__ = '1.35.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -540,7 +540,7 @@ class VCFRecord:
         :return: True if the variant is a deletion.
         :rtype: bool
         :warnings: This method can only be used on record with only one alternative allele.
-        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
+        :note: If the alternative allele and the reference allele have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(self.getName()))
@@ -629,44 +629,36 @@ class VCFRecord:
             record_type = "variation"
         return record_type
 
-    def fastDownstreamed(self, seq_handler, padding=500):
+    def fastDownstreamed(self, seq_handler, padding=50):
         """
-        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition.
+        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition and standardized.
 
         :param seq_handler: File handle to the reference sequences file.
         :type seq_handler: anacore.sequenceIO.IdxFastaIO
-        :param padding: Number of nucleotids to inspect after variant. Upstream movement is limited to this number of nucleotids.
+        :param padding: Size of sliding windows to process reference sequence.
         :type padding: int
-        :return: The simplified record moved to the most downstream postition.
+        :return: The simplified record moved to the most downstream postition and standardized.
+        :rtype: anacore.vcf.VCFRecord
+
+        .. deprecated::
+            Replaced by :func:`VCFRecord.downstreamed`.
+        """
+        return self.downstreamed(seq_handler, padding)
+
+    def downstreamed(self, seq_handler, buffer_size=50):
+        """
+        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition and standardized.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :return: The simplified record moved to the most downstream postition and standardized.
         :rtype: anacore.vcf.VCFRecord
         """
-        if len(self.alt) > 1:
-            raise Exception('The function "fastDownstreamed" cannot be used on multi-allelic variant {}.'.format(self.getName()))
-        downstream_rec = VCFRecord(self.chrom, self.pos, None, self.ref, [elt for elt in self.alt])
-        if self._normalized is not None:
-            downstream_rec._normalized = deepcopy(self._normalized)
-        ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
-        alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
-        if len(ref) != 1 or len(alt) != 1:
-            # Move to downstream
-            sub_region = seq_handler.getSub(self.chrom, self.pos, self.pos + len(self.ref) + padding)
-            downstream_rec.pos = 1  # Switch position from chromosome to position from subregion
-            downstream_rec = downstream_rec.getMostDownstream(sub_region)
-            downstream_rec.pos = self.pos + downstream_rec.pos - 1  # Switch position from subregion to position from chromosome
-            if len(ref) != len(alt):
-                # Add previous nt
-                prev_nt = seq_handler.getSub(downstream_rec.chrom, downstream_rec.pos - 1, downstream_rec.pos - 1)
-                if downstream_rec.ref == downstream_rec.getEmptyAlleleMarker():  # Insertion
-                    downstream_rec.ref = prev_nt
-                    downstream_rec.alt[0] = prev_nt + downstream_rec.alt[0]
-                    downstream_rec.pos -= 1
-                elif downstream_rec.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Deletion
-                    downstream_rec.ref = prev_nt + downstream_rec.ref
-                    downstream_rec.alt[0] = prev_nt
-                    downstream_rec.pos -= 1
-        return downstream_rec
+        return self.streamed("down", seq_handler, buffer_size)
 
-    def fastStandardize(self, seq_handler, padding=500):
+    def fastStandardize(self, seq_handler, padding=50):
         """
         Standardize record (move to the most upstream position and remove unecessary nucleotids). This standardization concerns only POS, REF and ALT.
 
@@ -674,27 +666,25 @@ class VCFRecord:
         :type seq_handler: anacore.sequenceIO.IdxFastaIO
         :param padding: Number of nucleotids to inspect before variant. Upstream movement is limited to this number of nucleotids.
         :type padding: int
+
+        .. deprecated::
+            Replaced by :func:`VCFRecord.standardize`.
         """
-        # Move to upstream
-        sub_start = max(self.pos - padding, 1)
-        real_padding = self.pos - sub_start
-        sub_region = seq_handler.getSub(self.chrom, sub_start, self.pos + len(self.ref))
-        self.pos = real_padding + 1  # Switch position from chromosome to position from subregion
-        upstream_rec = self.getMostUpstream(sub_region)
-        self.pos = upstream_rec.pos - 1 + sub_start  # Switch position from subregion to position from chromosome
+        self.standardize(seq_handler, padding)
+
+    def standardize(self, seq_handler, buffer_size=50):
+        """
+        Standardize record (move to the most upstream position and remove unecessary nucleotids). This standardization concerns only POS, REF and ALT.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        """
+        upstream_rec = self.upstreamed(seq_handler, buffer_size)
+        self.pos = upstream_rec.pos
         self.ref = upstream_rec.ref
         self.alt[0] = upstream_rec.alt[0]
-        # Add previous nt
-        if self.isIndel():
-            prev_nt = seq_handler.getSub(self.chrom, self.pos - 1, self.pos - 1)
-            if self.ref == VCFRecord.getEmptyAlleleMarker():  # Insertion
-                self.ref = prev_nt
-                self.alt[0] = prev_nt + self.alt[0]
-                self.pos -= 1
-            elif self.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Deletion
-                self.ref = prev_nt + self.ref
-                self.alt[0] = prev_nt
-                self.pos -= 1
 
     def normalizeSingleAllele(self):
         """
@@ -760,12 +750,14 @@ class VCFRecord:
         elif len(self.alt[0]) == len(self.ref) and len(self.ref) != 1:
             twoSideTrimming(self)
 
-    def getMostUpstream(self, ref_seq):
+    def getMostUpstream(self, seq_handler, buffer_size=50):
         """
-        Return the most upstream variant that can have the same alternative sequence of the instance.
+        Return the most upstream variant with same consequence on genomic reference.
 
-        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).
-        :type ref_seq: str
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
         :return: The normalized most upstream variant (see normalizeSingleAllele).
         :rtype: VCFRecord
         :warnings: This method can only be used on record with only one alternative allele.
@@ -777,37 +769,47 @@ class VCFRecord:
             self._normalized.normalizeSingleAllele()
         new_record = self._normalized
         if new_record.ref == VCFRecord.getEmptyAlleleMarker() or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker():  # normalized indel
-            uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
             # Deletion
             if new_record.isDeletion():
-                if uc_ref_seq[(new_record.pos - 1):(new_record.pos - 1 + len(ref))] != ref:
-                    raise Exception('The reference on position ' + new_record.chrom + ':' + str(new_record.pos) + ' does not correspond to "' + ref + '".')
-                before_var = uc_ref_seq[0:(new_record.pos - 1)]
-                while before_var != "" and before_var[-1] == ref[-1]:
-                    # shift to upstream
-                    before_var = before_var[:-1]
-                    ref = ref[-1] + ref[:-1]
-                new_record.pos = len(before_var) + 1
+                ref_in_file = seq_handler.getSub(new_record.chrom, new_record.pos, new_record.pos - 1 + len(ref))
+                if ref_in_file.upper() != ref:
+                    raise Exception(
+                        'The reference on position {}:{} does not correspond to "{}".'.format(
+                            new_record.chrom, new_record.pos, ref
+                        )
+                    )
+                new_pos = new_record.pos
+                for uc_before_var in _refDownIter(seq_handler, new_record.chrom, new_pos - 1, buffer_size):
+                    if uc_before_var != ref[-1]:
+                        break
+                    else:  # shift to upstream
+                        new_pos -= 1
+                        ref = ref[-1] + ref[:-1]
+                new_record.pos = new_pos
                 new_record.ref = ref
             # Insertion
             else:
-                before_var = uc_ref_seq[0:(new_record.pos - 1)]
-                while before_var != "" and before_var[-1] == alt[-1]:
-                    # shift to upstream
-                    before_var = before_var[:-1]
-                    alt = alt[-1] + alt[:-1]
-                new_record.pos = len(before_var) + 1
+                new_pos = new_record.pos
+                for uc_before_var in _refDownIter(seq_handler, new_record.chrom, new_pos - 1, buffer_size):
+                    if uc_before_var != alt[-1]:
+                        break
+                    else:  # shift to upstream
+                        new_pos -= 1
+                        alt = alt[-1] + alt[:-1]
+                new_record.pos = new_pos
                 new_record.alt = [alt]
         return new_record
 
-    def getMostDownstream(self, ref_seq):
+    def getMostDownstream(self, seq_handler, buffer_size=50):
         """
-        Return the most downstream variant that can have the same alternative sequence of the instance.
+        Return the most downstream variant with same consequence on genomic reference.
 
-        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).
-        :type ref_seq: str
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
         :return: The normalized most downstream variant (see normalizeSingleAllele).
         :rtype: VCFRecord
         :warnings: This method can only be used on record with only one alternative allele.
@@ -819,32 +821,36 @@ class VCFRecord:
             self._normalized.normalizeSingleAllele()
         new_record = self._normalized
         if new_record.ref == VCFRecord.getEmptyAlleleMarker() or new_record.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Normalized indel
-            uc_ref_seq = ref_seq.upper()
             ref = new_record.ref
             alt = new_record.alt[0]
             # Deletion
             if new_record.isDeletion():
-                if uc_ref_seq[(new_record.pos - 1):(new_record.pos - 1 + len(ref))] != ref:
-                    raise Exception('The reference on position ' + new_record.chrom + ':' + str(new_record.pos) + ' does not correspond to "' + ref + '".')
-                after_var = uc_ref_seq[new_record.pos + len(ref) - 1:]
-                nb_move = 0
-                while after_var != "" and after_var[0] == ref[0]:
-                    # shift to downstream
-                    after_var = after_var[1:]
-                    ref = ref[1:] + ref[0]
-                    nb_move += 1
-                new_record.pos += nb_move
+                ref_in_file = seq_handler.getSub(new_record.chrom, new_record.pos, new_record.pos - 1 + len(ref))
+                if ref_in_file.upper() != ref:
+                    raise Exception(
+                        'The reference on position {}:{} does not correspond to "{}".'.format(
+                            new_record.chrom, new_record.pos, ref
+                        )
+                    )
+                new_pos = new_record.pos
+                for uc_after_var in _refUpIter(seq_handler, new_record.chrom, new_pos + len(ref), buffer_size):
+                    if uc_after_var != ref[0]:
+                        break
+                    else:  # shift to downstream
+                        new_pos += 1
+                        ref = ref[1:] + ref[0]
+                new_record.pos = new_pos
                 new_record.ref = ref
             # Insertion
             else:
-                after_var = uc_ref_seq[new_record.pos - 1:]
-                nb_move = 0
-                while after_var != "" and after_var[0] == alt[0]:
-                    # shift to upstream
-                    after_var = after_var[1:]
-                    alt = alt[1:] + alt[0]
-                    nb_move += 1
-                new_record.pos += nb_move
+                new_pos = new_record.pos
+                for uc_after_var in _refUpIter(seq_handler, new_record.chrom, new_pos, buffer_size):
+                    if uc_after_var != alt[0]:
+                        break
+                    else:  # shift to downstream
+                        new_pos += 1
+                        alt = alt[1:] + alt[0]
+                new_record.pos = new_pos
                 new_record.alt = [alt]
         return new_record
 
@@ -1213,6 +1219,73 @@ class VCFRecord:
             raise Exception('The depth cannot be retrieved in variant "' + self.chrom + ":" + str(self.pos) + '".')
         return DP
 
+    def streamed(self, stream_direction, seq_handler, buffer_size=50):
+        """
+        Return a simplified record (CHROM, POS, ALT and REF) moved to the most upstream or downstream postition and standardized.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param stream_direction: Stream direction: "up" or "down".
+        :type stream_direction: str
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :return: The simplified record moved to the most upstream or downstream postition and standardized.
+        :rtype: anacore.vcf.VCFRecord
+        """
+        if len(self.alt) > 1:
+            raise Exception('The function "streamed" cannot be used on multi-allelic variant {}.'.format(self.getName()))
+        new_rec = VCFRecord(self.chrom, self.pos, None, self.ref, [elt for elt in self.alt])
+        if self._normalized is not None:
+            new_rec._normalized = deepcopy(self._normalized)
+        ref = self.ref.replace(VCFRecord.getEmptyAlleleMarker(), "")
+        alt = self.alt[0].replace(VCFRecord.getEmptyAlleleMarker(), "")
+        if len(ref) != 1 or len(alt) != 1:
+            if stream_direction == "up":
+                new_rec = new_rec.getMostUpstream(seq_handler, buffer_size)
+            else:
+                new_rec = new_rec.getMostDownstream(seq_handler, buffer_size)
+            if len(ref) != len(alt):
+                # For simple insertions and deletions in which either the REF or
+                # one of the ALT alleles would otherwise be null/empty, the REF
+                # and ALT Strings must include the base before the variant
+                # (which must be reflected in the POS field), unless the variant
+                # occurs at position 1 on the contig in which case it must
+                # include the base after the variant
+                if new_rec.pos == 1:  # Add next nt
+                    if new_rec.ref == VCFRecord.getEmptyAlleleMarker():  # Insertion
+                        first_nt = seq_handler.getSub(new_rec.chrom, 1, 1).upper()
+                        new_rec.ref = first_nt
+                        new_rec.alt[0] = new_rec.alt[0] + first_nt
+                    elif new_rec.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Deletion
+                        next_nt = seq_handler.getSub(new_rec.chrom, 2, 2).upper()
+                        new_rec.ref = new_rec.ref + next_nt
+                        new_rec.alt[0] = next_nt
+                else:  # Add previous nt
+                    if new_rec.ref == VCFRecord.getEmptyAlleleMarker():  # Insertion
+                        prev_nt = seq_handler.getSub(new_rec.chrom, new_rec.pos - 1, new_rec.pos - 1).upper()
+                        new_rec.ref = prev_nt
+                        new_rec.alt[0] = prev_nt + new_rec.alt[0]
+                        new_rec.pos -= 1
+                    elif new_rec.alt[0] == VCFRecord.getEmptyAlleleMarker():  # Deletion
+                        prev_nt = seq_handler.getSub(new_rec.chrom, new_rec.pos - 1, new_rec.pos - 1).upper()
+                        new_rec.ref = prev_nt + new_rec.ref
+                        new_rec.alt[0] = prev_nt
+                        new_rec.pos -= 1
+        return new_rec
+
+    def upstreamed(self, seq_handler, buffer_size=50):
+        """
+        Return a simplified record (CHROM, POS, ALT and REF) moved to the most upstream postition and standardized.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :return: The simplified record moved to the most upstream postition and standardized.
+        :rtype: anacore.vcf.VCFRecord
+        """
+        return self.streamed("up", seq_handler, buffer_size)
+
 
 class VCFSymbAltRecord(VCFRecord):
     """Class to manage a variant record with symbolic alternative like <DUP>, <DEL>, etc."""
@@ -1240,8 +1313,24 @@ class VCFSymbAltRecord(VCFRecord):
 
         :return: True if the variant contains an allele corresponding to an insertion or a deletion.
         :rtype: bool
+        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.
         """
         raise NotImplementedError("Method 'containsIndel' is not implemented for {}.".format(self.__class__.__name__))
+
+    def downstreamed(self, seq_handler, buffer_size=500, convert_dup=False):
+        """
+        Return record moved to the most downstream postition.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :param convert_dup: If True, DUP are converted to INS to move on most downstream.
+        :type convert_dup: bool
+        :return: Record moved to the most downstream postition.
+        :rtype: anacore.vcf.VCFSymbAltRecord
+        """
+        return self.streamed("down", seq_handler, buffer_size, convert_dup)
 
     @property
     def end(self):
@@ -1265,40 +1354,152 @@ class VCFSymbAltRecord(VCFRecord):
             end = self.pos + abs(self.sv_len)
         return end
 
-    def fastDownstreamed(self, seq_handler, padding=500):
-        raise NotImplementedError("Method 'fastDownstreamed' is not implemented for {}.".format(self.__class__.__name__))
-
-    def fastStandardize(self, seq_handler, padding=500):
-        raise NotImplementedError("Method 'fastStandardize' is not implemented for {}.".format(self.__class__.__name__))
-
-    @staticmethod
-    def fromStdRecord(record):
+    def getMostDownstream(self, seq_handler, buffer_size=500, convert_dup=False):
         """
-        Build and return an instance of VCFSymbAltRecord from VCFRecord.
+        Return the most downstream variant with same consequence on genomic reference.
 
-        :param record: Initial VCFRecord.
-        :type record: VCFRecord
-        :return: The new instance.
-        :rtype: VCFSymbAltRecord
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :return: The most downstream variant.
+        :param convert_dup: If True, DUP are converted to INS to move on most downstream.
+        :type convert_dup: bool
+        :rtype: VCFRecord
+        :warnings: This method can only be used on record with only one alternative allele.
         """
-        return VCFSymbAltRecord(
-            record.chrom,
-            record.pos,
-            record.id,
-            record.ref,
-            record.alt,
-            record.qual,
-            record.filter,
-            record.info,
-            record.format,
-            record.samples
-        )
+        downstreamed_rec = None
+        if "IMPRECISE" in self.info:
+            downstreamed_rec = deepcopy(self)
+        elif "CIPOS" in self.info:
+            downstreamed_rec = deepcopy(self)
+            cipos_up, cipos_down = self.info["CIPOS"]  # 2 numbers in releases prior to VCF4.4 and 2 * alt_nb after
+            downstreamed_rec.pos = downstreamed_rec.pos + cipos_down
+            downstreamed_rec.info["CIPOS"] = (cipos_up - cipos_down, 0)
+            if self.pos != downstreamed_rec.pos:  # Moved
+                if convert_dup and self.alt[0].startswith("<DUP"):  # DUP and authorized to convert to INS
+                    downstreamed_rec.alt = ["<INS>"]
+                    downstreamed_rec.pos = downstreamed_rec.pos + abs(self.sv_len)
+                    downstreamed_rec.info["CIPOS"] = (
+                        downstreamed_rec.info["CIPOS"][0] - abs(self.sv_len), 0
+                    )
+                    if "END" in self.info:
+                        downstreamed_rec.info["END"] = downstreamed_rec.pos
+                else:  # All others
+                    if "END" in self.info:
+                        downstreamed_rec.info["END"] += cipos_down
+                downstreamed_rec.ref = seq_handler.getSub(self.chrom, downstreamed_rec.pos, downstreamed_rec.pos)
+        else:
+            alt = self.alt[0]
+            if alt.startswith("<INS"):  # Sequence of insertion is unknown
+                warnings.warn(
+                    'Symbolic insertion {} cannot be convert to litteral: sequence is unknown.'.format(
+                        self.getName()
+                    )
+                )
+                downstreamed_rec = deepcopy(self)
+            elif alt.startswith("<DUP"):
+                litteral_rec = self.litteralized(seq_handler)
+                litteral_downstreamed_rec = litteral_rec.downstreamed(seq_handler, buffer_size)
+                downstreamed_rec = deepcopy(self)
+                if self.pos != litteral_downstreamed_rec.pos:  # DUP has been moved
+                    if convert_dup:
+                        downstreamed_rec.pos = litteral_downstreamed_rec.pos
+                        downstreamed_rec.ref = litteral_downstreamed_rec.ref[0]
+                        downstreamed_rec.alt = ["<INS>"]
+                    else:
+                        downstreamed_rec.pos = litteral_downstreamed_rec.pos - abs(self.sv_len)
+                        downstreamed_rec.ref = seq_handler.getSub(self.chrom, downstreamed_rec.pos, downstreamed_rec.pos)
+                if "END" in self.info:
+                    downstreamed_rec.info["END"] = downstreamed_rec.pos + abs(self.sv_len)
+            elif alt.startswith("<DEL"):
+                litteral_rec = self.litteralized(seq_handler)
+                litteral_downstreamed_rec = litteral_rec.downstreamed(seq_handler, buffer_size)
+                downstreamed_rec = deepcopy(self)
+                downstreamed_rec.pos = litteral_downstreamed_rec.pos
+                downstreamed_rec.ref = litteral_downstreamed_rec.ref[0]
+                if "END" in self.info:
+                    downstreamed_rec.info["END"] = downstreamed_rec.pos + abs(self.sv_len)
+            elif alt.startswith("<CNV"):  # CNV is DUP or TANDEM or DEL
+                sv_len = abs(self.sv_len)
+                ref = seq_handler.getSub(self.chrom, self.pos, self.pos + sv_len)
+                alt = ref[0]
+                litteral_rec = VCFRecord(self.chrom, self.pos, None, ref, [alt])  # DEL and DUP have the same downstream behaviour
+                litteral_downstreamed_rec = litteral_rec.downstreamed(seq_handler, buffer_size)
+                downstreamed_rec = deepcopy(self)
+                downstreamed_rec.pos = litteral_downstreamed_rec.pos
+                downstreamed_rec.ref = litteral_downstreamed_rec.ref[0]
+                if "END" in self.info:
+                    downstreamed_rec.info["END"] += downstreamed_rec.pos - self.pos
+            elif alt.startswith("<INV"):  # INV cannot be moved
+                downstreamed_rec = deepcopy(self)
+            else:
+                raise Exception('Unknown symbolic type "{}" in {}.'.format(alt, self.getName()))
+        return downstreamed_rec
 
-    def getMostUpstream(self, ref_seq):
-        raise NotImplementedError("Method 'getMostUpstream' is not implemented for {}.".format(self.__class__.__name__))
+    def getMostUpstream(self, seq_handler, buffer_size=500):
+        """
+        Return the most upstream variant with same consequence on genomic reference.
 
-    def getMostDownstream(self, ref_seq):
-        raise NotImplementedError("Method 'getMostDownstream' is not implemented for {}.".format(self.__class__.__name__))
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :return: The most upstream variant.
+        :rtype: TestVCFSymbAltRecord
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'getMostUpstream' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        upstream_rec = None
+        if "IMPRECISE" in self.info:
+            upstream_rec = deepcopy(self)
+        elif "CIPOS" in self.info:
+            upstream_rec = deepcopy(self)
+            cipos_up, cipos_down = self.info["CIPOS"]  # 2 numbers in releases prior to VCF4.4 and 2 * alt_nb after
+            if cipos_up != 0:
+                upstream_rec.pos = upstream_rec.pos + cipos_up
+                upstream_rec.info["CIPOS"] = (
+                    0,
+                    cipos_down + abs(cipos_up)
+                )
+                if "END" in self.info:
+                    upstream_rec.info["END"] += cipos_up
+                upstream_rec.ref = seq_handler.getSub(self.chrom, upstream_rec.pos, upstream_rec.pos)
+        else:
+            alt = self.alt[0]
+            if alt.startswith("<INS"):  # Sequence of insertion is unknown
+                warnings.warn(
+                    'Symbolic insertion {} cannot be convert to litteral: sequence is unknown.'.format(
+                        self.getName()
+                    )
+                )
+                upstream_rec = deepcopy(self)
+            elif alt.startswith("<CNV"):  # CNV is DUP or TANDEM or DEL
+                sv_len = abs(self.sv_len)
+                ref = seq_handler.getSub(self.chrom, self.pos, self.pos + sv_len)
+                alt = ref[0]
+                litteral_rec = VCFRecord(self.chrom, self.pos, None, ref, [alt])  # DEL and DUP have the same upstream behaviour
+                litteral_upstream_rec = litteral_rec.upstreamed(seq_handler, buffer_size)
+                upstream_rec = deepcopy(self)
+                upstream_rec.pos = litteral_upstream_rec.pos
+                upstream_rec.ref = litteral_upstream_rec.ref[0]
+                if "END" in self.info:
+                    upstream_rec.info["END"] -= (self.pos - upstream_rec.pos)
+            elif alt.startswith("<INV"):  # INV cannot be moved
+                upstream_rec = deepcopy(self)
+            else:
+                litteral_rec = self.litteralized(seq_handler)
+                litteral_upstream_rec = litteral_rec.upstreamed(seq_handler, buffer_size)
+                upstream_rec = deepcopy(self)
+                upstream_rec.pos = litteral_upstream_rec.pos
+                upstream_rec.ref = litteral_upstream_rec.ref[0]
+                if "END" in self.info:
+                    if alt.startswith("<DEL") or alt.startswith("<DUP"):
+                        upstream_rec.info["END"] = upstream_rec.pos + abs(self.sv_len)
+                    else:
+                        raise Exception('Unknown symbolic type "{}" in {}.'.format(alt, self.getName()))
+        return upstream_rec
 
     def getName(self):
         """
@@ -1326,18 +1527,11 @@ class VCFSymbAltRecord(VCFRecord):
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isDeletion' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
-        is_deletion = False
-        if self.alt[0].startswith("<DEL"):
+        is_deletion = False  # DUP or INS or INV
+        if self.alt[0].startswith("<DEL"):  # DEL
             is_deletion = True
-        elif self.alt[0].startswith("<CNV"):
-            if "SVLEN" in self.info:
-                sv_len = self.info["SVLEN"]
-                if isinstance(sv_len, (list, tuple)):
-                    sv_len = sv_len[0]
-                if sv_len < 0:
-                    is_deletion = True
-            else:
-                raise Exception("CNV can be deletion or insertion on variant {}.".format(VCFRecord.getName(self)))
+        elif self.alt[0].startswith("<CNV"):  # CNV
+            raise Exception("CNV can be deletion or insertion on variant {}.".format(VCFRecord.getName(self)))
         return is_deletion
 
     def isIndel(self):
@@ -1350,7 +1544,7 @@ class VCFSymbAltRecord(VCFRecord):
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isIndel' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
-        return self.isDeletion() or self.isInsertion() or self.alt[0].startswith("<CNV")  # CNV may be both deletion and duplication
+        return self.alt[0].startswith("<CNV") or self.isDeletion() or self.isInsertion()  # CNV may be both deletion and duplication
 
     def isInsAndDel(self):
         """
@@ -1362,7 +1556,7 @@ class VCFSymbAltRecord(VCFRecord):
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isInsAndDel' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
-        return False
+        return self.alt[0].startswith("<INV")
 
     def isInsertion(self):
         """
@@ -1374,19 +1568,11 @@ class VCFSymbAltRecord(VCFRecord):
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isInsertion' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
-        is_insertion = False
-        if self.alt[0].startswith("<DUP") or self.alt[0].startswith("<INS"):
+        is_insertion = False  # DEL or INV
+        if self.alt[0].startswith("<DUP") or self.alt[0].startswith("<INS"):  # DUP or INS
             is_insertion = True
-        elif self.alt[0].startswith("<CNV"):
-            if "SVLEN" in self.info:
-                sv_len = self.info["SVLEN"]
-                if isinstance(sv_len, (list, tuple)):
-                    sv_len = sv_len[0]
-                if sv_len >= 0:
-                    is_insertion = True
-                # else: is_insertion = False
-            else:
-                raise Exception("CNV can be deletion or insertion on variant {}.".format(VCFRecord.getName(self)))
+        elif self.alt[0].startswith("<CNV"):  # CNV
+            raise Exception("CNV can be deletion or insertion on variant {}.".format(VCFRecord.getName(self)))
         return is_insertion
 
     def isInversion(self):
@@ -1399,10 +1585,52 @@ class VCFSymbAltRecord(VCFRecord):
         """
         if len(self.alt) > 1:
             raise Exception("The function 'isInversion' cannot be used on multi-allelic variant {}.".format(VCFRecord.getName(self)))
-        is_inversion = False
-        if self.alt[0].startswith("<INV"):
-            is_inversion = True
-        return is_inversion
+        return self.alt[0].startswith("<INV")
+
+    def litteralized(self, seq_handler):
+        """
+        Return simplified (only chrom, id, ref and alt) litteral (replace symbole by sequence) version of symbolic record.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :return: Simplified (only chrom, id, ref and alt) litteral (replace symbole by sequence) version of symbolic record.
+        :rtype: VCFRecord
+        :warnings: This method can only be used on record with only one alternative allele.
+        """
+        if len(self.alt) > 1:
+            raise Exception("The function 'litteralized' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        self_alt = self.alt[0]
+        if self_alt.startswith("<INS"):
+            raise Exception(
+                'Symbolic insertion "{}" cannot be convert to litteral: sequence is unknown.'.format(
+                    self.getName()
+                )
+            )
+        if "IMPRECISE" in self.info:
+            raise Exception(
+                'IMPRECISE symbolic variant "{}" cannot be convert to litteral: real position is unknown.'.format(
+                    self.getName()
+                )
+            )
+        if self_alt.startswith("<DEL"):
+            pos = self.pos
+            ref = seq_handler.getSub(self.chrom, self.pos, self.pos + abs(self.sv_len))
+            alt = ref[0]
+        elif self_alt.startswith("<INV"):
+            pos = self.pos + 1
+            ref = seq_handler.getSub(self.chrom, self.pos + 1, self.pos + abs(self.sv_len))
+            alt = ref[::-1]
+        elif self_alt.startswith("<DUP"):
+            pos = self.pos
+            ref = self.ref
+            alt = self.ref + seq_handler.getSub(self.chrom, self.pos + 1, self.pos + abs(self.sv_len))
+        elif self_alt.startswith("<CNV"):
+            raise Exception(
+                'Symbolic CNV "{}" cannot be convert to litteral: CNV can be DUP or DEL depending on sample.'.format(
+                    self.getName()
+                )
+            )
+        return VCFRecord(self.chrom, pos, self.id, ref, [alt])
 
     def normalizeSingleAllele(self):
         raise NotImplementedError("Method 'normalizeSingleAllele' is not implemented for {}.".format(self.__class__.__name__))
@@ -1415,8 +1643,12 @@ class VCFSymbAltRecord(VCFRecord):
         :rtype: float | None
         :warnings: This method can only be used on record with only one alternative allele.
         """
-        end = self.end
-        if self.isInsertion():  # DUP or INS or CNV representing INS
+        if len(self.alt) > 1:
+            raise Exception("The function 'refEnd' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        if self.alt[0].startswith("<CNV"):  # CNV
+            raise Exception("The method 'refEnd' cannot be used on CNV: it can be deletion or insertion.")
+        end = self.end  # DEL or INV
+        if self.isInsertion():  # DUP or INS
             end = self.pos + 0.5
         return end
 
@@ -1428,19 +1660,61 @@ class VCFSymbAltRecord(VCFRecord):
         :rtype: float | None
         :warnings: This method can only be used on record with only one alternative allele.
         """
-        start = None  # CNV
-        if self.isInsertion():  # DUP or INS or CNV representing INS
+        if len(self.alt) > 1:
+            raise Exception("The function 'refStart' cannot be used on multi-allelic variant {}.".format(self.getName()))
+        if self.alt[0].startswith("<CNV"):  # CNV
+            raise Exception("The method 'refStart' cannot be used on CNV: it can be deletion or insertion.")
+        if self.isInsertion():  # DUP or INS
             start = self.pos + 0.5
-        elif not self.alt[0].startswith("<CNV"):  # DEL or INV
+        else:  # DEL or INV
             start = self.pos + 1
         return start
+
+    def standardize(self, seq_handler, buffer_size=500):
+        """
+        Standardize record (move to the most upstream position). This standardization concerns only POS, REF, ALT, INFO.CIPOS and INFO.END.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        """
+        std = self.upstreamed(seq_handler, buffer_size)
+        self.pos = std.pos
+        self.ref = std.ref
+        self.alt = std.alt
+        self.info = std.info
+
+    def streamed(self, stream_direction, seq_handler, buffer_size=500, down_convert_dup=False):
+        """
+        Return record moved to the most upstream or downstream postition and standardized.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param stream_direction: Stream direction: "up" or "down".
+        :type stream_direction: str
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :param down_convert_dup: For downstream direction, if True, DUP are converted to INS to move on most downstream.
+        :type down_convert_dup: bool
+        :return: The record moved to the most upstream or downstream postition and standardized.
+        :rtype: anacore.vcf.VCFRecord
+        """
+        if stream_direction == "up":
+            return self.getMostUpstream(seq_handler, buffer_size)
+        else:
+            return self.getMostDownstream(seq_handler, buffer_size, down_convert_dup)
+        # if "IMPRECISE" not in self.info and "CIPOS" not in self.info:
+        #     downstream = self.downstreamed(seq_handler, buffer_size)
+        #     if downstream.pos != self.pos:  # can be move to downstream
+        #         self.info["CIPOS"] = [0, downstream.pos - self.pos]
 
     @property
     def sv_len(self):
         """
         Return difference in length between REF and ALT alleles.
 
-        :return: Difference in length between REF and ALT alleles. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.
+        :return: Difference in length between REF and ALT alleles. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values and CNV are unsigned.
         :rtype: int | None
         :warnings: This method can only be used on record with only one alternative allele.
         """
@@ -1451,14 +1725,16 @@ class VCFSymbAltRecord(VCFRecord):
             sv_len = self.info["SVLEN"]
             if isinstance(sv_len, (list, tuple)):
                 sv_len = sv_len[0]
+            if not self.alt[0].startswith("<CNV"):
+                if self.isDeletion() and sv_len > 0:  # Since VCF 4.4 SVLEN is absolute value: >0 can be ins or del
+                    sv_len = sv_len * -1
         elif "END" in self.info:
-            try:
+            sv_len = (self.end - self.pos)  # CNV or DUP or INV
+            if not self.alt[0].startswith("<CNV"):
                 if self.isDeletion():  # DEL
-                    sv_len = - (self.end - self.pos)
-                elif not self.alt[0].startswith("<INS"):  # CNV or DUP or INV (Exclude INS because length is unknown)
-                    sv_len = (self.end - self.pos)
-            except Exception:
-                pass  # CNV with unknown type del or ins
+                    sv_len = sv_len * -1
+                elif self.alt[0].startswith("<INS"):  # INS length cannot be known from END
+                    sv_len = None
         return sv_len
 
     def type(self):
@@ -1469,10 +1745,23 @@ class VCFSymbAltRecord(VCFRecord):
         :rtype: str
         :warnings: This method can only be used on record with only one alternative allele.
         """
-        record_type = "indel"
-        if self.alt[0].startswith("<INV"):
+        record_type = "indel"  # DEL or DUP or CNV or INS
+        if self.alt[0].startswith("<INV"):  # INV
             record_type = "inv"
         return record_type
+
+    def upstreamed(self, seq_handler, buffer_size=500):
+        """
+        Return record moved to the most upstream postition.
+
+        :param seq_handler: File handle to the reference sequences file.
+        :type seq_handler: anacore.sequenceIO.IdxFastaIO
+        :param buffer_size: Buffer size to read reference sequence file (in nt).
+        :type buffer_size: int
+        :return: Record moved to the most upstream postition.
+        :rtype: anacore.vcf.VCFSymbAltRecord
+        """
+        return self.streamed("up", seq_handler, buffer_size)
 
 
 class VCFIO(AbstractFile):
@@ -1672,8 +1961,13 @@ class VCFIO(AbstractFile):
                     data_by_spl[self.samples[spl_idx]] = spl_data
                 variation.samples = data_by_spl
 
+        # Convert symbolic
         if variation.alt[0].startswith("<"):
-            variation = VCFSymbAltRecord.fromStdRecord(variation)
+            variation = VCFSymbAltRecord(
+                variation.chrom, variation.pos, variation.id, variation.ref,
+                variation.alt, variation.qual, variation.filter,
+                variation.info, variation.format, variation.samples
+            )
 
         return variation
 
@@ -1873,3 +2167,56 @@ def getFreqMatrix(vcf_path, missing_replacement=0.0, accept_missing=True):
                     row_array.append(AF)
                 AF_matrix.append(row_array)
     return samples, variants, AF_matrix
+
+
+def _refDownIter(seq_handler, chrom, pos, buffer_size=50):
+    """
+    Return a generator to read nt by nt the uppercased reference sequence from pos to downstream.
+
+    :param seq_handler: File handle to the sequences file.
+    :type seq_handler: anacore.sequenceIO.IdxFastaIO
+    :param chrom: Name of chromosome/contig to read.
+    :type chrom: str
+    :param pos: Start position on chromosome.
+    :type pos: int
+    :param buffer_size: Buffer size for sequence file reading (in nt). Iterator return nt by nt but to optimise read in file the buffer is larger.
+    :type buffer_size: int
+    :return: Generator to read nt by nt the uppercased reference sequence from pos to downstream.
+    :rtype: generator
+    """
+    while pos > 0:
+        uc_ref = seq_handler.getSub(
+            chrom,
+            max(1, pos - buffer_size),
+            max(1, pos)
+        ).upper()
+        for char in uc_ref[::-1]:
+            yield char
+        pos -= (buffer_size + 1)
+
+
+def _refUpIter(seq_handler, chrom, pos, buffer_size=50):
+    """
+    Return a generator to read nt by nt the uppercased reference sequence from pos to upstream.
+
+    :param seq_handler: File handle to the sequences file.
+    :type seq_handler: anacore.sequenceIO.IdxFastaIO
+    :param chrom: Name of chromosome/contig to read.
+    :type chrom: str
+    :param pos: Start position on chromosome.
+    :type pos: int
+    :param buffer_size: Buffer size for sequence file reading (in nt). Iterator return nt by nt but to optimise read in file the buffer is larger.
+    :type buffer_size: int
+    :return: Generator to read nt by nt the uppercased reference sequence from pos to upstream.
+    :rtype: generator
+    """
+    chrom_size = seq_handler.index[chrom].length + 1
+    while pos <= chrom_size:
+        uc_ref = seq_handler.getSub(
+            chrom,
+            min(chrom_size, pos),
+            min(chrom_size, pos + buffer_size)
+        ).upper()
+        for char in uc_ref:
+            yield char
+        pos += buffer_size + 1

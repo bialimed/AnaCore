@@ -1,3 +1,18 @@
+# Release 3.1.0 [DEV]
+
+### Improvements
+  * `downstreamed`, `getMostDownstream`, `getMostUpstream` and `upstreamed` are
+  now available from `anacore.vcf.VCFSymbAltRecord`.
+  * `getMostDownstream` and `getMostUpstream` form `anacore.vcf.VCFRecord` take
+  sequence file reader instead of sequence string to improve speed.
+  * Replace padding size to buffer size in up and down methods from
+  `anacore.vcf.VCFRecord`. This change breaks padding limitations and keep
+  performances.
+  
+### Bug fixes
+  * CNV are now always seen as DEL or DUP in `anacore.vcf.VCFSymbAltRecord`.
+  * `anacore.vcf.VCFSymbAltRecord.isInsAndDel` now returns True for inversions.
+
 # Release 3.0.0 [2023-06-13]
 
 ### Break changes
@@ -31,7 +46,7 @@
   * Add `anacore.vcf.VCFSymbAltRecord` to handle structural variants with
   symbolic alternative like \<DUP\>, \<DEL\>, etc. `anacore.vcf.VCFIO` can now
   reads VCF containing standard variants and structural variants except BND. BND
-  keep currently manage in `anacore.fusion`.
+  stay currently manage in `anacore.fusion`.
   * Add log and statistics reader for bcl-convert:
   `anacore.illumina.demultiplex.bclconvert.DemultLog` and
   `anacore.illumina.demultiplex.bclconvert.DemultStat`.

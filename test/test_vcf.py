@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.15.0'
+__version__ = '1.16.0'
 __email__ = 'escudie.frederic@iuct-oncopole.fr'
 __status__ = 'prod'
 
@@ -19,7 +19,7 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.vcf import getHeaderAttr, HeaderInfoAttr, VCFIO, VCFRecord, VCFSymbAltRecord
+from anacore.vcf import _refDownIter, _refUpIter, getHeaderAttr, HeaderInfoAttr, VCFIO, VCFRecord, VCFSymbAltRecord
 
 
 ########################################################################
@@ -831,184 +831,345 @@ class TestVCFRecord(unittest.TestCase):
             self.assertEqual(expected_records, observed_records)
 
     def testNormalizeSingleAllele(self):
+        chrom = "artificial_1"
+        # Test substitution one nt already normalized
+        substitution = VCFRecord(chrom, 19, None, "C", ["A"])
+        substitution.normalizeSingleAllele()
+        self.assertTrue(substitution.ref == "C" and substitution.alt[0] == "A" and substitution.pos == 19)
         # Test substitution one nt
-        substitution = VCFRecord("artificial_1", 18, None, "TC", ["TA"], 230)
+        substitution = VCFRecord(chrom, 18, None, "TC", ["TA"])
         substitution.normalizeSingleAllele()
         self.assertTrue(substitution.ref == "C" and substitution.alt[0] == "A" and substitution.pos == 19)
         # Test substitution multi nt
-        substitution = VCFRecord("artificial_1", 18, None, "TCtgA", ["TaGCc"], 230)
+        substitution = VCFRecord(chrom, 18, None, "TCtgA", ["TaGCc"])
         substitution.normalizeSingleAllele()
         self.assertTrue(substitution.ref == "CTGA" and substitution.alt[0] == "AGCC" and substitution.pos == 19)
         # Test substitution multi nt with possible remove
-        substitution = VCFRecord("artificial_1", 18, None, "TCtgATT", ["TaGGctT"], 230)
+        substitution = VCFRecord(chrom, 18, None, "TCtgATT", ["TaGGctT"])
         substitution.normalizeSingleAllele()
         self.assertTrue(substitution.ref == "CTGA" and substitution.alt[0] == "AGGC" and substitution.pos == 19)
-
         # Test insertion
-        insertion = VCFRecord("artificial_1", 18, None, "T", ["TA"], 230)
+        insertion = VCFRecord(chrom, 18, None, "T", ["TA"])
         insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "-" and insertion.alt[0] == "A" and insertion.pos == 19)
         # Test insertion multi nt and remove upstream and downstream
-        insertion = VCFRecord("artificial_1", 18, None, "TGAT", ["TCGAGAT"], 230)
+        insertion = VCFRecord(chrom, 18, None, "TGAT", ["TCGAGAT"])
         insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "-" and insertion.alt[0] == "CGA" and insertion.pos == 19)
         # Test insertion multi nt with possible remove and downstream and without complete standardization
-        insertion = VCFRecord("artificial_1", 18, None, "TCtgATTAGC", ["TaGGctTATGCGC"], 230)
+        insertion = VCFRecord(chrom, 18, None, "TCtgATTAGC", ["TaGGctTATGCGC"])
         insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "CTGATTA" and insertion.alt[0] == "AGGCTTATGC" and insertion.pos == 19)
-
         # Test deletion
-        insertion = VCFRecord("artificial_1", 18, None, "TA", ["T"], 230)
+        insertion = VCFRecord(chrom, 18, None, "TA", ["T"])
         insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "A" and insertion.alt[0] == "-" and insertion.pos == 19)
-        # Test insertion multi nt and remove upstream and downstream
-        insertion = VCFRecord("artificial_1", 18, None, "TCGAGAT", ["TGAT"], 230)
+        # Test deletion multi nt and remove upstream and downstream
+        insertion = VCFRecord(chrom, 18, None, "TCGAGAT", ["TGAT"])
         insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "CGA" and insertion.alt[0] == "-" and insertion.pos == 19)
-        # Test insertion multi nt with possible remove and downstream and without complete standardization
-        insertion = VCFRecord("artificial_1", 18, None, "TaGGctTATGCGC", ["TCtgATTAGC"], 230)
+        # Test deletion multi nt with possible remove and downstream and without complete standardization
+        insertion = VCFRecord(chrom, 18, None, "TaGGctTATGCGC", ["TCtgATTAGC"])
         insertion.normalizeSingleAllele()
         self.assertTrue(insertion.ref == "AGGCTTATGC" and insertion.alt[0] == "CTGATTA" and insertion.pos == 19)
+        # Test insertion on start already normalized
+        insertion = VCFRecord(chrom, 1, None, "-", ["A"])
+        insertion.normalizeSingleAllele()
+        self.assertTrue(insertion.pos == 1 and insertion.ref == "-" and insertion.alt[0] == "A")
+        # Test insertion on start
+        insertion = VCFRecord(chrom, 1, None, "G", ["AG"])
+        insertion.normalizeSingleAllele()
+        self.assertTrue(insertion.pos == 1 and insertion.ref == "-" and insertion.alt[0] == "A")
+        # Test deletion on start already normalized
+        deletion = VCFRecord(chrom, 1, None, "G", ["-"])
+        deletion.normalizeSingleAllele()
+        self.assertTrue(deletion.pos == 1 and deletion.ref == "G" and deletion.alt[0] == "-")
+        # Test deletion on start
+        deletion = VCFRecord(chrom, 1, None, "GN", ["N"])
+        deletion.normalizeSingleAllele()
+        self.assertTrue(deletion.pos == 1 and deletion.ref == "G" and deletion.alt[0] == "-")
+
+    def testUpstreamed(self):
+        chrom = "artificial_1"
+        ref = "gnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #      | | | | | | | | | | | | | | | | |
+        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                  13  17  21  25  29  33
+        fastIdxRef(chrom, ref, self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test substit
+            substit = VCFRecord(chrom, 18, None, "T", ["A"])
+            upstream = substit.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 18 and upstream.ref == "T" and upstream.alt[0] == "A")
+            # Test large substit
+            substit = VCFRecord(chrom, 18, None, "TTT", ["AGC"])
+            upstream = substit.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 18 and upstream.ref == "TTT" and upstream.alt[0] == "AGC")
+            # Test fix deletion
+            deletion = VCFRecord(chrom, 18, None, "TtTaAGC", ["T"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 18 and upstream.ref == "TTTAAGC" and upstream.alt[0] == "T")
+            deletion = VCFRecord(chrom, 19, None, "tTaAGC", ["-"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 18 and upstream.ref == "TTTAAGC" and upstream.alt[0] == "T")
+            # Test homopolymer deletion
+            deletion = VCFRecord(chrom, 18, None, "TTT", ["T"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 16 and upstream.ref == "GTT" and upstream.alt[0] == "G")
+            deletion = VCFRecord(chrom, 19, None, "TT", ["-"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 16 and upstream.ref == "GTT" and upstream.alt[0] == "G")
+            # Test complex deletion
+            deletion = VCFRecord(chrom, 25, None, "CGAgCC", ["C"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 21 and upstream.ref == "AAGCCG" and upstream.alt[0] == "A")
+            deletion = VCFRecord(chrom, 26, None, "GAgCC", ["-"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 21 and upstream.ref == "AAGCCG" and upstream.alt[0] == "A")
+            # Test deletion on start
+            deletion = VCFRecord(chrom, 1, None, ref[0], ["-"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 1 and upstream.ref == "GN" and upstream.alt[0] == "N")
+            deletion = VCFRecord(chrom, 1, None, "GN", ["N"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 1 and upstream.ref == "GN" and upstream.alt[0] == "N")
+            # Test deletion on end
+            deletion = VCFRecord(chrom, len(ref) - 1, None, ref[-2:], [ref[-2]])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 32 and upstream.ref == "AT" and upstream.alt[0] == "A")
+            deletion = VCFRecord(chrom, len(ref), None, ref[-1:], ["-"])
+            upstream = deletion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 32 and upstream.ref == "AT" and upstream.alt[0] == "A")
+            # Test fix insertion
+            insertion = VCFRecord(chrom, 4, None, "N", ["NGGTT"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 4 and upstream.ref == "N" and upstream.alt[0] == "NGGTT")
+            insertion = VCFRecord(chrom, 5, None, "-", ["GGTT"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 4 and upstream.ref == "N" and upstream.alt[0] == "NGGTT")
+            # Test homopolymer insertion
+            insertion = VCFRecord(chrom, 18, None, "T", ["TT"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 16 and upstream.ref == "G" and upstream.alt[0] == "GT")
+            insertion = VCFRecord(chrom, 19, None, "-", ["T"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 16 and upstream.ref == "G" and upstream.alt[0] == "GT")
+            # Test complex insertion
+            insertion = VCFRecord(chrom, 25, None, "C", ["CGAgCC"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 21 and upstream.ref == "A" and upstream.alt[0] == "AAGCCG")
+            insertion = VCFRecord(chrom, 26, None, "-", ["GAgCC"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 21 and upstream.ref == "A" and upstream.alt[0] == "AAGCCG")
+            # Test insertion on start
+            insertion = VCFRecord(chrom, 1, None, "-", ["A"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 1 and upstream.ref == "G" and upstream.alt[0] == "AG")
+            insertion = VCFRecord(chrom, 1, None, "G", ["AG"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 1 and upstream.ref == "G" and upstream.alt[0] == "AG")
+            # Test insertion on end
+            insertion = VCFRecord(chrom, len(ref), None, ref[-1], [ref[-1] + "G"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == "TG")
+            insertion = VCFRecord(chrom, len(ref) + 1, None, "-", ["G"])
+            upstream = insertion.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == "TG")
+        chrom = "artificial_2"
+        ref = "CCGTGATGCAT"  # length: 11
+        #      | | | | | |
+        #      1 3 5 7 9 11
+        fastIdxRef(chrom, ref, self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test insertion
+            substit = VCFRecord(chrom, 8, None, "G", ["GATG"])
+            upstream = substit.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 3 and upstream.ref == "G" and upstream.alt[0] == "GTGA")
+            # Test deletion
+            substit = VCFRecord(chrom, 5, None, "GATG", ["G"])
+            upstream = substit.upstreamed(seq_handler)
+            self.assertTrue(upstream.pos == 3 and upstream.ref == "GTGA" and upstream.alt[0] == "G")
 
     def testGetMostUpstream(self):
-        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
-        #      | | | | | | | | | | | | | | | | |
-        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
-        #                  13  17  21  25  29  32
-        # Test fix deletion
-        deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
-        upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 19 and upstream.ref == "TTAAGC" and upstream.alt[0] == "-")
-        # Test homopolymer deletion
-        deletion = VCFRecord("artificial_1", 18, None, "TTT", ["T"], 230)
-        upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 17 and upstream.ref == "TT" and upstream.alt[0] == "-")
-        # Test complex deletion
-        deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
-        upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 22 and upstream.ref == "AGCCG" and upstream.alt[0] == "-")
-        # Test deletion on start
-        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["-"], 230)
-        upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 1 and upstream.ref == "N" and upstream.alt[0] == "-")
-        # Test deletion on end
-        deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
-        upstream = deletion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == "-")
-        # Test fix insertion
-        insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
-        upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 5 and upstream.ref == "-" and upstream.alt[0] == "GGTT")
-        # Test homopolymer insertion
-        insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
-        upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 17 and upstream.ref == "-" and upstream.alt[0] == "T")
-        # Test complex insertion
-        insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
-        upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 22 and upstream.ref == "-" and upstream.alt[0] == "AGCCG")
-        # Test insertion on start
-        insertion = VCFRecord("artificial_1", 1, None, "-", ["A"], 230)
-        upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 1 and upstream.ref == "-" and upstream.alt[0] == "A")
-        # Test insertion on end
-        insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
-        upstream = insertion.getMostUpstream(ref)
-        self.assertTrue(upstream.pos == 34 and upstream.ref == "-" and upstream.alt[0] == "G")
-
-    def testGetMostDownstream(self):
-        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
-        #      | | | | | | | | | | | | | | | | |
-        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
-        #                  13  17  21  25  29  32
-        # Test fix deletion
-        deletion = VCFRecord("artificial_1", 18, None, "TtTaAGC", ["T"], 230)
-        downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 19 and downstream.ref == "TTAAGC" and downstream.alt[0] == "-")
-        # Test homopolymer deletion
-        deletion = VCFRecord("artificial_1", 18, None, "TTT", ["T"], 230)
-        downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 19 and downstream.ref == "TT" and downstream.alt[0] == "-")
-        # Test complex deletion
-        deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
-        downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 28 and downstream.ref == "GCCGA" and downstream.alt[0] == "-")
-        # Test deletion on start
-        deletion = VCFRecord("artificial_1", 1, None, ref[0], ["-"], 230)
-        downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == "-")
-        # Test deletion on end
-        deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
-        downstream = deletion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == "-")
-        # Test fix insertion
-        insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
-        downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 5 and downstream.ref == "-" and downstream.alt[0] == "GGTT")
-        # Test homopolymer insertion
-        insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
-        downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 21 and downstream.ref == "-" and downstream.alt[0] == "T")
-        # Test complex insertion
-        insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
-        downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 33 and downstream.ref == "-" and downstream.alt[0] == "GCCGA")
-        # Test insertion on start
-        insertion = VCFRecord("artificial_1", 1, None, "-", ["A"], 230)
-        downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 1 and downstream.ref == "-" and downstream.alt[0] == "A")
-        # Test insertion on end
-        insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
-        downstream = insertion.getMostDownstream(ref)
-        self.assertTrue(downstream.pos == 34 and downstream.ref == "-" and downstream.alt[0] == "G")
-
-    def testFastDownstreamed(self):
+        chrom = "artificial_1"
         ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
         #      | | | | | | | | | | | | | | | | |
         #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
         #                  13  17  21  25  29  33
-        with open(self.tmp_fa, "w") as writer:
-            writer.write(">artificial_1\n")
-            writer.write("nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT")
-        with open(self.tmp_fai, "w") as writer:
-            writer.write("artificial_1\t33\t14\t33\t34")
+        fastIdxRef(chrom, ref, self.tmp_fa, self.tmp_fai)
         with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test substit
+            substit = VCFRecord(chrom, 18, None, "T", ["A"])
+            upstream = substit.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 18 and upstream.ref == "T" and upstream.alt[0] == "A")
+            # Test large substit
+            substit = VCFRecord(chrom, 18, None, "TTT", ["AGC"])
+            upstream = substit.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 18 and upstream.ref == "TTT" and upstream.alt[0] == "AGC")
             # Test fix deletion
-            deletion = VCFRecord("artificial_1", 18, None, "TTTaAGC", ["T"], 230)
-            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            deletion = VCFRecord(chrom, 18, None, "TtTaAGC", ["T"], 230)
+            upstream = deletion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 19 and upstream.ref == "TTAAGC" and upstream.alt[0] == "-")
+            # Test homopolymer deletion
+            deletion = VCFRecord(chrom, 18, None, "TTT", ["T"], 230)
+            upstream = deletion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 17 and upstream.ref == "TT" and upstream.alt[0] == "-")
+            # Test complex deletion
+            deletion = VCFRecord(chrom, 25, None, "CGAgCC", ["C"], 230)
+            upstream = deletion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 22 and upstream.ref == "AGCCG" and upstream.alt[0] == "-")
+            # Test deletion on start
+            deletion = VCFRecord(chrom, 1, None, ref[0], ["-"], 230)
+            upstream = deletion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 1 and upstream.ref == "N" and upstream.alt[0] == "-")
+            # Test deletion on end
+            deletion = VCFRecord(chrom, len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
+            upstream = deletion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 33 and upstream.ref == "T" and upstream.alt[0] == "-")
+            # Test fix insertion
+            insertion = VCFRecord(chrom, 4, None, "N", ["NGGTT"], 230)
+            upstream = insertion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 5 and upstream.ref == "-" and upstream.alt[0] == "GGTT")
+            # Test homopolymer insertion
+            insertion = VCFRecord(chrom, 18, None, "T", ["TT"], 230)
+            upstream = insertion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 17 and upstream.ref == "-" and upstream.alt[0] == "T")
+            # Test complex insertion
+            insertion = VCFRecord(chrom, 25, None, "C", ["CGAgCC"], 230)
+            upstream = insertion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 22 and upstream.ref == "-" and upstream.alt[0] == "AGCCG")
+            # Test insertion on start
+            insertion = VCFRecord(chrom, 1, None, "-", ["A"], 230)
+            upstream = insertion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 1 and upstream.ref == "-" and upstream.alt[0] == "A")
+            # Test insertion on end
+            insertion = VCFRecord(chrom, len(ref), None, ref[-1], [ref[-1] + "G"], 230)
+            upstream = insertion.getMostUpstream(seq_handler)
+            self.assertTrue(upstream.pos == 34 and upstream.ref == "-" and upstream.alt[0] == "G")
+
+    def testGetMostDownstream(self):
+        chrom = "artificial_1"
+        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #      | | | | | | | | | | | | | | | | |
+        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                  13  17  21  25  29  33
+        fastIdxRef(chrom, ref, self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test substit
+            substit = VCFRecord(chrom, 18, None, "T", ["A"])
+            downstream = substit.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 18 and downstream.ref == "T" and downstream.alt[0] == "A")
+            # Test large substit
+            substit = VCFRecord(chrom, 18, None, "TTT", ["AGC"])
+            downstream = substit.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 18 and downstream.ref == "TTT" and downstream.alt[0] == "AGC")
+            # Test fix deletion
+            deletion = VCFRecord(chrom, 18, None, "TtTaAGC", ["T"], 230)
+            downstream = deletion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 19 and downstream.ref == "TTAAGC" and downstream.alt[0] == "-")
+            # Test homopolymer deletion
+            deletion = VCFRecord(chrom, 18, None, "TTT", ["T"], 230)
+            downstream = deletion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 19 and downstream.ref == "TT" and downstream.alt[0] == "-")
+            # Test complex deletion
+            deletion = VCFRecord(chrom, 25, None, "CGAgCC", ["C"], 230)
+            downstream = deletion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 28 and downstream.ref == "GCCGA" and downstream.alt[0] == "-")
+            # Test deletion on start
+            deletion = VCFRecord(chrom, 1, None, ref[0], ["-"], 230)
+            downstream = deletion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == "-")
+            # Test deletion on end
+            deletion = VCFRecord(chrom, len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
+            downstream = deletion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == "-")
+            # Test fix insertion
+            insertion = VCFRecord(chrom, 4, None, "N", ["NGGTT"], 230)
+            downstream = insertion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 5 and downstream.ref == "-" and downstream.alt[0] == "GGTT")
+            # Test homopolymer insertion
+            insertion = VCFRecord(chrom, 18, None, "T", ["TT"], 230)
+            downstream = insertion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 21 and downstream.ref == "-" and downstream.alt[0] == "T")
+            # Test complex insertion
+            insertion = VCFRecord(chrom, 25, None, "C", ["CGAgCC"], 230)
+            downstream = insertion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 33 and downstream.ref == "-" and downstream.alt[0] == "GCCGA")
+            # Test insertion on start
+            insertion = VCFRecord(chrom, 1, None, "-", ["A"], 230)
+            downstream = insertion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 1 and downstream.ref == "-" and downstream.alt[0] == "A")
+            # Test insertion on end
+            insertion = VCFRecord(chrom, len(ref), None, ref[-1], [ref[-1] + "G"], 230)
+            downstream = insertion.getMostDownstream(seq_handler)
+            self.assertTrue(downstream.pos == 34 and downstream.ref == "-" and downstream.alt[0] == "G")
+
+    def testDownstreamed(self):
+        chrom = "artificial_1"
+        ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #      | | | | | | | | | | | | | | | | |
+        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                  13  17  21  25  29  33
+        fastIdxRef(chrom, ref, self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test substit
+            substit = VCFRecord(chrom, 18, None, "T", ["A"])
+            downstream = substit.downstreamed(seq_handler)
+            self.assertTrue(downstream.pos == 18 and downstream.ref == "T" and downstream.alt[0] == "A")
+            # Test large substit
+            substit = VCFRecord(chrom, 18, None, "TTT", ["AGC"])
+            downstream = substit.downstreamed(seq_handler)
+            self.assertTrue(downstream.pos == 18 and downstream.ref == "TTT" and downstream.alt[0] == "AGC")
+            # Test fix deletion
+            deletion = VCFRecord(chrom, 18, None, "TTTaAGC", ["T"], 230)
+            downstream = deletion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 18 and downstream.ref == "TTTAAGC" and downstream.alt[0] == "T")
             # Test homopolymer deletion
-            deletion = VCFRecord("artificial_1", 16, None, "GTT", ["G"], 230)
-            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            deletion = VCFRecord(chrom, 16, None, "GTT", ["G"], 230)
+            downstream = deletion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 18 and downstream.ref == "TTT" and downstream.alt[0] == "T")
             # Test complex deletion
-            deletion = VCFRecord("artificial_1", 25, None, "CGAgCC", ["C"], 230)
-            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            deletion = VCFRecord(chrom, 25, None, "CGAgCC", ["C"], 230)
+            downstream = deletion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 27 and downstream.ref == "AGCCGA" and downstream.alt[0] == "A")
             # Test deletion on start
-            deletion = VCFRecord("artificial_1", 1, None, ref[0], ["-"], 230)
-            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            deletion = VCFRecord(chrom, 1, None, ref[0], ["-"], 230)
+            downstream = deletion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 3 and downstream.ref == "NN" and downstream.alt[0] == "N")
             # Test deletion on end
-            deletion = VCFRecord("artificial_1", len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
-            downstream = deletion.fastDownstreamed(seq_handler, 10)
+            deletion = VCFRecord(chrom, len(ref) - 1, None, ref[-2:], [ref[-2]], 230)
+            downstream = deletion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 32 and downstream.ref == "AT" and downstream.alt[0] == "A")
             # Test fix insertion
-            insertion = VCFRecord("artificial_1", 4, None, "N", ["NGGTT"], 230)
-            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            insertion = VCFRecord(chrom, 4, None, "N", ["NGGTT"], 230)
+            downstream = insertion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 4 and downstream.ref == "N" and downstream.alt[0] == "NGGTT")
             # Test homopolymer insertion
-            insertion = VCFRecord("artificial_1", 18, None, "T", ["TT"], 230)
-            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            insertion = VCFRecord(chrom, 18, None, "T", ["TT"], 230)
+            downstream = insertion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 20 and downstream.ref == "T" and downstream.alt[0] == "TT")
             # Test complex insertion
-            insertion = VCFRecord("artificial_1", 25, None, "C", ["CGAgCC"], 230)
-            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            insertion = VCFRecord(chrom, 25, None, "C", ["CGAgCC"], 230)
+            downstream = insertion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 32 and downstream.ref == "A" and downstream.alt[0] == "AGCCGA")
             # Test insertion on end
-            insertion = VCFRecord("artificial_1", len(ref), None, ref[-1], [ref[-1] + "G"], 230)
-            downstream = insertion.fastDownstreamed(seq_handler, 10)
+            insertion = VCFRecord(chrom, len(ref), None, ref[-1], [ref[-1] + "G"], 230)
+            downstream = insertion.downstreamed(seq_handler)
             self.assertTrue(downstream.pos == 33 and downstream.ref == "T" and downstream.alt[0] == "TG")
+        chrom = "artificial_2"
+        ref = "CCGTGATGCAT"  # length: 11
+        #      | | | | | |
+        #      1 3 5 7 9 11
+        fastIdxRef(chrom, ref, self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test insertion
+            substit = VCFRecord(chrom, 3, None, "G", ["GTGA"])
+            downstream = substit.downstreamed(seq_handler)
+            self.assertTrue(downstream.pos == 8 and downstream.ref == "G" and downstream.alt[0] == "GATG")
+            # Test deletion
+            substit = VCFRecord(chrom, 3, None, "GTGA", ["G"])
+            downstream = substit.downstreamed(seq_handler)
+            self.assertTrue(downstream.pos == 5 and downstream.ref == "GATG" and downstream.alt[0] == "G")
 
     def testRefStart(self):
         data = [
@@ -1053,6 +1214,113 @@ class TestVCFRecord(unittest.TestCase):
         for curr_data in data:
             record = VCFRecord(*curr_data)
             self.assertTrue(record.refEnd() == record.info["expected_end"])
+
+    def testStandardize(self):
+        chrom = "artificial_1"
+        ref = "gnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #      | | | | | | | | | | | | | | | | |
+        #      1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                  13  17  21  25  29  33
+        fastIdxRef(chrom, ref, self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Test substit
+            substit = VCFRecord(chrom, 18, None, "T", ["A"])
+            substit.standardize(seq_handler)
+            self.assertTrue(substit.pos == 18 and substit.ref == "T" and substit.alt[0] == "A")
+            # Test substit with useless prev
+            substitution = VCFRecord(chrom, 20, None, "TA", ["TC"])
+            substitution.normalizeSingleAllele()
+            self.assertTrue(substitution.pos == 21 and substitution.ref == "A" and substitution.alt[0] == "C")
+            # Test substit with useless prev and next
+            substitution = VCFRecord(chrom, 20, None, "TAA", ["TCA"])
+            substitution.normalizeSingleAllele()
+            self.assertTrue(substitution.pos == 21 and substitution.ref == "A" and substitution.alt[0] == "C")
+            # Test large substit
+            substit = VCFRecord(chrom, 18, None, "TTT", ["AGC"])
+            substit.standardize(seq_handler)
+            self.assertTrue(substit.pos == 18 and substit.ref == "TTT" and substit.alt[0] == "AGC")
+            # Test fix deletion
+            deletion = VCFRecord(chrom, 18, None, "TtTaAGC", ["T"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 18 and deletion.ref == "TTTAAGC" and deletion.alt[0] == "T")
+            deletion = VCFRecord(chrom, 19, None, "tTaAGC", ["-"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 18 and deletion.ref == "TTTAAGC" and deletion.alt[0] == "T")
+            # Test homopolymer deletion
+            deletion = VCFRecord(chrom, 18, None, "TTT", ["T"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 16 and deletion.ref == "GTT" and deletion.alt[0] == "G")
+            deletion = VCFRecord(chrom, 19, None, "TT", ["-"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 16 and deletion.ref == "GTT" and deletion.alt[0] == "G")
+            # Test complex deletion
+            deletion = VCFRecord(chrom, 25, None, "CGAgCC", ["C"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 21 and deletion.ref == "AAGCCG" and deletion.alt[0] == "A")
+            deletion = VCFRecord(chrom, 26, None, "GAgCC", ["-"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 21 and deletion.ref == "AAGCCG" and deletion.alt[0] == "A")
+            # Test deletion on start
+            deletion = VCFRecord(chrom, 1, None, ref[0], ["-"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 1 and deletion.ref == "GN" and deletion.alt[0] == "N")
+            deletion = VCFRecord(chrom, 1, None, "GN", ["N"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 1 and deletion.ref == "GN" and deletion.alt[0] == "N")
+            # Test deletion on end
+            deletion = VCFRecord(chrom, len(ref) - 1, None, ref[-2:], [ref[-2]])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 32 and deletion.ref == "AT" and deletion.alt[0] == "A")
+            deletion = VCFRecord(chrom, len(ref), None, ref[-1:], ["-"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 32 and deletion.ref == "AT" and deletion.alt[0] == "A")
+            # Test deletion multi nt with useless up and down and without complete normalization
+            deletion = VCFRecord(chrom, 18, None, "TtTaAGCCGAG", ["TTGGAG"])
+            deletion.standardize(seq_handler)
+            self.assertTrue(deletion.pos == 20 and deletion.ref == "TAAGCC" and deletion.alt[0] == "G")
+            # Test fix insertion
+            insertion = VCFRecord(chrom, 4, None, "N", ["NGGTT"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 4 and insertion.ref == "N" and insertion.alt[0] == "NGGTT")
+            insertion = VCFRecord(chrom, 5, None, "-", ["GGTT"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 4 and insertion.ref == "N" and insertion.alt[0] == "NGGTT")
+            # Test homopolymer insertion
+            insertion = VCFRecord(chrom, 18, None, "T", ["TT"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 16 and insertion.ref == "G" and insertion.alt[0] == "GT")
+            insertion = VCFRecord(chrom, 19, None, "-", ["T"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 16 and insertion.ref == "G" and insertion.alt[0] == "GT")
+            # Test complex insertion
+            insertion = VCFRecord(chrom, 25, None, "C", ["CGAgCC"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 21 and insertion.ref == "A" and insertion.alt[0] == "AAGCCG")
+            insertion = VCFRecord(chrom, 26, None, "-", ["GAgCC"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 21 and insertion.ref == "A" and insertion.alt[0] == "AAGCCG")
+            # Test insertion multi nt and remove upstream and downstream
+            insertion = VCFRecord(chrom, 11, None, "ATGAT", ["ATCGAGAT"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 12 and insertion.ref == "T" and insertion.alt[0] == "TCGA")
+            # Test insertion on start
+            insertion = VCFRecord(chrom, 1, None, "-", ["A"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 1 and insertion.ref == "G" and insertion.alt[0] == "AG")
+            insertion = VCFRecord(chrom, 1, None, "G", ["AG"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 1 and insertion.ref == "G" and insertion.alt[0] == "AG")
+            # Test insertion on end
+            insertion = VCFRecord(chrom, len(ref), None, ref[-1], [ref[-1] + "G"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 33 and insertion.ref == "T" and insertion.alt[0] == "TG")
+            insertion = VCFRecord(chrom, len(ref) + 1, None, "-", ["G"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 33 and insertion.ref == "T" and insertion.alt[0] == "TG")
+            # Test insertion multi nt with useless up and down and without complete normalization
+            insertion = VCFRecord(chrom, 11, None, "aTgATGTT", ["aTTTCAGTT"])
+            insertion.standardize(seq_handler)
+            self.assertTrue(insertion.pos == 13 and insertion.ref == "GAT" and insertion.alt[0] == "TTCA")
 
     def testIsDeletion(self):
         data = [
@@ -1108,6 +1376,8 @@ class TestVCFSymbAltRecord(unittest.TestCase):
         tmp_folder = tempfile.gettempdir()
         unique_id = str(uuid.uuid1())
         self.tmp_variants = os.path.join(tmp_folder, unique_id + ".vcf")
+        self.tmp_fa = os.path.join(tmp_folder, unique_id + ".fa")
+        self.tmp_fai = os.path.join(tmp_folder, unique_id + ".fa.fai")
         with open(self.tmp_variants, "w") as writer:
             writer.write("""##fileformat=VCFv4.3
 ##fileDate=20100501
@@ -1147,9 +1417,182 @@ class TestVCFSymbAltRecord(unittest.TestCase):
 17	41242722	.	N	<DEL>	.	.	END=41246879	GT	./.""")
 
     def tearDown(self):
-        for curr_file in [self.tmp_variants]:
+        for curr_file in [self.tmp_variants, self.tmp_fa, self.tmp_fai]:
             if os.path.exists(curr_file):
                 os.remove(curr_file)
+
+    def testDownstreamed(self):
+        chrom = "chrA"
+        fastIdxRef(chrom, "ATGCGAAAAAAATGTCCGTGATGCAT", self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # IMPRECISE
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "IMPRECISE": True})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (var.pos, var.ref, var.alt[0])
+            )
+            # DEL with CIPOS
+            var = VCFSymbAltRecord(chrom, 5, None, "G", ["<DEL>"], info={"SVLEN": [2], "CIPOS": (0, 5)})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"]),
+                (10, "A", "<DEL>", (-5, 0))
+            )
+            # DEL without CIPOS
+            var = VCFSymbAltRecord(chrom, 5, None, "G", ["<DEL>"], info={"SVLEN": [2]})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (10, "A", "<DEL>")
+            )
+            # DEL with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 5, None, "G", ["<DEL>"], info={"SVLEN": [2], "CIPOS": (0, 5), "END": 7})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"], down_var.info["END"]),
+                (10, "A", "<DEL>", (-5, 0), 12)
+            )
+            # DEL without CIPOS and END
+            var = VCFSymbAltRecord(chrom, 5, None, "G", ["<DEL>"], info={"SVLEN": [2], "END": 7})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["END"]),
+                (10, "A", "<DEL>", 12)
+            )
+            # DEL complex
+            var = VCFSymbAltRecord(chrom, 18, None, "G", ["<DEL>"], info={"SVLEN": [3]})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (20, "G", "<DEL>")
+            )
+            # DUP with CIPOS
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<DUP>"], info={"SVLEN": [2], "CIPOS": (-1, 4)})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"]),
+                (10, "A", "<DUP>", (-5, 0))
+            )
+            # DUP without CIPOS
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<DUP>"], info={"SVLEN": [2]})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (10, "A", "<DUP>")
+            )
+            # DUP without CIPOS and with convert to INS
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<DUP>"], info={"SVLEN": [2]})
+            down_var = var.downstreamed(seq_handler, convert_dup=True)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (12, "A", "<INS>")
+            )
+            # DUP with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<DUP>"], info={"SVLEN": [2], "CIPOS": (-1, 4), "END": 8})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"], down_var.info["END"]),
+                (10, "A", "<DUP>", (-5, 0), 12)
+            )
+            # DUP with CIPOS and END and convert to INS
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<DUP>"], info={"SVLEN": [2], "CIPOS": (-1, 4), "END": 8})
+            down_var = var.downstreamed(seq_handler, convert_dup=True)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"], down_var.info["END"]),
+                (12, "A", "<INS>", (-7, 0), 12)
+            )
+            # DUP without CIPOS and END
+            var = VCFSymbAltRecord(chrom, 5, None, "G", ["<DUP>"], info={"SVLEN": [2], "END": 7})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["END"]),
+                (10, "A", "<DUP>", 12)
+            )
+            # DUP complex move
+            var = VCFSymbAltRecord(chrom, 18, None, "G", ["<DUP>"], info={"SVLEN": [3]})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (20, "G", "<DUP>")
+            )
+            # DUP complex move to INS
+            var = VCFSymbAltRecord(chrom, 18, None, "G", ["<DUP>"], info={"SVLEN": [3]})
+            down_var = var.downstreamed(seq_handler, convert_dup=True)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (23, "G", "<INS>")
+            )
+            # INV with END
+            var = VCFSymbAltRecord(chrom, 3, None, "G", ["<INV>"], info={"END": 11})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["END"]),
+                (3, "G", "<INV>", 11)
+            )
+            # INS with CIPOS
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<INS>"], info={"CIPOS": [-1,4]})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"]),
+                (10, "A", "<INS>", (-5, 0))
+            )
+            # INS without CIPOS => cannot be moved
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={})
+            down_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (9, "A", "<INS>")
+            )
+            # INS with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<INS>"], info={"CIPOS": (-1, 4), "END": 6})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"], down_var.info["END"]),
+                (10, "A", "<INS>", (-5, 0), 10)
+            )
+            # INS without CIPOS and with END => cannot be moved
+            var = VCFSymbAltRecord(chrom, 6, None, "A", ["<INS>"], info={"END": 6})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["END"]),
+                (6, "A", "<INS>", 6)
+            )
+            # CNV with CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "CIPOS": (-4, 1)})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"]),
+                (10, "A", "<CNV:TR>", (-5, 0))
+            )
+            # CNV without CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2]})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (10, "A", "<CNV:TR>")
+            )
+            # CNV with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "CIPOS": (-4, 1), "END": 11})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["CIPOS"], down_var.info["END"]),
+                (10, "A", "<CNV:TR>", (-5, 0), 12)
+            )
+            # CNV without CIPOS and with END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "END": 11})
+            down_var = var.downstreamed(seq_handler)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0], down_var.info["END"]),
+                (10, "A", "<CNV:TR>", 12)
+            )
+            # CNV complex move
+            var = VCFSymbAltRecord(chrom, 18, None, "G", ["<CNV>"], info={"SVLEN": [3]})
+            down_var = var.downstreamed(seq_handler, convert_dup=True)
+            self.assertEqual(
+                (down_var.pos, down_var.ref, down_var.alt[0]),
+                (20, "G", "<CNV>")
+            )
 
     def testEnd(self):
         # With END
@@ -1190,11 +1633,16 @@ class TestVCFSymbAltRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsDeletion(self):
-        expected = [False, True, True, False, True, False, False, False, True]
+        expected = [True, True, False, True, False, False, False, True]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
-                observed.append(record.isDeletion())
+                if record.alt[0].startswith("<CNV"):
+                    with self.assertRaises(Exception) as context:
+                        record.isDeletion()
+                    self.assertTrue('CNV can be deletion or insertion' in str(context.exception))
+                else:
+                    observed.append(record.isDeletion())
         self.assertEqual(observed, expected)
 
     def testIsIndel(self):
@@ -1206,7 +1654,7 @@ class TestVCFSymbAltRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsInsAndDel(self):
-        expected = [False, False, False, False, False, False, False, False, False]
+        expected = [False, False, False, True, False, False, False, False, False]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1214,11 +1662,16 @@ class TestVCFSymbAltRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testIsInsertion(self):
-        expected = [True, False, False, False, False, True, True, True, False]
+        expected = [False, False, False, False, True, True, True, False]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
-                observed.append(record.isInsertion())
+                if record.alt[0].startswith("<CNV"):
+                    with self.assertRaises(Exception) as context:
+                        record.isInsertion()
+                    self.assertTrue('CNV can be deletion or insertion' in str(context.exception))
+                else:
+                    observed.append(record.isInsertion())
         self.assertEqual(observed, expected)
 
     def testIsInversion(self):
@@ -1229,6 +1682,47 @@ class TestVCFSymbAltRecord(unittest.TestCase):
                 if record.__class__ is VCFSymbAltRecord:
                     observed.append(record.isInversion())
         self.assertEqual(observed, expected)
+
+    def testLitteralized(self):
+        chrom = "chrA"
+        fastIdxRef(chrom, "ATGCGAAAAAAATGT", self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # DEL
+            var = VCFSymbAltRecord(chrom, 2, None, "T", ["<DEL>"], info={"SVLEN": [2], "END": 4})
+            litteral_var = var.litteralized(seq_handler)
+            self.assertEqual(
+                (litteral_var.pos, litteral_var.ref, litteral_var.alt[0]),
+                (2, "TGC", "T")
+            )
+            # DUP in homopolymer
+            var = VCFSymbAltRecord(chrom, 5, None, "G", ["<DUP>"], info={"SVLEN": [3], "CIPOS": [0, 5]})
+            litteral_var = var.litteralized(seq_handler)
+            self.assertEqual(
+                (litteral_var.pos, litteral_var.ref, litteral_var.alt[0]),
+                (5, "G", "GAAA")
+            )
+            # INV
+            var = VCFSymbAltRecord(chrom, 3, None, "G", ["<INV>"], info={"END": 11})
+            litteral_var = var.litteralized(seq_handler)
+            self.assertEqual(
+                (litteral_var.pos, litteral_var.ref, litteral_var.alt[0]),
+                (4, "CGAAAAAA", "AAAAAAGC")
+            )
+            # INS
+            var = VCFSymbAltRecord(chrom, 14, None, "T", ["<INS>"], info={"SVLEN": [100]})
+            with self.assertRaises(Exception) as context:
+                var.litteralized(seq_handler)
+            self.assertTrue('sequence is unknown' in str(context.exception))
+            # IMPRECISE
+            var = VCFSymbAltRecord(chrom, 2, None, "T", ["<DEL>"], info={"IMPRECISE": True})
+            with self.assertRaises(Exception) as context:
+                var.litteralized(seq_handler)
+            self.assertTrue('real position is unknown' in str(context.exception))
+            # CNV
+            var = VCFSymbAltRecord(chrom, 14, None, "T", ["<CNV>"], info={"SVLEN": [100]})
+            with self.assertRaises(Exception) as context:
+                var.litteralized(seq_handler)
+            self.assertTrue('CNV can be DUP or DEL' in str(context.exception))
 
     def testParsingClass(self):
         expected = [
@@ -1243,20 +1737,182 @@ class TestVCFSymbAltRecord(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def testRefEnd(self):
-        expected = [100.5, 2827708, 321887, 421681, 14477381, 9425916.5, 12665100.5, 18665128.5, 41246879]
+        expected = [2827708, 321887, 421681, 14477381, 9425916.5, 12665100.5, 18665128.5, 41246879]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
-                observed.append(record.refEnd())
+                if record.alt[0].startswith("<CNV"):
+                    with self.assertRaises(Exception) as context:
+                        record.refEnd()
+                    self.assertTrue('it can be deletion or insertion' in str(context.exception))
+                else:
+                    observed.append(record.refEnd())
         self.assertEqual(observed, expected)
 
     def testRefStart(self):
-        expected = [100.5, 2827695, 321683, 321683, 14477085, 9425916.5, 12665100.5, 18665128.5, 41242723]
+        expected = [2827695, 321683, 321683, 14477085, 9425916.5, 12665100.5, 18665128.5, 41242723]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
-                observed.append(record.refStart())
+                if record.alt[0].startswith("<CNV"):
+                    with self.assertRaises(Exception) as context:
+                        record.refStart()
+                    self.assertTrue('it can be deletion or insertion' in str(context.exception))
+                else:
+                    observed.append(record.refStart())
         self.assertEqual(observed, expected)
+
+    def testStandardize(self):
+        chrom = "chrA"
+        fastIdxRef(chrom, "ATGCGAAAAAAATGTCCGTGATGCAT", self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # IMPRECISE
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "IMPRECISE": True})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (10, "A", "<DEL>")
+            )
+            # DEL with CIPOS
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "CIPOS": [-5,0]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"]),
+                (5, "G", "<DEL>", (0, 5))
+            )
+            # DEL without CIPOS
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (5, "G", "<DEL>")
+            )
+            # DEL with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "CIPOS": (-5, 0), "END": 12})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"], var.info["END"]),
+                (5, "G", "<DEL>", (0, 5), 7)
+            )
+            # DEL without CIPOS and END
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "END": 12})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["END"]),
+                (5, "G", "<DEL>", 7)
+            )
+            # DEL complex move
+            var = VCFSymbAltRecord(chrom, 20, None, "G", ["<DEL>"], info={"SVLEN": [3]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (18, "G", "<DEL>")
+            )
+            # DUP with CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2], "CIPOS": (-4, 1)})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"]),
+                (5, "G", "<DUP>", (0, 5))
+            )
+            # DUP without CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (5, "G", "<DUP>")
+            )
+            # DUP with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2], "CIPOS": (-4, 1), "END": 11})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"], var.info["END"]),
+                (5, "G", "<DUP>", (0, 5), 7)
+            )
+            # DUP without CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2], "END": 11})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["END"]),
+                (5, "G", "<DUP>", 7)
+            )
+            # DUP complex move
+            var = VCFSymbAltRecord(chrom, 20, None, "G", ["<DUP>"], info={"SVLEN": [3]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (18, "G", "<DUP>")
+            )
+            # INV with END
+            var = VCFSymbAltRecord(chrom, 3, None, "G", ["<INV>"], info={"END": 11})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["END"]),
+                (3, "G", "<INV>", 11)
+            )
+            # INS with CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={"CIPOS": [-4,1]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"]),
+                (5, "G", "<INS>", (0, 5))
+            )
+            # INS without CIPOS => cannot be moved
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (9, "A", "<INS>")
+            )
+            # INS with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={"CIPOS": (-4, 1), "END": 9})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"], var.info["END"]),
+                (5, "G", "<INS>", (0, 5), 5)
+            )
+            # INS without CIPOS and with END => cannot be moved
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={"END": 9})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["END"]),
+                (9, "A", "<INS>", 9)
+            )
+            # CNV with CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "CIPOS": (-4, 1)})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"]),
+                (5, "G", "<CNV:TR>", (0, 5))
+            )
+            # CNV without CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (5, "G", "<CNV:TR>")
+            )
+            # CNV with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "CIPOS": (-4, 1), "END": 11})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["CIPOS"], var.info["END"]),
+                (5, "G", "<CNV:TR>", (0, 5), 7)
+            )
+            # CNV without CIPOS and with END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "END": 11})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0], var.info["END"]),
+                (5, "G", "<CNV:TR>", 7)
+            )
+            # CNV complex move
+            var = VCFSymbAltRecord(chrom, 20, None, "G", ["<CNV>"], info={"SVLEN": [3]})
+            var.standardize(seq_handler)
+            self.assertEqual(
+                (var.pos, var.ref, var.alt[0]),
+                (18, "G", "<CNV>")
+            )
 
     def testSvLen(self):
         # With SVLEN
@@ -1268,7 +1924,7 @@ class TestVCFSymbAltRecord(unittest.TestCase):
                     observed.append(record.sv_len)
         self.assertEqual(observed, expected)
         # Without SVLEN
-        expected = [None, -205, 99999, -297, None, 21100, 76, -4157]
+        expected = [30, -205, 99999, -297, None, 21100, 76, -4157]
         observed = list()
         with VCFIO(self.tmp_variants) as reader:
             for record in reader:
@@ -1285,6 +1941,221 @@ class TestVCFSymbAltRecord(unittest.TestCase):
             for record in reader:
                 observed.append(record.type())
         self.assertEqual(observed, expected)
+
+    def testUpstreamed(self):
+        chrom = "chrA"
+        fastIdxRef(chrom, "ATGCGAAAAAAATGTCCGTGATGCAT", self.tmp_fa, self.tmp_fai)
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # IMPRECISE
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "IMPRECISE": True})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (var.pos, var.ref, var.alt[0])
+            )
+            # DEL with CIPOS
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "CIPOS": [-5,0]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"]),
+                (5, "G", "<DEL>", (0, 5))
+            )
+            # DEL without CIPOS
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (5, "G", "<DEL>")
+            )
+            # DEL with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "CIPOS": (-5, 0), "END": 12})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"], up_var.info["END"]),
+                (5, "G", "<DEL>", (0, 5), 7)
+            )
+            # DEL without CIPOS and END
+            var = VCFSymbAltRecord(chrom, 10, None, "A", ["<DEL>"], info={"SVLEN": [2], "END": 12})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["END"]),
+                (5, "G", "<DEL>", 7)
+            )
+            # DEL complex move
+            var = VCFSymbAltRecord(chrom, 20, None, "G", ["<DEL>"], info={"SVLEN": [3]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (18, "G", "<DEL>")
+            )
+            # DUP with CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2], "CIPOS": (-4, 1)})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"]),
+                (5, "G", "<DUP>", (0, 5))
+            )
+            # DUP without CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (5, "G", "<DUP>")
+            )
+            # DUP with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2], "CIPOS": (-4, 1), "END": 11})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"], up_var.info["END"]),
+                (5, "G", "<DUP>", (0, 5), 7)
+            )
+            # DUP without CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<DUP>"], info={"SVLEN": [2], "END": 11})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["END"]),
+                (5, "G", "<DUP>", 7)
+            )
+            # DUP complex move
+            var = VCFSymbAltRecord(chrom, 20, None, "G", ["<DUP>"], info={"SVLEN": [3]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (18, "G", "<DUP>")
+            )
+            # INV with END
+            var = VCFSymbAltRecord(chrom, 3, None, "G", ["<INV>"], info={"END": 11})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["END"]),
+                (3, "G", "<INV>", 11)
+            )
+            # INS with CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={"CIPOS": [-4,1]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"]),
+                (5, "G", "<INS>", (0, 5))
+            )
+            # INS without CIPOS => cannot be moved
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (9, "A", "<INS>")
+            )
+            # INS with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={"CIPOS": (-4, 1), "END": 9})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"], up_var.info["END"]),
+                (5, "G", "<INS>", (0, 5), 5)
+            )
+            # INS without CIPOS and with END => cannot be moved
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<INS>"], info={"END": 9})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["END"]),
+                (9, "A", "<INS>", 9)
+            )
+            # CNV with CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "CIPOS": (-4, 1)})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"]),
+                (5, "G", "<CNV:TR>", (0, 5))
+            )
+            # CNV without CIPOS
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (5, "G", "<CNV:TR>")
+            )
+            # CNV with CIPOS and END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "CIPOS": (-4, 1), "END": 11})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["CIPOS"], up_var.info["END"]),
+                (5, "G", "<CNV:TR>", (0, 5), 7)
+            )
+            # CNV without CIPOS and with END
+            var = VCFSymbAltRecord(chrom, 9, None, "A", ["<CNV:TR>"], info={"SVLEN": [2], "END": 11})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0], up_var.info["END"]),
+                (5, "G", "<CNV:TR>", 7)
+            )
+            # CNV complex move
+            var = VCFSymbAltRecord(chrom, 20, None, "G", ["<CNV>"], info={"SVLEN": [3]})
+            up_var = var.upstreamed(seq_handler)
+            self.assertEqual(
+                (up_var.pos, up_var.ref, up_var.alt[0]),
+                (18, "G", "<CNV>")
+            )
+
+
+class TestRefWalker(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_fa = os.path.join(tmp_folder, unique_id + ".fa")
+        self.tmp_fai = os.path.join(tmp_folder, unique_id + ".fa.fai")
+        self.chrom = "test"
+        self.ref = "nnNNATGCCAaTgATGTTtTaAGCCGAGCCGAT"  # length: 33
+        #           | | | | | | | | | | | | | | | | |
+        #           1 3 5 7 9 11| 15| 19| 23| 27| 31|
+        #                       13  17  21  25  29  33
+        fastIdxRef(self.chrom, self.ref, self.tmp_fa, self.tmp_fai)
+
+    def tearDown(self):
+        for curr_file in [self.tmp_fa, self.tmp_fai]:
+            if os.path.exists(curr_file):
+                os.remove(curr_file)
+
+    def testDownIter(self):
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Short window, Large window and Too large window
+            expected = [elt.upper() for elt in self.ref[14 - 7:14]][::-1]
+            for buffer_size in [2, 10, 100]:
+                observed = list()
+                for idx, curr in enumerate(_refDownIter(seq_handler, self.chrom, 14, buffer_size)):
+                    if idx == 7:
+                        break
+                    observed.append(curr)
+                self.assertEqual(observed, expected)
+            # Stop iterration
+            expected = [elt.upper() for elt in self.ref[0:14]][::-1]
+            observed = list()
+            for curr in _refDownIter(seq_handler, self.chrom, 14, 3):
+                observed.append(curr)
+            self.assertEqual(observed, expected)
+
+    def testUpIter(self):
+        with IdxFastaIO(self.tmp_fa) as seq_handler:
+            # Short window, Large window and Too large window
+            expected = [elt.upper() for elt in self.ref[14:14 + 7]]
+            for buffer_size in [2, 10, 100]:
+                observed = list()
+                for idx, curr in enumerate(_refUpIter(seq_handler, self.chrom, 15, buffer_size)):
+                    if idx == 7:
+                        break
+                    observed.append(curr)
+                self.assertEqual(observed, expected)
+            # Stop iterration
+            expected = [elt.upper() for elt in self.ref[14:]]
+            observed = list()
+            for curr in _refUpIter(seq_handler, self.chrom, 15, 3):
+                observed.append(curr)
+            self.assertEqual(observed, expected)
+
+
+def fastIdxRef(chrom, seq, seq_path, idx_path):
+    with open(seq_path, "w") as writer:
+        writer.write(">{}\n".format(chrom))
+        writer.write(seq)
+    with open(idx_path, "w") as writer:
+        writer.write("{}\t{}\t{}\t{}\t{}".format(chrom, len(seq), len(chrom) + 2, len(seq), len(seq) + 1))
 
 
 ########################################################################
