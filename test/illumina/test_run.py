@@ -4,8 +4,6 @@ __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '2.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
 
 import datetime
 import os
@@ -51,6 +49,17 @@ class TestRTAComplete(unittest.TestCase):
                 handle.write(curr_test["content"] + "\n")
             res = RTAComplete(self.tmp_file)
             observed.append({"RTA_version": res.RTA_version, "end_date": res.end_date})
+        self.assertEqual(expected, observed)
+
+    def testParseNova(self):
+        with open(self.tmp_file, "w") as handle:
+            handle.write("")
+        res = RTAComplete(self.tmp_file)
+        expected = {
+            "RTA_version": None,
+            "end_date": datetime.date.fromtimestamp(os.path.getmtime(self.tmp_file))
+        }
+        observed = {"RTA_version": res.RTA_version, "end_date": res.end_date}
         self.assertEqual(expected, observed)
 
 
@@ -244,6 +253,44 @@ class TestRunInfo(unittest.TestCase):
                     "instrument": {'id': 'A00198', 'platform': 'NovaSeq'},
                     "reads_phases": [{'is_index': False, 'nb_cycles': 101}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 101}],
                     "run": {'number': '98', 'id': '180627_SL-NVB_0098_AFCHCYTJDMXX', 'start_date': datetime.datetime(2018, 6, 27, 16, 59, 20)}
+                }
+            },
+            {  # NovaSeq dual index
+                "content": '''<?xml version="1.0" encoding="utf-8"?>
+<RunInfo Version="5">
+        <Run Id="231204_A01789_0106_BHTLGNDRX3" Number="106">
+                <Flowcell>HTLGNDRX3</Flowcell>
+                <Instrument>A01789</Instrument>
+                <Date>12/4/2023 4:53:55 PM</Date>
+                <Reads>
+                        <Read Number="1" NumCycles="151" IsIndexedRead="N"/>
+                        <Read Number="2" NumCycles="8" IsIndexedRead="Y"/>
+                        <Read Number="3" NumCycles="8" IsIndexedRead="Y"/>
+                        <Read Number="4" NumCycles="151" IsIndexedRead="N"/>
+                </Reads>
+                <FlowcellLayout LaneCount="2" SurfaceCount="2" SwathCount="2" TileCount="78" FlowcellSide="2">
+                        <TileSet TileNamingConvention="FourDigit">
+                                <Tiles>
+                                        <Tile>1_2101</Tile>
+                                        <Tile>1_2102</Tile>
+                                        <Tile>2_2277</Tile>
+                                        <Tile>2_2278</Tile>
+                                </Tiles>
+                        </TileSet>
+                </FlowcellLayout>
+                <AlignToPhiX/>
+                <ImageDimensions Width="3200" Height="3607"/>
+                <ImageChannels>
+                        <Name>RED</Name>
+                        <Name>GREEN</Name>
+                </ImageChannels>
+        </Run>
+</RunInfo>''',
+                "expected": {
+                    "flowcell": {'id': 'HTLGNDRX3', 'layout': {'LaneCount': '2', 'SurfaceCount': '2', 'SwathCount': '2', 'TileCount': '78', 'FlowcellSide': '2'}},
+                    "instrument": {'id': 'A01789', 'platform': 'NovaSeq'},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}],
+                    "run": {'number': '106', 'id': '231204_A01789_0106_BHTLGNDRX3', 'start_date': datetime.datetime(2023, 12, 4, 16, 53, 55)}
                 }
             }
         ]
@@ -798,7 +845,145 @@ class TestRunParameters(unittest.TestCase):
   <RunManagementType>Standalone</RunManagementType>
   <CloudRunId />
   <SendInstrumentHealthToILMN>false</SendInstrumentHealthToILMN>
-</RunParameters>"""
+</RunParameters>""",
+            "NovaSeq": '''<?xml version="1.0"?>
+<RunParameters xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Surface>Both</Surface>
+  <ReadType>PairedEnd</ReadType>
+  <Side>B</Side>
+  <Read1NumberOfCycles>151</Read1NumberOfCycles>
+  <Read2NumberOfCycles>151</Read2NumberOfCycles>
+  <IndexRead1NumberOfCycles>8</IndexRead1NumberOfCycles>
+  <IndexRead2NumberOfCycles>8</IndexRead2NumberOfCycles>
+  <PlannedRead1Cycles>151</PlannedRead1Cycles>
+  <PlannedRead2Cycles>151</PlannedRead2Cycles>
+  <PlannedIndex1ReadCycles>8</PlannedIndex1ReadCycles>
+  <PlannedIndex2ReadCycles>8</PlannedIndex2ReadCycles>
+  <RunNumber>106</RunNumber>
+  <RtaVersion>v3.4.4</RtaVersion>
+  <RecipeVersion>1.8.0</RecipeVersion>
+  <ExperimentName>20231204_op1</ExperimentName>
+  <RfidsInfo>
+    <FlowCellSerialBarcode>HTLGNDRX3</FlowCellSerialBarcode>
+    <FlowCellPartNumber>20026406</FlowCellPartNumber>
+    <FlowCellLotNumber>20789096</FlowCellLotNumber>
+    <FlowCellExpirationdate>09/21/2024 00:00:00</FlowCellExpirationdate>
+    <FlowCellStartDate>12/04/2023 16:50:00</FlowCellStartDate>
+    <FlowCellNumberOfReuseRemaining>1</FlowCellNumberOfReuseRemaining>
+    <FlowCellSupportedModes>LTWashOnly;SP</FlowCellSupportedModes>
+    <FlowCellMode>SP</FlowCellMode>
+    <FlowCellConsumableVersion>1</FlowCellConsumableVersion>
+    <FlowCellRssi>3</FlowCellRssi>
+    <LibraryTubeSerialBarcode>NV0891884-LIB</LibraryTubeSerialBarcode>
+    <LibraryTubeSupportedModes>Universal</LibraryTubeSupportedModes>
+    <LibraryTubePartNumber>20005221</LibraryTubePartNumber>
+    <LibraryTubeLotNumber>1000017502</LibraryTubeLotNumber>
+    <LibraryTubeExpirationdate>12/31/2169 00:00:00</LibraryTubeExpirationdate>
+    <LibraryTubeStartDate>12/04/2023 16:50:00</LibraryTubeStartDate>
+    <LibraryTubeRssi>3</LibraryTubeRssi>
+    <SbsSerialBarcode>NV5101243-RGSBS</SbsSerialBarcode>
+    <SbsSupportedModes>S2;S1;SP</SbsSupportedModes>
+    <SbsPartNumber>20031054</SbsPartNumber>
+    <SbsLotNumber>20798740</SbsLotNumber>
+    <SbsExpirationdate>10/16/2024 00:00:00</SbsExpirationdate>
+    <SbsStartDate>12/04/2023 16:50:00</SbsStartDate>
+    <SbsCycleKit>338</SbsCycleKit>
+    <SbsNumberOfCyclesRemaining>20</SbsNumberOfCyclesRemaining>
+    <SbsNumberOfCyclesSupported>338</SbsNumberOfCyclesSupported>
+    <SbsConsumableVersion>3</SbsConsumableVersion>
+    <SbsRssi>4</SbsRssi>
+    <ClusterSerialBarcode>NV5098114-RGCPE</ClusterSerialBarcode>
+    <ClusterSupportedModes>SP</ClusterSupportedModes>
+    <ClusterPartNumber>20031059</ClusterPartNumber>
+    <ClusterLotNumber>20796637</ClusterLotNumber>
+    <ClusterExpirationdate>10/13/2024 00:00:00</ClusterExpirationdate>
+    <ClusterStartDate>12/04/2023 16:50:00</ClusterStartDate>
+    <ClusterCycleKit>545</ClusterCycleKit>
+    <ClusterNumberOfCyclesRemaining>227</ClusterNumberOfCyclesRemaining>
+    <ClusterRssi>5</ClusterRssi>
+    <BufferSerialBarcode>NV5729825-BUFFR</BufferSerialBarcode>
+    <BufferSupportedModes>S2;S1;SP</BufferSupportedModes>
+    <BufferPartNumber>20013524</BufferPartNumber>
+    <BufferLotNumber>50000650</BufferLotNumber>
+    <BufferExpirationdate>09/04/2024 00:00:00</BufferExpirationdate>
+    <BufferNumberOfCyclesRemaining>12</BufferNumberOfCyclesRemaining>
+    <BufferStartDate>12/04/2023 16:50:00</BufferStartDate>
+    <BufferRssi>4</BufferRssi>
+  </RfidsInfo>
+  <RecipeFilePath>C:\\Program Files\\Illumina\\NovaSeq Control Software\\Recipe</RecipeFilePath>
+  <SamplesheetFile />
+  <UsedLimsSetup>false</UsedLimsSetup>
+  <CeLinuxRunFolder>/ilmn/outputfolder/231204_A01789_0106_BHTLGNDRX3/</CeLinuxRunFolder>
+  <RtaRawRunFolder>/ilmn/outputfolder</RtaRawRunFolder>
+  <CeMountRunFolder>Z:\\outputfolder\\231204_A01789_0106_BHTLGNDRX3\\</CeMountRunFolder>
+  <OutputRunFolder>\\sequenceurs\\NovaSeq1\\231204_A01789_0106_BHTLGNDRX3\\</OutputRunFolder>
+  <OutputRootFolder>\\sequenceurs\\NovaSeq1</OutputRootFolder>
+  <SbcRunFolder>C:\\ProgramData\\Illumina\\NovaSeq\\NovaSeqTemp\\231204_A01789_0106_BHTLGNDRX3\\</SbcRunFolder>
+  <PreRunFolder>C:\\ProgramData\\Illumina\\NovaSeq\\NovaSeqTemp\\RunSetupLogs\\A01789_2023-12-04__16_33_56_SideB</PreRunFolder>
+  <RunStartDate>231204</RunStartDate>
+  <RunId>231204_A01789_0106_BHTLGNDRX3</RunId>
+  <UseBaseSpace>false</UseBaseSpace>
+  <UseBaseSpaceMonitoringAndStorage>true</UseBaseSpaceMonitoringAndStorage>
+  <Autocenter>true</Autocenter>
+  <BiDirectionalScanning>true</BiDirectionalScanning>
+  <UseCustomRecipe>false</UseCustomRecipe>
+  <UseCustomRead1Primer>false</UseCustomRead1Primer>
+  <UseCustomRead2Primer>false</UseCustomRead2Primer>
+  <UseCustomIndexRead1Primer>false</UseCustomIndexRead1Primer>
+  <IsRehyb>false</IsRehyb>
+  <InstrumentName>A01789</InstrumentName>
+  <PlatformType>HighThroughput</PlatformType>
+  <Application>NovaSeq Control Software</Application>
+  <ApplicationVersion>1.8.1</ApplicationVersion>
+  <Build>59</Build>
+  <FirmwareVersions>
+    <FirmwareVersion>
+      <Board>Fluidics Board</Board>
+      <Version>novaseq_flu@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Left Buffer Interface Board</Board>
+      <Version>novaseq_bim@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Right Buffer Interface Board</Board>
+      <Version>novaseq_bim@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Chassis Module Board</Board>
+      <Version>novaseq_chm@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Camera Interface Board</Board>
+      <Version>novaseq_cib_2@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Focus Interface Board</Board>
+      <Version>novaseq_fib_2@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Flow Cell Holder Board</Board>
+      <Version>novaseq_fch_2@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>System Thermal Board</Board>
+      <Version>novaseq_syst@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Left Reagent Chiller Board</Board>
+      <Version>novaseq_rca@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+    <FirmwareVersion>
+      <Board>Right Reagent Chiller Board</Board>
+      <Version>novaseq_rca@NovaSeq_1.26.10</Version>
+    </FirmwareVersion>
+  </FirmwareVersions>
+  <SendIlluminaHealthData>false</SendIlluminaHealthData>
+  <UcsRunId>1AD2DEEC917EADAC</UcsRunId>
+  <UcsVersion>2.7.3.4836</UcsVersion>
+  <RunSetupMode>Manual</RunSetupMode>
+  <WorkflowType>NovaSeqStandard</WorkflowType>
+</RunParameters>'''
         }
 
     def setUp(self):
@@ -859,6 +1044,17 @@ class TestRunParameters(unittest.TestCase):
                     "kit": {"flowcell_id": "HAMVRADXX", "reagent_kit_id": None},
                     "post_process": None,
                     "software": {"RTA": "1.18.61", "CS": "2.2.38"}
+                }
+            },
+            {  # NovaSeq
+                "content": TestRunParameters.CONTENT["NovaSeq"],
+                "expected": {
+                    "instrument": {"id": "A01789", "platform": "NovaSeq"},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}],
+                    "run": {"number": "106", "id": "231204_A01789_0106_BHTLGNDRX3", "start_date": datetime.datetime(2023, 12, 4)},
+                    "kit": {"flowcell_id": "BHTLGNDRX3", "reagent_kit_id": None},
+                    "post_process": None,
+                    "software": {"RTA": "3.4.4", "CS": "1.8.1"}
                 }
             }
         ]

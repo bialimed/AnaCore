@@ -27,9 +27,7 @@ Classes and functions for reading Illumina's files on run: runInfo, runParameter
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '2.1.0'
 
 from anacore.illumina.base import getPlatformFromSerialNumber
 from anacore.illumina.samplesheet import SampleSheetFactory
@@ -107,6 +105,24 @@ def etreeToDict(node):
     return data
 
 
+def findAny(node, searches):
+    """
+    Return the first subelement matching any term of searches.
+
+    :param node: Node to convert.
+    :type node: xml.etree.ElementTree.Element
+    :param searches: List accepted element tag or XPath. Order determines the first match.
+    :type searche: str
+    :return: Subelement matching any term of searches.
+    :rtype: xml.etree.ElementTree.Element
+    """
+    for curr in searches:
+        match = node.find(curr)
+        if match is not None:
+            return match
+    return None
+
+
 def getRunFolderInfo(run_folder):
     """
     Return run information (instrument, run configuration, samples, ...) coming from several file in run folder.
@@ -157,22 +173,26 @@ class RTAComplete(object):
         self._parse()
 
     def _parse(self):
-        """Read file content and store information on the instance's attributes."""
-        with open(self.filepath) as FH_in:
-            content = FH_in.read().strip()
-            match = re.fullmatch(r"(.+/.+/.+,.+),Illumina RTA (.+)", content)
-            if match:  # 11/1/2017,15:11:43.174,Illumina RTA 1.18.54
-                date_str, self.RTA_version = match.groups()
-                if "." in date_str and ".":
-                    date_str = date_str.split(".")[0]
-                self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y,%H:%M:%S')
-            else:
-                match = re.fullmatch(r"RTA (.+) completed on (.+/.+/.+ .+:.+:.+ ..)", content)
-                if match:  # RTA 2.4.11 completed on 11/14/2019 4:56:45 AM
-                    self.RTA_version, date_str = match.groups()
-                    self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
+        """Read file content and store information on the instance's attributes. If file come from NovaSeq end_date is retrieve from file last modification date."""
+        if os.path.getsize(self.filepath) == 0:  # is empty (NovaSeq)
+            self.RTA_version = None
+            self.end_date = datetime.date.fromtimestamp(os.path.getmtime(self.filepath))
+        else:
+            with open(self.filepath) as FH_in:
+                content = FH_in.read().strip()
+                match = re.fullmatch(r"(.+/.+/.+,.+),Illumina RTA (.+)", content)
+                if match:  # 11/1/2017,15:11:43.174,Illumina RTA 1.18.54
+                    date_str, self.RTA_version = match.groups()
+                    if "." in date_str and ".":
+                        date_str = date_str.split(".")[0]
+                    self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y,%H:%M:%S')
                 else:
-                    raise Exception('"{}" in {} cannot be parsed by {}.'.format(content, self.filepath, self.__class__.__name__))
+                    match = re.fullmatch(r"RTA (.+) completed on (.+/.+/.+ .+:.+:.+ ..)", content)
+                    if match:  # RTA 2.4.11 completed on 11/14/2019 4:56:45 AM
+                        self.RTA_version, date_str = match.groups()
+                        self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
+                    else:
+                        raise Exception('"{}" in {} cannot be parsed by {}.'.format(content, self.filepath, self.__class__.__name__))
 
 
 class Run:
@@ -200,8 +220,15 @@ class Run:
         if self.isSequenced():
             run_params = self.parameters
             completed_copy_file = os.path.join(self.path, "CopyComplete.txt")
-            if run_params.instrument["platform"] in ["HiSeq", "MiSeq"]:
+            if run_params.instrument["platform"] == "HiSeq":
                 is_completed = True
+            elif run_params.instrument["platform"] == "MiSeq":
+                mcs_version = run_params.software["CS"]
+                if int(mcs_version.split(".")[0]) < 4:
+                    is_completed = True
+                else:  # The universal copy service replace the previous system since MCS v4
+                    if os.path.exists(completed_copy_file):
+                        is_completed = True
             elif run_params.instrument["platform"] == "NextSeq":
                 ncs_version = run_params.software["CS"]
                 if int(ncs_version.split(".")[0]) < 4:
@@ -351,26 +378,22 @@ class RunParameters(object):
             root = [child for child in root if child.tag == "Setup"][0]
         # Process information
         self.instrument = self._getInstrumentFromRoot(root)
-        reads_subtree = root.find("Reads")
-        if reads_subtree is not None:
-            self.reads_phases = self._getReadsFromSection(reads_subtree)
-        else:
-            self.reads_phases = self._getReadsFromSetup(root.find("Setup"))
+        self.reads_phases = self._getReadsFromRoot(root)
         self.run = self._getRunFromRoot(root)
         self.kit = self._getKitFromRoot(root)
         self.post_process = self._getPostProcessFromRoot(root)
         self.software = self._getSoftwareFromRoot(root)
 
-    def _getReadsFromSetup(self, subtree):
+    def _getReadsFrom(self, subtree, prefix=""):
         reads = list()
         indices = list()
         for child in subtree:
-            if child.tag.startswith("Read"):
+            if child.tag.startswith(prefix + "Read"):
                 reads.append({
                     "is_index": False,
                     "nb_cycles": int(child.text)
                 })
-            elif child.tag.startswith("Index"):
+            elif child.tag.startswith(prefix + "Index"):
                 indices.append({
                     "is_index": True,
                     "nb_cycles": int(child.text)
@@ -382,7 +405,20 @@ class RunParameters(object):
             phases.append(curr)
         return phases
 
-    def _getReadsFromSection(self, subtree):
+    def _getReadsFromRoot(self, root):
+        reads_phases = None
+        reads_subtree = root.find("Reads")
+        if reads_subtree is not None:
+            reads_phases = self._getReadsFromReads(reads_subtree)
+        else:
+            setup_subtree = root.find("Setup")
+            if setup_subtree is not None:
+                reads_phases = self._getReadsFrom(root.find("Setup"))
+            else:
+                reads_phases = self._getReadsFrom(root, "Planned")  # Nova style
+        return reads_phases
+
+    def _getReadsFromReads(self, subtree):
         reads = list()
         for child in subtree:
             reads.append({
@@ -392,23 +428,19 @@ class RunParameters(object):
         return reads
 
     def _getInstrumentFromRoot(self, root):
-        serial_number = root.find("ScannerID")
-        if serial_number is None:
-            serial_number = root.find("InstrumentID")
-        serial_number = serial_number.text
+        serial_number = findAny(root, ("ScannerID", "InstrumentID", "InstrumentName")).text
         return {
             "id": serial_number,
             "platform": getPlatformFromSerialNumber(serial_number)
         }
 
     def _getRunFromRoot(self, root):
-        run_number = root.find("RunNumber")
-        if run_number is None:
-            run_number = root.find("ScanNumber")
+        run_number = findAny(root, ("RunNumber", "ScanNumber"))
         run_number = run_number.text.lstrip("0")
+        run_id = findAny(root, ("RunID", "RunId")).text
         return {
             "number": run_number,
-            "id": root.find("RunID").text,
+            "id": run_id,
             "start_date": datetime.datetime.strptime(root.find("RunStartDate").text, '%y%m%d')
         }
 
@@ -439,9 +471,7 @@ class RunParameters(object):
                 else:
                     flowcell_id = self.run["id"].rsplit("_", 1)[1]
         # Reagent kit ID
-        reagent_kit_id = root.find("ReagentKitBarcode")
-        if reagent_kit_id is None:
-            reagent_kit_id = root.find("ReagentKitSerial")
+        reagent_kit_id = findAny(root, ("ReagentKitBarcode", "ReagentKitSerial"))
         if reagent_kit_id is not None:
             reagent_kit_id = reagent_kit_id.text
         return {
@@ -453,7 +483,10 @@ class RunParameters(object):
         cs_root_markup = root.find("Setup")
         if cs_root_markup is None:
             cs_root_markup = root
+        rta_version = findAny(root, ("RTAVersion", "RtaVersion")).text
+        if rta_version.startswith("v"):
+            rta_version = rta_version[1:]
         return {
-            "RTA": root.find("RTAVersion").text,
+            "RTA": rta_version,
             "CS": cs_root_markup.find("ApplicationVersion").text
         }

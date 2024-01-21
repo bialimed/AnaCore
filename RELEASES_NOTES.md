@@ -1,6 +1,8 @@
 # Release 3.1.0 [DEV]
 
 ### Improvements
+  * Manage `illumina.run.[RunParameter|RTAComplete]` from NovaSeq Control
+  Software.
   * `downstreamed`, `getMostDownstream`, `getMostUpstream` and `upstreamed` are
   now available from `anacore.vcf.VCFSymbAltRecord`.
   * `getMostDownstream` and `getMostUpstream` form `anacore.vcf.VCFRecord` take
