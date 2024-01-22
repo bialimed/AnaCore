@@ -174,25 +174,25 @@ class RTAComplete(object):
 
     def _parse(self):
         """Read file content and store information on the instance's attributes. If file come from NovaSeq end_date is retrieve from file last modification date."""
-        if os.path.getsize(self.filepath) == 0:  # is empty (NovaSeq)
+        with open(self.filepath) as FH_in:
+            content = FH_in.read().strip()
+        if content == "":  # is empty (NovaSeq)
             self.RTA_version = None
-            self.end_date = datetime.date.fromtimestamp(os.path.getmtime(self.filepath))
+            self.end_date = datetime.datetime.fromtimestamp(os.path.getmtime(self.filepath))
         else:
-            with open(self.filepath) as FH_in:
-                content = FH_in.read().strip()
-                match = re.fullmatch(r"(.+/.+/.+,.+),Illumina RTA (.+)", content)
-                if match:  # 11/1/2017,15:11:43.174,Illumina RTA 1.18.54
-                    date_str, self.RTA_version = match.groups()
-                    if "." in date_str and ".":
-                        date_str = date_str.split(".")[0]
-                    self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y,%H:%M:%S')
+            match = re.fullmatch(r"(.+/.+/.+,.+),Illumina RTA (.+)", content)
+            if match:  # 11/1/2017,15:11:43.174,Illumina RTA 1.18.54
+                date_str, self.RTA_version = match.groups()
+                if "." in date_str and ".":
+                    date_str = date_str.split(".")[0]
+                self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y,%H:%M:%S')
+            else:
+                match = re.fullmatch(r"RTA (.+) completed on (.+/.+/.+ .+:.+:.+ ..)", content)
+                if match:  # RTA 2.4.11 completed on 11/14/2019 4:56:45 AM
+                    self.RTA_version, date_str = match.groups()
+                    self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
                 else:
-                    match = re.fullmatch(r"RTA (.+) completed on (.+/.+/.+ .+:.+:.+ ..)", content)
-                    if match:  # RTA 2.4.11 completed on 11/14/2019 4:56:45 AM
-                        self.RTA_version, date_str = match.groups()
-                        self.end_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
-                    else:
-                        raise Exception('"{}" in {} cannot be parsed by {}.'.format(content, self.filepath, self.__class__.__name__))
+                    raise Exception('"{}" in {} cannot be parsed by {}.'.format(content, self.filepath, self.__class__.__name__))
 
 
 class Run:

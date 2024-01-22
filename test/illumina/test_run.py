@@ -53,11 +53,11 @@ class TestRTAComplete(unittest.TestCase):
 
     def testParseNova(self):
         with open(self.tmp_file, "w") as handle:
-            handle.write("")
+            handle.write(" ")
         res = RTAComplete(self.tmp_file)
         expected = {
             "RTA_version": None,
-            "end_date": datetime.date.fromtimestamp(os.path.getmtime(self.tmp_file))
+            "end_date": datetime.datetime.fromtimestamp(os.path.getmtime(self.tmp_file))
         }
         observed = {"RTA_version": res.RTA_version, "end_date": res.end_date}
         self.assertEqual(expected, observed)
