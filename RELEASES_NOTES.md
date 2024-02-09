@@ -1,6 +1,7 @@
 # Release 3.1.0 [DEV]
 
 ### Improvements
+  * Add `anacore.wig` for reading/writing/processing wiggle files.
   * Manage `illumina.run.[RunParameter|RTAComplete]` from NovaSeq Control
   Software.
   * `downstreamed`, `getMostDownstream`, `getMostUpstream` and `upstreamed` are
