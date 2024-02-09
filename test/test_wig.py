@@ -133,12 +133,15 @@ variableStep chrom=chr2 span=5""")
 
     def testRead(self):
         with open(self.tmp_in, "w") as writer:
-            writer.write("""variableStep chrom=chr1
+            writer.write("""browser hide all
+variableStep chrom=chr1
 300701 12.5
 300702 12.5
+track type=wiggle_0 name="variableStep" description="variableStep format" visibility=full autoScale=off
 variableStep chrom=chr2 span=5
 300701 13
 300710 18
+# comment
 fixedStep chrom=chr4 start=400601 step=100
 11
 22
