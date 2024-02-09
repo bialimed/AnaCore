@@ -233,6 +233,8 @@ class WigIO(AbstractFile):
             self.span = span
             self._prev = {"chrom": chrom}
             return False
+        if self.current_line.startswith("#") or self.current_line.startswith("browser") or self.current_line.startswith("track"):
+            return False
         return True
 
     def write(self, chrom, pos, val):
