@@ -1,157 +1,75 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.sequenceIO &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/anacore.css?v=93b82d15" />
 
   
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home"> AnaCore
           
-
-          
-            
-            <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
+          <a href="../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.sequenceIO</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.sequenceIO</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.sequenceIO</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing sequence files and their indices.&quot;&quot;&quot;</span>
@@ -171,10 +89,10 @@
 
 
 <div class="viewcode-block" id="FaidxRecord"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FaidxRecord">[docs]</a><span class="k">class</span> <span class="nc">FaidxRecord</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Record for faidx (see http://www.htslib.org/doc/faidx.html).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Record for faidx (see http://www.htslib.org/doc/faidx.html).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">line_bases</span><span class="p">,</span> <span class="n">line_width</span><span class="p">,</span> <span class="n">qual_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of FaidxRecord.</span>
 
 <span class="sd">        :param name: Name of this reference sequence.</span>
@@ -201,10 +119,10 @@
 
 
 <div class="viewcode-block" id="Faidx"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.Faidx">[docs]</a><span class="k">class</span> <span class="nc">Faidx</span><span class="p">(</span><span class="n">SVIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write a faidx file (see http://www.htslib.org/doc/faidx.html).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write a faidx file (see http://www.htslib.org/doc/faidx.html).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of Faidx.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -217,7 +135,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">title_starter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">has_title</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record defined by the current line.</span>
@@ -232,7 +150,7 @@
         <span class="k">return</span> <span class="n">FaidxRecord</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Faidx.readById"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.Faidx.readById">[docs]</a>    <span class="k">def</span> <span class="nf">readById</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return all the record from the file.</span>
 
 <span class="sd">        :return: By sequence ID his FaiItem.</span>
@@ -253,10 +171,10 @@
 
 
 <div class="viewcode-block" id="FastqIO"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO">[docs]</a><span class="k">class</span> <span class="nc">FastqIO</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write in fastq file (https://en.wikipedia.org/wiki/FASTQ_format).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write in fastq file (https://en.wikipedia.org/wiki/FASTQ_format).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of FastqIO.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -278,7 +196,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="FastqIO.close"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Close file handle it is opened.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close file handle it is opened.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;file_handle&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="kc">None</span>
@@ -300,7 +218,7 @@
                 <span class="n">is_end</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="FastqIO.nextSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.nextSeq">[docs]</a>    <span class="k">def</span> <span class="nf">nextSeq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the next sequence.</span>
 
 <span class="sd">        :return: The next sequence or None if it is the end of file.</span>
@@ -340,7 +258,7 @@
 
 <div class="viewcode-block" id="FastqIO.qualOffset"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.qualOffset">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">qualOffset</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the offset used to encode the quality in the file.</span>
 
 <span class="sd">        :param filepath: The file path.</span>
@@ -377,7 +295,7 @@
 
 <div class="viewcode-block" id="FastqIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if the file is in fastq format.</span>
 
 <span class="sd">        :param filepath: The file path.</span>
@@ -424,7 +342,7 @@
 
 <div class="viewcode-block" id="FastqIO.nbSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.nbSeq">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">nbSeq</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of sequences in file.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -445,7 +363,7 @@
 
 <div class="viewcode-block" id="FastqIO.nbSeqAndNt"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.nbSeqAndNt">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">nbSeqAndNt</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of sequences and nucleotids in file.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -469,7 +387,7 @@
         <span class="k">return</span> <span class="n">nb_seq</span><span class="p">,</span> <span class="n">nb_nt</span></div>
 
 <div class="viewcode-block" id="FastqIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write record lines in file.</span>
 
 <span class="sd">        :param sequence_record: The record to write.</span>
@@ -479,7 +397,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="FastqIO.seqToFastqLine"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastqIO.seqToFastqLine">[docs]</a>    <span class="k">def</span> <span class="nf">seqToFastqLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the sequence in fastq format.</span>
 
 <span class="sd">        :param sequence: The sequence to process.</span>
@@ -495,10 +413,10 @@
 
 
 <div class="viewcode-block" id="FastaIO"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO">[docs]</a><span class="k">class</span> <span class="nc">FastaIO</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write in fasta file (https://en.wikipedia.org/wiki/FASTA_format).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write in fasta file (https://en.wikipedia.org/wiki/FASTA_format).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of FastaIO.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -522,7 +440,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="FastaIO.close"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Close file handle it is opened.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close file handle it is opened.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;file_handle&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span> <span class="o">=</span> <span class="kc">None</span>
@@ -544,7 +462,7 @@
                 <span class="n">is_end</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="FastaIO.nextSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.nextSeq">[docs]</a>    <span class="k">def</span> <span class="nf">nextSeq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the next sequence.</span>
 
 <span class="sd">        :return: The next sequence.</span>
@@ -586,7 +504,7 @@
 
 <div class="viewcode-block" id="FastaIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return true if the file is in fasta format.</span>
 
 <span class="sd">        :param filepath: The file path.</span>
@@ -623,7 +541,7 @@
 
 <div class="viewcode-block" id="FastaIO.nbSeq"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.nbSeq">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">nbSeq</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of sequences in file.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -645,7 +563,7 @@
 
 <div class="viewcode-block" id="FastaIO.nbSeqAndNt"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.nbSeqAndNt">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">nbSeqAndNt</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of sequences and nucleotids in file.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -669,7 +587,7 @@
         <span class="k">return</span> <span class="n">nb_seq</span><span class="p">,</span> <span class="n">nb_nt</span></div>
 
 <div class="viewcode-block" id="FastaIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence_record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write record lines in file.</span>
 
 <span class="sd">        :param sequence_record: The record to write.</span>
@@ -679,7 +597,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="FastaIO.seqToFastaLine"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.FastaIO.seqToFastaLine">[docs]</a>    <span class="k">def</span> <span class="nf">seqToFastaLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the sequence in fasta format.</span>
 
 <span class="sd">        :param sequence: The sequence to process.</span>
@@ -692,10 +610,10 @@
 
 
 <div class="viewcode-block" id="IdxFastaIO"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.IdxFastaIO">[docs]</a><span class="k">class</span> <span class="nc">IdxFastaIO</span><span class="p">(</span><span class="n">FastaIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write a fasta file with an faidx index file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write a fasta file with an faidx index file.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fai_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of IdxFastaIO.</span>
 
 <span class="sd">        :param filepath: Path to the file.</span>
@@ -718,11 +636,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_setIndex</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_setIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Set self.index with content of self.fai_path.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set self.index with content of self.fai_path.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">Faidx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fai_path</span><span class="p">)</span><span class="o">.</span><span class="n">readById</span><span class="p">()</span>
 
 <div class="viewcode-block" id="IdxFastaIO.getSub"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.IdxFastaIO.getSub">[docs]</a>    <span class="k">def</span> <span class="nf">getSub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the selected sub of the sequence from file. Return empty sequence if start position is out. Return fitted sequence if end is out.</span>
 
 <span class="sd">        :param id: The sequence ID.</span>
@@ -751,7 +669,7 @@
         <span class="k">return</span> <span class="n">seq</span></div>
 
 <div class="viewcode-block" id="IdxFastaIO.get"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.IdxFastaIO.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the sequence from file.</span>
 
 <span class="sd">        :param id: The sequence ID.</span>
@@ -782,7 +700,7 @@
 
 
 <div class="viewcode-block" id="getStrandedSeqFromPos"><a class="viewcode-back" href="../../anacore.html#anacore.sequenceIO.getStrandedSeqFromPos">[docs]</a><span class="k">def</span> <span class="nf">getStrandedSeqFromPos</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">pos_on_ref</span><span class="p">,</span> <span class="n">strand</span><span class="p">,</span> <span class="n">sequence_reader</span><span class="p">,</span> <span class="n">complement_alphabet</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the stranded sequence for the positions (continuous or not).</span>
 
 <span class="sd">    :param sequence_reader: File handle to the sequences file.</span>
@@ -817,46 +735,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

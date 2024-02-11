@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>anacore.illumina.run &mdash; AnaCore  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/anacore.css?v=93b82d15" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -26,12 +27,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> AnaCore
-            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,7 +59,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">anacore.illumina.run</li>
       <li class="wy-breadcrumbs-aside">
@@ -95,9 +100,7 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.1.0&#39;</span>
 
 <span class="kn">from</span> <span class="nn">anacore.illumina.base</span> <span class="kn">import</span> <span class="n">getPlatformFromSerialNumber</span>
 <span class="kn">from</span> <span class="nn">anacore.illumina.samplesheet</span> <span class="kn">import</span> <span class="n">SampleSheetFactory</span>
@@ -175,6 +178,24 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
+<div class="viewcode-block" id="findAny"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.run.findAny">[docs]</a><span class="k">def</span> <span class="nf">findAny</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">searches</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the first subelement matching any term of searches.</span>
+
+<span class="sd">    :param node: Node to convert.</span>
+<span class="sd">    :type node: xml.etree.ElementTree.Element</span>
+<span class="sd">    :param searches: List accepted element tag or XPath. Order determines the first match.</span>
+<span class="sd">    :type searche: str</span>
+<span class="sd">    :return: Subelement matching any term of searches.</span>
+<span class="sd">    :rtype: xml.etree.ElementTree.Element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">curr</span> <span class="ow">in</span> <span class="n">searches</span><span class="p">:</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">match</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
 <div class="viewcode-block" id="getRunFolderInfo"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.run.getRunFolderInfo">[docs]</a><span class="k">def</span> <span class="nf">getRunFolderInfo</span><span class="p">(</span><span class="n">run_folder</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return run information (instrument, run configuration, samples, ...) coming from several file in run folder.</span>
@@ -225,9 +246,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read file content and store information on the instance&#39;s attributes.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read file content and store information on the instance&#39;s attributes. If file come from NovaSeq end_date is retrieve from file last modification date.&quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">FH_in</span><span class="p">:</span>
             <span class="n">content</span> <span class="o">=</span> <span class="n">FH_in</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">content</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>  <span class="c1"># is empty (NovaSeq)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">RTA_version</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(.+/.+/.+,.+),Illumina RTA (.+)&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">match</span><span class="p">:</span>  <span class="c1"># 11/1/2017,15:11:43.174,Illumina RTA 1.18.54</span>
                 <span class="n">date_str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">RTA_version</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
@@ -268,8 +293,15 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isSequenced</span><span class="p">():</span>
             <span class="n">run_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
             <span class="n">completed_copy_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;CopyComplete.txt&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">run_params</span><span class="o">.</span><span class="n">instrument</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;HiSeq&quot;</span><span class="p">,</span> <span class="s2">&quot;MiSeq&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">run_params</span><span class="o">.</span><span class="n">instrument</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HiSeq&quot;</span><span class="p">:</span>
                 <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">run_params</span><span class="o">.</span><span class="n">instrument</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;MiSeq&quot;</span><span class="p">:</span>
+                <span class="n">mcs_version</span> <span class="o">=</span> <span class="n">run_params</span><span class="o">.</span><span class="n">software</span><span class="p">[</span><span class="s2">&quot;CS&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">mcs_version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># The universal copy service replace the previous system since MCS v4</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">completed_copy_file</span><span class="p">):</span>
+                        <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">elif</span> <span class="n">run_params</span><span class="o">.</span><span class="n">instrument</span><span class="p">[</span><span class="s2">&quot;platform&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">:</span>
                 <span class="n">ncs_version</span> <span class="o">=</span> <span class="n">run_params</span><span class="o">.</span><span class="n">software</span><span class="p">[</span><span class="s2">&quot;CS&quot;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncs_version</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
@@ -419,26 +451,22 @@
             <span class="n">root</span> <span class="o">=</span> <span class="p">[</span><span class="n">child</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">root</span> <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s2">&quot;Setup&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="c1"># Process information</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getInstrumentFromRoot</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">reads_subtree</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Reads&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">reads_subtree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reads_phases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReadsFromSection</span><span class="p">(</span><span class="n">reads_subtree</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reads_phases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReadsFromSetup</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Setup&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reads_phases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReadsFromRoot</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRunFromRoot</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getKitFromRoot</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPostProcessFromRoot</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">software</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSoftwareFromRoot</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_getReadsFromSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_getReadsFrom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtree</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="n">reads</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">subtree</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Read&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;Read&quot;</span><span class="p">):</span>
                 <span class="n">reads</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
                     <span class="s2">&quot;is_index&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                     <span class="s2">&quot;nb_cycles&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
                 <span class="p">})</span>
-            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Index&quot;</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;Index&quot;</span><span class="p">):</span>
                 <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
                     <span class="s2">&quot;is_index&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
                     <span class="s2">&quot;nb_cycles&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
@@ -450,7 +478,20 @@
             <span class="n">phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">phases</span>
 
-    <span class="k">def</span> <span class="nf">_getReadsFromSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_getReadsFromRoot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="n">reads_phases</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">reads_subtree</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Reads&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reads_subtree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reads_phases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReadsFromReads</span><span class="p">(</span><span class="n">reads_subtree</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">setup_subtree</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Setup&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">setup_subtree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">reads_phases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReadsFrom</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Setup&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">reads_phases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getReadsFrom</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s2">&quot;Planned&quot;</span><span class="p">)</span>  <span class="c1"># Nova style</span>
+        <span class="k">return</span> <span class="n">reads_phases</span>
+
+    <span class="k">def</span> <span class="nf">_getReadsFromReads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtree</span><span class="p">):</span>
         <span class="n">reads</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">subtree</span><span class="p">:</span>
             <span class="n">reads</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
@@ -460,23 +501,19 @@
         <span class="k">return</span> <span class="n">reads</span>
 
     <span class="k">def</span> <span class="nf">_getInstrumentFromRoot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
-        <span class="n">serial_number</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ScannerID&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">serial_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">serial_number</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;InstrumentID&quot;</span><span class="p">)</span>
-        <span class="n">serial_number</span> <span class="o">=</span> <span class="n">serial_number</span><span class="o">.</span><span class="n">text</span>
+        <span class="n">serial_number</span> <span class="o">=</span> <span class="n">findAny</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;ScannerID&quot;</span><span class="p">,</span> <span class="s2">&quot;InstrumentID&quot;</span><span class="p">,</span> <span class="s2">&quot;InstrumentName&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">text</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">serial_number</span><span class="p">,</span>
             <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="n">getPlatformFromSerialNumber</span><span class="p">(</span><span class="n">serial_number</span><span class="p">)</span>
         <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">_getRunFromRoot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
-        <span class="n">run_number</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;RunNumber&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">run_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">run_number</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ScanNumber&quot;</span><span class="p">)</span>
+        <span class="n">run_number</span> <span class="o">=</span> <span class="n">findAny</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;RunNumber&quot;</span><span class="p">,</span> <span class="s2">&quot;ScanNumber&quot;</span><span class="p">))</span>
         <span class="n">run_number</span> <span class="o">=</span> <span class="n">run_number</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
+        <span class="n">run_id</span> <span class="o">=</span> <span class="n">findAny</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;RunID&quot;</span><span class="p">,</span> <span class="s2">&quot;RunId&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">text</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">run_number</span><span class="p">,</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;RunID&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">run_id</span><span class="p">,</span>
             <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;RunStartDate&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;%y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="p">}</span>
 
@@ -507,9 +544,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">flowcell_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="c1"># Reagent kit ID</span>
-        <span class="n">reagent_kit_id</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ReagentKitBarcode&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">reagent_kit_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">reagent_kit_id</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ReagentKitSerial&quot;</span><span class="p">)</span>
+        <span class="n">reagent_kit_id</span> <span class="o">=</span> <span class="n">findAny</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;ReagentKitBarcode&quot;</span><span class="p">,</span> <span class="s2">&quot;ReagentKitSerial&quot;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">reagent_kit_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">reagent_kit_id</span> <span class="o">=</span> <span class="n">reagent_kit_id</span><span class="o">.</span><span class="n">text</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -521,8 +556,11 @@
         <span class="n">cs_root_markup</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Setup&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cs_root_markup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cs_root_markup</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="n">rta_version</span> <span class="o">=</span> <span class="n">findAny</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;RTAVersion&quot;</span><span class="p">,</span> <span class="s2">&quot;RtaVersion&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">if</span> <span class="n">rta_version</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">):</span>
+            <span class="n">rta_version</span> <span class="o">=</span> <span class="n">rta_version</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;RTA&quot;</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;RTAVersion&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+            <span class="s2">&quot;RTA&quot;</span><span class="p">:</span> <span class="n">rta_version</span><span class="p">,</span>
             <span class="s2">&quot;CS&quot;</span><span class="p">:</span> <span class="n">cs_root_markup</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ApplicationVersion&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
         <span class="p">}</span></div>
 </pre></div>

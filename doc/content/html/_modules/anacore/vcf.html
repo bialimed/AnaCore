@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>anacore.vcf &mdash; AnaCore  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/anacore.css?v=93b82d15" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -26,12 +27,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> AnaCore
-            <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,7 +59,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
       <li class="breadcrumb-item active">anacore.vcf</li>
       <li class="wy-breadcrumbs-aside">
@@ -147,7 +152,7 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.34.0&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.35.0&#39;</span>
 <span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
 
@@ -608,7 +613,7 @@
 <span class="sd">        :return: True if the variant is a deletion.</span>
 <span class="sd">        :rtype: bool</span>
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
-<span class="sd">        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.</span>
+<span class="sd">        :note: If the alternative allele and the reference allele have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isDeletion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
@@ -697,44 +702,36 @@
             <span class="n">record_type</span> <span class="o">=</span> <span class="s2">&quot;variation&quot;</span>
         <span class="k">return</span> <span class="n">record_type</span></div>
 
-<div class="viewcode-block" id="VCFRecord.fastDownstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastDownstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">fastDownstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<div class="viewcode-block" id="VCFRecord.fastDownstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastDownstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">fastDownstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition.</span>
+<span class="sd">        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition and standardized.</span>
 
 <span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
 <span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
-<span class="sd">        :param padding: Number of nucleotids to inspect after variant. Upstream movement is limited to this number of nucleotids.</span>
+<span class="sd">        :param padding: Size of sliding windows to process reference sequence.</span>
 <span class="sd">        :type padding: int</span>
-<span class="sd">        :return: The simplified record moved to the most downstream postition.</span>
+<span class="sd">        :return: The simplified record moved to the most downstream postition and standardized.</span>
+<span class="sd">        :rtype: anacore.vcf.VCFRecord</span>
+
+<span class="sd">        .. deprecated::</span>
+<span class="sd">            Replaced by :func:`VCFRecord.downstreamed`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">downstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VCFRecord.downstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.downstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">downstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a simplified record (CHROM, POS, ALT and REF) moved to the most downstream postition and standardized.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :return: The simplified record moved to the most downstream postition and standardized.</span>
 <span class="sd">        :rtype: anacore.vcf.VCFRecord</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The function &quot;fastDownstreamed&quot; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
-        <span class="n">downstream_rec</span> <span class="o">=</span> <span class="n">VCFRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">])</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">downstream_rec</span><span class="o">.</span><span class="n">_normalized</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="p">)</span>
-        <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># Move to downstream</span>
-            <span class="n">sub_region</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">)</span> <span class="o">+</span> <span class="n">padding</span><span class="p">)</span>
-            <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Switch position from chromosome to position from subregion</span>
-            <span class="n">downstream_rec</span> <span class="o">=</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">getMostDownstream</span><span class="p">(</span><span class="n">sub_region</span><span class="p">)</span>
-            <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># Switch position from subregion to position from chromosome</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">):</span>
-                <span class="c1"># Add previous nt</span>
-                <span class="n">prev_nt</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">downstream_rec</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">==</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Insertion</span>
-                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span>
-                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Deletion</span>
-                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">downstream_rec</span><span class="o">.</span><span class="n">ref</span>
-                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span>
-                    <span class="n">downstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">downstream_rec</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">streamed</span><span class="p">(</span><span class="s2">&quot;down&quot;</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VCFRecord.fastStandardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastStandardize">[docs]</a>    <span class="k">def</span> <span class="nf">fastStandardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<div class="viewcode-block" id="VCFRecord.fastStandardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.fastStandardize">[docs]</a>    <span class="k">def</span> <span class="nf">fastStandardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Standardize record (move to the most upstream position and remove unecessary nucleotids). This standardization concerns only POS, REF and ALT.</span>
 
@@ -742,27 +739,25 @@
 <span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
 <span class="sd">        :param padding: Number of nucleotids to inspect before variant. Upstream movement is limited to this number of nucleotids.</span>
 <span class="sd">        :type padding: int</span>
+
+<span class="sd">        .. deprecated::</span>
+<span class="sd">            Replaced by :func:`VCFRecord.standardize`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Move to upstream</span>
-        <span class="n">sub_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="n">padding</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">real_padding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="n">sub_start</span>
-        <span class="n">sub_region</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">sub_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">real_padding</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># Switch position from chromosome to position from subregion</span>
-        <span class="n">upstream_rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMostUpstream</span><span class="p">(</span><span class="n">sub_region</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">sub_start</span>  <span class="c1"># Switch position from subregion to position from chromosome</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">standardize</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VCFRecord.standardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.standardize">[docs]</a>    <span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Standardize record (move to the most upstream position and remove unecessary nucleotids). This standardization concerns only POS, REF and ALT.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">upstream_rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">ref</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="c1"># Add previous nt</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isIndel</span><span class="p">():</span>
-            <span class="n">prev_nt</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Insertion</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Deletion</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="VCFRecord.normalizeSingleAllele"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.normalizeSingleAllele">[docs]</a>    <span class="k">def</span> <span class="nf">normalizeSingleAllele</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -828,12 +823,14 @@
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">twoSideTrimming</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="VCFRecord.getMostUpstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getMostUpstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostUpstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
+<div class="viewcode-block" id="VCFRecord.getMostUpstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getMostUpstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostUpstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the most upstream variant that can have the same alternative sequence of the instance.</span>
+<span class="sd">        Return the most upstream variant with same consequence on genomic reference.</span>
 
-<span class="sd">        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).</span>
-<span class="sd">        :type ref_seq: str</span>
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
 <span class="sd">        :return: The normalized most upstream variant (see normalizeSingleAllele).</span>
 <span class="sd">        :rtype: VCFRecord</span>
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
@@ -845,37 +842,47 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">normalizeSingleAllele</span><span class="p">()</span>
         <span class="n">new_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span>
         <span class="k">if</span> <span class="n">new_record</span><span class="o">.</span><span class="n">ref</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">()</span> <span class="ow">or</span> <span class="n">new_record</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># normalized indel</span>
-            <span class="n">uc_ref_seq</span> <span class="o">=</span> <span class="n">ref_seq</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="n">ref</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">ref</span>
             <span class="n">alt</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="c1"># Deletion</span>
             <span class="k">if</span> <span class="n">new_record</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">uc_ref_seq</span><span class="p">[(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">))]</span> <span class="o">!=</span> <span class="n">ref</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The reference on position &#39;</span> <span class="o">+</span> <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; does not correspond to &quot;&#39;</span> <span class="o">+</span> <span class="n">ref</span> <span class="o">+</span> <span class="s1">&#39;&quot;.&#39;</span><span class="p">)</span>
-                <span class="n">before_var</span> <span class="o">=</span> <span class="n">uc_ref_seq</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
-                <span class="k">while</span> <span class="n">before_var</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">before_var</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">ref</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                    <span class="c1"># shift to upstream</span>
-                    <span class="n">before_var</span> <span class="o">=</span> <span class="n">before_var</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ref</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">before_var</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">ref_in_file</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">ref_in_file</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">!=</span> <span class="n">ref</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s1">&#39;The reference on position </span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1"> does not correspond to &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">ref</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">new_pos</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span>
+                <span class="k">for</span> <span class="n">uc_before_var</span> <span class="ow">in</span> <span class="n">_refDownIter</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">uc_before_var</span> <span class="o">!=</span> <span class="n">ref</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># shift to upstream</span>
+                        <span class="n">new_pos</span> <span class="o">-=</span> <span class="mi">1</span>
+                        <span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ref</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">new_pos</span>
                 <span class="n">new_record</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span>
             <span class="c1"># Insertion</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">before_var</span> <span class="o">=</span> <span class="n">uc_ref_seq</span><span class="p">[</span><span class="mi">0</span><span class="p">:(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
-                <span class="k">while</span> <span class="n">before_var</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">before_var</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">alt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                    <span class="c1"># shift to upstream</span>
-                    <span class="n">before_var</span> <span class="o">=</span> <span class="n">before_var</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="n">alt</span> <span class="o">=</span> <span class="n">alt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">alt</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">before_var</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">new_pos</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span>
+                <span class="k">for</span> <span class="n">uc_before_var</span> <span class="ow">in</span> <span class="n">_refDownIter</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">uc_before_var</span> <span class="o">!=</span> <span class="n">alt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># shift to upstream</span>
+                        <span class="n">new_pos</span> <span class="o">-=</span> <span class="mi">1</span>
+                        <span class="n">alt</span> <span class="o">=</span> <span class="n">alt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">alt</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">new_pos</span>
                 <span class="n">new_record</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="p">[</span><span class="n">alt</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">new_record</span></div>
 
-<div class="viewcode-block" id="VCFRecord.getMostDownstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getMostDownstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostDownstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
+<div class="viewcode-block" id="VCFRecord.getMostDownstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.getMostDownstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostDownstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return the most downstream variant that can have the same alternative sequence of the instance.</span>
+<span class="sd">        Return the most downstream variant with same consequence on genomic reference.</span>
 
-<span class="sd">        :param ref_seq: The reference sequence where the variant has been identified (example: the sequence of the chromosome).</span>
-<span class="sd">        :type ref_seq: str</span>
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
 <span class="sd">        :return: The normalized most downstream variant (see normalizeSingleAllele).</span>
 <span class="sd">        :rtype: VCFRecord</span>
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
@@ -887,32 +894,36 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="o">.</span><span class="n">normalizeSingleAllele</span><span class="p">()</span>
         <span class="n">new_record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span>
         <span class="k">if</span> <span class="n">new_record</span><span class="o">.</span><span class="n">ref</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">()</span> <span class="ow">or</span> <span class="n">new_record</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Normalized indel</span>
-            <span class="n">uc_ref_seq</span> <span class="o">=</span> <span class="n">ref_seq</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
             <span class="n">ref</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">ref</span>
             <span class="n">alt</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="c1"># Deletion</span>
             <span class="k">if</span> <span class="n">new_record</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">uc_ref_seq</span><span class="p">[(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">))]</span> <span class="o">!=</span> <span class="n">ref</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The reference on position &#39;</span> <span class="o">+</span> <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; does not correspond to &quot;&#39;</span> <span class="o">+</span> <span class="n">ref</span> <span class="o">+</span> <span class="s1">&#39;&quot;.&#39;</span><span class="p">)</span>
-                <span class="n">after_var</span> <span class="o">=</span> <span class="n">uc_ref_seq</span><span class="p">[</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:]</span>
-                <span class="n">nb_move</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">while</span> <span class="n">after_var</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">after_var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                    <span class="c1"># shift to downstream</span>
-                    <span class="n">after_var</span> <span class="o">=</span> <span class="n">after_var</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-                    <span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">nb_move</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="n">nb_move</span>
+                <span class="n">ref_in_file</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">ref_in_file</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">!=</span> <span class="n">ref</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s1">&#39;The reference on position </span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1"> does not correspond to &quot;</span><span class="si">{}</span><span class="s1">&quot;.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">ref</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">new_pos</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span>
+                <span class="k">for</span> <span class="n">uc_after_var</span> <span class="ow">in</span> <span class="n">_refUpIter</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_pos</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">),</span> <span class="n">buffer_size</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">uc_after_var</span> <span class="o">!=</span> <span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># shift to downstream</span>
+                        <span class="n">new_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">new_pos</span>
                 <span class="n">new_record</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span>
             <span class="c1"># Insertion</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">after_var</span> <span class="o">=</span> <span class="n">uc_ref_seq</span><span class="p">[</span><span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:]</span>
-                <span class="n">nb_move</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">while</span> <span class="n">after_var</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="n">after_var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                    <span class="c1"># shift to upstream</span>
-                    <span class="n">after_var</span> <span class="o">=</span> <span class="n">after_var</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-                    <span class="n">alt</span> <span class="o">=</span> <span class="n">alt</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">nb_move</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">+=</span> <span class="n">nb_move</span>
+                <span class="n">new_pos</span> <span class="o">=</span> <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span>
+                <span class="k">for</span> <span class="n">uc_after_var</span> <span class="ow">in</span> <span class="n">_refUpIter</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">new_record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_pos</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">uc_after_var</span> <span class="o">!=</span> <span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># shift to downstream</span>
+                        <span class="n">new_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">alt</span> <span class="o">=</span> <span class="n">alt</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">new_record</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">new_pos</span>
                 <span class="n">new_record</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="p">[</span><span class="n">alt</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">new_record</span></div>
 
@@ -1279,7 +1290,74 @@
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The depth cannot be retrieved in variant &quot;&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chrom</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;.&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># AD is missing to calculate DP</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The depth cannot be retrieved in variant &quot;&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chrom</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&quot;.&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">DP</span></div></div>
+        <span class="k">return</span> <span class="n">DP</span></div>
+
+<div class="viewcode-block" id="VCFRecord.streamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.streamed">[docs]</a>    <span class="k">def</span> <span class="nf">streamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_direction</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a simplified record (CHROM, POS, ALT and REF) moved to the most upstream or downstream postition and standardized.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param stream_direction: Stream direction: &quot;up&quot; or &quot;down&quot;.</span>
+<span class="sd">        :type stream_direction: str</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :return: The simplified record moved to the most upstream or downstream postition and standardized.</span>
+<span class="sd">        :rtype: anacore.vcf.VCFRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The function &quot;streamed&quot; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="n">new_rec</span> <span class="o">=</span> <span class="n">VCFRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="p">[</span><span class="n">elt</span> <span class="k">for</span> <span class="n">elt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_rec</span><span class="o">.</span><span class="n">_normalized</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_normalized</span><span class="p">)</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">stream_direction</span> <span class="o">==</span> <span class="s2">&quot;up&quot;</span><span class="p">:</span>
+                <span class="n">new_rec</span> <span class="o">=</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">getMostUpstream</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_rec</span> <span class="o">=</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">getMostDownstream</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alt</span><span class="p">):</span>
+                <span class="c1"># For simple insertions and deletions in which either the REF or</span>
+                <span class="c1"># one of the ALT alleles would otherwise be null/empty, the REF</span>
+                <span class="c1"># and ALT Strings must include the base before the variant</span>
+                <span class="c1"># (which must be reflected in the POS field), unless the variant</span>
+                <span class="c1"># occurs at position 1 on the contig in which case it must</span>
+                <span class="c1"># include the base after the variant</span>
+                <span class="k">if</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Add next nt</span>
+                    <span class="k">if</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Insertion</span>
+                        <span class="n">first_nt</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">new_rec</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">first_nt</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">first_nt</span>
+                    <span class="k">elif</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Deletion</span>
+                        <span class="n">next_nt</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">new_rec</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">+</span> <span class="n">next_nt</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_nt</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># Add previous nt</span>
+                    <span class="k">if</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Insertion</span>
+                        <span class="n">prev_nt</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">new_rec</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="k">elif</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">VCFRecord</span><span class="o">.</span><span class="n">getEmptyAlleleMarker</span><span class="p">():</span>  <span class="c1"># Deletion</span>
+                        <span class="n">prev_nt</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="n">new_rec</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">prev_nt</span> <span class="o">+</span> <span class="n">new_rec</span><span class="o">.</span><span class="n">ref</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_nt</span>
+                        <span class="n">new_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">new_rec</span></div>
+
+<div class="viewcode-block" id="VCFRecord.upstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFRecord.upstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">upstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a simplified record (CHROM, POS, ALT and REF) moved to the most upstream postition and standardized.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :return: The simplified record moved to the most upstream postition and standardized.</span>
+<span class="sd">        :rtype: anacore.vcf.VCFRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">streamed</span><span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="VCFSymbAltRecord"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord">[docs]</a><span class="k">class</span> <span class="nc">VCFSymbAltRecord</span><span class="p">(</span><span class="n">VCFRecord</span><span class="p">):</span>
@@ -1308,8 +1386,24 @@
 
 <span class="sd">        :return: True if the variant contains an allele corresponding to an insertion or a deletion.</span>
 <span class="sd">        :rtype: bool</span>
+<span class="sd">        :note: If the alternative allele and the reference alle have the same length the variant is considered as a substitution. For example: AA/GC is considered as double substitution and not as double insertion after double deletion.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;containsIndel&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.downstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.downstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">downstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">convert_dup</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return record moved to the most downstream postition.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :param convert_dup: If True, DUP are converted to INS to move on most downstream.</span>
+<span class="sd">        :type convert_dup: bool</span>
+<span class="sd">        :return: Record moved to the most downstream postition.</span>
+<span class="sd">        :rtype: anacore.vcf.VCFSymbAltRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">streamed</span><span class="p">(</span><span class="s2">&quot;down&quot;</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">convert_dup</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1333,40 +1427,152 @@
             <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">end</span>
 
-<div class="viewcode-block" id="VCFSymbAltRecord.fastDownstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.fastDownstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">fastDownstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;fastDownstreamed&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="VCFSymbAltRecord.fastStandardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.fastStandardize">[docs]</a>    <span class="k">def</span> <span class="nf">fastStandardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;fastStandardize&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="VCFSymbAltRecord.fromStdRecord"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.fromStdRecord">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">fromStdRecord</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+<div class="viewcode-block" id="VCFSymbAltRecord.getMostDownstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getMostDownstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostDownstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">convert_dup</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Build and return an instance of VCFSymbAltRecord from VCFRecord.</span>
+<span class="sd">        Return the most downstream variant with same consequence on genomic reference.</span>
 
-<span class="sd">        :param record: Initial VCFRecord.</span>
-<span class="sd">        :type record: VCFRecord</span>
-<span class="sd">        :return: The new instance.</span>
-<span class="sd">        :rtype: VCFSymbAltRecord</span>
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :return: The most downstream variant.</span>
+<span class="sd">        :param convert_dup: If True, DUP are converted to INS to move on most downstream.</span>
+<span class="sd">        :type convert_dup: bool</span>
+<span class="sd">        :rtype: VCFRecord</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">VCFSymbAltRecord</span><span class="p">(</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">qual</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
-            <span class="n">record</span><span class="o">.</span><span class="n">samples</span>
-        <span class="p">)</span></div>
+        <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;IMPRECISE&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;CIPOS&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">cipos_up</span><span class="p">,</span> <span class="n">cipos_down</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;CIPOS&quot;</span><span class="p">]</span>  <span class="c1"># 2 numbers in releases prior to VCF4.4 and 2 * alt_nb after</span>
+            <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">cipos_down</span>
+            <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;CIPOS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">cipos_up</span> <span class="o">-</span> <span class="n">cipos_down</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">!=</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span>  <span class="c1"># Moved</span>
+                <span class="k">if</span> <span class="n">convert_dup</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DUP&quot;</span><span class="p">):</span>  <span class="c1"># DUP and authorized to convert to INS</span>
+                    <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;INS&gt;&quot;</span><span class="p">]</span>
+                    <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+                    <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;CIPOS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;CIPOS&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">),</span> <span class="mi">0</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># All others</span>
+                    <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cipos_down</span>
+                <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>  <span class="c1"># Sequence of insertion is unknown</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Symbolic insertion </span><span class="si">{}</span><span class="s1"> cannot be convert to litteral: sequence is unknown.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DUP&quot;</span><span class="p">):</span>
+                <span class="n">litteral_rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">litteralized</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">)</span>
+                <span class="n">litteral_downstreamed_rec</span> <span class="o">=</span> <span class="n">litteral_rec</span><span class="o">.</span><span class="n">downstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+                <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">!=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">:</span>  <span class="c1"># DUP has been moved</span>
+                    <span class="k">if</span> <span class="n">convert_dup</span><span class="p">:</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">pos</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;INS&gt;&quot;</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+                        <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DEL&quot;</span><span class="p">):</span>
+                <span class="n">litteral_rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">litteralized</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">)</span>
+                <span class="n">litteral_downstreamed_rec</span> <span class="o">=</span> <span class="n">litteral_rec</span><span class="o">.</span><span class="n">downstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+                <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">pos</span>
+                <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># CNV is DUP or TANDEM or DEL</span>
+                <span class="n">sv_len</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+                <span class="n">ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">sv_len</span><span class="p">)</span>
+                <span class="n">alt</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">litteral_rec</span> <span class="o">=</span> <span class="n">VCFRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="p">[</span><span class="n">alt</span><span class="p">])</span>  <span class="c1"># DEL and DUP have the same downstream behaviour</span>
+                <span class="n">litteral_downstreamed_rec</span> <span class="o">=</span> <span class="n">litteral_rec</span><span class="o">.</span><span class="n">downstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+                <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">pos</span>
+                <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">litteral_downstreamed_rec</span><span class="o">.</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">downstreamed_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+            <span class="k">elif</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>  <span class="c1"># INV cannot be moved</span>
+                <span class="n">downstreamed_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unknown symbolic type &quot;</span><span class="si">{}</span><span class="s1">&quot; in </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="n">downstreamed_rec</span></div>
 
-<div class="viewcode-block" id="VCFSymbAltRecord.getMostUpstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getMostUpstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostUpstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;getMostUpstream&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+<div class="viewcode-block" id="VCFSymbAltRecord.getMostUpstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getMostUpstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostUpstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the most upstream variant with same consequence on genomic reference.</span>
 
-<div class="viewcode-block" id="VCFSymbAltRecord.getMostDownstream"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getMostDownstream">[docs]</a>    <span class="k">def</span> <span class="nf">getMostDownstream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_seq</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;getMostDownstream&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :return: The most upstream variant.</span>
+<span class="sd">        :rtype: TestVCFSymbAltRecord</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;getMostUpstream&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="n">upstream_rec</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;IMPRECISE&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="n">upstream_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;CIPOS&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="n">upstream_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">cipos_up</span><span class="p">,</span> <span class="n">cipos_down</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;CIPOS&quot;</span><span class="p">]</span>  <span class="c1"># 2 numbers in releases prior to VCF4.4 and 2 * alt_nb after</span>
+            <span class="k">if</span> <span class="n">cipos_up</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">cipos_up</span>
+                <span class="n">upstream_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;CIPOS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mi">0</span><span class="p">,</span>
+                    <span class="n">cipos_down</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cipos_up</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="n">upstream_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cipos_up</span>
+                <span class="n">upstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>  <span class="c1"># Sequence of insertion is unknown</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Symbolic insertion </span><span class="si">{}</span><span class="s1"> cannot be convert to litteral: sequence is unknown.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">upstream_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># CNV is DUP or TANDEM or DEL</span>
+                <span class="n">sv_len</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+                <span class="n">ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="n">sv_len</span><span class="p">)</span>
+                <span class="n">alt</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">litteral_rec</span> <span class="o">=</span> <span class="n">VCFRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="p">[</span><span class="n">alt</span><span class="p">])</span>  <span class="c1"># DEL and DUP have the same upstream behaviour</span>
+                <span class="n">litteral_upstream_rec</span> <span class="o">=</span> <span class="n">litteral_rec</span><span class="o">.</span><span class="n">upstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+                <span class="n">upstream_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">litteral_upstream_rec</span><span class="o">.</span><span class="n">pos</span>
+                <span class="n">upstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">litteral_upstream_rec</span><span class="o">.</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="n">upstream_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">-=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">-</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>  <span class="c1"># INV cannot be moved</span>
+                <span class="n">upstream_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">litteral_rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">litteralized</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">)</span>
+                <span class="n">litteral_upstream_rec</span> <span class="o">=</span> <span class="n">litteral_rec</span><span class="o">.</span><span class="n">upstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+                <span class="n">upstream_rec</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">litteral_upstream_rec</span><span class="o">.</span><span class="n">pos</span>
+                <span class="n">upstream_rec</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">litteral_upstream_rec</span><span class="o">.</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DEL&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DUP&quot;</span><span class="p">):</span>
+                        <span class="n">upstream_rec</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;END&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">upstream_rec</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unknown symbolic type &quot;</span><span class="si">{}</span><span class="s1">&quot; in </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="n">upstream_rec</span></div>
 
 <div class="viewcode-block" id="VCFSymbAltRecord.getName"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.getName">[docs]</a>    <span class="k">def</span> <span class="nf">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1394,18 +1600,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isDeletion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-        <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DEL&quot;</span><span class="p">):</span>
+        <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># DUP or INS or INV</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DEL&quot;</span><span class="p">):</span>  <span class="c1"># DEL</span>
             <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="s2">&quot;SVLEN&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
-                <span class="n">sv_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;SVLEN&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv_len</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-                    <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">sv_len</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">is_deletion</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CNV can be deletion or insertion on variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># CNV</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CNV can be deletion or insertion on variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">is_deletion</span></div>
 
 <div class="viewcode-block" id="VCFSymbAltRecord.isIndel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isIndel">[docs]</a>    <span class="k">def</span> <span class="nf">isIndel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1418,7 +1617,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isIndel&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">)</span>  <span class="c1"># CNV may be both deletion and duplication</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">()</span>  <span class="c1"># CNV may be both deletion and duplication</span></div>
 
 <div class="viewcode-block" id="VCFSymbAltRecord.isInsAndDel"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isInsAndDel">[docs]</a>    <span class="k">def</span> <span class="nf">isInsAndDel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1430,7 +1629,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isInsAndDel&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="VCFSymbAltRecord.isInsertion"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isInsertion">[docs]</a>    <span class="k">def</span> <span class="nf">isInsertion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1442,19 +1641,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isInsertion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-        <span class="n">is_insertion</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DUP&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>
+        <span class="n">is_insertion</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># DEL or INV</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DUP&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>  <span class="c1"># DUP or INS</span>
             <span class="n">is_insertion</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="s2">&quot;SVLEN&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
-                <span class="n">sv_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;SVLEN&quot;</span><span class="p">]</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv_len</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
-                    <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">sv_len</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">is_insertion</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="c1"># else: is_insertion = False</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CNV can be deletion or insertion on variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># CNV</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;CNV can be deletion or insertion on variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">is_insertion</span></div>
 
 <div class="viewcode-block" id="VCFSymbAltRecord.isInversion"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.isInversion">[docs]</a>    <span class="k">def</span> <span class="nf">isInversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1467,10 +1658,52 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;isInversion&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">VCFRecord</span><span class="o">.</span><span class="n">getName</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-        <span class="n">is_inversion</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>
-            <span class="n">is_inversion</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="n">is_inversion</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.litteralized"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.litteralized">[docs]</a>    <span class="k">def</span> <span class="nf">litteralized</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return simplified (only chrom, id, ref and alt) litteral (replace symbole by sequence) version of symbolic record.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :return: Simplified (only chrom, id, ref and alt) litteral (replace symbole by sequence) version of symbolic record.</span>
+<span class="sd">        :rtype: VCFRecord</span>
+<span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;litteralized&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="n">self_alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">self_alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;Symbolic insertion &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be convert to litteral: sequence is unknown.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;IMPRECISE&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;IMPRECISE symbolic variant &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be convert to litteral: real position is unknown.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">self_alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DEL&quot;</span><span class="p">):</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">))</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">self_alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">))</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="n">ref</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">self_alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;DUP&quot;</span><span class="p">):</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">+</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sv_len</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">self_alt</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;Symbolic CNV &quot;</span><span class="si">{}</span><span class="s1">&quot; cannot be convert to litteral: CNV can be DUP or DEL depending on sample.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">VCFRecord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="p">[</span><span class="n">alt</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="VCFSymbAltRecord.normalizeSingleAllele"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.normalizeSingleAllele">[docs]</a>    <span class="k">def</span> <span class="nf">normalizeSingleAllele</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Method &#39;normalizeSingleAllele&#39; is not implemented for </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span></div>
@@ -1483,8 +1716,12 @@
 <span class="sd">        :rtype: float | None</span>
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">():</span>  <span class="c1"># DUP or INS or CNV representing INS</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;refEnd&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># CNV</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The method &#39;refEnd&#39; cannot be used on CNV: it can be deletion or insertion.&quot;</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span>  <span class="c1"># DEL or INV</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">():</span>  <span class="c1"># DUP or INS</span>
             <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mf">0.5</span>
         <span class="k">return</span> <span class="n">end</span></div>
 
@@ -1496,19 +1733,61 @@
 <span class="sd">        :rtype: float | None</span>
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># CNV</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">():</span>  <span class="c1"># DUP or INS or CNV representing INS</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The function &#39;refStart&#39; cannot be used on multi-allelic variant </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># CNV</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The method &#39;refStart&#39; cannot be used on CNV: it can be deletion or insertion.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isInsertion</span><span class="p">():</span>  <span class="c1"># DUP or INS</span>
             <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mf">0.5</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>  <span class="c1"># DEL or INV</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># DEL or INV</span>
             <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">start</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.standardize"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.standardize">[docs]</a>    <span class="k">def</span> <span class="nf">standardize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Standardize record (move to the most upstream position). This standardization concerns only POS, REF, ALT, INFO.CIPOS and INFO.END.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upstreamed</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos</span> <span class="o">=</span> <span class="n">std</span><span class="o">.</span><span class="n">pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref</span> <span class="o">=</span> <span class="n">std</span><span class="o">.</span><span class="n">ref</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alt</span> <span class="o">=</span> <span class="n">std</span><span class="o">.</span><span class="n">alt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="n">std</span><span class="o">.</span><span class="n">info</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.streamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.streamed">[docs]</a>    <span class="k">def</span> <span class="nf">streamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_direction</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">down_convert_dup</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return record moved to the most upstream or downstream postition and standardized.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param stream_direction: Stream direction: &quot;up&quot; or &quot;down&quot;.</span>
+<span class="sd">        :type stream_direction: str</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :param down_convert_dup: For downstream direction, if True, DUP are converted to INS to move on most downstream.</span>
+<span class="sd">        :type down_convert_dup: bool</span>
+<span class="sd">        :return: The record moved to the most upstream or downstream postition and standardized.</span>
+<span class="sd">        :rtype: anacore.vcf.VCFRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">stream_direction</span> <span class="o">==</span> <span class="s2">&quot;up&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMostUpstream</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMostDownstream</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">,</span> <span class="n">down_convert_dup</span><span class="p">)</span></div>
+        <span class="c1"># if &quot;IMPRECISE&quot; not in self.info and &quot;CIPOS&quot; not in self.info:</span>
+        <span class="c1">#     downstream = self.downstreamed(seq_handler, buffer_size)</span>
+        <span class="c1">#     if downstream.pos != self.pos:  # can be move to downstream</span>
+        <span class="c1">#         self.info[&quot;CIPOS&quot;] = [0, downstream.pos - self.pos]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sv_len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return difference in length between REF and ALT alleles.</span>
 
-<span class="sd">        :return: Difference in length between REF and ALT alleles. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.</span>
+<span class="sd">        :return: Difference in length between REF and ALT alleles. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values and CNV are unsigned.</span>
 <span class="sd">        :rtype: int | None</span>
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1519,14 +1798,16 @@
             <span class="n">sv_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;SVLEN&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sv_len</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
                 <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">()</span> <span class="ow">and</span> <span class="n">sv_len</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Since VCF 4.4 SVLEN is absolute value: &gt;0 can be ins or del</span>
+                    <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">elif</span> <span class="s2">&quot;END&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
+            <span class="n">sv_len</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>  <span class="c1"># CNV or DUP or INV</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;CNV&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeletion</span><span class="p">():</span>  <span class="c1"># DEL</span>
-                    <span class="n">sv_len</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>  <span class="c1"># CNV or DUP or INV (Exclude INS because length is unknown)</span>
-                    <span class="n">sv_len</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="k">pass</span>  <span class="c1"># CNV with unknown type del or ins</span>
+                    <span class="n">sv_len</span> <span class="o">=</span> <span class="n">sv_len</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INS&quot;</span><span class="p">):</span>  <span class="c1"># INS length cannot be known from END</span>
+                    <span class="n">sv_len</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">sv_len</span>
 
 <div class="viewcode-block" id="VCFSymbAltRecord.type"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.type">[docs]</a>    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1537,10 +1818,23 @@
 <span class="sd">        :rtype: str</span>
 <span class="sd">        :warnings: This method can only be used on record with only one alternative allele.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">record_type</span> <span class="o">=</span> <span class="s2">&quot;indel&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>
+        <span class="n">record_type</span> <span class="o">=</span> <span class="s2">&quot;indel&quot;</span>  <span class="c1"># DEL or DUP or CNV or INS</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;INV&quot;</span><span class="p">):</span>  <span class="c1"># INV</span>
             <span class="n">record_type</span> <span class="o">=</span> <span class="s2">&quot;inv&quot;</span>
-        <span class="k">return</span> <span class="n">record_type</span></div></div>
+        <span class="k">return</span> <span class="n">record_type</span></div>
+
+<div class="viewcode-block" id="VCFSymbAltRecord.upstreamed"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFSymbAltRecord.upstreamed">[docs]</a>    <span class="k">def</span> <span class="nf">upstreamed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">500</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return record moved to the most upstream postition.</span>
+
+<span class="sd">        :param seq_handler: File handle to the reference sequences file.</span>
+<span class="sd">        :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">        :param buffer_size: Buffer size to read reference sequence file (in nt).</span>
+<span class="sd">        :type buffer_size: int</span>
+<span class="sd">        :return: Record moved to the most upstream postition.</span>
+<span class="sd">        :rtype: anacore.vcf.VCFSymbAltRecord</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">streamed</span><span class="p">(</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="n">seq_handler</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="VCFIO"><a class="viewcode-back" href="../../anacore.html#anacore.vcf.VCFIO">[docs]</a><span class="k">class</span> <span class="nc">VCFIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
@@ -1740,8 +2034,13 @@
                     <span class="n">data_by_spl</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">spl_idx</span><span class="p">]]</span> <span class="o">=</span> <span class="n">spl_data</span>
                 <span class="n">variation</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">data_by_spl</span>
 
+        <span class="c1"># Convert symbolic</span>
         <span class="k">if</span> <span class="n">variation</span><span class="o">.</span><span class="n">alt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
-            <span class="n">variation</span> <span class="o">=</span> <span class="n">VCFSymbAltRecord</span><span class="o">.</span><span class="n">fromStdRecord</span><span class="p">(</span><span class="n">variation</span><span class="p">)</span>
+            <span class="n">variation</span> <span class="o">=</span> <span class="n">VCFSymbAltRecord</span><span class="p">(</span>
+                <span class="n">variation</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">variation</span><span class="o">.</span><span class="n">pos</span><span class="p">,</span> <span class="n">variation</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">variation</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span>
+                <span class="n">variation</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="n">variation</span><span class="o">.</span><span class="n">qual</span><span class="p">,</span> <span class="n">variation</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span>
+                <span class="n">variation</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">variation</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">variation</span><span class="o">.</span><span class="n">samples</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">variation</span>
 
@@ -1941,6 +2240,59 @@
                     <span class="n">row_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AF</span><span class="p">)</span>
                 <span class="n">AF_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_array</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">samples</span><span class="p">,</span> <span class="n">variants</span><span class="p">,</span> <span class="n">AF_matrix</span></div>
+
+
+<span class="k">def</span> <span class="nf">_refDownIter</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a generator to read nt by nt the uppercased reference sequence from pos to downstream.</span>
+
+<span class="sd">    :param seq_handler: File handle to the sequences file.</span>
+<span class="sd">    :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">    :param chrom: Name of chromosome/contig to read.</span>
+<span class="sd">    :type chrom: str</span>
+<span class="sd">    :param pos: Start position on chromosome.</span>
+<span class="sd">    :type pos: int</span>
+<span class="sd">    :param buffer_size: Buffer size for sequence file reading (in nt). Iterator return nt by nt but to optimise read in file the buffer is larger.</span>
+<span class="sd">    :type buffer_size: int</span>
+<span class="sd">    :return: Generator to read nt by nt the uppercased reference sequence from pos to downstream.</span>
+<span class="sd">    :rtype: generator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="n">pos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">uc_ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span>
+            <span class="n">chrom</span><span class="p">,</span>
+            <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pos</span> <span class="o">-</span> <span class="n">buffer_size</span><span class="p">),</span>
+            <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">uc_ref</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">yield</span> <span class="n">char</span>
+        <span class="n">pos</span> <span class="o">-=</span> <span class="p">(</span><span class="n">buffer_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_refUpIter</span><span class="p">(</span><span class="n">seq_handler</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a generator to read nt by nt the uppercased reference sequence from pos to upstream.</span>
+
+<span class="sd">    :param seq_handler: File handle to the sequences file.</span>
+<span class="sd">    :type seq_handler: anacore.sequenceIO.IdxFastaIO</span>
+<span class="sd">    :param chrom: Name of chromosome/contig to read.</span>
+<span class="sd">    :type chrom: str</span>
+<span class="sd">    :param pos: Start position on chromosome.</span>
+<span class="sd">    :type pos: int</span>
+<span class="sd">    :param buffer_size: Buffer size for sequence file reading (in nt). Iterator return nt by nt but to optimise read in file the buffer is larger.</span>
+<span class="sd">    :type buffer_size: int</span>
+<span class="sd">    :return: Generator to read nt by nt the uppercased reference sequence from pos to upstream.</span>
+<span class="sd">    :rtype: generator</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chrom_size</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">chrom</span><span class="p">]</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">pos</span> <span class="o">&lt;=</span> <span class="n">chrom_size</span><span class="p">:</span>
+        <span class="n">uc_ref</span> <span class="o">=</span> <span class="n">seq_handler</span><span class="o">.</span><span class="n">getSub</span><span class="p">(</span>
+            <span class="n">chrom</span><span class="p">,</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">chrom_size</span><span class="p">,</span> <span class="n">pos</span><span class="p">),</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">chrom_size</span><span class="p">,</span> <span class="n">pos</span> <span class="o">+</span> <span class="n">buffer_size</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">uc_ref</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">char</span>
+        <span class="n">pos</span> <span class="o">+=</span> <span class="n">buffer_size</span> <span class="o">+</span> <span class="mi">1</span>
 </pre></div>
 
            </div>

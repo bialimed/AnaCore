@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AnaCore - managing standard file formats and objects from NGS &mdash; AnaCore  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/anacore.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/anacore.css?v=93b82d15" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,12 +29,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> AnaCore
-            <img src="_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="#" class="icon icon-home">
+            AnaCore
+              <img src="_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -56,7 +61,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home"></a></li>
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">AnaCore - managing standard file formats and objects from NGS</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
@@ -354,6 +359,7 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.run.RunInfo"><code class="docutils literal notranslate"><span class="pre">RunInfo</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.run.RunParameters"><code class="docutils literal notranslate"><span class="pre">RunParameters</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.run.etreeToDict"><code class="docutils literal notranslate"><span class="pre">etreeToDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.run.findAny"><code class="docutils literal notranslate"><span class="pre">findAny()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.illumina.run.getRunFolderInfo"><code class="docutils literal notranslate"><span class="pre">getRunFolderInfo()</span></code></a></li>
 </ul>
 </li>
@@ -622,6 +628,7 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord"><code class="docutils literal notranslate"><span class="pre">VCFRecord</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.containsIndel"><code class="docutils literal notranslate"><span class="pre">VCFRecord.containsIndel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.downstreamed"><code class="docutils literal notranslate"><span class="pre">VCFRecord.downstreamed()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.fastDownstreamed"><code class="docutils literal notranslate"><span class="pre">VCFRecord.fastDownstreamed()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.fastStandardize"><code class="docutils literal notranslate"><span class="pre">VCFRecord.fastStandardize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.getAD"><code class="docutils literal notranslate"><span class="pre">VCFRecord.getAD()</span></code></a></li>
@@ -646,15 +653,16 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.normalizeSingleAllele"><code class="docutils literal notranslate"><span class="pre">VCFRecord.normalizeSingleAllele()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.refEnd"><code class="docutils literal notranslate"><span class="pre">VCFRecord.refEnd()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.refStart"><code class="docutils literal notranslate"><span class="pre">VCFRecord.refStart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.standardize"><code class="docutils literal notranslate"><span class="pre">VCFRecord.standardize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.streamed"><code class="docutils literal notranslate"><span class="pre">VCFRecord.streamed()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.type"><code class="docutils literal notranslate"><span class="pre">VCFRecord.type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFRecord.upstreamed"><code class="docutils literal notranslate"><span class="pre">VCFRecord.upstreamed()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.containsIndel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.containsIndel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.downstreamed"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.downstreamed()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.end"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.end</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.fastDownstreamed"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fastDownstreamed()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.fastStandardize"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fastStandardize()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.fromStdRecord"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.fromStdRecord()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.getMostDownstream"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getMostDownstream()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.getMostUpstream"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getMostUpstream()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.getName"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.getName()</span></code></a></li>
@@ -663,11 +671,15 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isInsAndDel"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInsAndDel()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isInsertion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInsertion()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.isInversion"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.isInversion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.litteralized"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.litteralized()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.normalizeSingleAllele"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.normalizeSingleAllele()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.refEnd"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.refEnd()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.refStart"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.refStart()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.standardize"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.standardize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.streamed"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.streamed()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.sv_len"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.sv_len</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.type"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.vcf.VCFSymbAltRecord.upstreamed"><code class="docutils literal notranslate"><span class="pre">VCFSymbAltRecord.upstreamed()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.decodeInfoValue"><code class="docutils literal notranslate"><span class="pre">decodeInfoValue()</span></code></a></li>
@@ -675,6 +687,17 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, …) and objects from NGS.</p>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.getAlleleRecord"><code class="docutils literal notranslate"><span class="pre">getAlleleRecord()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.getFreqMatrix"><code class="docutils literal notranslate"><span class="pre">getFreqMatrix()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.vcf.getHeaderAttr"><code class="docutils literal notranslate"><span class="pre">getHeaderAttr()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="anacore.html#module-anacore.wig">anacore.wig</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.wig.WigIO"><code class="docutils literal notranslate"><span class="pre">WigIO</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.wig.WigIO.isRecordLine"><code class="docutils literal notranslate"><span class="pre">WigIO.isRecordLine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.wig.WigIO.isValid"><code class="docutils literal notranslate"><span class="pre">WigIO.isValid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="anacore.html#anacore.wig.WigIO.write"><code class="docutils literal notranslate"><span class="pre">WigIO.write()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.wig.getInfoFromFixedDef"><code class="docutils literal notranslate"><span class="pre">getInfoFromFixedDef()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="anacore.html#anacore.wig.getInfoFromVariableDef"><code class="docutils literal notranslate"><span class="pre">getInfoFromVariableDef()</span></code></a></li>
 </ul>
 </li>
 </ul>

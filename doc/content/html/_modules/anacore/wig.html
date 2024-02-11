@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>anacore.wig &mdash; AnaCore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/anacore.css?v=93b82d15" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">AnaCore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.wig</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for anacore.wig</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes and functions for reading/writing/processing wiggle file.</span>
+
+<span class="sd">:Example:</span>
+
+<span class="sd">    Test if a file is a wiggle file</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.wig import WigIO</span>
+
+<span class="sd">        if WigIO.isValid(&quot;test.txt.gz&quot;):</span>
+<span class="sd">            print(&quot;The file is a wiggle file&quot;)</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # The file is a wiggle file</span>
+
+<span class="sd">    Read wiggle file by line</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.wig import WigIO</span>
+
+<span class="sd">        with WigIO(&quot;test.wig.gz&quot;) as reader:</span>
+<span class="sd">            print(&quot;region&quot;, &quot;mean_depth&quot;, sep=&quot;\\t&quot;)</span>
+<span class="sd">            for record in reader:</span>
+<span class="sd">                print(</span>
+<span class="sd">                    &quot;{}:{}-{}&quot;.format(</span>
+<span class="sd">                        record.reference.name,</span>
+<span class="sd">                        record.start,</span>
+<span class="sd">                        record.end</span>
+<span class="sd">                    ),</span>
+<span class="sd">                    record.annot[&quot;value&quot;],</span>
+<span class="sd">                    sep=&quot;\\t&quot;</span>
+<span class="sd">                )</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # region\tmean_depth</span>
+<span class="sd">        # chr1:15800-15899\t12</span>
+<span class="sd">        # chr1:15900-15999\t40</span>
+<span class="sd">        # chr1:889100-889399\t22.5</span>
+<span class="sd">        # chr2:200100-200199\t13.4</span>
+<span class="sd">        # chr2:280100-280100\t5</span>
+
+<span class="sd">    Write wiggle</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.wig import WigIO</span>
+
+<span class="sd">        with WigIO(&quot;test.wig.gz&quot;, &quot;w&quot;, step=100, span=100) as writer:</span>
+<span class="sd">            writer.write(&quot;chr1&quot;, 15800, 12)</span>
+<span class="sd">            writer.write(&quot;chr1&quot;, 15900, 40)</span>
+<span class="sd">            writer.write(&quot;chr1&quot;, 889100, 22.5)</span>
+<span class="sd">            writer.step = None</span>
+<span class="sd">            writer.write(&quot;chr2&quot;, 200100, 13.4)</span>
+<span class="sd">            writer.span = None</span>
+<span class="sd">            writer.write(&quot;chr2&quot;, 280100, 5)</span>
+
+<span class="sd">        # File content&gt;</span>
+<span class="sd">        # fixeStep chrom=chr1 start=15800 step=100 span=100</span>
+<span class="sd">        # 12</span>
+<span class="sd">        # 40</span>
+<span class="sd">        # fixeStep chrom=chr1 start=889100 step=100 span=100</span>
+<span class="sd">        # 22.5</span>
+<span class="sd">        # variableStep chrom=chr2 span=100</span>
+<span class="sd">        # 200100 13.4</span>
+<span class="sd">        # variableStep chrom=chr2 span=1</span>
+<span class="sd">        # 280100 5</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2024 CHU Toulouse&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+
+<span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="kn">import</span> <span class="n">AbstractFile</span><span class="p">,</span> <span class="n">isEmpty</span><span class="p">,</span> <span class="n">isGzip</span>
+<span class="kn">from</span> <span class="nn">anacore.region</span> <span class="kn">import</span> <span class="n">Region</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+
+
+<div class="viewcode-block" id="getInfoFromFixedDef"><a class="viewcode-back" href="../../anacore.html#anacore.wig.getInfoFromFixedDef">[docs]</a><span class="k">def</span> <span class="nf">getInfoFromFixedDef</span><span class="p">(</span><span class="n">def_line</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return information from definition line as tuple.</span>
+
+<span class="sd">    :param def_line: FixedStep definition line from wiggle.</span>
+<span class="sd">    :type def_line: str</span>
+<span class="sd">    :return: Information from definition: chrom, pos, step, span.</span>
+<span class="sd">    :rtype: (str, int, int, int)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># fixeStep\schrom=.+\sstart=\d+\sstep=\d+(\sspan=\d+)?</span>
+    <span class="k">if</span> <span class="s2">&quot; span=&quot;</span> <span class="ow">in</span> <span class="n">def_line</span><span class="p">:</span>
+        <span class="n">step_type</span><span class="p">,</span> <span class="n">chrom_part</span><span class="p">,</span> <span class="n">start_part</span><span class="p">,</span> <span class="n">step_part</span><span class="p">,</span> <span class="n">span_part</span> <span class="o">=</span> <span class="n">def_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">span_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">step_type</span><span class="p">,</span> <span class="n">chrom_part</span><span class="p">,</span> <span class="n">start_part</span><span class="p">,</span> <span class="n">step_part</span> <span class="o">=</span> <span class="n">def_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">chrom</span> <span class="o">=</span> <span class="n">chrom_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">step_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">span</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getInfoFromVariableDef"><a class="viewcode-back" href="../../anacore.html#anacore.wig.getInfoFromVariableDef">[docs]</a><span class="k">def</span> <span class="nf">getInfoFromVariableDef</span><span class="p">(</span><span class="n">def_line</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return information from definition line as tuple.</span>
+
+<span class="sd">    :param def_line: VariableStep definition line from wiggle.</span>
+<span class="sd">    :type def_line: str</span>
+<span class="sd">    :return: Information from definition: chrom, None, None, span.</span>
+<span class="sd">    :rtype: (str, None, None, int)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot; span=&quot;</span> <span class="ow">in</span> <span class="n">def_line</span><span class="p">:</span>
+        <span class="n">step_type</span><span class="p">,</span> <span class="n">chrom_part</span><span class="p">,</span> <span class="n">span_part</span> <span class="o">=</span> <span class="n">def_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">span_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">step_type</span><span class="p">,</span> <span class="n">chrom_part</span> <span class="o">=</span> <span class="n">def_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+        <span class="n">chrom</span> <span class="o">=</span> <span class="n">chrom_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">chrom</span> <span class="o">=</span> <span class="n">chrom_part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">chrom</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">span</span></div>
+
+
+<div class="viewcode-block" id="WigIO"><a class="viewcode-back" href="../../anacore.html#anacore.wig.WigIO">[docs]</a><span class="k">class</span> <span class="nc">WigIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write in wiggle file (https://genome.ucsc.edu/goldenPath/help/wiggle.html).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">span</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of WigIO.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str.</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str.</span>
+<span class="sd">        :param step: In write mode: distance between data values. If this value is None data are in varaibleStep otherwise they are in fiwedStep.</span>
+<span class="sd">        :type step: int.</span>
+<span class="sd">        :param span: In write mode: number of bases that each data value should cover [Default: 1].</span>
+<span class="sd">        :type span: int.</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: WigIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">AbstractFile</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>  <span class="c1"># In write mode set to None convert writer from fixedStep to variableStep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">span</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">span</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">&quot;a&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;chrom&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;span&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Append mode</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isEmpty</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+                <span class="c1"># Get _prev</span>
+                <span class="n">open_fct</span> <span class="o">=</span> <span class="nb">open</span>
+                <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
+                <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+                    <span class="n">open_fct</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span>
+                    <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+                <span class="k">with</span> <span class="n">open_fct</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fixedStep&quot;</span><span class="p">):</span>
+                            <span class="n">prev_chrom</span><span class="p">,</span> <span class="n">prev_pos</span><span class="p">,</span> <span class="n">prev_step</span><span class="p">,</span> <span class="n">prev_span</span> <span class="o">=</span> <span class="n">getInfoFromFixedDef</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                            <span class="n">prev_pos</span> <span class="o">=</span> <span class="n">prev_pos</span> <span class="o">-</span> <span class="n">prev_step</span>
+                        <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;variableStep&quot;</span><span class="p">):</span>
+                            <span class="n">prev_chrom</span><span class="p">,</span> <span class="n">prev_pos</span><span class="p">,</span> <span class="n">prev_step</span><span class="p">,</span> <span class="n">prev_span</span> <span class="o">=</span> <span class="n">getInfoFromVariableDef</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">prev_step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">prev_pos</span> <span class="o">+=</span> <span class="n">prev_step</span>
+                    <span class="n">end_with_line_return</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;chrom&quot;</span><span class="p">:</span> <span class="n">prev_chrom</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">prev_pos</span><span class="p">,</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="n">prev_step</span><span class="p">,</span> <span class="s2">&quot;span&quot;</span><span class="p">:</span> <span class="n">prev_span</span><span class="p">}</span>
+                <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">span</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;span&quot;</span><span class="p">]</span>
+                <span class="c1"># Add first return</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">end_with_line_return</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WigIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.wig.WigIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the file can be a WIG file.</span>
+
+<span class="sd">        :return: True if the file can be a WIG file.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check is empty</span>
+        <span class="k">if</span> <span class="n">isEmpty</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="c1"># Check first line</span>
+        <span class="n">open_fct</span> <span class="o">=</span> <span class="nb">open</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;r&quot;</span>
+        <span class="k">if</span> <span class="n">isGzip</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="n">open_fct</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;rt&quot;</span>
+        <span class="k">with</span> <span class="n">open_fct</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="n">first_line</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">first_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fixedStep&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">first_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;variableStep&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1"># Check begin content</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">WigIO</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="n">record_idx</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">record_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">record</span>
+                    <span class="k">if</span> <span class="n">record_idx</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="n">record_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">is_valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="WigIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.wig.WigIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if the line corresponds to a record: it is not a step definition.</span>
+
+<span class="sd">        :param line: The evaluated line.</span>
+<span class="sd">        :type line: str.</span>
+<span class="sd">        :return: True if the line corresponds to a record.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fixedStep&quot;</span><span class="p">):</span>
+            <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">span</span> <span class="o">=</span> <span class="n">getInfoFromFixedDef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="n">step</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="n">span</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;chrom&quot;</span><span class="p">:</span> <span class="n">chrom</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">}</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;variableStep&quot;</span><span class="p">):</span>
+            <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">span</span> <span class="o">=</span> <span class="n">getInfoFromVariableDef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="n">span</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;chrom&quot;</span><span class="p">:</span> <span class="n">chrom</span><span class="p">}</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;browser&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;track&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="WigIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.wig.WigIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write record line in file.</span>
+
+<span class="sd">        :param chrom: Chromosome.</span>
+<span class="sd">        :type chrom: str</span>
+<span class="sd">        :param pos: Position (1-based).</span>
+<span class="sd">        :type pos: int</span>
+<span class="sd">        :param val: Value for the position.</span>
+<span class="sd">        :type val: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">:</span>  <span class="c1"># fixedStep</span>
+            <span class="k">if</span> <span class="n">chrom</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;chrom&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">pos</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;span&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;fixedStep chrom=</span><span class="si">{}</span><span class="s2"> start=</span><span class="si">{}</span><span class="s2"> step=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">+=</span> <span class="s2">&quot; span=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># variableStep</span>
+            <span class="k">if</span> <span class="n">chrom</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;chrom&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;span&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;variableStep chrom=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chrom</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">+=</span> <span class="s2">&quot; span=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_line_nb</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;chrom&quot;</span><span class="p">:</span> <span class="n">chrom</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos</span><span class="p">,</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">,</span> <span class="s2">&quot;span&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">}</span></div>
+
+    <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a structured record from the current line.</span>
+
+<span class="sd">        :return: The record defined by the current line. Value is in elt.annot[&quot;value&quot;]</span>
+<span class="sd">        :rtype: anacore.region.Region</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">:</span>  <span class="c1"># fixedStep</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># variableStep</span>
+            <span class="n">pos_str</span><span class="p">,</span> <span class="n">val_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pos_str</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Region</span><span class="p">(</span>
+            <span class="n">reference</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prev</span><span class="p">[</span><span class="s2">&quot;chrom&quot;</span><span class="p">],</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span>
+            <span class="n">end</span><span class="o">=</span><span class="n">pos</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">annot</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

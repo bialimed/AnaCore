@@ -327,3 +327,11 @@ anacore.vcf
    :members:
    :undoc-members:
    :show-inheritance:
+
+anacore.wig
+------------------
+
+.. automodule:: anacore.wig
+   :members:
+   :undoc-members:
+   :show-inheritance:

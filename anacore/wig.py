@@ -126,7 +126,7 @@ def getInfoFromVariableDef(def_line):
 
 
 class WigIO(AbstractFile):
-    """Class to read and write in wiggle file (https://genome.ucsc.edu/goldenPath/help/wiggle.html."""
+    """Class to read and write in wiggle file (https://genome.ucsc.edu/goldenPath/help/wiggle.html)."""
 
     def __init__(self, filepath, mode="r", step=None, span=None):
         """
