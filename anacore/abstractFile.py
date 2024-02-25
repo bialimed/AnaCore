@@ -17,6 +17,8 @@ def checksum(path, algo="md5", chunk_size=8192):
 
     :param path: Path to the file.
     :type path: str
+    :param algo: Algorithm for checksum (see hashlib.new).
+    :typa algo: str
     :param chunk_size: Size of chunks.
     :type chunk_size: int
     :return: Checksum for the file.
