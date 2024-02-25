@@ -2,14 +2,33 @@
 """Classes and funcions for reading/writing text files."""
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT-O'
+__copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '1.3.0'
 
+import hashlib
 import os
 import gzip
+
+
+def checksum(path, algo="md5", chunk_size=8192):
+    """
+    Return checksum for the file.
+
+    :param path: Path to the file.
+    :type path: str
+    :param chunk_size: Size of chunks.
+    :type chunk_size: int
+    :return: Checksum for the file.
+    :rtype: str
+    """
+    hashsum = hashlib.new(algo)
+    with open(path, "rb") as reader:
+        chunk = reader.read(chunk_size)
+        while chunk:  # while chunk := reader.read(chunk_size):
+            hashsum.update(chunk)
+            chunk = reader.read(chunk_size)
+    return hashsum.hexdigest()
 
 
 def isEmpty(path):
@@ -40,15 +59,16 @@ def isGzip(path):
     :return: True if the file is gziped.
     :rtype: bool
     """
-    is_gzip = None
-    FH_input = gzip.open(path)
-    try:
-        FH_input.readline()
-        is_gzip = True
-    except Exception:
-        is_gzip = False
-    finally:
-        FH_input.close()
+    is_gzip = False
+    if os.path.getsize(path) != 0:
+        reader = gzip.open(path)
+        try:
+            reader.readline()
+            is_gzip = True
+        except Exception:
+            pass
+        finally:
+            reader.close()
     return is_gzip
 
 
