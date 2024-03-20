@@ -11,7 +11,7 @@
 
     conda create --name test_package
     conda activate test_package
-    conda install -c bioconda -c conda-forge --use-local anacore=2.10.0
+    conda install -c bioconda -c conda-forge --use-local anacore=3.1.0
     python
     # In interpreter
       from anacore.vcf import VCFIO
