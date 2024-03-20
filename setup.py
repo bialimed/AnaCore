@@ -38,7 +38,7 @@ setup(
     packages=find_packages(),
     install_requires=load_requirements("requirements.txt"),
     url='https://github.com/bialimed/anacore',
-    python_requires='>=3.5',
+    python_requires='>=3.8',
     keywords='bio NGS',
     #long_description_content_type='text/markdown',
     #long_description=get_long_description()

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>anacore.abstractFile &mdash; AnaCore  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/anacore.css?v=93b82d15" />
 
   
@@ -75,14 +75,35 @@
 <span class="sd">&quot;&quot;&quot;Classes and funcions for reading/writing text files.&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 IUCT-O&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.2.0&#39;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.3.0&#39;</span>
 
+<span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
+
+
+<div class="viewcode-block" id="checksum"><a class="viewcode-back" href="../../anacore.html#anacore.abstractFile.checksum">[docs]</a><span class="k">def</span> <span class="nf">checksum</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">algo</span><span class="o">=</span><span class="s2">&quot;md5&quot;</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">8192</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return checksum for the file.</span>
+
+<span class="sd">    :param path: Path to the file.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :param algo: Algorithm for checksum (see hashlib.new).</span>
+<span class="sd">    :typa algo: str</span>
+<span class="sd">    :param chunk_size: Size of chunks.</span>
+<span class="sd">    :type chunk_size: int</span>
+<span class="sd">    :return: Checksum for the file.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hashsum</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">algo</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">chunk</span><span class="p">:</span>  <span class="c1"># while chunk := reader.read(chunk_size):</span>
+            <span class="n">hashsum</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hashsum</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="isEmpty"><a class="viewcode-back" href="../../anacore.html#anacore.abstractFile.isEmpty">[docs]</a><span class="k">def</span> <span class="nf">isEmpty</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -113,15 +134,16 @@
 <span class="sd">    :return: True if the file is gziped.</span>
 <span class="sd">    :rtype: bool</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">is_gzip</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">FH_input</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">FH_input</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
-        <span class="n">is_gzip</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="n">is_gzip</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">FH_input</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">is_gzip</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="n">is_gzip</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">reader</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">is_gzip</span></div>
 
 

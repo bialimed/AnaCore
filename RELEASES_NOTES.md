@@ -1,4 +1,4 @@
-# Release 3.1.0 [DEV]
+# Release 3.1.0 [2024-03-20]
 
 ### Improvements
   * Add `anacore.wig` for reading/writing/processing wiggle files.
