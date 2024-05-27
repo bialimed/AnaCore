@@ -1,3 +1,7 @@
+# Release 3.2.0 [DEV]
+### Improvements
+  * Add first elements of `anacore.nanopore`.
+
 # Release 3.1.0 [2024-03-20]
 
 ### Improvements
