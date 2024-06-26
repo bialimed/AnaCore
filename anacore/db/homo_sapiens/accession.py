@@ -2,11 +2,9 @@
 """Utils to works with human genome accessions."""
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2021 IUCT-O'
+__copyright__ = 'Copyright (C) 2021 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '1.2.0'
 
 
 class AssemblyAccession:
@@ -50,7 +48,7 @@ class AssemblyAccession:
         "gca_000001405.12": "GRCh37",
         "gca_000001405.13": "GRCh37",
         "gca_000001405.14": "GRCh37",
-        # GRCh37 GenBank 15 -> 28
+        # GRCh38 GenBank 15 -> 29
         "gca_000001405.15": "GRCh38",
         "gca_000001405.16": "GRCh38",
         "gca_000001405.17": "GRCh38",
@@ -64,7 +62,8 @@ class AssemblyAccession:
         "gca_000001405.25": "GRCh38",
         "gca_000001405.26": "GRCh38",
         "gca_000001405.27": "GRCh38",
-        "gca_000001405.28": "GRCh38"
+        "gca_000001405.28": "GRCh38",
+        "gca_000001405.29": "GRCh38"
     }
 
     HUMAN_BY_REFSEQ = {
@@ -84,7 +83,7 @@ class AssemblyAccession:
         "gcf_000001405.23": "GRCh37",
         "gcf_000001405.24": "GRCh37",
         "gcf_000001405.25": "GRCh37",
-        # GRCh38 RefSeq 26 -> 39
+        # GRCh38 RefSeq 26 -> 40
         "gcf_000001405.26": "GRCh38",
         "gcf_000001405.27": "GRCh38",
         "gcf_000001405.28": "GRCh38",
@@ -98,7 +97,8 @@ class AssemblyAccession:
         "gcf_000001405.36": "GRCh38",
         "gcf_000001405.37": "GRCh38",
         "gcf_000001405.38": "GRCh38",
-        "gcf_000001405.39": "GRCh38"
+        "gcf_000001405.39": "GRCh38",
+        "gcf_000001405.40": "GRCh38"
     }
 
     HUMAN_BY_ACC = {
