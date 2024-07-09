@@ -2,11 +2,9 @@
 """Classes and functions for reading/writing/processing GFF files."""
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2017 IUCT-O'
+__copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '2.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
 
 import re
 import copy
@@ -139,7 +137,7 @@ class GFF3Record(Region):
 class GFF3IO(AbstractFile):
     """Class to manage read and write in GFF3 file."""
 
-    def __init__(self, filepath, mode="r", separator="\t", title_starter="#", has_title=True):
+    def __init__(self, filepath, mode="r"):
         """
         Build and return an instance of GFF3IO.
 

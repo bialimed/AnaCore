@@ -3,11 +3,9 @@
 
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2019 IUCT-O'
+__copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '1.2.1'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
 
 from anacore.sequence import AA3LettersAlphabet
 import base64
@@ -766,7 +764,7 @@ class HGVSProtChange:
             return HGVSProtChange(None, 0, None, None, None, None, None, predicted)
         match = re.search(r"^([^\d]+)(\d+)(.+)$", change)
         if not match:
-            raise Exception('"{}" has not a valid syntax for HGVS protein change.'.format(change))
+            raise Exception('"{}" is not a valid syntax for HGVS protein change.'.format(change))
         else:
             start_aa, start_pos, follow = match.groups()
             start_pos = int(start_pos)
