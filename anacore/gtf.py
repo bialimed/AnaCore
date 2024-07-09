@@ -1,12 +1,32 @@
 # -*- coding: utf-8 -*-
-"""Classes and functions for reading/writing/processing GTF files."""
+"""
+Classes and functions for reading/writing/processing GTF files.
+
+:Example:
+
+    Read GTF by line
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.gtf import GTFIO
+
+        with GTFIO("test.gtf.gz", "r", {"db_xref", "gene_synonym"}) as reader:
+            print("gene", "xref", ""length", sep="\\t")
+            for rec in reader:
+                if rec.annot["feature"] == "gene" and rec.annot["gene_biotype"] == "protein_coding":
+                    print(rec.annot["gene_id"], ",".join(rec.annot["db_xref"]), rec.length, sep="\\t")
+
+        # Result>
+        # gene\txref\tlength
+        # EGFR\tGeneID:1956,HGNC:HGNC:3236,MIM:131550\t192612
+        # ...
+"""
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2018 IUCT-O'
+__copyright__ = 'Copyright (C) 2018 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.4'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '1.2.0'
 
 import re
 from anacore.abstractFile import AbstractFile
@@ -16,6 +36,22 @@ from anacore.genomicRegion import Gene, Transcript, Protein, Exon, CDS
 
 class GTFIO(AbstractFile):
     """Class to manage read and write in GTF file."""
+
+    def __init__(self, filepath, mode="r", repeatable_attr={"tag"}):
+        """
+        Build and return an instance of GTFIO.
+
+        :param filepath: The filepath.
+        :type filepath: str.
+        :param mode: Mode to open the file ('r', 'w', 'a').
+        :type mode: str.
+        :param repeatable_attr: GTF attributes that can be repeated several times.
+        :type repeatable_attr: set
+        :return: The new instance.
+        :rtype: GTFIO
+        """
+        AbstractFile.__init__(self, filepath, mode)
+        self.repeatable_attr = repeatable_attr
 
     def _parseLine(self):
         """
@@ -45,14 +81,14 @@ class GTFIO(AbstractFile):
             if current_attr.strip() != "":
                 if prev is not None:  # Attribute value is split because it contains semicolon
                     current_attr = prev + current_attr
-                matches = re.fullmatch("(.+)\s+\"([^\"]+)\"", current_attr.strip())
+                matches = re.fullmatch(r"(.+)\s+\"([^\"]+)\"", current_attr.strip())
                 if matches is None:
                     prev = current_attr + ";"
                 else:
                     key, val = matches.groups(1)
-                    if key != "tag":
+                    if key not in self.repeatable_attr:
                         record_attr[key] = val
-                    else:  # "tag" contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)
+                    else:  # Contains a set of values so this key can occurate several times (cf. www.genecodegenes.org/pages/data_format.html)
                         if key in record_attr:
                             record_attr[key].add(val)
                         else:
@@ -88,9 +124,9 @@ class GTFIO(AbstractFile):
         std_fields = {"source", "feature", "score", "frame"}
         for key, val in sorted(record.annot.items()):
             if key not in std_fields:
-                if key != "tag" or not issubclass(val.__class__, (set, list, tuple)):
+                if key not in self.repeatable_attr or not issubclass(val.__class__, (set, list, tuple)):
                     attributes.append('{} "{}"'.format(key, val))
-                else:  # "tag" contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)
+                else:  # Contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)
                     for sub_val in sorted(val):
                         attributes.append('{} "{}"'.format(key, sub_val))
         line = "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
