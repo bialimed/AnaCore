@@ -1,5 +1,8 @@
 # Release 3.2.0 [DEV]
 ### Improvements
+  * Change `anacore.illumina.demultiplex.base.AbstractDemultStat.unexpectedBarcodes`
+  interface and behaviour. It now it detects strange undetermined barcodes
+  regardless of the number of clusters in the expected samples.
   * Add first elements of `anacore.pacbio.sequel`.
   * Add first elements of `anacore.nanopore`.
 

@@ -5,8 +5,6 @@ __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '2.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
 
 from anacore.illumina.demultiplex.base import AbstractDemultStat
 import datetime

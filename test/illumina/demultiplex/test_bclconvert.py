@@ -3,12 +3,9 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2023 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '1.1.0'
 
 import datetime
-import csv
 import os
 import shutil
 import sys
@@ -143,6 +140,16 @@ class TestDemultStatBclConvert(unittest.TestCase):
             if os.path.exists(path):
                 os.remove(path)
 
+    def testExpectedBarcodesCounts(self):
+        expected = {
+            "CTGATCGT+GCGCATAT": 1546203,
+            "ACTCTCGA+CTGTACCA": 2585489,
+            "CGCATGAT+AAGCCTGA": 2293141,
+            "ACGGAACA+ACGAGAAC": 2318638
+        }
+        stats = DemultStat(self.tmp_stat_file)
+        self.assertEqual(stats.expectedBarcodesCounts(), expected)
+
     def testSamplesCounts(self):
         expected = {
             "splA": 1546203 + 2293141,
@@ -164,31 +171,83 @@ class TestDemultStatBclConvert(unittest.TestCase):
         self.assertEqual(stats.undeterminedCounts(), expected)
 
     def testUnexpectedBarcodes(self):
-        expected = []
-        stats = DemultStat(self.tmp_stat_file, self.tmp_undet_file)
-        self.assertEqual(stats.unexpectedBarcodes(), expected)
-        # Increase count of undetermined
-        data = []
-        with open(self.tmp_undet_file) as handle:
-            reader = csv.DictReader(handle, delimiter=',')
-            for row in reader:
-                row["# Reads"] = int(row["# Reads"]) * 60
-                data.append(row)
-        fieldnames = ["Lane", "index", "index2", "# Reads", "% of Unknown Barcodes", "% of All Reads"]
-        with open(self.tmp_undet_file, "w") as handle:
-            writer = csv.DictWriter(handle, fieldnames, delimiter=',')
-            writer.writeheader()
-            for row in data:
-                writer.writerow(row)
-        stats = DemultStat(self.tmp_stat_file, self.tmp_undet_file)
-        # RNA under
-        expected = [  # "GGGGGGGG+AGATCTCG" is skipped because it corresponds to without UDI
-            {"spl": "TGGACTCT+TCTTACGG", "ct": (37763 + 28943) * 60},
+        with open(self.tmp_stat_file, "w") as writer:
+            writer.write("""Lane,SampleID,Index,# Reads,# Perfect Index Reads,# One Mismatch Index Reads,# Two Mismatch Index Reads,% Reads,% Perfect Index Reads,% One Mismatch Index Reads,% Two Mismatch Index Reads
+1,splA,CTACTA-GTCGTC,101700,100700,1000,0,0.254250,0.251750,0.000000,0.000000
+1,splB,ACTCTC-CTGTAC,90000,90000,0,0,0.225000,0.225000,0.000000,0.000000
+2,splA,CTACTA-GTCGTC,80500,80000,500,0,0.201250,0.200000,0.000000,0.000000
+2,splB,ACTCTC-CTGTAC,58500,56300,2200,0,0.146250,0.140750,0.000000,0.000000""")
+        dataset = [
+            {"tag": "hidden", "line": "1,GTTATC,GTTGGG,7000,0.101010101,0.0175"},
+            {"tag": "phiX", "line": "1,GGGGGG,AGTCAA,5000,0.072150072,0.0125"},
+            {"tag": "hidden", "line": "1,AAATCT,GTTGGG,2400,0.034632035,0.006"},
+            {"tag": "hidden", "line": "1,TTTACT,GTTGGG,2200,0.031746032,0.0055"},
+            {"tag": "hidden", "line": "1,GGGTTC,GGGAAG,2000,0.028860029,0.005"},
+            {"tag": "spl", "line": "1,CTACTA,GTCGNN,1850,0.026695527,0.004625"},
+            {"tag": "spl", "line": "1,CTACNN,GTCGTC,1700,0.024531025,0.00425"},
+            {"tag": "phiX", "line": "1,GGGGGG,AGTCAA,1500,0.021645022,0.00375"},
+            {"tag": "phiX", "line": "1,GGGGGG,AGTCAA,1400,0.02020202,0.0035"},
+            {"tag": "phiX", "line": "1,GGGGGG,AGTCAA,1300,0.018759019,0.00325"},
+            {"tag": "noise", "line": "1,ATGCAT,AAATTT,1200,0.017316017,0.003"},
+            {"tag": "noise", "line": "1,ATGCAT,GGCTAA,1100,0.015873016,0.00275"},
+            {"tag": "noise", "line": "1,GGCTAA,ATGCAT,1000,0.014430014,0.0025"},
+            {"tag": "hidden", "line": "2,GTTATC,GTTGGG,7000,0.101010101,0.0175"},
+            {"tag": "phiX", "line": "2,GGGGGG,AGTCAA,5000,0.072150072,0.0125"},
+            {"tag": "hidden", "line": "2,AAATCT,GTTGGG,2400,0.034632035,0.006"},
+            {"tag": "hidden", "line": "2,TTTACT,GTTGGG,2200,0.031746032,0.0055"},
+            {"tag": "hidden", "line": "2,GGGTTC,GGGAAG,2000,0.028860029,0.005"},
+            {"tag": "spl", "line": "2,CTACTA,GTCGNN,1850,0.026695527,0.004625"},
+            {"tag": "spl", "line": "2,CTACNN,GTCGTC,1700,0.024531025,0.00425"},
+            {"tag": "phiX", "line": "2,GGGGGG,AGTCAA,1500,0.021645022,0.00375"},
+            {"tag": "phiX", "line": "2,GGGGGG,AGTCAA,1400,0.02020202,0.0035"},
+            {"tag": "phiX", "line": "2,GGGGGG,AGTCAA,1300,0.018759019,0.00325"},
+            {"tag": "noise", "line": "2,ATGCAT,AAATTT,1200,0.017316017,0.003"},
+            {"tag": "noise", "line": "2,ATGCAT,GGCTAA,1100,0.015873016,0.00275"},
+            {"tag": "noise", "line": "2,GGCTAA,ATGCAT,1000,0.014430014,0.0025"}
         ]
-        self.assertEqual(stats.unexpectedBarcodes(), expected)
-        # RNA under with skipped
+        # No hidden samples in undetermined
         expected = []
-        self.assertEqual(stats.unexpectedBarcodes({"splA"}), expected)
+        with open(self.tmp_undet_file, "w") as writer:
+            writer.write("Lane,index,index2,# Reads,% of Unknown Barcodes,% of All Reads\n")
+            for rec in dataset:
+                if rec["tag"] != "hidden":
+                    writer.write(rec["line"] + "\n")
+        stats = DemultStat(self.tmp_stat_file, self.tmp_undet_file)
+        self.assertEqual(stats.unexpectedBarcodes(), expected)
+        # Hidden samples in undetermined
+        expected = [
+            {"spl": "GTTATC+GTTGGG", "ct": 14000, "parent": {"bc": "CTACTA+GTCGTC", "dist": 7}, "rate": 0.34},
+            {"spl": "AAATCT+GTTGGG", "ct": 4800, "parent": {"bc": "CTACTA+GTCGTC", "dist": 8}, "rate": 0.92},
+            {"spl": "TTTACT+GTTGGG", "ct": 4400, "parent": {"bc": "CTACTA+GTCGTC", "dist": 8}, "rate": 0.91},
+            {"spl": "GGGTTC+GGGAAG", "ct": 4000, "parent": {"bc": "ACTCTC+CTGTAC", "dist": 8}, "rate": 0.6}
+        ]
+        with open(self.tmp_undet_file, "w") as writer:
+            writer.write("Lane,index,index2,# Reads,% of Unknown Barcodes,% of All Reads\n")
+            for rec in dataset:
+                writer.write(rec["line"] + "\n")
+        stats = DemultStat(self.tmp_stat_file, self.tmp_undet_file)
+        self.assertEqual(stats.unexpectedBarcodes(), expected)
+        # Hidden samples in undetermined and error with 2nt of barcode for splC in samplesheet
+        with open(self.tmp_stat_file, "w") as writer:
+            writer.write("""Lane,SampleID,Index,# Reads,# Perfect Index Reads,# One Mismatch Index Reads,# Two Mismatch Index Reads,% Reads,% Perfect Index Reads,% One Mismatch Index Reads,% Two Mismatch Index Reads
+1,splA,CTACTA-GTCGTC,101700,100700,1000,0,0.254250,0.251750,0.000000,0.000000
+1,splB,ACTCTC-CTGTAC,90000,90000,0,0,0.225000,0.225000,0.000000,0.000000
+1,splC,AAATCT-GAAGGG,100,100,0,0,0.000250,0.000250,0.000000,0.000000
+2,splA,CTACTA-GTCGTC,80500,80000,500,0,0.201250,0.200000,0.000000,0.000000
+2,splB,ACTCTC-CTGTAC,58500,56300,2200,0,0.146250,0.140750,0.000000,0.000000
+2,splC,AAATCT-GAAGGG,0,0,0,0,0.000000,0.000000,0.000000,0.000000""")
+        expected = [
+            {"spl": "GTTATC+GTTGGG", "ct": 14000, "parent": {"bc": "CTACTA+GTCGTC", "dist": 7}, "rate": 0.34},
+            {"spl": "AAATCT+GTTGGG", "ct": 4800, "parent": {"bc": "AAATCT+GAAGGG", "dist": 2}, "rate": 0.92},
+            {"spl": "TTTACT+GTTGGG", "ct": 4400, "parent": {"bc": "AAATCT+GAAGGG", "dist": 6}, "rate": 0.91},
+            {"spl": "GGGTTC+GGGAAG", "ct": 4000, "parent": {"bc": "ACTCTC+CTGTAC", "dist": 8}, "rate": 0.6}
+        ]
+        with open(self.tmp_undet_file, "w") as writer:
+            writer.write("Lane,index,index2,# Reads,% of Unknown Barcodes,% of All Reads\n")
+            for rec in dataset:
+                writer.write(rec["line"] + "\n")
+        stats = DemultStat(self.tmp_stat_file, self.tmp_undet_file)
+        self.assertEqual(stats.unexpectedBarcodes(), expected)
 
 
 if __name__ == "__main__":

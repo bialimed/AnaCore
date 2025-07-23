@@ -3,9 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '2.1.0'
 
 import datetime
 import json
@@ -145,6 +143,18 @@ class TestDemultStatBcl2fastq(unittest.TestCase):
         if os.path.exists(self.tmp_file):
             os.remove(self.tmp_file)
 
+    def testExpectedBarcodesCounts(self):
+        expected = {
+            "TTAATCAG+CTTCGCCT": 19077591,
+            "TCCGGAGA+AGGATAGG": 5435665,
+            "CGCTCATT+TAAGATTA": 19218799,
+            "CTGAAGCT+TCAGAGCC": 5249236,
+            "TCCGCGAA+AGTAAGTA": 18392766,
+            "ATTACTCG+GACTTCCT": 19957894
+        }
+        stats = DemultStat(self.tmp_file)
+        self.assertEqual(stats.expectedBarcodesCounts(), expected)
+
     def testSamplesCounts(self):
         expected = {
             "splA-DNA": 19077591,
@@ -170,33 +180,34 @@ class TestDemultStatBcl2fastq(unittest.TestCase):
         self.assertEqual(stats.undeterminedCounts(), expected)
 
     def testUnexpectedBarcodes(self):
+        # No hidden samples in undetermined
         expected = []
         stats = DemultStat(self.tmp_file)
         self.assertEqual(stats.unexpectedBarcodes(), expected)
-        # Increase count of undetermined
+        # Hidden samples in undetermined
+        expected = [
+            {"spl": "TTGTCTTA+AGGATATT", "ct": 800000, "parent": {"bc": "TCCGGAGA+AGGATAGG", "dist": 8}, "rate": 0.75},
+        ]
         with open(self.tmp_file) as reader:
             data = json.load(reader)
-            for lane in data["UnknownBarcodes"]:
-                for barcode, ct in lane["Barcodes"].items():
-                    lane["Barcodes"][barcode] = ct * 10
+            data["UnknownBarcodes"][0]["Barcodes"]["TTGTCTTA+AGGATATT"] = 350000
+            data["UnknownBarcodes"][1]["Barcodes"]["TTGTCTTA+AGGATATT"] = 450000
         with open(self.tmp_file, "w") as writer:
             json.dump(data, writer)
         stats = DemultStat(self.tmp_file)
-        # RNA under
-        expected = [  # "GGGGGGGG+AGATCTCG" is skipped because it corresponds to without UDI
-            {"spl": "ACTGCTTA+AGATCTCG", "ct": 5965600},
-            {"spl": "ATGCGGCT+AGATCTCG", "ct": 5573800}
-        ]
         self.assertEqual(stats.unexpectedBarcodes(), expected)
-        # RNA under with skipped
-        expected = [  # "GGGGGGGG+AGATCTCG" is skipped because it corresponds to without UDI
-            {"spl": "ACTGCTTA+AGATCTCG", "ct": 5965600},
-            {"spl": "ATGCGGCT+AGATCTCG", "ct": 5573800}
-        ]
-        self.assertEqual(stats.unexpectedBarcodes({"splA-RNA"}), expected)
+        # Previous hidden in undetermined become child of expected sample
         expected = []
-        self.assertEqual(stats.unexpectedBarcodes({"splA-RNA", "splB-RNA"}), expected)
-
+        with open(self.tmp_file) as reader:
+            data = json.load(reader)
+            del(data["UnknownBarcodes"][0]["Barcodes"]["TTGTCTTA+AGGATATT"])
+            del(data["UnknownBarcodes"][1]["Barcodes"]["TTGTCTTA+AGGATATT"])
+            data["UnknownBarcodes"][0]["Barcodes"]["NNCGGAGA+AGGATAGG"] = 350000
+            data["UnknownBarcodes"][1]["Barcodes"]["NNCGGAGA+AGGATAGG"] = 450000
+        with open(self.tmp_file, "w") as writer:
+            json.dump(data, writer)
+        stats = DemultStat(self.tmp_file)
+        self.assertEqual(stats.unexpectedBarcodes(), expected)
 
 if __name__ == "__main__":
     unittest.main()

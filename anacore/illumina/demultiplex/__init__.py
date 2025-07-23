@@ -4,7 +4,7 @@ Classes and functions to manage Illumina's demultiplex logs and stats files.
 
 :Code example:
 
-    List undetermined barcodes with a count greater than smallest sample
+    List undetermined barcodes which may be forgotten samples.
 
     .. highlight:: python
     .. code-block:: python
@@ -18,7 +18,7 @@ Classes and functions to manage Illumina's demultiplex logs and stats files.
                 "{}\t{}".format(barcode["ct"], barcode["seq"])
             )
 
-        # Result (with smallest sample count equal to 10000)>
+        # Result (forgotten samples)>
         # count barcode
         # 14879 AATGC+TTTA
         # 10457 AGCGC+TTGA

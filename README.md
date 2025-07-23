@@ -18,7 +18,7 @@ formats (BED, fasta, gff, gtf, MAF, newick, VCF, ...) and objects from NGS.
 * [developper way] Clones the repository from the latest unreleased version: `git clone https://github.com/bialimed/AnaCore.git`.
 
 #### 2- Install
-`python setup.py install --user`
+`python -m pip install --user .`
 
 ## Documentation
 See `doc/index.html`
@@ -26,6 +26,3 @@ See `doc/index.html`
 ## Copyright
 2017 Laboratoire d'Anatomo-Cytopathologie de l'Institut Universitaire du Cancer
 Toulouse - Oncopole
-
-## Contact
-escudie.frederic@iuct-oncopole.fr
