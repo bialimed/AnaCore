@@ -107,7 +107,7 @@ class AbstractDemultStat:
             ct_by_barcode[barcode["seq"]] = sum(lane["ct"] for lane in barcode["lanes"])
         return ct_by_barcode
 
-    def unexpectedBarcodes(self, parent_bc_max_dist=2, min_ct=1500, break_rate=0.80):
+    def unexpectedBarcodes(self, parent_bc_max_dist=2, min_ct=1000, break_rate=0.80):
         """
         Return list of odd undetermined barcodes. Unexpected barcodes:
         - have clusters count greater than min_ct
@@ -125,45 +125,43 @@ class AbstractDemultStat:
         :return: Odd undetermined index (list of {"spl": barcode, "ct": count, "parent": nearest_bc, "rate": rate}).
         :rtype: list
         """
-        ct_by_bc = self.expectedBarcodesCounts()
-        expected_bc = ct_by_bc.keys()
         unexpected_barcodes = list()
         prev_count = None
-        exists_ct_break = False
-        for barcode, count in sorted(self.undeterminedCounts().items(), key=lambda elt: elt[1]):  # List unknown barcode by ascending count
-            if count < min_ct:
-                prev_count = count
-            else:
+        # Get undetermined without PhiX and over min_ct
+        unk_bc_counts = list()
+        for barcode in self.undetermined:
+            barcode_ct = sum(lane["ct"] for lane in barcode["lanes"])
+            if barcode_ct < min_ct:
                 if prev_count is None:
-                    prev_count = count
-                # Identified phiX
-                without_udi = False
-                for udi in barcode.split("+"):
-                    udi = udi.replace("N", "")
-                    if set(udi) == {"G"} or set(udi) == {"A"} or udi == "":
-                        without_udi = True
-                # For barcodes except phiX
-                if not without_udi:
-                    nearest_bc = _getNearestBarcode(barcode, expected_bc)
-                    if nearest_bc["dist"] > parent_bc_max_dist or ct_by_bc[nearest_bc["bc"]] <= count:
-                        # The barcode doesn't seem to be the result of reading errors on one of expected barcodes
-                        # or
-                        # There's an error on one of the expected barcodes because the derivative contains more read
-                        rate = round(prev_count / count, 2)
-                        if rate <= break_rate and not exists_ct_break:  # First break in count from lower to higher
-                            exists_ct_break = True
-                            unexpected_barcodes = list()
-                        unexpected_barcodes.append({
-                            "spl": barcode, "ct": count, "parent": nearest_bc,
-                            "rate": rate
-                        })
-                        prev_count = count
+                    prev_count = barcode_ct
+                elif barcode_ct > prev_count:
+                    prev_count = barcode_ct
+            else:
+                if not _isWithoutUDI(barcode["seq"]):  # For barcodes except PhiX
+                    unk_bc_counts.append([barcode["seq"], barcode_ct])
+        # Select unknown barcodes over count break
+        ct_by_bc = self.expectedBarcodesCounts()
+        expected_bc = ct_by_bc.keys()
+        exists_ct_break = False
+        for bc_seq, bc_count in sorted(unk_bc_counts, key=lambda elt: elt[1]):  # List unknown barcode by ascending count
+            if prev_count is None:
+                prev_count = bc_count
+            nearest_bc = _getNearestBarcode(bc_seq, expected_bc)
+            if nearest_bc["dist"] > parent_bc_max_dist or ct_by_bc[nearest_bc["bc"]] <= bc_count:
+                # The barcode doesn't seem to be the result of reading errors on one of expected barcodes
+                # or
+                # There's an error on one of the expected barcodes because the derivative contains more read
+                rate = round(prev_count / bc_count, 2)
+                if rate <= break_rate and not exists_ct_break:  # First break in count from lower to higher
+                    exists_ct_break = True
+                if exists_ct_break:
+                    unexpected_barcodes.append({
+                        "spl": bc_seq, "ct": bc_count, "parent": nearest_bc,
+                        "rate": rate
+                    })
+                prev_count = bc_count
         # Return
-        if not exists_ct_break:
-            unexpected_barcodes = list()  # 0 unexpected if it has no break in counts
-        else:
-            unexpected_barcodes = unexpected_barcodes[::-1]  # Sort by descending count
-        return unexpected_barcodes
+        return unexpected_barcodes[::-1]  # Sort by descending count
 
 
 def _getNearestBarcode(query_bc, db_barcodes):
@@ -206,3 +204,20 @@ def _getNearestBarcode(query_bc, db_barcodes):
             match = curr_db_bc
             best_nb_diff = nb_diff
     return {"bc": match, "dist": best_nb_diff}
+
+
+def _isWithoutUDI(barcode):
+    """
+    Return True if the barcode sequence correspond to cluster without index.
+
+    :param barcode: Barcode sequence.
+    :type barcode: str
+    :return: True if the barcode sequence correspond to cluster without index.
+    :rtype: bool
+    """
+    without_udi = False
+    for udi in barcode.split("+"):
+        udi = udi.replace("N", "")
+        if set(udi) == {"G"} or set(udi) == {"A"} or udi == "":
+            without_udi = True
+    return without_udi
