@@ -42,9 +42,7 @@ Functions to manage reads headers and filenames.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '2.1.0'
 
 import os
 import re
@@ -135,15 +133,23 @@ def getPlatformFromSerialNumber(instrument_id):
     :return: The platform name (Hiseq or NextSeq or ...).
     :rtype: str
     """
+    # Info:
+    #  https://www.biostars.org/p/198143
+    #  https://knowledge.illumina.com/instrumentation/general/instrumentation-general-reference_material-list/000006351
+    #  https://knowledge.illumina.com/instrumentation/nextseq-1000-2000/instrumentation-nextseq-1000-2000-reference_material-list/000002388
     platform_by_re = {
-        # "?": "iSeq",
+        # "^FS[0-9]+$": "iSeq",
         "^MN[0-9]{5}$": "MiniSeq",
         "^ML-..-[0-9]{2}$": "MiniSeq",
         "^M[0-9]{5}$": "MiSeq",
-        "^N[SB][0-9]{6}$": "NextSeq",
-        "^NDX[0-9]{6}": "NextSeq",
+        "^SH[0-9]{5}$": "MiSeq_i100",
+        "^N[SB][0-9]{6}$": "NextSeq",  # NextSeq 500/550
+        "^NDX[0-9]{6}": "NextSeq",  # NextSeqDx 500/550
+        "^VL[0-9]{5}$": "NextSeq_1000",
+        "^VH[0-9]{5}$": "NextSeq_2000",
         "^[CDJKE][0-9]{5}$": "HiSeq",
-        "^A[0-9]{5}$": "NovaSeq"
+        "^A[0-9]{5}$": "NovaSeq",  # NovaSeq 6000
+        "^LH[0-9]{5}$": "NovaSeq_X"
     }
     if instrument_id.startswith("HWI"):
         instrument_id = instrument_id[3:]
