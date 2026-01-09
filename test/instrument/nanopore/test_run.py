@@ -5,7 +5,6 @@ __copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '2.0.0'
 
-import datetime
 import os
 import sys
 import tempfile
@@ -16,7 +15,7 @@ TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.nanopore.run import Run
+from anacore.instrument.nanopore.run import Run
 
 
 class TestRun(unittest.TestCase):

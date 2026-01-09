@@ -13,7 +13,7 @@ TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.nanopore.base import getInfFromSeqDesc
+from anacore.instrument.nanopore.base import getInfFromSeqDesc
 
 
 class TestGetInfFromSeqDesc(unittest.TestCase):

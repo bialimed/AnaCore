@@ -16,7 +16,7 @@ TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.nanopore.samplesheet import SampleSheet
+from anacore.instrument.nanopore.samplesheet import SampleSheet
 
 
 class TestSampleSheet(unittest.TestCase):

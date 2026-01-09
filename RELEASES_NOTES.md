@@ -1,12 +1,13 @@
 # Release 3.2.0 [DEV]
+
 ### Improvements
   * Add serial number for NextSeq 1000/2000, MiSeq i100 and NovaSeq X in
   `anacore.illumina.base.getPlatformFromSerialNumber`.
   * Change `anacore.illumina.demultiplex.base.AbstractDemultStat.unexpectedBarcodes`
   interface and behaviour. It now it detects strange undetermined barcodes
   regardless of the number of clusters in the expected samples.
-  * Add first elements of `anacore.pacbio.sequel`.
-  * Add first elements of `anacore.nanopore`.
+  * Add first elements for `anacore.instrument.elementbio`,
+  `anacore.instrument.nanopore` and `anacore.instrument.sequel`.
 
 # Release 3.1.0 [2024-03-20]
 
