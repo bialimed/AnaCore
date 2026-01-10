@@ -68,11 +68,11 @@ def getInfFromSeqDesc(seq_desc):
     :return: The sequencer id, run id, flowcell id and position of the sequence on the sequencer flowcell.
     :rtype: dict
     """
-    # AVITI's description: 1:Y:18:ATCACG
+    # AVITI's description: 1:Y:0:ATCACG
     reads_phases, kept_status, control_bits, barcode = seq_desc.split(":")
     return {
         "reads_phases": int(reads_phases),
         "is_kept": kept_status == "N",
         "control_bits": None if control_bits == "0" else int(control_bits),
-        "barcode": None if barcode == "" else barcode
+        "barcode": None if barcode == "" or barcode.isnumeric() else barcode  # No indexing: The sample number
     }

@@ -48,40 +48,43 @@ class SampleSheet:
         self.filepath = path
         self.run_values = dict()
         self.samples = list()
-        self.settings = {"all": dict(), "1": dict(), "2": dict()}  # Settings by lane
+        self.settings = dict()
         self._parse()
 
     def _parse(self):
         """Read file content and store information on the instance's attributes."""
         with open(self.filepath) as fh:
-            reader = csv.Reader(fh)
+            reader = csv.reader(fh)
             spl_obj_fields = {"SampleName", "Index1", "Index2", "Description"}
             section = None
+            fields_by_section = {}
             for rec in reader:
-                if rec[0].startswith("#") or "".join(rec) == "":
+                if len(rec) == 0 or rec[0].startswith("#") or "".join(rec) == "":
                     pass
                 elif rec[0].startswith("["):
                     section = rec[0][1:-1].lower()
-                    if section == "samples":
-                        spl_fields = [elt.strip() for elt in next(reader) if elt != ""]
+                    fields_by_section[section] = [elt.strip() for elt in next(reader) if elt != ""]
                 else:
-                    if section == "run_values":
-                        self.run_values[rec[0].strip()] = rec[1].strip()
+                    rec_info = {key: val.strip() for key, val in zip(fields_by_section[section], rec)}
+                    if section == "runvalues":
+                        self.run_values[rec_info["KeyName"]] = rec_info["Value"]
                     elif section == "settings":
-                        lane = "all" if len(rec) >= 3 and rec[2] != "" else rec[2]
-                        self.settings[lane][rec[0].strip()] = rec[1].strip()
-                    elif section != "samples":
-                        spl_rec = {key: val.strip() for key, val in zip(spl_fields, rec)}
-                        barcodes = None
-                        if "Index1" in spl_rec:
-                            barcodes = {"index": spl_rec["Index1"]}
-                        if "Index2" in spl_rec:
-                            barcodes["index2"] = spl_rec["Index2"]
-                        metadata = {k: v for k, v in spl_rec.items() if k not in spl_obj_fields}
-                        if "SampleName" not in spl_rec or spl_rec["SampleName"] == "":
+                        lanes = rec_info["Lane"].split("+") if "Lane" in rec_info and rec_info["Lane"] != "" else ["1", "2"]
+                        self.settings[rec_info["SettingName"]] = {curr: rec_info["Value"] for curr in lanes}
+                    elif section == "samples":
+                        if "SampleName" not in rec_info or rec_info["SampleName"] == "":
                             raise Exception("SampleName is required for each sample.")
+                        barcodes = None
+                        if "Index1" in rec_info:
+                            barcodes = {"index": rec_info["Index1"]}
+                        if "Index2" in rec_info:
+                            barcodes["index2"] = rec_info["Index2"]
+                        description = rec_info["Description"] if "Description" in rec_info and rec_info["Description"] != "" else None
+                        metadata = {k: v for k, v in rec_info.items() if k not in spl_obj_fields}
+                        if "Lane" in metadata:
+                            metadata["Lane"] = metadata["Lane"].split("+")
                         self.samples.append(
-                            Sample(spl_rec["SampleName"], barcodes, spl_rec.get("Description"), metadata)
+                            Sample(rec_info["SampleName"], barcodes, description, metadata)
                         )
 
     @property
