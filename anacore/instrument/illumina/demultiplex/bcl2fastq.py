@@ -4,9 +4,9 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 
-from anacore.illumina.demultiplex.base import AbstractDemultStat
+from anacore.instrument.demultiplex import AbstractDemultStat
 import datetime
 import json
 import re

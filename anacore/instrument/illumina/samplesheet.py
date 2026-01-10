@@ -9,7 +9,7 @@ Classes and functions for reading Illumina's samplesheet.
     .. highlight:: python
     .. code-block:: python
 
-        from anacore.illumina.samplesheet import SampleSheetFactory
+        from anacore.instrument.illumina.samplesheet import SampleSheetFactory
 
         samplesheet = SampleSheetFactory.get("my_run/SampleSheet.csv"):
         print("Samples:")
@@ -26,9 +26,10 @@ Classes and functions for reading Illumina's samplesheet.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
-from anacore.illumina.base import getIlluminaName
+from anacore.instrument.illumina.base import getIlluminaName
+from anacore.instrument.samplesheet import cleanedEnd
 import glob
 import os
 import re
@@ -58,21 +59,6 @@ class AbstractSampleSheet(object):
         self.samples = None
         self._parse()
 
-    @staticmethod
-    def cleanedEnd(value):
-        """
-        Return line without ending empty CSV fields. This method can be used to removes invalid comma used in CSV to obtain the same number of columns in whole file.
-
-        :param value: Line to clean.
-        :type value: str
-        :return: Line without ending empty CSV fields.
-        :rtype: str
-        """
-        value = value.strip()
-        while value.endswith(","):
-            value = value[:-1].strip()
-        return value
-
     def _getInfoFromSection(self, section):
         """
         Return keys and values contained in section.
@@ -85,7 +71,7 @@ class AbstractSampleSheet(object):
         info = dict()
         for line in section:
             key, value = [field.strip() for field in line.split(",", 1)]
-            value = AbstractSampleSheet.cleanedEnd(value)
+            value = cleanedEnd(value)
             info[key] = value
         return info
 
@@ -98,7 +84,7 @@ class AbstractSampleSheet(object):
         :return: Titles and list of entries (Keys and values for one element).
         :rtype: (list, list)
         """
-        titles_line = AbstractSampleSheet.cleanedEnd(section[0])
+        titles_line = cleanedEnd(section[0])
         titles = titles_line.split(",")
         rows = list()
         for line in section[1:]:
@@ -190,7 +176,7 @@ class AbstractSampleSheet(object):
             for line in reader:
                 striped_line = line.strip()
                 if re.fullmatch(r"\[[^]]+\],*", striped_line):  # New section
-                    striped_line = AbstractSampleSheet.cleanedEnd(striped_line)
+                    striped_line = cleanedEnd(striped_line)
                     section_title = striped_line[1:-1]
                     sections_by_title[section_title] = list()
                 elif re.fullmatch(r",*", striped_line):  # Empty line
@@ -389,7 +375,7 @@ class SampleSheetV1(AbstractSampleSheet):
         cycles = dict()
         read_idx = 1
         for line in reads_section:
-            striped_line = AbstractSampleSheet.cleanedEnd(line)
+            striped_line = cleanedEnd(line)
             cycles["R{}".format(read_idx)] = int(striped_line)
             read_idx += 1
         return {"nb_cycles": cycles}
@@ -411,7 +397,7 @@ class SampleSheetV1(AbstractSampleSheet):
                 for line in reader:
                     striped_line = line.strip()
                     if re.fullmatch(r"\[[^]]+\],*", striped_line):
-                        title = AbstractSampleSheet.cleanedEnd(striped_line)[1:-1]
+                        title = cleanedEnd(striped_line)[1:-1]
                         sections.add(title)
                     elif striped_line.startswith("FileFormatVersion,"):
                         if striped_line.split(",")[1] != "1":
@@ -495,7 +481,7 @@ class SampleSheetV2(AbstractSampleSheet):
                 for line in reader:
                     striped_line = line.strip()
                     if re.fullmatch(r"\[[^]]+\],*", striped_line):
-                        title = AbstractSampleSheet.cleanedEnd(striped_line)[1:-1]
+                        title = cleanedEnd(striped_line)[1:-1]
                         sections.add(title)
                     elif striped_line.startswith("FileFormatVersion,2"):
                         format_declaration = striped_line

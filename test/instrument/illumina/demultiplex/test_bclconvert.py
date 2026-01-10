@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2023 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 import datetime
 import os
@@ -13,11 +13,11 @@ import tempfile
 import unittest
 import uuid
 
-TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.illumina.demultiplex.bclconvert import DemultLog, DemultStat
+from anacore.instrument.illumina.demultiplex.bclconvert import DemultLog, DemultStat
 
 
 class TestBclConvertLog(unittest.TestCase):

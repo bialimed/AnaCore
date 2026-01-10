@@ -9,7 +9,7 @@ Classes and functions to manage Illumina's demultiplex logs and stats files.
     .. highlight:: python
     .. code-block:: python
 
-        from anacore.illumina.demultiplex import DemultStatFactory
+        from anacore.instrument.illumina.demultiplex import DemultStatFactory
 
         demult_stat = DemultStatFactory.get("my_demultiplex_folder")
         print("count\tbarcode")
@@ -24,8 +24,8 @@ Classes and functions to manage Illumina's demultiplex logs and stats files.
         # 10457 AGCGC+TTGA
 """
 
-from anacore.illumina.demultiplex.bcl2fastq import DemultStat as DemultStatBcl2fastq
-from anacore.illumina.demultiplex.bclconvert import DemultStat as DemultStatBclConvert
+from anacore.instrument.illumina.demultiplex.bcl2fastq import DemultStat as DemultStatBcl2fastq
+from anacore.instrument.illumina.demultiplex.bclconvert import DemultStat as DemultStatBclConvert
 import os
 
 

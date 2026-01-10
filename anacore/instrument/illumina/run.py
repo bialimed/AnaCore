@@ -9,7 +9,7 @@ Classes and functions for reading Illumina's files on run: runInfo, runParameter
     .. highlight:: python
     .. code-block:: python
 
-        from anacore.illumina.run import Run
+        from anacore.instrument.illumina.run import Run
 
         run = Run("my_run/"):
         print("Run steps:")
@@ -27,10 +27,10 @@ Classes and functions for reading Illumina's files on run: runInfo, runParameter
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
-from anacore.illumina.base import getPlatformFromSerialNumber
-from anacore.illumina.samplesheet import SampleSheetFactory
+from anacore.instrument.illumina.base import getPlatformFromSerialNumber
+from anacore.instrument.illumina.samplesheet import SampleSheetFactory
 import datetime
 import os
 import re

@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2023 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 import os
 import shutil
@@ -12,13 +12,13 @@ import tempfile
 import unittest
 import uuid
 
-TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.illumina.demultiplex import DemultStatFactory
-from anacore.illumina.demultiplex.bcl2fastq import DemultStat as DemultStatBcl2fastq
-from anacore.illumina.demultiplex.bclconvert import DemultStat as DemultStatBclConvert
+from anacore.instrument.illumina.demultiplex import DemultStatFactory
+from anacore.instrument.illumina.demultiplex.bcl2fastq import DemultStat as DemultStatBcl2fastq
+from anacore.instrument.illumina.demultiplex.bclconvert import DemultStat as DemultStatBclConvert
 
 
 class TestDemultStatFactory(unittest.TestCase):

@@ -9,7 +9,7 @@ Functions to manage reads headers and filenames.
     .. highlight:: python
     .. code-block:: python
 
-        from anacore.illumina.base import getInfFromSeqID
+        from anacore.instrument.illumina.base import getInfFromSeqID
 
         read_id = "EAS139:136:FC706VJ:2:2104:15343:197393:ATGCATA+CTAGC"
         print(getInfFromSeqID(read_id))
@@ -31,7 +31,7 @@ Functions to manage reads headers and filenames.
     .. highlight:: python
     .. code-block:: python
 
-        from anacore.illumina.base import getPlatformFromSerialNumber
+        from anacore.instrument.illumina.base import getPlatformFromSerialNumber
 
         print(getPlatformFromSerialNumber("EAS139"))
 

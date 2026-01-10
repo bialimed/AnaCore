@@ -3,19 +3,38 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.0.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '2.1.0'
 
 import os
 import sys
 import unittest
 
-TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.illumina.base import getInfFromSeqID, getPlatformFromSerialNumber
+from anacore.instrument.illumina.base import getInfFromSeqDesc, getInfFromSeqID, getPlatformFromSerialNumber
+
+
+class TestGetInfFromSeqDesc(unittest.TestCase):
+    def test(self):
+        # Standard
+        expected = {
+            "reads_phases": 1,
+            "is_kept": False,
+            "control_bits": 18,
+            "barcode": "ATCACG+ATTA"
+        }
+        observed = getInfFromSeqDesc("1:Y:18:ATCACG+ATTA")
+        self.assertEqual(expected, observed)
+        # Without barcode
+        expected = {
+            "reads_phases": 2,
+            "is_kept": True,
+            "control_bits": None,
+            "barcode": None
+        }
+        observed = getInfFromSeqDesc("2:N:0:")
 
 
 class TestGetInfFromSeqID(unittest.TestCase):
@@ -57,6 +76,9 @@ class TestGetPlatformFromSerialNumber(unittest.TestCase):
         self.assertEqual(getPlatformFromSerialNumber("NDX550500"), "NextSeq")
         self.assertEqual(getPlatformFromSerialNumber("D00154"), "HiSeq")
         self.assertEqual(getPlatformFromSerialNumber("A01789"), "NovaSeq")
+        self.assertEqual(getPlatformFromSerialNumber("SH00093"), "MiSeq_i100")
+        self.assertEqual(getPlatformFromSerialNumber("VH00159"), "NextSeq_2000")
+        self.assertEqual(getPlatformFromSerialNumber("LH00101"), "NovaSeq_X")
 
 
 if __name__ == "__main__":
