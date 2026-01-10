@@ -6,7 +6,7 @@ __copyright__ = 'Copyright (C) 2026 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.0'
 
-from anacore.instument.demultiplex import AbstractDemultStat
+from anacore.instrument.demultiplex import AbstractDemultStat
 import csv
 
 
@@ -33,7 +33,7 @@ class DemultStat(AbstractDemultStat):
         with open(self._path) as handle:
             reader = csv.DictReader(handle, delimiter=',')
             for row in reader:
-                if row["Lane"] != "1+2":
+                if "+" not in row["Lane"]:
                     # Sample
                     spl_id = row["SampleName"]
                     if spl_id not in tmp_data:
@@ -83,16 +83,17 @@ class DemultStat(AbstractDemultStat):
         with open(self._undet_path) as handle:
             reader = csv.DictReader(handle, delimiter=',')
             for row in reader:
-                idx_seq = row["I1"]
-                if "I2" in row:
-                    idx_seq = "{}+{}".format(row["I1"], row["I2"])
-                if idx_seq not in barcode_by_seq:
-                    barcode_by_seq[idx_seq] = {
-                        "seq": idx_seq,
-                        "lanes": list()
-                    }
-                barcode_by_seq[idx_seq]["lanes"].append({
-                    "id": row["Lane"],
-                    "ct": int(row["Count"])
-                })
+                if "+" not in row["Lane"]:
+                    idx_seq = row["I1"]
+                    if "I2" in row:
+                        idx_seq = "{}+{}".format(row["I1"], row["I2"])
+                    if idx_seq not in barcode_by_seq:
+                        barcode_by_seq[idx_seq] = {
+                            "seq": idx_seq,
+                            "lanes": list()
+                        }
+                    barcode_by_seq[idx_seq]["lanes"].append({
+                        "id": row["Lane"],
+                        "ct": int(row["Count"])
+                    })
         return barcode_by_seq.values()
