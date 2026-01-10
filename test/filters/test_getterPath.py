@@ -4,7 +4,6 @@ __author__ = 'Rémi THEVENOUX'
 __copyright__ = 'Copyright (C) 2023 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.0'
-__status__ = 'prod'
 
 import os
 import sys
@@ -75,10 +74,10 @@ class TestGetterPath(unittest.TestCase):
     def assertParseEqual(self, sequence, expected, safe):
         if safe is None:
             result = GetterPath.parse(sequence)
-            self.assertEquals(expected, result)
+            self.assertEqual(expected, result)
         else:
             result = GetterPath.parse(sequence, safe)
-            self.assertEquals(expected, result)
+            self.assertEqual(expected, result)
 
     def assertParseFail(self, sequence, safe):
         try:
@@ -111,7 +110,7 @@ class TestGetterPath(unittest.TestCase):
         result = GetterPath.apply(data, getterChains)
         if expected != result:
             print(input, data, expected, result)
-        self.assertEquals(expected, result)
+        self.assertEqual(expected, result)
 
     def assertApplyFail(self, input, data):
         getterChains = GetterPath.parse(input)
@@ -123,7 +122,7 @@ class TestGetterPath(unittest.TestCase):
 
     def assertPathEquals(self, path1, path2, expected):
         result = GetterPath.equals(path1, path2)
-        self.assertEquals(expected, result)
+        self.assertEqual(expected, result)
 
     def testParse(self):
         case_dict = {
