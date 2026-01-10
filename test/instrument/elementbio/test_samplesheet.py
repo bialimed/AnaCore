@@ -26,7 +26,7 @@ class TestSampleSheet(unittest.TestCase):
             # {
             #     "name": "no_sample",
             #     "content": """[SAMPLES]"""
-            # }, 
+            # },
             {
                 "name": "no_barcode",
                 "content": """[SAMPLES]
@@ -89,40 +89,103 @@ Sample-2,ATTGCCATA,ATATTGGTG,Enrich_Solid_V2,Melanoma"""
         if os.path.exists(self.tmp_file):
             os.remove(self.tmp_file)
 
-#     def testIsValid(self):
-#         for curr_test in self.test_cases:
-#             with open(self.tmp_file, "w") as writer:
-#                 writer.write(curr_test["content"])
-#             self.assertTrue(
-#                 SampleSheet.isValid(self.tmp_file)
-#             )
-#         test_cases_invalid = [
-#             {
-#                 "name": "empty",
-#                 "content": """protocol_run_id,position_id,flow_cell_id,sample_id,experiment_id,flow_cell_product_code,kit"""
-#             },
-#             {
-#                 "name": "empty_cr",
-#                 "content": """protocol_run_id,position_id,flow_cell_id,sample_id,experiment_id,flow_cell_product_code,kit
-# """
-#             },
-#             {
-#                 "name": "missing_kit",
-#                 "content": """protocol_run_id,position_id,flow_cell_id,sample_id,flow_cell_product_code
-# 500ea8b3-e682-451f-a47e-e2e845f55c88,MN42938,FAX28220,no_sample,FLO-MIN106"""
-#             },
-#             {
-#                 "name": "nb_column_change",
-#                 "content": """protocol_run_id,position_id,flow_cell_id,sample_id,experiment_id,flow_cell_product_code,kit
-# 500ea8b3-e682-451f-a47e-e2e845f55c88,MN42938,FAX28220,no_sample,RUN4_VM,FLO-MIN106,,"""
-#             },
-#         ]
-#         for curr_test in test_cases_invalid:
-#             with open(self.tmp_file, "w") as writer:
-#                 writer.write(curr_test["content"])
-#             self.assertFalse(
-#                 SampleSheet.isValid(self.tmp_file)
-#             )
+    def testIsValid(self):
+        for curr_test in self.test_cases:
+            with open(self.tmp_file, "w") as writer:
+                writer.write(curr_test["content"])
+            self.assertTrue(
+                SampleSheet.isValid(self.tmp_file)
+            )
+        test_cases_invalid = [
+            {
+                "name": "empty",
+                "content": """"""
+            },
+            {
+                "name": "missing_SampleName",
+                "content": """[SAMPLES]
+I1,I2
+ATGC,ATTG
+"""
+            },
+            {
+                "name": "blank_SampleName",
+                "content": """[SAMPLES]
+SampleName,I1
+,ATTG
+"""
+            },
+            {
+                "name": "unaivalable _section",
+                "content": """[ODD_SECTION]
+[SAMPLES]
+SampleName,I1
+splA,ATTG
+"""
+            },
+            {
+                "name": "inconsistent_number_fields",
+                "content": """[SAMPLES]
+SampleName,I1,Design,Disease
+splA,ATTG,Enrich_V1,Melanoma
+splB,GGTC,Enrich_V1,Lymphome,test
+"""
+            },
+            {
+                "name": "invalid_settings_titles",
+                "content": """[SETTINGS]
+key,val
+
+[SAMPLES]
+SampleName,I1,Design,Disease
+splA,ATTG,Enrich_V1,Melanoma"""
+            },
+            {
+                "name": "missing_run_values_titles",
+                "content": """[RUNVALUES],,,
+operator,John
+
+[SAMPLES]
+SampleName,I1,Design,Disease
+splA,ATTG,Enrich_V1,Melanoma"""
+            },
+            {
+                "name": "invalid_number_fields_run_values",
+                "content": """[RUNVALUES]
+KeyName,Value
+operator,John,Smith
+
+[SAMPLES]
+SampleName,I1,Design,Disease
+splA,ATTG,Enrich_V1,Melanoma"""
+            },
+            {
+                "name": "invalid_number_fields_settings",
+                "content": """[SETTINGS]
+SettingName,Value
+R1AdapterTrim,FALSE,1,8
+
+[SAMPLES]
+SampleName,I1,Design,Disease
+splA,ATTG,Enrich_V1,Melanoma"""
+            },
+            {
+                "name": "inconsistent_number_fields_settings",
+                "content": """[SETTINGS]
+SettingName,Value
+R1AdapterTrim,FALSE,1
+
+[SAMPLES]
+SampleName,I1,Design,Disease
+splA,ATTG,Enrich_V1,Melanoma"""
+            },
+        ]
+        for curr_test in test_cases_invalid:
+            with open(self.tmp_file, "w") as writer:
+                writer.write(curr_test["content"])
+            self.assertFalse(
+                SampleSheet.isValid(self.tmp_file)
+            )
 
     def testParse(self):
         expected = {

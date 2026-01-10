@@ -102,24 +102,44 @@ class SampleSheet:
         :rtype: bool
         """
         is_valid = False
-        required_sections = {"Samples"}
-        authorized_sections = {"RunValues", "Settings", "Samples"}
+        required_sections = {"samples"}
+        authorized_sections = {"runvalues", "settings", "samples"}
         try:
             sections = set()
+            nb_col_by_section = {"runvalues": 2}
             with open(filepath) as reader:
                 curr_title = None
                 for line in reader:
                     cleaned_line = cleanedEnd(line)
                     if re.fullmatch(r"\[[^]]+\]", cleaned_line):
-                        curr_title = cleaned_line[1:-1]
+                        curr_title = cleaned_line[1:-1].lower()
                         sections.add(curr_title)
+                        if curr_title == "runvalues":
+                            cols = cleanedEnd(next(reader)).split(",")
+                            if set(cols) != {"KeyName", "Value"}:
+                                raise Exception('Section RunValues must starts with title line "KeyName,Value".')
+                        elif curr_title == "settings":
+                            cols = cleanedEnd(next(reader)).split(",")
+                            nb_col_by_section["settings"] = len(cols)
+                            if set(cols) != {"SettingName", "Value"} and set(cols) != {"SettingName", "Value", "Lane"}:
+                                raise Exception('Section Settings must starts with title line "SettingName,Value[,Lane]".')
+                        elif curr_title == "samples":
+                            cols = cleanedEnd(next(reader)).split(",")
+                            nb_col_by_section["samples"] = len(cols)
+                            if "SampleName" not in cols:
+                                raise Exception('Section Samples must starts with title line containing at least SampleName".')
                     elif not cleaned_line.startswith("#") and cleaned_line != "":
-                        if curr_title == "RunValues":
-                            if cleaned_line.count(",") != 2:
+                        if curr_title == "runvalues":
+                            if cleaned_line.count(",") + 1 != 2:
                                 raise Exception("Rows in RunValues section must contain 2 fields: key,value.")
-                        elif curr_title == "Settings":
-                            if cleaned_line.count(",") != 2 and cleaned_line.count(",") != 3:
+                        elif curr_title == "settings":
+                            if cleaned_line.count(",") + 1 not in [2, 3]:
                                 raise Exception("Rows in Settings section must contain 2 or 3 fields: key,value[,lane].")
+                            elif cleaned_line.count(",") + 1 != nb_col_by_section["settings"]:
+                                raise Exception("Inconsistent number of columns between Settings section tile and data line.")
+                        elif curr_title == "samples":
+                            if cleaned_line.count(",") + 1 > nb_col_by_section["samples"]:
+                                raise Exception("Inconsistent number of columns between Samples section tile and data line.")
             if len(required_sections - sections) != 0:
                 raise Exception('Missing core sections: {}.'.format(required_sections - sections))
             if len(sections - authorized_sections) != 0:
