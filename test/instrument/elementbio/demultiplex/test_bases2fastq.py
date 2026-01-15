@@ -5,6 +5,7 @@ __copyright__ = 'Copyright (C) 2026 CHU Toulouse'
 __license__ = 'GNU General Public License'
 __version__ = '1.0.0'
 
+import datetime
 import os
 import sys
 import tempfile
@@ -15,7 +16,143 @@ TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.instrument.elementbio.demultiplex.bases2fastq import DemultStat
+from anacore.instrument.elementbio.demultiplex.bases2fastq import DemultLog, DemultStat
+
+
+class TestDemultLogLog(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_file = os.path.join(tmp_folder, unique_id + "_bases2fastq.log")
+        self.test_cases = [
+            {  # Complete with warnings
+                "content": """<2025-12-02 09:32:33> [info]: bases2fastq version: 2.3.0.2116803307, use subject to license available at elementbiosciences.com
+<2025-12-02 09:32:33> [info]: Run command: /soft/bases2fastq/v2.3.0/bases2fastq /raw/aviti_run4 /work/aviti_run4 --num-threads 20 --group-fastq --no-projects 
+<2025-12-02 09:32:33> [info]: Parsing run manifest /raw/aviti_run4/RunManifest.csv
+<2025-12-02 09:33:04> [info]: Maintaining orientation of I1 and I2 sequence(s) in lane 1
+<2025-12-02 09:33:05> [info]: Maintaining orientation of I1 and I2 sequence(s) in lane 2
+<2025-12-02 09:33:05> [info]: Skipping adapter sequence detection
+<2025-12-02 09:33:05> [info]: Starting FASTQ generation for SIDEB_ADA_2510541191
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C02S1
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C02S2
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C03S1
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C03S2
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C04S1
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C04S2
+<2025-12-02 09:33:05> [info]: Processing tile L1R02C01S1
+<2025-12-02 09:33:05> [info]: Processing tile L1R02C01S2
+<2025-12-02 09:33:05> [info]: Processing tile L1R02C02S1
+<2025-12-02 09:33:05> [info]: Processing tile L1R02C02S2
+<2025-12-02 10:39:56> [info]: Aggregating run stats
+<2025-12-02 10:40:01> [info]: [SIDEB_ADA_2510541191] Generating HTML QC-report
+<2025-12-02 10:40:01> [warning]: Failed to generate HTML QC report. To suppress this warning, use option --skip-qc-report. Errors from QC report generation can be found in /work/aviti_run4/info/SIDEB_ADA_2510541191_QC.errors
+<2025-12-02 10:40:01> [info]: [SIDEB_ADA_2510541191] Generating MultiQC report
+<2025-12-02 10:40:01> [warning]: Failed to run MultiQC. See log for details: /work/aviti_run4/info/MultiQCReport.log
+<2025-12-02 10:40:02> [info]: ========= Stats Summary =========
+<2025-12-02 10:40:02> [info]: Polony count:      1,172,877,956
+<2025-12-02 10:40:02> [info]: Reads assigned:    96.068%
+<2025-12-02 10:40:02> [info]: Mean Q score:      41.693
+<2025-12-02 10:40:02> [info]: Percent Q30:       94.226%
+<2025-12-02 10:40:02> [info]: Percent Q40:       82.863%
+<2025-12-02 10:40:02> [info]: Assigned yield:    338.008 Gb
+<2025-12-02 10:40:02> [info]: =================================
+<2025-12-02 10:40:02> [info]: ============ Timing =============
+<2025-12-02 10:40:02> [info]: FASTQ generation:    1h7m22.974s
+<2025-12-02 10:40:02> [info]: Stats reports:       5.804s
+<2025-12-02 10:40:02> [info]: Total elapsed:       1h7m28.778s
+<2025-12-02 10:40:02> [info]: =================================
+<2025-12-02 10:40:02> [info]: Output stored in /work/aviti_run4""",
+                "expected": {
+                    "command": "/soft/bases2fastq/v2.3.0/bases2fastq /raw/aviti_run4 /work/aviti_run4 --num-threads 20 --group-fastq --no-projects",
+                    "version": "2.3.0.2116803307",
+                    "start_time": datetime.datetime(2025, 12, 2, 9, 32, 33),
+                    "status": "COMPLETED",
+                    "end_time": datetime.datetime(2025, 12, 2, 10, 40, 2)
+                }
+            },
+            {  # Incomplete
+                "content": """<2025-12-02 09:32:33> [info]: bases2fastq version: 2.3.0.2116803307, use subject to license available at elementbiosciences.com
+<2025-12-02 09:32:33> [info]: Run command: /soft/bases2fastq/v2.3.0/bases2fastq /raw/aviti_run4 /work/aviti_run4 --num-threads 20 --group-fastq --no-projects 
+<2025-12-02 09:32:33> [info]: Parsing run manifest /raw/aviti_run4/RunManifest.csv
+<2025-12-02 09:33:04> [info]: Maintaining orientation of I1 and I2 sequence(s) in lane 1
+<2025-12-02 09:33:05> [info]: Maintaining orientation of I1 and I2 sequence(s) in lane 2
+<2025-12-02 09:33:05> [info]: Skipping adapter sequence detection
+<2025-12-02 09:33:05> [info]: Starting FASTQ generation for SIDEB_ADA_2510541191
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C02S1
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C02S2
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C03S1
+<2025-12-02 09:33:05> [info]: Processing tile L1R01C03S2""",
+                "expected": {
+                    "command": "/soft/bases2fastq/v2.3.0/bases2fastq /raw/aviti_run4 /work/aviti_run4 --num-threads 20 --group-fastq --no-projects",
+                    "version": "2.3.0.2116803307",
+                    "start_time": datetime.datetime(2025, 12, 2, 9, 32, 33),
+                    "status": "RUNNING",
+                    "end_time": None
+                }
+            },
+            {  # Error
+                "content": """<2026-01-15 10:30:30> [info]: bases2fastq version: 2.3.0.2116803307, use subject to license available at elementbiosciences.com
+<2026-01-15 10:30:30> [info]: Run command: /app/bases2fastq /work/aviti_run4 /work/aviti_run4/demultiplex --group-fastq --no-projects --num-threads 20 --num-unassigned 10000
+<2026-01-15 10:30:30> [info]: Parsing run manifest /work/aviti_run4/RunManifest.csv
+Error: error on line(s) [], Index1 length (0) for sample (TEM-HD730-S45-2025-R2) is invalid. Based on the I1Mask and I1Cycles, the software expects the Index1 length to be (10).: error on line(s) [], Index1 length (0) for sample (TEM-HD730-S45-2025-R2) is invalid. Based on the I1Mask and I1Cycles, the software expects the Index1 length to be (10).: error on line(s) [12], Index2 length (0) is invalid for sample (25T051952-RE1). Based on the I2Mask and I2Cycles, the software expects the Index2 length to be (10).: error on line(s) [12], Index2 length (0) is invalid for sample (25T051952-RE1). Based on the I2Mask and I2Cycles, the software expects the Index2 length to be (10).
+Usage:
+  elemctl sequence import [file name] [flags]
+
+Flags:
+  -c, --chemistryVersion string      set's the Chemistry Version
+  -e, --errorFile string             overrides the default name of the warnings and errors file (default "errors.json")
+  -f, --file                         if false process and validates the file but won't write the file, errors and manifest will be shown in the console (default true)
+  -h, --help                         help for import
+  -i, --i1Cycles int                 set's I1 Cycles (default -1)
+  -j, --i2Cycles int                 set's I2 Cycles (default -1)
+  -d, --kit-info                     includes the kit configuration detail in the output file
+  -k, --kitConfiguration string      set's the kit configuration
+  -l, --logLevel string              set's the console output level between debug/error/quiet (default "debug")
+  -z, --lowDiversity                 set's the low diversity option
+  -o, --output string                indicates output file for the manifest
+  -p, --preparationWorkflow string   set's the preparation workflow
+  -m, --r1Cycles int                 set's R1 Cycles (default -1)
+  -n, --r2Cycles int                 set's R2 Cycles (default -1)
+  -x, --runParamsFile string         uses the indicated file (json) to complete the RunParameters section
+  -r, --runValues stringArray        overwrites any Run Value from the manifest key,value
+  -s, --settings stringArray         overwrites any Setting from the manifest key,value,lane
+  -v, --verbose                      prints detail process steps and errors
+
+<2026-01-15 10:30:30> [error]: Run manifest error: Index1 length (0) for sample (TEM-HD730-S45-2025-R2) is invalid. Based on the I1Mask and I1Cycles, the software expects the Index1 length to be (10).
+<2026-01-15 10:30:30> [error]: Run manifest error: Index1 length (0) for sample (TEM-HD730-S45-2025-R2) is invalid. Based on the I1Mask and I1Cycles, the software expects the Index1 length to be (10).
+<2026-01-15 10:30:30> [error]: Run manifest error: Index2 length (0) is invalid for sample (25T051952-RE1). Based on the I2Mask and I2Cycles, the software expects the Index2 length to be (10).
+<2026-01-15 10:30:30> [error]: Run manifest error: Index2 length (0) is invalid for sample (25T051952-RE1). Based on the I2Mask and I2Cycles, the software expects the Index2 length to be (10).
+<2026-01-15 10:30:30> [error]: Failed to parse run manifest. manifest-parser exited with status -1. See details in /work/aviti_run4/demultiplex/info/RunManifestErrors.json
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Failed to parse run manifest. manifest-parser exited with status -1. See details in /work/aviti_run4/demultiplex/info/RunManifestErrors.json
+Aborted (core dumped)""",
+                "expected": {
+                    "command": "/app/bases2fastq /work/aviti_run4 /work/aviti_run4/demultiplex --group-fastq --no-projects --num-threads 20 --num-unassigned 10000",
+                    "version": "2.3.0.2116803307",
+                    "start_time": datetime.datetime(2026, 1, 15, 10, 30, 30),
+                    "status": "FAILED",
+                    "end_time": datetime.datetime(2026, 1, 15, 10, 30, 30)
+                }
+            }
+        ]
+
+    def tearDown(self):
+        if os.path.exists(self.tmp_file):
+            os.remove(self.tmp_file)
+
+    def testParse(self):
+        for curr_test in self.test_cases:
+            with open(self.tmp_file, "w") as handle:
+                handle.write(curr_test["content"] + "\n")
+            res = DemultLog(self.tmp_file)
+            observed = {
+                "command": res.command,
+                "version": res.version,
+                "start_time": res.start_time,
+                "status": res.status,
+                "end_time": res.end_time
+            }
+            self.assertEqual(observed, curr_test["expected"])
 
 
 class TestDemultStat(unittest.TestCase):

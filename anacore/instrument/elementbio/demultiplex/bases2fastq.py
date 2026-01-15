@@ -8,6 +8,54 @@ __version__ = '1.0.0'
 
 from anacore.instrument.demultiplex import AbstractDemultStat
 import csv
+import datetime
+import re
+
+
+class DemultLog(object):
+    """Reader for bcl-convert log."""
+
+    def __init__(self, path):
+        """
+        Build and return an instance of DemultLog.
+
+        :param path: Path to bases2fastq log file (format: txt).
+        :type path: str
+        :return: The new instance.
+        :rtype: DemultLog
+        """
+        self.filepath = path
+        self.command = None
+        self.end_time = None
+        self.start_time = None
+        self.status = None  # COMPLETED or FAILED or RUNNING
+        self.version = None
+        self._parse()
+
+    def _parse(self):
+        """Read logs and store information on the instance's attributes."""
+        self.command = None
+        self.end_time = None
+        self.start_time = None
+        self.status = "RUNNING"
+        self.version = None
+        with open(self.filepath) as reader:
+            for line in reader:
+                line = line.strip()
+                matches = re.match(r"^\<(.+)\> \[(.+)\]: (.+)$", line)
+                if matches:
+                    log_time, log_lvl, msg, = matches.groups()
+                    if msg.startswith("bases2fastq version:"):
+                        self.start_time = datetime.datetime.strptime(log_time, '%Y-%m-%d %H:%M:%S')
+                        self.version = re.match(r"^bases2fastq version: ([^, ]+)", msg).groups()[0]
+                    elif msg.startswith("Run command:"):
+                        self.command = msg.replace("Run command: ", "")
+                    elif log_lvl == "error":
+                        self.status = "FAILED"
+                        self.end_time = datetime.datetime.strptime(log_time, '%Y-%m-%d %H:%M:%S')
+                    elif msg.startswith("Output stored"):
+                        self.end_time = datetime.datetime.strptime(log_time, '%Y-%m-%d %H:%M:%S')
+                        self.status = "COMPLETED"
 
 
 class DemultStat(AbstractDemultStat):
