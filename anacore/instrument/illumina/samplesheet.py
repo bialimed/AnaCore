@@ -30,6 +30,7 @@ __version__ = '2.2.0'
 
 from anacore.instrument.illumina.base import getIlluminaName
 from anacore.instrument.samplesheet import cleanedEnd
+from anacore.instrument.samplesheet import Sample as SampleBase
 import glob
 import os
 import re
@@ -222,7 +223,7 @@ class AbstractSampleSheet(object):
             self.header["Description"] = ""
 
 
-class Sample:
+class Sample(SampleBase):
     """Class to manage a sample from sample sheet. One sample could represent several libraries if they are the same sample ID."""
 
     def __init__(self, sheet_index, id, barcodes=None, description=None, metadata=None):
@@ -245,11 +246,8 @@ class Sample:
         :return: The new instance.
         :rtype: Sample
         """
-        self.barcodes = dict() if barcodes is None else barcodes
-        self.description = description
-        self.id = id
+        super().__init__(id, barcodes, description, metadata)
         self.sheet_index = sheet_index
-        self.metadata = dict() if metadata is None else metadata
 
     @property
     def basename(self):
@@ -270,18 +268,6 @@ class Sample:
         :rtype: str
         """
         return "{}_S{}".format(self.basename, self.sheet_index)
-
-    def toDict(self):
-        """
-        Return dict representation of the instance.
-
-        :return: Dict representation of the instance.
-        :rtype: dict
-        """
-        res = self.__dict__
-        res["basename"] = self.basename
-        res["library_basename"] = self.library_basename
-        return res
 
 
 class SampleADS(Sample):

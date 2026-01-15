@@ -85,6 +85,7 @@ X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode03,Test3"""
                     'basename': 'no_sample',
                     'description': None,
                     'id': 'no_sample',
+                    'library_basename': 'no_sample',
                     'metadata': {
                         "protocol_run_id": "500ea8b3-e682-451f-a47e-e2e845f55c88",
                         "position_id": "MN42938",
@@ -101,6 +102,7 @@ X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode03,Test3"""
                     'basename': 'Test',
                     'description': None,
                     'id': 'Test',
+                    'library_basename': 'Test',
                     'metadata': {
                         "position_id": "X1",
                         "experiment_id": "Sample_sheet",
@@ -113,6 +115,7 @@ X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode03,Test3"""
                     'basename': 'Test',
                     'description': None,
                     'id': 'Test',
+                    'library_basename': 'Test',
                     'metadata': {
                         "position_id": "X1",
                         "experiment_id": "Sample_sheet",
@@ -125,6 +128,7 @@ X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode03,Test3"""
                     'basename': 'Test',
                     'description': None,
                     'id': 'Test',
+                    'library_basename': 'Test',
                     'metadata': {
                         "position_id": "X1",
                         "experiment_id": "Sample_sheet",

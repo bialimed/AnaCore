@@ -57,6 +57,16 @@ class Sample:
         """
         return self.id
 
+    @property
+    def library_basename(self):
+        """
+        Return the start of file basename corresponding to the library (example: splA).
+
+        :return: Library basename.
+        :rtype: str
+        """
+        return self.basename
+
     def toDict(self):
         """
         Return dict representation of the instance.
@@ -66,4 +76,5 @@ class Sample:
         """
         res = self.__dict__
         res["basename"] = self.basename
+        res["library_basename"] = self.library_basename
         return res

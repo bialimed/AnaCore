@@ -44,10 +44,6 @@ class Sample(SampleBase):
                 barcode_name += "--" + self.barcodes["index2"]
         return barcode_name
 
-    @property
-    def library_basename(self):
-        return self.id
-
     def toDict(self):
         """
         Return dict representation of the instance.

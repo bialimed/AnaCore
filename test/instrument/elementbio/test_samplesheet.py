@@ -211,6 +211,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-1',
                         'description': None,
                         'id': 'Sample-1',
+                        'library_basename': 'Sample-1',
                         'metadata': {}
                     }
                 ]
@@ -224,6 +225,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-1',
                         'description': None,
                         'id': 'Sample-1',
+                        'library_basename': 'Sample-1',
                         'metadata': {}
                     },
                     {
@@ -231,6 +233,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-2',
                         'description': None,
                         'id': 'Sample-2',
+                        'library_basename': 'Sample-2',
                         'metadata': {}
                     },
                 ]
@@ -244,6 +247,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'PhiX',
                         'description': None,
                         'id': 'PhiX',
+                        'library_basename': 'PhiX',
                         'metadata': {"Lane": ["1", "2"]}
                     },
                     {
@@ -251,6 +255,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'PhiX',
                         'description': None,
                         'id': 'PhiX',
+                        'library_basename': 'PhiX',
                         'metadata': {"Lane": ["1", "2"]}
                     },
                     {
@@ -258,6 +263,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-1',
                         'description': None,
                         'id': 'Sample-1',
+                        'library_basename': 'Sample-1',
                         'metadata': {"Lane": ["1"]}
                     },
                     {
@@ -265,6 +271,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-2',
                         'description': None,
                         'id': 'Sample-2',
+                        'library_basename': 'Sample-2',
                         'metadata': {"Lane": ["2"]}
                     },
                     {
@@ -272,6 +279,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-3',
                         'description': None,
                         'id': 'Sample-3',
+                        'library_basename': 'Sample-3',
                         'metadata': {"Lane": ["1", "2"]}
                     }
                 ]
@@ -288,6 +296,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'PhiX',
                         'description': None,
                         'id': 'PhiX',
+                        'library_basename': 'PhiX',
                         'metadata': {"Lane": ["1", "2"]}
                     },
                     {
@@ -295,6 +304,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'PhiX',
                         'description': None,
                         'id': 'PhiX',
+                        'library_basename': 'PhiX',
                         'metadata': {"Lane": ["1", "2"]}
                     },
                     {
@@ -302,6 +312,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-1',
                         'description': None,
                         'id': 'Sample-1',
+                        'library_basename': 'Sample-1',
                         'metadata': {"Lane": ["1"]}
                     },
                     {
@@ -309,6 +320,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-2',
                         'description': None,
                         'id': 'Sample-2',
+                        'library_basename': 'Sample-2',
                         'metadata': {"Lane": ["2"]}
                     },
                     {
@@ -316,6 +328,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-3',
                         'description': None,
                         'id': 'Sample-3',
+                        'library_basename': 'Sample-3',
                         'metadata': {"Lane": ["1", "2"]}
                     }
                 ]
@@ -332,6 +345,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-1',
                         'description': None,
                         'id': 'Sample-1',
+                        'library_basename': 'Sample-1',
                         'metadata': {"Design": "Enrich_Lymph_V1"}
                     },
                     {
@@ -339,6 +353,7 @@ splA,ATTG,Enrich_V1,Melanoma"""
                         'basename': 'Sample-2',
                         'description': "Melanoma",
                         'id': 'Sample-2',
+                        'library_basename': 'Sample-2',
                         'metadata': {"Design": "Enrich_Solid_V2"}
                     }
                 ]

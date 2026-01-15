@@ -52,6 +52,7 @@ M13_bc1011--M13_bc1063,splB,14,"""
                     'basename': 'Alfred',
                     'description': None,
                     'id': 'Alfred',
+                    'library_basename': 'Alfred',
                     'metadata': {}
                 },
                 {
@@ -60,6 +61,7 @@ M13_bc1011--M13_bc1063,splB,14,"""
                     'basename': 'Berthold',
                     'description': None,
                     'id': 'Berthold',
+                    'library_basename': 'Berthold',
                     'metadata': {}
                 }
             ],
@@ -70,6 +72,7 @@ M13_bc1011--M13_bc1063,splB,14,"""
                     'basename': 'splA',
                     'description': None,
                     'id': 'splA',
+                    'library_basename': 'splA',
                     'metadata': {"CT": "100", "Design": "Cov"}
                 },
                 {
@@ -78,6 +81,7 @@ M13_bc1011--M13_bc1063,splB,14,"""
                     'basename': 'splB',
                     'description': None,
                     'id': 'splB',
+                    'library_basename': 'splB',
                     'metadata': {"CT": "14", "Design": ""}
                 }
             ]
