@@ -67,10 +67,12 @@ class SampleSheet:
                 else:
                     rec_info = {key: val.strip() for key, val in zip(fields_by_section[section], rec)}
                     if section == "runvalues":
-                        self.run_values[rec_info["KeyName"]] = rec_info["Value"]
+                        rec_info = {key.lower(): val for key, val in rec_info.items()}
+                        self.run_values[rec_info["keyname"]] = rec_info["value"]
                     elif section == "settings":
-                        lanes = rec_info["Lane"].split("+") if "Lane" in rec_info and rec_info["Lane"] != "" else ["1", "2"]
-                        self.settings[rec_info["SettingName"]] = {curr: rec_info["Value"] for curr in lanes}
+                        rec_info = {key.lower(): val for key, val in rec_info.items()}
+                        lanes = rec_info["lane"].split("+") if "lane" in rec_info and rec_info["lane"] != "" else ["1", "2"]
+                        self.settings[rec_info["settingname"]] = {curr: rec_info["value"] for curr in lanes}
                     elif section == "samples":
                         if "SampleName" not in rec_info or rec_info["SampleName"] == "":
                             raise Exception("SampleName is required for each sample.")
@@ -115,13 +117,13 @@ class SampleSheet:
                         curr_title = cleaned_line[1:-1].lower()
                         sections.add(curr_title)
                         if curr_title == "runvalues":
-                            cols = cleanedEnd(next(reader)).split(",")
-                            if set(cols) != {"KeyName", "Value"}:
+                            cols = {elt.lower() for elt in cleanedEnd(next(reader)).split(",")}
+                            if cols != {"keyname", "value"}:
                                 raise Exception('Section RunValues must starts with title line "KeyName,Value".')
                         elif curr_title == "settings":
-                            cols = cleanedEnd(next(reader)).split(",")
+                            cols = {elt.lower() for elt in cleanedEnd(next(reader)).split(",")}
                             nb_col_by_section["settings"] = len(cols)
-                            if set(cols) != {"SettingName", "Value"} and set(cols) != {"SettingName", "Value", "Lane"}:
+                            if cols != {"settingname", "value"} and set(cols) != {"settingname", "value", "lane"}:
                                 raise Exception('Section Settings must starts with title line "SettingName,Value[,Lane]".')
                         elif curr_title == "samples":
                             cols = cleanedEnd(next(reader)).split(",")
