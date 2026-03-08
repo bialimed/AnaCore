@@ -26,10 +26,33 @@ Classes and functions for reading PacificBioscience's sequel samplesheet.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 from anacore.instrument.samplesheet import Sample as SampleBase
+from anacore.sequenceIO import FastaIO
 import csv
+
+
+def filterBarcodes(in_ss, in_barcodes, out_barcodes):
+    """
+    Filter barcodes file to keep only barcodes present in samplesheet.
+
+    :param in_ss: Path to samplesheet (format: CSV).
+    :type in_ss: str
+    :param in_barcodes: Path to original barcodes files (format: Fasta).
+    :type in_barcodes: str
+    :param out_barcodes: Path to filtered barcodes files (format: Fasta).
+    :type out_barcodes: str
+    """
+    selected_barcodes = set()
+    for spl in SampleSheet(in_ss).samples:
+        for barcode in spl.barcodes.values():
+            selected_barcodes.add(barcode)
+    with FastaIO(out_barcodes, "w") as writer:
+        with FastaIO(in_barcodes) as reader:
+            for rec in reader:
+                if rec.id in selected_barcodes:
+                    writer.write(rec)
 
 
 class Sample(SampleBase):
@@ -115,6 +138,16 @@ class SampleSheet:
 
     @staticmethod
     def filterSamples(in_ss, out_ss, samples):
+        """
+        Write samplesheet without unselected samples.
+
+        :param in_ss: Path to original samplesheet.
+        :type in_ss: str
+        :param out_ss: Path to filtered samplesheet.
+        :type out_ss: str
+        :param samples: List of IDs for selected samples.
+        :type samples: list
+        """
         filtered_samples = [spl for spl in SampleSheet(in_ss).samples if spl.id in samples]
         SampleSheet.write(out_ss, filtered_samples)
 
@@ -148,14 +181,24 @@ class SampleSheet:
         return is_valid
 
     @staticmethod
-    def write(filepath, samples, fields_names=None):
+    def write(out_path, samples, fields_names=None):
+        """
+        Write samplesheet without unselected samples.
+
+        :param out_path: Path to samplesheet.
+        :type out_path: str
+        :param samples: List of samples.
+        :type samples: anacore.instrument.sequel.samplesheet.Sample
+        :param fields_names: Selected sample information to write. [Default: all metadata, barcone name and sample name].
+        :type fields_names: list
+        """
         if fields_names is None:
             metadata_keys = set()
             for spl in samples:
                 for tag in spl.metadata.keys():
                     metadata_keys.add(tag)
             fields_names = ["Barcode Name", "Bio Sample Name"] + sorted(list(metadata_keys))  # https://www.pacb.com/wp-content/uploads/SMRT_Link_User_Guide_v10.2.pdf
-        with open(filepath, "w") as fh:
+        with open(out_path, "w") as fh:
             writer = csv.DictWriter(fh, fieldnames=fields_names)
             writer.writeheader()
             for spl in samples:
