@@ -169,7 +169,7 @@ class Run:
         """
         is_completed = False
         if self.isSequenced():
-            copy_complete_file = os.path.join(self.path, "*.transfertdone")
+            copy_complete_file = os.path.join(self.path, "*.transferdone")
             is_completed = len(glob.glob(copy_complete_file)) != 0
         return is_completed
 
