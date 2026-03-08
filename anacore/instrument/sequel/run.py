@@ -30,9 +30,24 @@ __version__ = '1.0.0'
 import datetime
 import glob
 import os
+import re
 import xml.etree.ElementTree as ET
 # https://pacbiofileformats.readthedocs.io/en/11.0/RunDesignCsv.html
 # https://www.umassmed.edu/globalassets/deep-sequencing-core/pbce/sequel_ii_and_iie_data_files.pdf
+
+
+def _consReadsetDateToDatetime(date_str):
+    """
+    Return datetime object from date string coming from consensus readset file.
+
+    :param date_str: Date string coming from consensus readset file (example: 2026-01-01T10:15:30.3Z).
+    :type date_str: str
+    :return: Datetime object from date string coming from consensus readset file.
+    :rtypr: datetime.datetime
+    """
+    iso_date_str = date_str.replace("Z", "+00:00")
+    iso_date_str = re.sub(r"\.(\d*)\+", r"+", iso_date_str)
+    return datetime.datetime.fromisoformat(iso_date_str)
 
 
 def etreeToDict(node):
@@ -63,16 +78,16 @@ def etreeToDict(node):
     return data
 
 
-def getMetadataFromConsensusReadset(in_ccs_info_path):
+def getMetadataFromConsensusReadset(in_readset_info_path):
     """
     Return run information tree from consensusreadset.xml.
 
-    :param in_ccs_info_path: Path to consensus readset.
-    :type in_ccs_info_path: str
+    :param in_readset_info_path: Path to consensus readset file.
+    :type in_readset_info_path: str
     :return: Return run information tree ffrom consensusreadset.xml.
     :rtype: dict
     """
-    root = ET.parse(in_ccs_info_path).getroot()
+    root = ET.parse(in_readset_info_path).getroot()
     return etreeToDict(root)
 
 
@@ -85,9 +100,9 @@ def getRunInfo(in_smart_folder):
     :return: Return run information (StartDate, EndDate, Operator, InstrumentID, ...) from smart cell folder.
     :rtype: dict
     """
-    ccs_info_path = glob.glob(os.path.join(in_smart_folder, "*.consensusreadset.xml"))[0]
-    css_info = getMetadataFromConsensusReadset(ccs_info_path)
-    collection_metadata = css_info["DataSetMetadata"]["Collections"]["CollectionMetadata"]
+    readset_info_path = glob.glob(os.path.join(in_smart_folder, "*.consensusreadset.xml"))[0]
+    readset_info = getMetadataFromConsensusReadset(readset_info_path)
+    collection_metadata = readset_info["DataSetMetadata"]["Collections"]["CollectionMetadata"]
     run_dict = dict()
     run_dict["InstrumentID"] = collection_metadata["attributes"]["InstrumentId"]
     # Run
@@ -100,11 +115,11 @@ def getRunInfo(in_smart_folder):
     if run_details.get("CreatedBy") and run_details["StartedBy"]["val"]:
         run_dict["OperatorName"] = run_details["StartedBy"]["val"]
     # Run dates
-    run_dict["StartDate"] = datetime.datetime.fromisoformat(collection_metadata["attributes"]["CreatedAt"].replace("Z", "+00:00"))
+    run_dict["StartDate"] = _consReadsetDateToDatetime(collection_metadata["attributes"]["CreatedAt"])
     run_dict["EndDate"] = None
-    if css_info["ExternalResources"].get("ExternalResource"):
-        run_dict["EndDate"] = datetime.datetime.fromisoformat(
-            css_info["ExternalResources"]["ExternalResource"]["attributes"]["CreatedAt"].replace("Z", "+00:00")
+    if readset_info["ExternalResources"].get("ExternalResource"):
+        run_dict["EndDate"] = _consReadsetDateToDatetime(
+            readset_info["ExternalResources"]["ExternalResource"]["attributes"]["CreatedAt"]
         )
     # Well
     well_info = collection_metadata["WellSample"]
