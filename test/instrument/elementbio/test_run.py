@@ -56,5 +56,6 @@ class TestRun(unittest.TestCase):
             writer.write("")
         self.assertTrue(run.isSequenced())
 
+
 if __name__ == "__main__":
     unittest.main()

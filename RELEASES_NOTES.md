@@ -7,7 +7,7 @@
   * Add serial number for NextSeq 1000/2000, MiSeq i100 and NovaSeq X in
   `anacore.instrument.illumina.base.getPlatformFromSerialNumber`.
   * Change `anacore.instrument.demultiplex.AbstractDemultStat.unexpectedBarcodes`
-  interface and behaviour. It now it detects strange undetermined barcodes
+  interface and behaviour. Now, it detects strange undetermined barcodes
   regardless of the number of clusters in the expected samples.
   * Add first elements for `anacore.instrument.elementbio`,
   `anacore.instrument.nanopore` and `anacore.instrument.sequel`.

@@ -26,7 +26,7 @@ Classes and functions for reading PacificBioscience's sequel samplesheet.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 
 from anacore.instrument.samplesheet import Sample as SampleBase
 from anacore.sequenceIO import FastaIO
@@ -202,7 +202,7 @@ class SampleSheet:
             writer = csv.DictWriter(fh, fieldnames=fields_names)
             writer.writeheader()
             for spl in samples:
-                spl_dict = spl.metadata
+                spl_dict = {key: val for key, val in spl.metadata.items() if key in fields_names}
                 spl_dict["Bio Sample Name"] = ""
                 if spl.id != spl.barcode_name:
                     spl_dict["Bio Sample Name"] = spl.id

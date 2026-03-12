@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 
 import os
@@ -16,7 +16,46 @@ TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.instrument.sequel.samplesheet import SampleSheet
+from anacore.instrument.sequel.samplesheet import filterBarcodes, Sample, SampleSheet
+
+
+class TestFilterBarcodes(unittest.TestCase):
+    def setUp(self):
+        tmp_folder = tempfile.gettempdir()
+        unique_id = str(uuid.uuid1())
+        self.tmp_out_barcodes = os.path.join(tmp_folder, unique_id + "_out_barcodes.fasta")
+        self.tmp_in_barcodes = os.path.join(tmp_folder, unique_id + "_in_barcodes.fasta")
+        with open(self.tmp_in_barcodes, "w") as writer:
+            writer.write(""">bc1005
+CACTCGACTCTCGCGT
+>bc1007
+TCTGTATCTCTATGTG
+>bc1008
+ACAGTCGAGCGCTGCG
+>bc1012
+ACACTAGATCGCGTGT""")
+        self.tmp_in_samplesheet = os.path.join(tmp_folder, unique_id + "_samplesheet.csv")
+        with open(self.tmp_in_samplesheet, "w") as writer:
+            writer.write("""Barcode Name,Bio Sample Name,Annotations,Comment,CtN
+bc1007--bc1012,sapmleA,ctrl,,4.21""")
+
+    def tearDown(self):
+        if os.path.exists(self.tmp_in_barcodes):
+            os.remove(self.tmp_in_barcodes)
+        if os.path.exists(self.tmp_out_barcodes):
+            os.remove(self.tmp_out_barcodes)
+        if os.path.exists(self.tmp_in_samplesheet):
+            os.remove(self.tmp_in_samplesheet)
+
+    def test(self):
+        expected = """>bc1007
+TCTGTATCTCTATGTG
+>bc1012
+ACACTAGATCGCGTGT"""
+        filterBarcodes(self.tmp_in_samplesheet, self.tmp_in_barcodes, self.tmp_out_barcodes)
+        with open(self.tmp_out_barcodes) as reader:
+            observed = "\n".join([line.strip() for line in reader])
+        self.assertEqual(observed, expected)
 
 
 class TestSampleSheet(unittest.TestCase):
@@ -24,6 +63,7 @@ class TestSampleSheet(unittest.TestCase):
         tmp_folder = tempfile.gettempdir()
         unique_id = str(uuid.uuid1())
         self.tmp_file = os.path.join(tmp_folder, unique_id + "_SampleSheet.csv")
+        self.tmp_out_samplesheet = os.path.join(tmp_folder, unique_id + "_out_SampleSheet.csv")
         self.test_cases = [
             {
                 "name": "single",
@@ -42,6 +82,39 @@ M13_bc1011--M13_bc1063,splB,14,"""
     def tearDown(self):
         if os.path.exists(self.tmp_file):
             os.remove(self.tmp_file)
+        if os.path.exists(self.tmp_out_samplesheet):
+            os.remove(self.tmp_out_samplesheet)
+
+    def testFilterSamples(self):
+        test_cases = [
+            {
+                "selected": [],
+                "expected": """Barcode Name,Bio Sample Name"""
+            },
+            {
+                "selected": ["splA"],
+                "expected": """Barcode Name,Bio Sample Name,CT,Design
+M13_bc1011--M13_bc1062,splA,100,Cov"""
+            },
+            {
+                "selected": ["splB", ],
+                "expected": """Barcode Name,Bio Sample Name,CT,Design
+M13_bc1011--M13_bc1063,splB,14,"""
+            },
+            {
+                "selected": ["splA", "splB"],
+                "expected": """Barcode Name,Bio Sample Name,CT,Design
+M13_bc1011--M13_bc1062,splA,100,Cov
+M13_bc1011--M13_bc1063,splB,14,"""
+            }
+        ]
+        with open(self.tmp_file, "w") as writer:
+            writer.write(self.test_cases[1]["content"])
+        for curr_test in test_cases:
+            SampleSheet.filterSamples(self.tmp_file, self.tmp_out_samplesheet, curr_test["selected"])
+            with open(self.tmp_out_samplesheet) as reader:
+                observed = "\n".join([line.strip() for line in reader])
+            self.assertEqual(observed, curr_test["expected"])
 
     def testParse(self):
         expected = {
@@ -92,6 +165,36 @@ M13_bc1011--M13_bc1063,splB,14,"""
             observed = SampleSheet(self.tmp_file)
             observed = [spl.toDict() for spl in observed.samples]
             self.assertEqual(observed, expected[curr_test["name"]])
+
+    def testWrite(self):
+        samples = [
+            Sample(
+                'splA',
+                barcodes={"index": "M13_bc1011", "index2": "M13_bc1062"},
+                metadata={"CT": 100, "Design": "Cov"}
+            ),
+            Sample(
+                'splB',
+                barcodes={"index": "M13_bc1011", "index2": "M13_bc1063"},
+                metadata={"CT": 14}
+            )
+        ]
+        # Automatic metadata
+        expected = """Barcode Name,Bio Sample Name,CT,Design
+M13_bc1011--M13_bc1062,splA,100,Cov
+M13_bc1011--M13_bc1063,splB,14,"""
+        SampleSheet.write(self.tmp_out_samplesheet, samples)
+        with open(self.tmp_out_samplesheet) as reader:
+            observed = "\n".join([line.strip() for line in reader])
+        self.assertEqual(observed, expected)
+        # Fixed metadata
+        expected = """Barcode Name,Bio Sample Name,Design,Unexpected
+M13_bc1011--M13_bc1062,splA,Cov,
+M13_bc1011--M13_bc1063,splB,,"""
+        SampleSheet.write(self.tmp_out_samplesheet, samples, ["Barcode Name", "Bio Sample Name", "Design", "Unexpected"])
+        with open(self.tmp_out_samplesheet) as reader:
+            observed = "\n".join([line.strip() for line in reader])
+        self.assertEqual(observed, expected)
 
 
 if __name__ == "__main__":
