@@ -1,157 +1,75 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.msi.locus &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/anacore.css?v=93b82d15" />
 
   
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../../index.html" class="icon icon-home"> AnaCore
           
-
-          
-            
-            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
+          <a href="../../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.msi.locus</li>
-    
-    
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.msi.locus</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.msi.locus</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Classes and functions for manipulating/processing MSI locus information (status, data, ...).&quot;&quot;&quot;</span>
@@ -169,7 +87,7 @@
 
 
 <div class="viewcode-block" id="getRefSeqInfo"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.getRefSeqInfo">[docs]</a><span class="k">def</span> <span class="nf">getRefSeqInfo</span><span class="p">(</span><span class="n">ref_fh</span><span class="p">,</span> <span class="n">microsat</span><span class="p">,</span> <span class="n">flank_size</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return location, flanks bases, repeat sequences and number of occurences from reference sequence and target.</span>
 
 <span class="sd">    :param ref_fh: File handle to reference sequences file.</span>
@@ -198,10 +116,10 @@
 
 
 <div class="viewcode-block" id="Locus"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.Locus">[docs]</a><span class="k">class</span> <span class="nc">Locus</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Manage a locus of a microsatellite (name, position and stability status).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manage a locus of a microsatellite (name, position and stability status).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of Locus.</span>
 
 <span class="sd">        :param position: The position of the locus with format chr:start-end (the start is 0-based).</span>
@@ -220,7 +138,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">results</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">results</span>
 
 <div class="viewcode-block" id="Locus.delResult"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.Locus.delResult">[docs]</a>    <span class="k">def</span> <span class="nf">delResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result_id</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Delete result from locus.</span>
 
 <span class="sd">        :param result_id: The ID used for index the results to delete.</span>
@@ -230,7 +148,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return end position on reference (1-based).</span>
 
 <span class="sd">        :return: End position on reference (1-based).</span>
@@ -240,7 +158,7 @@
 
 <div class="viewcode-block" id="Locus.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.Locus.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="nb">hash</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of Locus from a dict. This method is used for load instance from JSON.</span>
 
 <span class="sd">        :param hash: The locus information.</span>
@@ -256,7 +174,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return length of locus in reference sequence.</span>
 
 <span class="sd">        :return: Length of locus in reference sequence.</span>
@@ -266,7 +184,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return start position on reference (1-based).</span>
 
 <span class="sd">        :return: Start position on reference (1-based).</span>
@@ -276,10 +194,10 @@
 
 
 <div class="viewcode-block" id="LocusDataDistrib"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib">[docs]</a><span class="k">class</span> <span class="nc">LocusDataDistrib</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Microsatellites lengths distribution.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Microsatellites lengths distribution.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ct_by_len</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reads&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusDataDistrib.</span>
 
 <span class="sd">        :param ct_by_len: Depth by length.</span>
@@ -298,7 +216,7 @@
 
 <div class="viewcode-block" id="LocusDataDistrib.fromDense"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.fromDense">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDense</span><span class="p">(</span><span class="n">dense</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reads&quot;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return LocusDataDistrib from dense list of counts (example: [0, 5, 4, 1] =&gt; {2: 5, 3: 4, 4: 1}).</span>
 
 <span class="sd">        :param dense: List of counts. Each value correspond to a length and each length is represented between start and max length.</span>
@@ -314,7 +232,7 @@
         <span class="k">return</span> <span class="n">LocusDataDistrib</span><span class="p">(</span><span class="n">ct_by_len</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getCount"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getCount">[docs]</a>    <span class="k">def</span> <span class="nf">getCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of elements in size distribution.</span>
 
 <span class="sd">        :return: The number of elements in size distribution.</span>
@@ -323,7 +241,7 @@
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ct_by_len</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getDenseCount"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getDenseCount">[docs]</a>    <span class="k">def</span> <span class="nf">getDenseCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the number of elements by locus length for absolutely all lengths betwen start and end. The length with 0 are also indicated.</span>
 
 <span class="sd">        :param start: The first length of the returned distribution. [Default: the minimum length in the distribution]</span>
@@ -346,7 +264,7 @@
         <span class="k">return</span> <span class="n">dense_count</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getDensePrct"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getDensePrct">[docs]</a>    <span class="k">def</span> <span class="nf">getDensePrct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the percentage of elements by locus length for absolutely all lengths betwen start and end. The lengths with 0 are also indicated. The percentage is based on all the distribution not reduced at start and end.</span>
 
 <span class="sd">        :param start: The first length of the returned distribution. [Default: the minimum length in the distribution]</span>
@@ -366,7 +284,7 @@
         <span class="k">return</span> <span class="n">dense_prct</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getMaxLength"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getMaxLength">[docs]</a>    <span class="k">def</span> <span class="nf">getMaxLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the maximum length of the locus.</span>
 
 <span class="sd">        :return: The maximum length of the locus.</span>
@@ -375,7 +293,7 @@
         <span class="k">return</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span> <span class="k">for</span> <span class="nb">len</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_by_len</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">ct</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getMinLength"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getMinLength">[docs]</a>    <span class="k">def</span> <span class="nf">getMinLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the minimum length of the locus.</span>
 
 <span class="sd">        :return: The minimum length of the locus.</span>
@@ -384,7 +302,7 @@
         <span class="k">return</span> <span class="nb">min</span><span class="p">([</span><span class="nb">len</span> <span class="k">for</span> <span class="nb">len</span><span class="p">,</span> <span class="n">ct</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ct_by_len</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">ct</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getMostRepresented"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getMostRepresented">[docs]</a>    <span class="k">def</span> <span class="nf">getMostRepresented</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.</span>
 
 <span class="sd">        :return: Length and count of the most represented length of the distribution. If two lengths have same count, the larger one is returned.</span>
@@ -398,7 +316,7 @@
         <span class="k">return</span> <span class="n">highest_peak</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.getNbPeaks"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.getNbPeaks">[docs]</a>    <span class="k">def</span> <span class="nf">getNbPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_count</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return number of peaks in the distribution.</span>
 
 <span class="sd">        :param min_count: Length with lower count than this value are not taken into account.</span>
@@ -413,7 +331,7 @@
         <span class="k">return</span> <span class="n">nb_peak</span></div>
 
 <div class="viewcode-block" id="LocusDataDistrib.items"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusDataDistrib.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a generator on tuples (lengths, count). Lengths are sparse.</span>
 
 <span class="sd">        :return: Generator on tuples (lengths, count). Lengths are sparse.</span>
@@ -424,10 +342,10 @@
 
 
 <div class="viewcode-block" id="LocusRes"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusRes">[docs]</a><span class="k">class</span> <span class="nc">LocusRes</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Manage the stability status for an anlysis of a locus.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Manage the stability status for an anlysis of a locus.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusRes.</span>
 
 <span class="sd">        :param status: The status of the locus.</span>
@@ -445,7 +363,7 @@
 
 <div class="viewcode-block" id="LocusRes.fromDict"><a class="viewcode-back" href="../../../anacore.html#anacore.msi.locus.LocusRes.fromDict">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="nb">hash</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of LocusRes from a dict. This method is used for load instance from JSON.</span>
 
 <span class="sd">        :param hash: The locus result information.</span>
@@ -461,46 +379,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>anacore.illumina.base &mdash; AnaCore  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/anacore.css?v=93b82d15" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -26,12 +27,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> AnaCore
-            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,7 +59,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">anacore.illumina.base</li>
       <li class="wy-breadcrumbs-aside">
@@ -77,7 +82,7 @@
 <span class="sd">    .. highlight:: python</span>
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">        from anacore.illumina.base import getInfFromSeqID</span>
+<span class="sd">        from anacore.instrument.illumina.base import getInfFromSeqID</span>
 
 <span class="sd">        read_id = &quot;EAS139:136:FC706VJ:2:2104:15343:197393:ATGCATA+CTAGC&quot;</span>
 <span class="sd">        print(getInfFromSeqID(read_id))</span>
@@ -99,7 +104,7 @@
 <span class="sd">    .. highlight:: python</span>
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">        from anacore.illumina.base import getPlatformFromSerialNumber</span>
+<span class="sd">        from anacore.instrument.illumina.base import getPlatformFromSerialNumber</span>
 
 <span class="sd">        print(getPlatformFromSerialNumber(&quot;EAS139&quot;))</span>
 
@@ -110,9 +115,7 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.1.0&#39;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -203,15 +206,23 @@
 <span class="sd">    :return: The platform name (Hiseq or NextSeq or ...).</span>
 <span class="sd">    :rtype: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Info:</span>
+    <span class="c1">#  https://www.biostars.org/p/198143</span>
+    <span class="c1">#  https://knowledge.illumina.com/instrumentation/general/instrumentation-general-reference_material-list/000006351</span>
+    <span class="c1">#  https://knowledge.illumina.com/instrumentation/nextseq-1000-2000/instrumentation-nextseq-1000-2000-reference_material-list/000002388</span>
     <span class="n">platform_by_re</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="c1"># &quot;?&quot;: &quot;iSeq&quot;,</span>
+        <span class="c1"># &quot;^FS[0-9]+$&quot;: &quot;iSeq&quot;,</span>
         <span class="s2">&quot;^MN[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;MiniSeq&quot;</span><span class="p">,</span>
         <span class="s2">&quot;^ML-..-[0-9]</span><span class="si">{2}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;MiniSeq&quot;</span><span class="p">,</span>
         <span class="s2">&quot;^M[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;MiSeq&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;^N[SB][0-9]</span><span class="si">{6}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;^NDX[0-9]</span><span class="si">{6}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^SH[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;MiSeq_i100&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^N[SB][0-9]</span><span class="si">{6}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">,</span>  <span class="c1"># NextSeq 500/550</span>
+        <span class="s2">&quot;^NDX[0-9]</span><span class="si">{6}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq&quot;</span><span class="p">,</span>  <span class="c1"># NextSeqDx 500/550</span>
+        <span class="s2">&quot;^VL[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq_1000&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;^VH[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NextSeq_2000&quot;</span><span class="p">,</span>
         <span class="s2">&quot;^[CDJKE][0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;HiSeq&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;^A[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NovaSeq&quot;</span>
+        <span class="s2">&quot;^A[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NovaSeq&quot;</span><span class="p">,</span>  <span class="c1"># NovaSeq 6000</span>
+        <span class="s2">&quot;^LH[0-9]</span><span class="si">{5}</span><span class="s2">$&quot;</span><span class="p">:</span> <span class="s2">&quot;NovaSeq_X&quot;</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">instrument_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;HWI&quot;</span><span class="p">):</span>
         <span class="n">instrument_id</span> <span class="o">=</span> <span class="n">instrument_id</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>

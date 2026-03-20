@@ -104,69 +104,189 @@ anacore.hgvs
    :undoc-members:
    :show-inheritance:
 
-anacore.illumina
-----------------
+anacore.instrument
+-----------------------
 
-.. automodule:: anacore.illumina
+.. automodule:: anacore.instrument
   :members:
   :undoc-members:
   :show-inheritance:
 
-  anacore.illumina.base
-  ---------------------
+  anacore.instrument.elementbio
+  ------------------------------
 
-  .. automodule:: anacore.illumina.base
+  .. automodule:: anacore.instrument.elementbio
      :members:
      :undoc-members:
      :show-inheritance:
 
-  anacore.illumina.demultiplex
+     anacore.instrument.elementbio.base
+     ------------------------------------
+
+     .. automodule:: anacore.instrument.elementbio.base
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+     anacore.instrument.elementbio.demultiplex
+     ------------------------------------------
+
+     .. automodule:: anacore.instrument.elementbio.demultiplex
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+        anacore.instrument.elementbio.demultiplex.bases2fastq
+        ------------------------------------------------------
+
+        .. automodule:: anacore.instrument.elementbio.demultiplex.bases2fastq
+           :members:
+           :undoc-members:
+           :show-inheritance:
+
+     anacore.instrument.elementbio.run
+     -----------------------------------
+
+     .. automodule:: anacore.instrument.elementbio.run
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+     anacore.instrument.elementbio.samplesheet
+     ------------------------------------------
+
+     .. automodule:: anacore.instrument.elementbio.samplesheet
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+  anacore.instrument.illumina
   ----------------------------
 
-  .. automodule:: anacore.illumina.demultiplex
+  .. automodule:: anacore.instrument.illumina
      :members:
      :undoc-members:
      :show-inheritance:
 
-     anacore.illumina.demultiplex.base
+     anacore.instrument.illumina.base
      ---------------------------------
 
-     .. automodule:: anacore.illumina.demultiplex.base
+     .. automodule:: anacore.instrument.illumina.base
         :members:
         :undoc-members:
         :show-inheritance:
 
-     anacore.illumina.demultiplex.bcl2fastq
-     --------------------------------------
+     anacore.instrument.illumina.demultiplex
+     ----------------------------------------
 
-     .. automodule:: anacore.illumina.demultiplex.bcl2fastq
+     .. automodule:: anacore.instrument.illumina.demultiplex
         :members:
         :undoc-members:
         :show-inheritance:
 
-     anacore.illumina.demultiplex.bclconvert
-     ---------------------------------------
+        anacore.instrument.illumina.demultiplex.bcl2fastq
+        ---------------------------------------------------
 
-     .. automodule:: anacore.illumina.demultiplex.bclconvert
+        .. automodule:: anacore.instrument.illumina.demultiplex.bcl2fastq
+           :members:
+           :undoc-members:
+           :show-inheritance:
+
+        anacore.instrument.illumina.demultiplex.bclconvert
+        ---------------------------------------------------
+
+        .. automodule:: anacore.instrument.illumina.demultiplex.bclconvert
+           :members:
+           :undoc-members:
+           :show-inheritance:
+
+     anacore.instrument.illumina.run
+     --------------------------------
+
+     .. automodule:: anacore.illumina.run
         :members:
         :undoc-members:
         :show-inheritance:
 
-  anacore.illumina.run
-  --------------------
+     anacore.instrument.illumina.samplesheet
+     ----------------------------------------
 
-  .. automodule:: anacore.illumina.run
-     :members:
-     :undoc-members:
-     :show-inheritance:
+     .. automodule:: anacore.illumina.samplesheet
+        :members:
+        :undoc-members:
+        :show-inheritance:
 
-  anacore.illumina.samplesheet
+  anacore.instrument.nanopore
   ----------------------------
 
-  .. automodule:: anacore.illumina.samplesheet
+  .. automodule:: anacore.instrument.nanopore
      :members:
      :undoc-members:
      :show-inheritance:
+
+     anacore.instrument.nanopore.base
+     ---------------------------------
+
+     .. automodule:: anacore.instrument.nanopore.base
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+     anacore.instrument.nanopore.run
+     ---------------------------------
+
+     .. automodule:: anacore.instrument.nanopore.run
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+     anacore.instrument.nanopore.samplesheet
+     ----------------------------------------
+
+     .. automodule:: anacore.instrument.nanopore.samplesheet
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+  anacore.instrument.sequel
+  --------------------------
+
+  .. automodule:: anacore.instrument.sequel
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+     anacore.instrument.sequel.demultiplex
+     --------------------------------------
+
+     .. automodule:: anacore.instrument.sequel.demultiplex
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+        anacore.instrument.sequel.demultiplex.lima
+        -------------------------------------------
+
+        .. automodule:: anacore.instrument.sequel.demultiplex.lima
+           :members:
+           :undoc-members:
+           :show-inheritance:
+
+     anacore.instrument.sequel.run
+     ------------------------------
+
+     .. automodule:: anacore.instrument.sequel.run
+        :members:
+        :undoc-members:
+        :show-inheritance:
+
+     anacore.instrument.sequel.samplesheet
+     --------------------------------------
+
+     .. automodule:: anacore.instrument.sequel.samplesheet
+        :members:
+        :undoc-members:
+        :show-inheritance:
 
 anacore.maf
 ------------------

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>anacore.instrument.sequel.run &mdash; AnaCore  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/anacore.css?v=93b82d15" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../anacore.html">AnaCore package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">AnaCore</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.instrument.sequel.run</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for anacore.instrument.sequel.run</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes and functions for reading Sequel&#39;s files on run.</span>
+
+<span class="sd">:Code example:</span>
+
+<span class="sd">    Check if run is ended</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.instrument.sequel.run import Run</span>
+
+<span class="sd">        run = Run(&quot;my_run/&quot;):</span>
+<span class="sd">        print(&quot;Run steps:&quot;)</span>
+<span class="sd">        print(&quot;&quot;, &quot;1- sequencing ended:&quot;, run.isSequenced())</span>
+<span class="sd">        print(&quot;&quot;, &quot;2- copy ended:&quot;, run.isCopied())</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # Run steps:</span>
+<span class="sd">        #   1- sequencing ended: True</span>
+<span class="sd">        #   2- copy ended: False</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2024 CHU Toulouse&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.0.0&#39;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+<span class="c1"># https://pacbiofileformats.readthedocs.io/en/11.0/RunDesignCsv.html</span>
+<span class="c1"># https://www.umassmed.edu/globalassets/deep-sequencing-core/pbce/sequel_ii_and_iie_data_files.pdf</span>
+
+
+<span class="k">def</span> <span class="nf">_consReadsetDateToDatetime</span><span class="p">(</span><span class="n">date_str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return datetime object from date string coming from consensus readset file.</span>
+
+<span class="sd">    :param date_str: Date string coming from consensus readset file (example: 2026-01-01T10:15:30.3Z).</span>
+<span class="sd">    :type date_str: str</span>
+<span class="sd">    :return: Datetime object from date string coming from consensus readset file.</span>
+<span class="sd">    :rtypr: datetime.datetime</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">iso_date_str</span> <span class="o">=</span> <span class="n">date_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="s2">&quot;+00:00&quot;</span><span class="p">)</span>
+    <span class="n">iso_date_str</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\.(\d*)\+&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">iso_date_str</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">iso_date_str</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="etreeToDict"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.etreeToDict">[docs]</a><span class="k">def</span> <span class="nf">etreeToDict</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return dict from XML node.</span>
+
+<span class="sd">    :param node: Node to convert.</span>
+<span class="sd">    :type node: xml.etree.ElementTree.Element</span>
+<span class="sd">    :return: Dict corresponding to XML node.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]}</span>
+    <span class="c1"># Attributes</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">attrib</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">val</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="s2">&quot;unknown&quot;</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">!=</span> <span class="s2">&quot;0001-01-01T00:00:00&quot;</span>
+        <span class="p">}</span>
+    <span class="c1"># Children</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">child_dict</span> <span class="o">=</span> <span class="n">etreeToDict</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">child_dict</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">etreeToDict</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;val&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;unknown&quot;</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;0001-01-01T00:00:00&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="c1"># Return</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="getMetadataFromConsensusReadset"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.getMetadataFromConsensusReadset">[docs]</a><span class="k">def</span> <span class="nf">getMetadataFromConsensusReadset</span><span class="p">(</span><span class="n">in_readset_info_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return run information tree from consensusreadset.xml.</span>
+
+<span class="sd">    :param in_readset_info_path: Path to consensus readset file.</span>
+<span class="sd">    :type in_readset_info_path: str</span>
+<span class="sd">    :return: Return run information tree ffrom consensusreadset.xml.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">in_readset_info_path</span><span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">etreeToDict</span><span class="p">(</span><span class="n">root</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getRunInfo"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.getRunInfo">[docs]</a><span class="k">def</span> <span class="nf">getRunInfo</span><span class="p">(</span><span class="n">in_smart_folder</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return run information (StartDate, EndDate, Operator, InstrumentID, ...) from smart cell folder.</span>
+
+<span class="sd">    :param in_smart_folder: Path to smart cell folder.</span>
+<span class="sd">    :type in_smart_folder: str</span>
+<span class="sd">    :return: Return run information (StartDate, EndDate, Operator, InstrumentID, ...) from smart cell folder.</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">readset_info_path</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">in_smart_folder</span><span class="p">,</span> <span class="s2">&quot;*.consensusreadset.xml&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">readset_info</span> <span class="o">=</span> <span class="n">getMetadataFromConsensusReadset</span><span class="p">(</span><span class="n">readset_info_path</span><span class="p">)</span>
+    <span class="n">collection_metadata</span> <span class="o">=</span> <span class="n">readset_info</span><span class="p">[</span><span class="s2">&quot;DataSetMetadata&quot;</span><span class="p">][</span><span class="s2">&quot;Collections&quot;</span><span class="p">][</span><span class="s2">&quot;CollectionMetadata&quot;</span><span class="p">]</span>
+    <span class="n">run_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;InstrumentID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collection_metadata</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;InstrumentId&quot;</span><span class="p">]</span>
+    <span class="c1"># Run</span>
+    <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;RunID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collection_metadata</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;Context&quot;</span><span class="p">]</span>
+    <span class="n">run_details</span> <span class="o">=</span> <span class="n">collection_metadata</span><span class="p">[</span><span class="s2">&quot;RunDetails&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">run_details</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">run_details</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]:</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;RunName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_details</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">run_details</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CreatedBy&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">run_details</span><span class="p">[</span><span class="s2">&quot;CreatedBy&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]:</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;CreatedBy&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_details</span><span class="p">[</span><span class="s2">&quot;CreatedBy&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">run_details</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;CreatedBy&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">run_details</span><span class="p">[</span><span class="s2">&quot;StartedBy&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]:</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;OperatorName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_details</span><span class="p">[</span><span class="s2">&quot;StartedBy&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span>
+    <span class="c1"># Run dates</span>
+    <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;StartDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_consReadsetDateToDatetime</span><span class="p">(</span><span class="n">collection_metadata</span><span class="p">[</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;CreatedAt&quot;</span><span class="p">])</span>
+    <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;EndDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">readset_info</span><span class="p">[</span><span class="s2">&quot;ExternalResources&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ExternalResource&quot;</span><span class="p">):</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;EndDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_consReadsetDateToDatetime</span><span class="p">(</span>
+            <span class="n">readset_info</span><span class="p">[</span><span class="s2">&quot;ExternalResources&quot;</span><span class="p">][</span><span class="s2">&quot;ExternalResource&quot;</span><span class="p">][</span><span class="s2">&quot;attributes&quot;</span><span class="p">][</span><span class="s2">&quot;CreatedAt&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="c1"># Well</span>
+    <span class="n">well_info</span> <span class="o">=</span> <span class="n">collection_metadata</span><span class="p">[</span><span class="s2">&quot;WellSample&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">well_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;WellName&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;WellName&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]:</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;WellName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;WellName&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">well_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Application&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;Application&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]:</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;Application&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;Application&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">well_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;IsoSeq&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;IsoSeq&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;IsoSeq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;IsoSeq&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+    <span class="k">if</span> <span class="n">well_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;IsoSeq&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;IsCCS&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">run_dict</span><span class="p">[</span><span class="s2">&quot;IsCCS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">well_info</span><span class="p">[</span><span class="s2">&quot;IsCCS&quot;</span><span class="p">][</span><span class="s2">&quot;val&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
+    <span class="k">return</span> <span class="n">run_dict</span></div>
+
+
+<div class="viewcode-block" id="getRunNameFromSequelHifi"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.getRunNameFromSequelHifi">[docs]</a><span class="k">def</span> <span class="nf">getRunNameFromSequelHifi</span><span class="p">(</span><span class="n">in_smart_folder</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return run name from SMRT Link file in run folder.</span>
+
+<span class="sd">    :param in_smart_folder: Path to run folder.</span>
+<span class="sd">    :type in_smart_folder: str</span>
+<span class="sd">    :return: Run name</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">getRunInfo</span><span class="p">(</span><span class="n">in_smart_folder</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;RunName&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Run"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.Run">[docs]</a><span class="k">class</span> <span class="nc">Run</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read and provide getters on Run from run folder.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of Run.</span>
+
+<span class="sd">        :param path: Path to the run folder.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: Run</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+
+<div class="viewcode-block" id="Run.isCopied"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.Run.isCopied">[docs]</a>    <span class="k">def</span> <span class="nf">isCopied</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if copy from temp to output folder is ended by instrument.</span>
+
+<span class="sd">        :return: True if copy from temp to output folder is ended by instrument.</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_completed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isSequenced</span><span class="p">():</span>
+            <span class="n">copy_complete_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;*.transferdone&quot;</span><span class="p">)</span>
+            <span class="n">is_completed</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">copy_complete_file</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">is_completed</span></div>
+
+<div class="viewcode-block" id="Run.isEnded"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.Run.isEnded">[docs]</a>    <span class="k">def</span> <span class="nf">isEnded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if all instrument steps are ended (sequencing and copy).</span>
+
+<span class="sd">        :return: True if all instrument steps are ended.</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isSequenced</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCopied</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Run.isSequenced"><a class="viewcode-back" href="../../../../anacore.html#anacore.instrument.sequel.run.Run.isSequenced">[docs]</a>    <span class="k">def</span> <span class="nf">isSequenced</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return True if sequencing step is ended on instrument.</span>
+
+<span class="sd">        :return: True if sequencing step is ended on instrument.</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">run_complete_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;*.zmw_metrics.json.gz&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">run_complete_file</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

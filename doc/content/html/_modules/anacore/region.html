@@ -1,157 +1,75 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.region &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/anacore.css?v=93b82d15" />
 
   
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home"> AnaCore
           
-
-          
-            
-            <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
+          <a href="../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.region</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.region</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.region</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;Classes and functions for manipulating/processing regions defines on references sequences.&quot;&quot;&quot;</span>
@@ -165,10 +83,10 @@
 
 
 <div class="viewcode-block" id="Region"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region">[docs]</a><span class="k">class</span> <span class="nc">Region</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage region on a sequence.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage region on a sequence.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of Region.</span>
 
 <span class="sd">        :param start: The start position on the reference. This position is 1-based and ascending (start &lt;= end).</span>
@@ -196,7 +114,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">annot</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">annot</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">annot</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the “informal” or nicely printable string representation of the object.</span>
 
 <span class="sd">        :return: The printable string representation of the object.</span>
@@ -211,7 +129,7 @@
         <span class="k">return</span> <span class="n">clean_str</span>
 
 <div class="viewcode-block" id="Region.getCoordinatesStr"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.getCoordinatesStr">[docs]</a>    <span class="k">def</span> <span class="nf">getCoordinatesStr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return printable string representation of the coordinates.</span>
 
 <span class="sd">        :return: The printable representation of the coordinates.</span>
@@ -225,7 +143,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Region.length"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return length of the region.</span>
 
 <span class="sd">        :return: The length of the region.</span>
@@ -234,7 +152,7 @@
         <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Region.setReference"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.setReference">[docs]</a>    <span class="k">def</span> <span class="nf">setReference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Change the reference region of the instance.</span>
 
 <span class="sd">        :param reference: The region object or the region name of the reference.</span>
@@ -250,7 +168,7 @@
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The type &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">reference</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; is not authorized for reference attribute in Region class.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Region.getPosOnRef"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.getPosOnRef">[docs]</a>    <span class="k">def</span> <span class="nf">getPosOnRef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_pos</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return coordinate on reference sequence from the coordinate on self.</span>
 
 <span class="sd">        :param region_pos: Coordinate on region (1-based).</span>
@@ -270,7 +188,7 @@
         <span class="k">return</span> <span class="n">reference_pos</span></div>
 
 <div class="viewcode-block" id="Region.getPosOnRegion"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.getPosOnRegion">[docs]</a>    <span class="k">def</span> <span class="nf">getPosOnRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_pos</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return coordinate on region from the coordinate on reference sequence.</span>
 
 <span class="sd">        :param ref_pos: The coordinate on reference sequence (1-based).</span>
@@ -294,7 +212,7 @@
         <span class="k">return</span> <span class="n">region_pos</span></div>
 
 <div class="viewcode-block" id="Region.contains"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the region contains the eval_region.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -309,7 +227,7 @@
         <span class="k">return</span> <span class="n">contains</span></div>
 
 <div class="viewcode-block" id="Region.strandedContains"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.strandedContains">[docs]</a>    <span class="k">def</span> <span class="nf">strandedContains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the region contains the eval_region and their are on the same strand.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -323,7 +241,7 @@
         <span class="k">return</span> <span class="n">contains</span></div>
 
 <div class="viewcode-block" id="Region.hasOverlap"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.hasOverlap">[docs]</a>    <span class="k">def</span> <span class="nf">hasOverlap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the region has an overlap with eval_region.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -338,7 +256,7 @@
         <span class="k">return</span> <span class="n">has_overlap</span></div>
 
 <div class="viewcode-block" id="Region.hasStrandedOverlap"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.hasStrandedOverlap">[docs]</a>    <span class="k">def</span> <span class="nf">hasStrandedOverlap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the region has an overlap with eval_region and their are on the same strand.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -352,7 +270,7 @@
         <span class="k">return</span> <span class="n">has_overlap</span></div>
 
 <div class="viewcode-block" id="Region.getMinDist"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.getMinDist">[docs]</a>    <span class="k">def</span> <span class="nf">getMinDist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the distance with the eval_region.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -373,7 +291,7 @@
 
 <div class="viewcode-block" id="Region.fromStr"><a class="viewcode-back" href="../../anacore.html#anacore.region.Region.fromStr">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromStr</span><span class="p">(</span><span class="n">interval_str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return region instance from interval string (example: 5:15746211-5746311).</span>
 
 <span class="sd">        :param interval_str: interval string in format &lt;ref_name&gt;:&lt;start_pos&gt;-&lt;end_pos&gt;. Positions are 1-based.</span>
@@ -387,10 +305,10 @@
 
 
 <div class="viewcode-block" id="RegionTree"><a class="viewcode-back" href="../../anacore.html#anacore.region.RegionTree">[docs]</a><span class="k">class</span> <span class="nc">RegionTree</span><span class="p">(</span><span class="n">Region</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage region with hierarchical relations (example: gene -&gt; transcript -&gt; exons).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage region with hierarchical relations (example: gene -&gt; transcript -&gt; exons).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of RegionTree.</span>
 
 <span class="sd">        :param start: The start position on the reference. This position is 1-based and ascending (start &lt;= end).</span>
@@ -422,7 +340,7 @@
             <span class="n">parent</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the “informal” or nicely printable string representation of the object.</span>
 
 <span class="sd">        :return: The printable string representation of the object.</span>
@@ -435,7 +353,7 @@
         <span class="k">return</span> <span class="n">clean_str</span>
 
     <span class="k">def</span> <span class="fm">__getattribute__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the value of the selected attribute.</span>
 
 <span class="sd">        :param name: The name of the selected attribute.</span>
@@ -460,7 +378,7 @@
         <span class="k">return</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="RegionTree.addChild"><a class="viewcode-back" href="../../anacore.html#anacore.region.RegionTree.addChild">[docs]</a>    <span class="k">def</span> <span class="nf">addChild</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add child region in region.</span>
 
 <span class="sd">        :param child: The added region.</span>
@@ -480,7 +398,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sortChildren</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="RegionTree.sortChildren"><a class="viewcode-back" href="../../anacore.html#anacore.region.RegionTree.sortChildren">[docs]</a>    <span class="k">def</span> <span class="nf">sortChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sort children in order of their apparition on self strand. Add siblings_idx (1-based) in annotations of children.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort children in order of their apparition on self strand. Add siblings_idx (1-based) in annotations of children.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot sort sub-regions because the strand is None in </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="c1"># Sort</span>
@@ -494,10 +412,10 @@
 
 
 <div class="viewcode-block" id="RegionList"><a class="viewcode-back" href="../../anacore.html#anacore.region.RegionList">[docs]</a><span class="k">class</span> <span class="nc">RegionList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage regions list. for example all the gene on a chromosome.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage regions list. for example all the gene on a chromosome.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of RegionList.</span>
 
 <span class="sd">        :param regions: List of regions.</span>
@@ -510,7 +428,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_region</span><span class="p">)</span>
 
 <div class="viewcode-block" id="RegionList.getContainers"><a class="viewcode-back" href="../../anacore.html#anacore.region.RegionList.getContainers">[docs]</a>    <span class="k">def</span> <span class="nf">getContainers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return all the regions that contains the eval_region.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -525,7 +443,7 @@
         <span class="k">return</span> <span class="n">containers</span></div>
 
 <div class="viewcode-block" id="RegionList.getOverlapped"><a class="viewcode-back" href="../../anacore.html#anacore.region.RegionList.getOverlapped">[docs]</a>    <span class="k">def</span> <span class="nf">getOverlapped</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return all the regions that have an overlap with eval_region.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -540,7 +458,7 @@
         <span class="k">return</span> <span class="n">overlapped</span></div>
 
 <div class="viewcode-block" id="RegionList.getNearests"><a class="viewcode-back" href="../../anacore.html#anacore.region.RegionList.getNearests">[docs]</a>    <span class="k">def</span> <span class="nf">getNearests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eval_region</span><span class="p">,</span> <span class="n">select_fct</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the nearest region to eval_region.</span>
 
 <span class="sd">        :param eval_region: The evaluated region.</span>
@@ -566,7 +484,7 @@
 
 
 <div class="viewcode-block" id="splittedByRef"><a class="viewcode-back" href="../../anacore.html#anacore.region.splittedByRef">[docs]</a><span class="k">def</span> <span class="nf">splittedByRef</span><span class="p">(</span><span class="n">region_list</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return regions list by reference.</span>
 
 <span class="sd">    :param region_list: The list of regions.</span>
@@ -584,7 +502,7 @@
 
 
 <div class="viewcode-block" id="mergedRegion"><a class="viewcode-back" href="../../anacore.html#anacore.region.mergedRegion">[docs]</a><span class="k">def</span> <span class="nf">mergedRegion</span><span class="p">(</span><span class="n">regions</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a region corresponding to the merge of all provided regions.</span>
 
 <span class="sd">    :param regions: One list of overlapped regions.</span>
@@ -628,7 +546,7 @@
 
 
 <div class="viewcode-block" id="consolidated"><a class="viewcode-back" href="../../anacore.html#anacore.region.consolidated">[docs]</a><span class="k">def</span> <span class="nf">consolidated</span><span class="p">(</span><span class="n">regions</span><span class="p">,</span> <span class="n">merge_contiguous</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return consolidated regions: the overlapping regions (and optionally the contiguous) are merged in one region.</span>
 
 <span class="sd">    :param regions: List of regions to consolidate.</span>
@@ -657,7 +575,7 @@
 
 
 <div class="viewcode-block" id="iterOverlapped"><a class="viewcode-back" href="../../anacore.html#anacore.region.iterOverlapped">[docs]</a><span class="k">def</span> <span class="nf">iterOverlapped</span><span class="p">(</span><span class="n">queries</span><span class="p">,</span> <span class="n">subjects</span><span class="p">,</span> <span class="n">check_ref</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a generator on query and his overlapped subjects. For example you can provide a list of variant (queries) and search the genes overlapped by each variant in the list of genes (subjects).</span>
 
 <span class="sd">    :param queries: The queries. They must be defined on the same reference.</span>
@@ -701,7 +619,7 @@
 
 
 <div class="viewcode-block" id="iterOverlappedByRegion"><a class="viewcode-back" href="../../anacore.html#anacore.region.iterOverlappedByRegion">[docs]</a><span class="k">def</span> <span class="nf">iterOverlappedByRegion</span><span class="p">(</span><span class="n">queries_by_chr</span><span class="p">,</span> <span class="n">subject_by_chr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a generator on query and his overlapped subjects. For example you can provide a list of variant (queries) and search the genes overlapped by each variant in the list of genes (subjects).</span>
 
 <span class="sd">    :param queries_by_chr: By chromosome the queries.</span>
@@ -721,46 +639,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>anacore.illumina.demultiplex &mdash; AnaCore  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/anacore.css?v=93b82d15" />
 
   
@@ -77,12 +77,12 @@
 
 <span class="sd">:Code example:</span>
 
-<span class="sd">    List undetermined barcodes with a count greater than smallest sample</span>
+<span class="sd">    List undetermined barcodes which may be forgotten samples.</span>
 
 <span class="sd">    .. highlight:: python</span>
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">        from anacore.illumina.demultiplex import DemultStatFactory</span>
+<span class="sd">        from anacore.instrument.illumina.demultiplex import DemultStatFactory</span>
 
 <span class="sd">        demult_stat = DemultStatFactory.get(&quot;my_demultiplex_folder&quot;)</span>
 <span class="sd">        print(&quot;count\tbarcode&quot;)</span>
@@ -91,14 +91,14 @@
 <span class="sd">                &quot;{}\t{}&quot;.format(barcode[&quot;ct&quot;], barcode[&quot;seq&quot;])</span>
 <span class="sd">            )</span>
 
-<span class="sd">        # Result (with smallest sample count equal to 10000)&gt;</span>
+<span class="sd">        # Result (forgotten samples)&gt;</span>
 <span class="sd">        # count barcode</span>
 <span class="sd">        # 14879 AATGC+TTTA</span>
 <span class="sd">        # 10457 AGCGC+TTGA</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">anacore.illumina.demultiplex.bcl2fastq</span> <span class="kn">import</span> <span class="n">DemultStat</span> <span class="k">as</span> <span class="n">DemultStatBcl2fastq</span>
-<span class="kn">from</span> <span class="nn">anacore.illumina.demultiplex.bclconvert</span> <span class="kn">import</span> <span class="n">DemultStat</span> <span class="k">as</span> <span class="n">DemultStatBclConvert</span>
+<span class="kn">from</span> <span class="nn">anacore.instrument.illumina.demultiplex.bcl2fastq</span> <span class="kn">import</span> <span class="n">DemultStat</span> <span class="k">as</span> <span class="n">DemultStatBcl2fastq</span>
+<span class="kn">from</span> <span class="nn">anacore.instrument.illumina.demultiplex.bclconvert</span> <span class="kn">import</span> <span class="n">DemultStat</span> <span class="k">as</span> <span class="n">DemultStatBclConvert</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 

@@ -1,157 +1,75 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.bed &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/anacore.css?v=93b82d15" />
 
   
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home"> AnaCore
           
-
-          
-            
-            <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
+          <a href="../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.bed</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.bed</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.bed</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -261,10 +179,10 @@
 
 
 <div class="viewcode-block" id="BEDRecord"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDRecord">[docs]</a><span class="k">class</span> <span class="nc">BEDRecord</span><span class="p">(</span><span class="n">Region</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage a BED record.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a BED record.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickStart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickEnd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">itemRgb</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockCount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockSizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blockStarts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of BEDRecord.</span>
 
 <span class="sd">        :param chrom: The name of the chromosome on which the annotation has been defined.</span>
@@ -319,7 +237,7 @@
 
 <div class="viewcode-block" id="BEDRecord.recFromRegion"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDRecord.recFromRegion">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">recFromRegion</span><span class="p">(</span><span class="n">region_record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an instance of BEDRecord corresponding to the region_record. The following fields will be None: score, thickStart, thickEnd, itemRgb, blockCount, blockSizes and blockStarts.</span>
 
 <span class="sd">        :param region_record:</span>
@@ -338,10 +256,10 @@
 
 
 <div class="viewcode-block" id="BEDIO"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO">[docs]</a><span class="k">class</span> <span class="nc">BEDIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to read and write in BED file (https://genome.ucsc.edu/FAQ/FAQformat.html#format1).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read and write in BED file (https://genome.ucsc.edu/FAQ/FAQformat.html#format1).&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">write_nb_col</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Build and return an instance of BEDIO.</span>
 
 <span class="sd">        :param filepath: The filepath.</span>
@@ -357,7 +275,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_write_nb_col</span> <span class="o">=</span> <span class="n">write_nb_col</span>
 
 <div class="viewcode-block" id="BEDIO.BEDRecordToBEDLine"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO.BEDRecordToBEDLine">[docs]</a>    <span class="k">def</span> <span class="nf">BEDRecordToBEDLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the record in BED format.</span>
 
 <span class="sd">        :param record: The record to process.</span>
@@ -383,7 +301,7 @@
         <span class="k">return</span> <span class="n">line</span></div>
 
 <div class="viewcode-block" id="BEDIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the line corresponds to a record (it is not a comment or an header line).</span>
 
 <span class="sd">        :param line: The evaluated line.</span>
@@ -398,7 +316,7 @@
 
 <div class="viewcode-block" id="BEDIO.isValid"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO.isValid">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the file can be a BED file.</span>
 
 <span class="sd">        :return: True if the file can be a BED file.</span>
@@ -432,7 +350,7 @@
         <span class="k">return</span> <span class="n">is_valid</span></div>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the current line.</span>
 
 <span class="sd">        :return: The record defined by the current line.</span>
@@ -463,7 +381,7 @@
         <span class="k">return</span> <span class="n">BEDRecord</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BEDIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write record line in file.</span>
 
 <span class="sd">        :param bed: The record to write.</span>
@@ -476,7 +394,7 @@
 
 <div class="viewcode-block" id="BEDIO.getMaxNbCol"><a class="viewcode-back" href="../../anacore.html#anacore.bed.BEDIO.getMaxNbCol">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">getMaxNbCol</span><span class="p">(</span><span class="n">in_bed</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the maximum number of fields in BED file. The number of fields per line must be consistent throughout any single set of data in an annotation track.</span>
 
 <span class="sd">        :param in_bed: The path to the file (format: BED).</span>
@@ -492,7 +410,7 @@
 
 
 <div class="viewcode-block" id="getAreas"><a class="viewcode-back" href="../../anacore.html#anacore.bed.getAreas">[docs]</a><span class="k">def</span> <span class="nf">getAreas</span><span class="p">(</span><span class="n">in_bed</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the list of areas from a BED file.</span>
 
 <span class="sd">    :param in_bed: The path to the areas description (format: BED).</span>
@@ -507,7 +425,7 @@
 
 
 <div class="viewcode-block" id="getAreasByChr"><a class="viewcode-back" href="../../anacore.html#anacore.bed.getAreasByChr">[docs]</a><span class="k">def</span> <span class="nf">getAreasByChr</span><span class="p">(</span><span class="n">in_bed</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return by chromosome the list of areas from a BED file.</span>
 
 <span class="sd">    :param in_bed: The path to the areas description (format: BED).</span>
@@ -525,7 +443,7 @@
 
 
 <div class="viewcode-block" id="getSortedAreasByChr"><a class="viewcode-back" href="../../anacore.html#anacore.bed.getSortedAreasByChr">[docs]</a><span class="k">def</span> <span class="nf">getSortedAreasByChr</span><span class="p">(</span><span class="n">in_bed</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return by chromosome the list of sorted areas from a BED file.</span>
 
 <span class="sd">    :param in_bed: The path to the areas description (format: BED).</span>
@@ -542,46 +460,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

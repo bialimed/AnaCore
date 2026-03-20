@@ -1,167 +1,105 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>anacore.gtf &mdash; AnaCore  documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/anacore.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/anacore.css?v=93b82d15" />
 
   
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home"> AnaCore
           
-
-          
-            
-            <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
-          
+          <a href="../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../anacore.html">AnaCore package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">AnaCore</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>anacore.gtf</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">anacore.gtf</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for anacore.gtf</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Classes and functions for reading/writing/processing GTF files.&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classes and functions for reading/writing/processing GTF files.</span>
+
+<span class="sd">:Example:</span>
+
+<span class="sd">    Read GTF by line</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from anacore.gtf import GTFIO</span>
+
+<span class="sd">        with GTFIO(&quot;test.gtf.gz&quot;, &quot;r&quot;, {&quot;db_xref&quot;, &quot;gene_synonym&quot;}) as reader:</span>
+<span class="sd">            print(&quot;gene&quot;, &quot;xref&quot;, &quot;&quot;length&quot;, sep=&quot;\\t&quot;)</span>
+<span class="sd">            for rec in reader:</span>
+<span class="sd">                if rec.annot[&quot;feature&quot;] == &quot;gene&quot; and rec.annot[&quot;gene_biotype&quot;] == &quot;protein_coding&quot;:</span>
+<span class="sd">                    print(rec.annot[&quot;gene_id&quot;], &quot;,&quot;.join(rec.annot[&quot;db_xref&quot;]), rec.length, sep=&quot;\\t&quot;)</span>
+
+<span class="sd">        # Result&gt;</span>
+<span class="sd">        # gene\txref\tlength</span>
+<span class="sd">        # EGFR\tGeneID:1956,HGNC:HGNC:3236,MIM:131550\t192612</span>
+<span class="sd">        # ...</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 IUCT-O&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2018 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.1.4&#39;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;1.2.0&#39;</span>
 
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">anacore.abstractFile</span> <span class="kn">import</span> <span class="n">AbstractFile</span>
@@ -170,10 +108,26 @@
 
 
 <div class="viewcode-block" id="GTFIO"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO">[docs]</a><span class="k">class</span> <span class="nc">GTFIO</span><span class="p">(</span><span class="n">AbstractFile</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class to manage read and write in GTF file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage read and write in GTF file.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">repeatable_attr</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build and return an instance of GTFIO.</span>
+
+<span class="sd">        :param filepath: The filepath.</span>
+<span class="sd">        :type filepath: str.</span>
+<span class="sd">        :param mode: Mode to open the file (&#39;r&#39;, &#39;w&#39;, &#39;a&#39;).</span>
+<span class="sd">        :type mode: str.</span>
+<span class="sd">        :param repeatable_attr: GTF attributes that can be repeated several times.</span>
+<span class="sd">        :type repeatable_attr: set</span>
+<span class="sd">        :return: The new instance.</span>
+<span class="sd">        :rtype: GTFIO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">AbstractFile</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeatable_attr</span> <span class="o">=</span> <span class="n">repeatable_attr</span>
 
     <span class="k">def</span> <span class="nf">_parseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a structured record from the GTF current line.</span>
 
 <span class="sd">        :return: The record.</span>
@@ -200,14 +154,14 @@
             <span class="k">if</span> <span class="n">current_attr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">prev</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Attribute value is split because it contains semicolon</span>
                     <span class="n">current_attr</span> <span class="o">=</span> <span class="n">prev</span> <span class="o">+</span> <span class="n">current_attr</span>
-                <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="s2">&quot;(.+)\s+</span><span class="se">\&quot;</span><span class="s2">([^</span><span class="se">\&quot;</span><span class="s2">]+)</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">current_attr</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(.+)\s+</span><span class="se">\&quot;</span><span class="s2">([^</span><span class="se">\&quot;</span><span class="s2">]+)</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">current_attr</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
                 <span class="k">if</span> <span class="n">matches</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">prev</span> <span class="o">=</span> <span class="n">current_attr</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">matches</span><span class="o">.</span><span class="n">groups</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;tag&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeatable_attr</span><span class="p">:</span>
                         <span class="n">record_attr</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
-                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># &quot;tag&quot; contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)</span>
+                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Contains a set of values so this key can occurate several times (cf. www.genecodegenes.org/pages/data_format.html)</span>
                         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">record_attr</span><span class="p">:</span>
                             <span class="n">record_attr</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
@@ -217,7 +171,7 @@
         <span class="k">return</span> <span class="n">record</span>
 
 <div class="viewcode-block" id="GTFIO.isRecordLine"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO.isRecordLine">[docs]</a>    <span class="k">def</span> <span class="nf">isRecordLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return True if the line corresponds to a record (it is not a comment or an header line).</span>
 
 <span class="sd">        :param line: The evaluated line.</span>
@@ -231,7 +185,7 @@
         <span class="k">return</span> <span class="n">is_record</span></div>
 
 <div class="viewcode-block" id="GTFIO.recordToLine"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO.recordToLine">[docs]</a>    <span class="k">def</span> <span class="nf">recordToLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the record in GTF format.</span>
 
 <span class="sd">        :param record: The region to process.</span>
@@ -243,9 +197,9 @@
         <span class="n">std_fields</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">,</span> <span class="s2">&quot;frame&quot;</span><span class="p">}</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">annot</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">std_fields</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;tag&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeatable_attr</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
                     <span class="n">attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>  <span class="c1"># &quot;tag&quot; contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># Contains a set of values so this key can can occurate several times (cf. www.genecodegenes/pages/data_format.html)</span>
                     <span class="k">for</span> <span class="n">sub_val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
                         <span class="n">attributes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">sub_val</span><span class="p">))</span>
         <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -262,7 +216,7 @@
         <span class="k">return</span> <span class="n">line</span></div>
 
 <div class="viewcode-block" id="GTFIO.write"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.GTFIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write one line on GTF file.</span>
 
 <span class="sd">        :param record: The object to write.</span>
@@ -273,7 +227,7 @@
 
 
 <span class="k">def</span> <span class="nf">_castedRegionTree</span><span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">new_class</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the region casted in the selected class of genomicRegion.</span>
 
 <span class="sd">    :param region: The region to cast.</span>
@@ -297,7 +251,7 @@
 
 
 <div class="viewcode-block" id="loadModel"><a class="viewcode-back" href="../../anacore.html#anacore.gtf.loadModel">[docs]</a><span class="k">def</span> <span class="nf">loadModel</span><span class="p">(</span><span class="n">gtf_path</span><span class="p">,</span> <span class="n">feature_handle</span><span class="o">=</span><span class="s2">&quot;exons&quot;</span><span class="p">,</span> <span class="n">restrict_to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return genomic model from a GTF. A genomic model is a tree where nodes are genes, transcripts, protein, exons and CDS.</span>
 
 <span class="sd">    :param gtf_path: Path to the GTF containing the annotations.</span>
@@ -413,46 +367,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2019, Frédéric Escudié.
-
-    </p>
+    <p>&#169; Copyright 2019, Frédéric Escudié.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>anacore.illumina.samplesheet &mdash; AnaCore  documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/anacore.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/anacore.css?v=93b82d15" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=b3ba4146"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -26,12 +27,16 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> AnaCore
-            <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            AnaCore
+              <img src="../../../_static/anacore_logo_40deg.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -54,7 +59,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
       <li class="breadcrumb-item active">anacore.illumina.samplesheet</li>
       <li class="wy-breadcrumbs-aside">
@@ -77,7 +82,7 @@
 <span class="sd">    .. highlight:: python</span>
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">        from anacore.illumina.samplesheet import SampleSheetFactory</span>
+<span class="sd">        from anacore.instrument.illumina.samplesheet import SampleSheetFactory</span>
 
 <span class="sd">        samplesheet = SampleSheetFactory.get(&quot;my_run/SampleSheet.csv&quot;):</span>
 <span class="sd">        print(&quot;Samples:&quot;)</span>
@@ -94,11 +99,11 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;Frederic Escudie&#39;</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s1">&#39;Copyright (C) 2017 CHU Toulouse&#39;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="s1">&#39;GNU General Public License&#39;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.0.0&#39;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s1">&#39;escudie.frederic@iuct-oncopole.fr&#39;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s1">&#39;prod&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;2.2.0&#39;</span>
 
-<span class="kn">from</span> <span class="nn">anacore.illumina.base</span> <span class="kn">import</span> <span class="n">getIlluminaName</span>
+<span class="kn">from</span> <span class="nn">anacore.instrument.illumina.base</span> <span class="kn">import</span> <span class="n">getIlluminaName</span>
+<span class="kn">from</span> <span class="nn">anacore.instrument.samplesheet</span> <span class="kn">import</span> <span class="n">cleanedEnd</span>
+<span class="kn">from</span> <span class="nn">anacore.instrument.samplesheet</span> <span class="kn">import</span> <span class="n">Sample</span> <span class="k">as</span> <span class="n">SampleBase</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -128,21 +133,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">()</span>
 
-<div class="viewcode-block" id="AbstractSampleSheet.cleanedEnd"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.AbstractSampleSheet.cleanedEnd">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">cleanedEnd</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return line without ending empty CSV fields. This method can be used to removes invalid comma used in CSV to obtain the same number of columns in whole file.</span>
-
-<span class="sd">        :param value: Line to clean.</span>
-<span class="sd">        :type value: str</span>
-<span class="sd">        :return: Line without ending empty CSV fields.</span>
-<span class="sd">        :rtype: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">while</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">value</span></div>
-
     <span class="k">def</span> <span class="nf">_getInfoFromSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return keys and values contained in section.</span>
@@ -155,7 +145,7 @@
         <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">section</span><span class="p">:</span>
             <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">AbstractSampleSheet</span><span class="o">.</span><span class="n">cleanedEnd</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">cleanedEnd</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">info</span>
 
@@ -168,7 +158,7 @@
 <span class="sd">        :return: Titles and list of entries (Keys and values for one element).</span>
 <span class="sd">        :rtype: (list, list)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">titles_line</span> <span class="o">=</span> <span class="n">AbstractSampleSheet</span><span class="o">.</span><span class="n">cleanedEnd</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">titles_line</span> <span class="o">=</span> <span class="n">cleanedEnd</span><span class="p">(</span><span class="n">section</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">titles</span> <span class="o">=</span> <span class="n">titles_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">section</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
@@ -260,7 +250,7 @@
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
                 <span class="n">striped_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\[[^]]+\],*&quot;</span><span class="p">,</span> <span class="n">striped_line</span><span class="p">):</span>  <span class="c1"># New section</span>
-                    <span class="n">striped_line</span> <span class="o">=</span> <span class="n">AbstractSampleSheet</span><span class="o">.</span><span class="n">cleanedEnd</span><span class="p">(</span><span class="n">striped_line</span><span class="p">)</span>
+                    <span class="n">striped_line</span> <span class="o">=</span> <span class="n">cleanedEnd</span><span class="p">(</span><span class="n">striped_line</span><span class="p">)</span>
                     <span class="n">section_title</span> <span class="o">=</span> <span class="n">striped_line</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                     <span class="n">sections_by_title</span><span class="p">[</span><span class="n">section_title</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;,*&quot;</span><span class="p">,</span> <span class="n">striped_line</span><span class="p">):</span>  <span class="c1"># Empty line</span>
@@ -306,7 +296,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;Description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 
-<div class="viewcode-block" id="Sample"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.Sample">[docs]</a><span class="k">class</span> <span class="nc">Sample</span><span class="p">:</span>
+<div class="viewcode-block" id="Sample"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.Sample">[docs]</a><span class="k">class</span> <span class="nc">Sample</span><span class="p">(</span><span class="n">SampleBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to manage a sample from sample sheet. One sample could represent several libraries if they are the same sample ID.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheet_index</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">barcodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -329,11 +319,8 @@
 <span class="sd">        :return: The new instance.</span>
 <span class="sd">        :rtype: Sample</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">barcodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">barcodes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">barcodes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">barcodes</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sheet_index</span> <span class="o">=</span> <span class="n">sheet_index</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">metadata</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -353,19 +340,7 @@
 <span class="sd">        :return: Library basename.</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_S</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_index</span><span class="p">)</span>
-
-<div class="viewcode-block" id="Sample.toDict"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.Sample.toDict">[docs]</a>    <span class="k">def</span> <span class="nf">toDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return dict representation of the instance.</span>
-
-<span class="sd">        :return: Dict representation of the instance.</span>
-<span class="sd">        :rtype: dict</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
-        <span class="n">res</span><span class="p">[</span><span class="s2">&quot;basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basename</span>
-        <span class="n">res</span><span class="p">[</span><span class="s2">&quot;library_basename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library_basename</span>
-        <span class="k">return</span> <span class="n">res</span></div></div>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_S</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sheet_index</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SampleADS"><a class="viewcode-back" href="../../../anacore.html#anacore.illumina.samplesheet.SampleADS">[docs]</a><span class="k">class</span> <span class="nc">SampleADS</span><span class="p">(</span><span class="n">Sample</span><span class="p">):</span>
@@ -459,7 +434,7 @@
         <span class="n">cycles</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">read_idx</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reads_section</span><span class="p">:</span>
-            <span class="n">striped_line</span> <span class="o">=</span> <span class="n">AbstractSampleSheet</span><span class="o">.</span><span class="n">cleanedEnd</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">striped_line</span> <span class="o">=</span> <span class="n">cleanedEnd</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="n">cycles</span><span class="p">[</span><span class="s2">&quot;R</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">read_idx</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">striped_line</span><span class="p">)</span>
             <span class="n">read_idx</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;nb_cycles&quot;</span><span class="p">:</span> <span class="n">cycles</span><span class="p">}</span>
@@ -481,7 +456,7 @@
                 <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
                     <span class="n">striped_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\[[^]]+\],*&quot;</span><span class="p">,</span> <span class="n">striped_line</span><span class="p">):</span>
-                        <span class="n">title</span> <span class="o">=</span> <span class="n">AbstractSampleSheet</span><span class="o">.</span><span class="n">cleanedEnd</span><span class="p">(</span><span class="n">striped_line</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">title</span> <span class="o">=</span> <span class="n">cleanedEnd</span><span class="p">(</span><span class="n">striped_line</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                         <span class="n">sections</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
                     <span class="k">elif</span> <span class="n">striped_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;FileFormatVersion,&quot;</span><span class="p">):</span>
                         <span class="k">if</span> <span class="n">striped_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
@@ -565,7 +540,7 @@
                 <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
                     <span class="n">striped_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\[[^]]+\],*&quot;</span><span class="p">,</span> <span class="n">striped_line</span><span class="p">):</span>
-                        <span class="n">title</span> <span class="o">=</span> <span class="n">AbstractSampleSheet</span><span class="o">.</span><span class="n">cleanedEnd</span><span class="p">(</span><span class="n">striped_line</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">title</span> <span class="o">=</span> <span class="n">cleanedEnd</span><span class="p">(</span><span class="n">striped_line</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                         <span class="n">sections</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
                     <span class="k">elif</span> <span class="n">striped_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;FileFormatVersion,2&quot;</span><span class="p">):</span>
                         <span class="n">format_declaration</span> <span class="o">=</span> <span class="n">striped_line</span>
