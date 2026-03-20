@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+authors = [
+    {name = "Frederic Escudie", email = "escudie.frederic@iuct-oncopole.fr"}
+]
+description = "Libraries for managing standard file formats and objects from NGS."
+dependencies = [
+    "numpy >=1.23.0",
+    "pysam >=0.22.0",
+    "requests >=2.20.1"
+]
+keywords = ["bio", "NGS"]
+license.text = "GNU GPL v3"
+name = "anacore"
+readme = "README.md"
+requires-python = ">=3.8"
+version = "3.2.0"
+
+[project.urls]
+Homepage = "https://github.com/bialimed/anacore"
+Repository = "https://github.com/bialimed/anacore"
+
+[tool.setuptools.packages.find]
+include = ["anacore*"]
+exclude = ["test*"]

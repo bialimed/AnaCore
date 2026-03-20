@@ -1,41 +1,40 @@
-{% set version = "3.1.0" %}
-{% set numpy_version = ">=1.23.0" %}
-{% set pysam_version = "=0.22.0" %}
-{% set python_version = ">=3.8" %}
-{% set requests_version = ">=2.20.1" %}
+{% set project = load_file_data('../../pyproject.toml', from_recipe_dir=true).get("project") %}
+{% set version = project.get("version") %}
 
 package:
-  name: anacore
+  name: {{ project["name"] }}
   version: {{ version }}
 
 source:
-  git_url: https://github.com/bialimed/anacore
+  git_url: {{ project["urls"]["Repository"] }}
   git_rev: {{ version }}
 
 build:
   number: 1
-  script: ${PYTHON} setup.py install --single-version-externally-managed --record=record.txt
+  script: ${PYTHON} -m pip install --single-version-externally-managed --record=record.txt
   noarch: python
 
 requirements:
   build:
-    - python {{ python_version }}
+    - python {{ project.get("requires-python", "") }}
     - setuptools
   run:
-    - python {{ python_version }}
-    - numpy {{ numpy_version }}
-    - pysam {{ pysam_version }}
-    - requests {{ requests_version }}
+    - python {{ project.get("requires-python", "") }}
+    {% for dep in project.get("dependencies") %}
+    - {{ dep }}
+    {% endfor %}
 
 test:
   imports:
-    - numpy
-    - pysam
-    - requests
+    {% for dep in project.get("dependencies") %}
+    - {{ dep.split(" ")[0] }}
+    {% endfor %}
     - anacore
 
 about:
   summary: Anapath Core is a package containing libraries for managing standard file formats (BED, fasta, gff, gtf, MAF, newick, VCF, ...) and objects from NGS.
-  license: GNU GPL v3
-  home: https://github.com/bialimed/anacore
-  doc_source_url: https://github.com/bialimed/anacore/blob/{{ version }}/README.md
+  license: {{ project["license"]["text"] }}
+  home: {{ project["urls"]["Repository"] }}
+  dev_url: project["urls"]["Repository"]
+  doc_url: https://pypi.python.org/pypi/{{ project["name"] }}
+  doc_source_url: {{ project["urls"]["Repository"] }}/blob/{{ version }}/README.md
