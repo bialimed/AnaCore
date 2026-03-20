@@ -9,7 +9,7 @@ Functions to manage reads headers and filenames.
     .. highlight:: python
     .. code-block:: python
 
-        from anacore.instrument.aviti.base import getInfFromSeqID
+        from anacore.instrument.elementbio.base import getInfFromSeqID
 
         read_id = "AVITI1:SIDEB_ADA_2510541191:2510541191:1:10102:0144:0037:ATGCATA+CTAGC"
         print(getInfFromSeqID(read_id))

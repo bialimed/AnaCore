@@ -9,7 +9,7 @@ Classes and functions for reading AVITI's run manifest.
     .. highlight:: python
     .. code-block:: python
 
-        from anacore.instrument.aviti.samplesheet import SampleSheet
+        from anacore.instrument.elementbio.samplesheet import SampleSheet
 
         samplesheet = SampleSheet("my_run/RunManifest.csv"):
         print("Samples:")

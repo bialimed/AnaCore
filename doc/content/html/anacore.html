@@ -4105,7 +4105,7 @@ path (as dict or string).</p>
 <dl class="field-list">
 <dt class="field-odd">Code example<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Get info from read ID</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.instrument.aviti.base</span> <span class="kn">import</span> <span class="n">getInfFromSeqID</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.instrument.elementbio.base</span> <span class="kn">import</span> <span class="n">getInfFromSeqID</span>
 
 <span class="n">read_id</span> <span class="o">=</span> <span class="s2">&quot;AVITI1:SIDEB_ADA_2510541191:2510541191:1:10102:0144:0037:ATGCATA+CTAGC&quot;</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">getInfFromSeqID</span><span class="p">(</span><span class="n">read_id</span><span class="p">))</span>
@@ -4292,7 +4292,7 @@ path (as dict or string).</p>
 <dl class="field-list">
 <dt class="field-odd">Code example<span class="colon">:</span></dt>
 <dd class="field-odd"><p>List samples and index from the samplesheet</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.instrument.aviti.samplesheet</span> <span class="kn">import</span> <span class="n">SampleSheet</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">anacore.instrument.elementbio.samplesheet</span> <span class="kn">import</span> <span class="n">SampleSheet</span>
 
 <span class="n">samplesheet</span> <span class="o">=</span> <span class="n">SampleSheet</span><span class="p">(</span><span class="s2">&quot;my_run/RunManifest.csv&quot;</span><span class="p">):</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Samples:&quot;</span><span class="p">)</span>

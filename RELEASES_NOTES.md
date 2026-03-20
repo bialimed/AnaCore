@@ -1,4 +1,4 @@
-# Release 3.2.0 [DEV]
+# Release 3.2.0 [2026-03-20]
 
 ### Deprecated
   * Change path for `anacore.illumina` to `anacore.instrument.illumina`.
