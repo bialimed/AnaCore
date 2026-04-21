@@ -3,9 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.16.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '1.17.0'
 
 from anacore.sequenceIO import IdxFastaIO
 import os
@@ -186,15 +184,16 @@ class TestNoneInfo(unittest.TestCase):
             FH_variants.write("""##fileformat=VCFv4.3
 ##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=TC,Number=.,Type=Integer,Description="">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
-20	14370	.	G	A	29.0	PASS	DP=.;AF=.	GT	0|0	1|0	1/1
+20	14370	.	G	A	29.0	PASS	DP=.;AF=.;TC=.	GT	0|0	1|0	1/1
 20	14371	.	T	A	29.0	PASS	.	GT	0|0	1|0	1/1
-20	14372	.	C	A	29.0	PASS	DP=300;AF=.	GT	0|0	1|0	1/1
+20	14372	.	C	A	29.0	PASS	DP=300;AF=.;TC=8,.,7	GT	0|0	1|0	1/1
 20	14373	.	C	A	29.0	PASS	DP=300	GT	0|0	1|0	1/1
 20	14374	.	G	A	29.0	PASS	DP=.;AF=0.5	GT	0|0	1|0	1/1
 20	14375	.	T	A	29.0	PASS	AF=0.5	GT	0|0	1|0	1/1
-20	14376	.	C	A	29.0	PASS	DP=300;AF=0.5	GT	0|0	1|0	1/1""")
+20	14376	.	C	A	29.0	PASS	DP=300;AF=0.5;TC=3,1,2	GT	0|0	1|0	1/1""")
 
     def tearDown(self):
         for curr_file in [self.tmp_in, self.tmp_out]:
@@ -212,20 +211,27 @@ class TestNoneInfo(unittest.TestCase):
                     self.assertTrue("DP" in record.info and record.info["DP"] == 300)
                 else:
                     self.assertTrue("DP" not in record.info)
+                if record.pos == 14372:
+                    self.assertTrue("TC" in record.info and record.info["TC"] == [8, None, 7])
+                elif record.pos == 14376:
+                    self.assertTrue("TC" in record.info and record.info["TC"] == [3, 1, 2])
+                else:
+                    self.assertTrue("TC" not in record.info)
 
     def testWrite(self):
         expected_content = """##fileformat=VCFv4.3
 ##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=TC,Number=.,Type=Integer,Description="">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
 20	14370	.	G	A	29.0	PASS	.	GT	0|0	1|0	1/1
 20	14371	.	T	A	29.0	PASS	.	GT	0|0	1|0	1/1
-20	14372	.	C	A	29.0	PASS	DP=300	GT	0|0	1|0	1/1
+20	14372	.	C	A	29.0	PASS	DP=300;TC=8,.,7	GT	0|0	1|0	1/1
 20	14373	.	C	A	29.0	PASS	DP=300	GT	0|0	1|0	1/1
 20	14374	.	G	A	29.0	PASS	AF=0.5	GT	0|0	1|0	1/1
 20	14375	.	T	A	29.0	PASS	AF=0.5	GT	0|0	1|0	1/1
-20	14376	.	C	A	29.0	PASS	AF=0.5;DP=300	GT	0|0	1|0	1/1"""
+20	14376	.	C	A	29.0	PASS	AF=0.5;DP=300;TC=3,1,2	GT	0|0	1|0	1/1"""
         # Read and write VCF
         with VCFIO(self.tmp_in) as reader:
             with VCFIO(self.tmp_out, "w") as writer:

@@ -79,9 +79,7 @@ Classes and functions for reading/writing/processing VCF.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.35.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '1.35.1'
 
 from anacore.abstractFile import AbstractFile
 from copy import deepcopy
@@ -1915,7 +1913,10 @@ class VCFIO(AbstractFile):
                             elif self.info[tag].type == "String":
                                 info[tag] = [decodeInfoValue(self.info[tag]._type(list_elt)) for list_elt in value.split(",")]
                             else:
-                                info[tag] = [self.info[tag]._type(list_elt) for list_elt in value.split(",")]
+                                info[tag] = [
+                                    None if list_elt == "." else self.info[tag]._type(list_elt)
+                                    for list_elt in value.split(",")
+                                ]
                 variation.info = info
 
             if len(fields) >= 9:
@@ -2006,13 +2007,13 @@ class VCFIO(AbstractFile):
             info_fields = list()
             for key in sorted(record.info):
                 if self.info[key]._number is None or self.info[key]._number > 1:  # The info may cointain a list of values
-                    values = [encodeInfoValue(str(elt)) for elt in record.info[key]]
+                    values = ["." if elt is None else encodeInfoValue(str(elt)) for elt in record.info[key]]
                     info_fields.append(key + "=" + ",".join(values))
                 else:  # The info contains a flag or a uniq value
                     if self.info[key]._type is None:  # Flag
                         info_fields.append(key)
                     else:
-                        value = encodeInfoValue(str(record.info[key]))
+                        value = "." if record.info[key] is None else encodeInfoValue(str(record.info[key]))
                         info_fields.append(key + "=" + value)
             line += "\t" + ";".join(info_fields)
         # Format
@@ -2039,13 +2040,13 @@ class VCFIO(AbstractFile):
                                 spl_fields.append(".")
                             else:
                                 if self.format[key]._number is None or self.format[key]._number > 1:  # The info may cointain a list of values
-                                    values = list()
-                                    for current_val in record_spl[key]:
-                                        value = (encodeInfoValue(str(current_val)) if current_val is not None else ".")
-                                        values.append(value)
+                                    values = [
+                                        "." if current_val is None else encodeInfoValue(str(current_val))
+                                        for current_val in record_spl[key]
+                                    ]
                                     spl_fields.append(",".join(values))
                                 else:  # The format contains a uniq value
-                                    value = (encodeInfoValue(str(record_spl[key])) if record_spl[key] is not None else ".")
+                                    value = "." if record_spl[key] is None else encodeInfoValue(str(record_spl[key]))
                                     spl_fields.append(value)
                         line += "\t" + ":".join(spl_fields)
         return line

@@ -1,3 +1,9 @@
+# Release 3.3.0 [DEV]
+
+### Bug fixes
+  * `anacore.vcf`: Manage None in a list of values for an INFO field (Example:
+    *QUALSRC=15.2,.,16*).
+
 # Release 3.2.0 [2026-03-20]
 
 ### Deprecated
