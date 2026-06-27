@@ -27,7 +27,7 @@ Classes and functions for reading Illumina's files on run: runInfo, runParameter
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.0'
+__version__ = '2.3.0'
 
 from anacore.instrument.illumina.base import getPlatformFromSerialNumber
 from anacore.instrument.illumina.samplesheet import SampleSheetFactory
@@ -333,6 +333,10 @@ class RunInfo(object):
             start_date = datetime.datetime.strptime(date_str, '%y%m%d')
         elif len(date_str) == 8:
             start_date = datetime.datetime.strptime(date_str, '%Y%m%d')
+        elif re.match(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?[Z\+]", date_str):
+            iso_date_str = date_str.replace("Z", "+00:00")
+            iso_date_str = re.sub(r"\.(\d*)\+", r"+", iso_date_str)
+            start_date = datetime.datetime.fromisoformat(iso_date_str)
         else:
             start_date = datetime.datetime.strptime(date_str, '%m/%d/%Y %I:%M:%S %p')
         return {
@@ -389,9 +393,11 @@ class RunParameters(object):
         indices = list()
         for child in subtree:
             if child.tag.startswith(prefix + "Read"):
+                is_index = "ReadName" in child.attrib and child.attrib["ReadName"].lower().startswith("index")  # <Read ReadName="Index1" Cycles="8" />
+                nb_cycles = child.attrib["Cycles"] if "Cycles" in child.attrib else child.text
                 reads.append({
-                    "is_index": False,
-                    "nb_cycles": int(child.text)
+                    "is_index": is_index,
+                    "nb_cycles": int(nb_cycles)
                 })
             elif child.tag.startswith(prefix + "Index"):
                 indices.append({
@@ -405,19 +411,6 @@ class RunParameters(object):
             phases.append(curr)
         return phases
 
-    def _getReadsFromRoot(self, root):
-        reads_phases = None
-        reads_subtree = root.find("Reads")
-        if reads_subtree is not None:
-            reads_phases = self._getReadsFromReads(reads_subtree)
-        else:
-            setup_subtree = root.find("Setup")
-            if setup_subtree is not None:
-                reads_phases = self._getReadsFrom(root.find("Setup"))
-            else:
-                reads_phases = self._getReadsFrom(root, "Planned")  # Nova style
-        return reads_phases
-
     def _getReadsFromReads(self, subtree):
         reads = list()
         for child in subtree:
@@ -427,25 +420,60 @@ class RunParameters(object):
             })
         return reads
 
+    def _getReadsFromRoot(self, root):
+        reads_phases = None
+        reads_subtree = root.find("Reads")
+        if reads_subtree is not None:
+            reads_phases = self._getReadsFromReads(reads_subtree)
+        else:
+            reads_subtree = findAny(root, ("Setup", "PlannedCycles", "PlannedReads"))
+            if reads_subtree is not None:
+                reads_phases = self._getReadsFrom(reads_subtree)
+            elif root.find("PlannedRead1Cycles") is not None:  # Nova style
+                reads_phases = self._getReadsFrom(root, "Planned")  # <PlannedRead1>
+            else:
+                raise Exception("Planned reads section cannot be find in {}.".format(self.filepath))
+        return reads_phases
+
     def _getInstrumentFromRoot(self, root):
-        serial_number = findAny(root, ("ScannerID", "InstrumentID", "InstrumentName")).text
+        serial_number = findAny(root, ("ScannerID", "InstrumentID", "InstrumentName", "InstrumentSerialNumber")).text
         return {
             "id": serial_number,
             "platform": getPlatformFromSerialNumber(serial_number)
         }
 
     def _getRunFromRoot(self, root):
-        run_number = findAny(root, ("RunNumber", "ScanNumber"))
+        # Run number
+        run_number = findAny(root, ("RunNumber", "ScanNumber", "RunCounter"))
         run_number = run_number.text.lstrip("0")
-        run_id = findAny(root, ("RunID", "RunId")).text
+        # Run ID
+        run_id = findAny(root, ("RunID", "RunId"))
+        if run_id is not None:
+            run_id = run_id.text
+        else:  # ID not in RunParametrs
+            run_id = os.path.basename(root.find("OutputFolder").text)
+        # Start date
+        start_date = None
+        if root.find("RunStartDate") is not None:
+            start_date = datetime.datetime.strptime(root.find("RunStartDate").text, '%y%m%d')
+        elif root.find("RunStartTime") is not None:
+            iso_date_str = root.find("RunStartTime").text.replace("Z", "+00:00")
+            iso_date_str = re.sub(r"\.(\d*)\+", r"+", iso_date_str)
+            start_date = datetime.datetime.fromisoformat(iso_date_str)
+        else:
+            start_date = run_id.split("_")[0]
+            if len(start_date) == 8:
+                start_date = start_date[2:]
+            start_date = datetime.datetime.strptime(start_date, '%y%m%d')
+        # Return
         return {
             "number": run_number,
             "id": run_id,
-            "start_date": datetime.datetime.strptime(root.find("RunStartDate").text, '%y%m%d')
+            "start_date": start_date
         }
 
     def _getPostProcessFromRoot(self, root):
-        workflow = root.find("AnalysisWorkflowType")  # NextSeq style
+        workflow = findAny(root, ("AnalysisWorkflowType", "SecondaryAnalysisWorkflow"))
         if workflow is None:
             workflow_markup = root.find("Workflow")  # MiSeq style
             if workflow_markup is not None:
@@ -457,7 +485,7 @@ class RunParameters(object):
 
     def _getKitFromRoot(self, root):
         # Flowcell ID
-        flowcell_id = root.find("FlowCellSerial")  # NextSeq style
+        flowcell_id = findAny(root, ("FlowCellSerial", "FlowCellSerialNumber"))  # NextSeq style
         if flowcell_id is not None:
             flowcell_id = flowcell_id.text
         else:
@@ -465,11 +493,14 @@ class RunParameters(object):
             if flowcell_markup is not None and flowcell_markup.find("SerialNumber") is not None:
                 flowcell_id = flowcell_markup.find("SerialNumber").text
             else:
-                flowcell_id = root.find("Barcode")  # HiSeq style or MiSeq with invalid RFID markup
-                if flowcell_id is not None:
-                    flowcell_id = flowcell_id.text
+                if root.find("Barcode") is not None:  # HiSeq style or MiSeq with invalid RFID markup
+                    flowcell_id = root.find("Barcode").text
+                elif root.find("ConsumableInfo") is not None:  # MiSeq i100
+                    for child in root.find("ConsumableInfo"):
+                        if child.find("Type") is not None and child.find("Type").text.lower().startswith("flowcell"):
+                            flowcell_id = child.find("SerialNumber").text
                 else:
-                    flowcell_id = self.run["id"].rsplit("_", 1)[1]
+                    flowcell_id = self.run["id"].rsplit("_", 1)[1]  # Not always the truth
         # Reagent kit ID
         reagent_kit_id = findAny(root, ("ReagentKitBarcode", "ReagentKitSerial"))
         if reagent_kit_id is not None:
@@ -480,13 +511,15 @@ class RunParameters(object):
         }
 
     def _getSoftwareFromRoot(self, root):
+        rta_version = findAny(root, ("RTAVersion", "RtaVersion"))
+        if rta_version is not None:
+            rta_version = rta_version.text
+            if rta_version.startswith("v"):
+                rta_version = rta_version[1:]
         cs_root_markup = root.find("Setup")
         if cs_root_markup is None:
             cs_root_markup = root
-        rta_version = findAny(root, ("RTAVersion", "RtaVersion")).text
-        if rta_version.startswith("v"):
-            rta_version = rta_version[1:]
         return {
             "RTA": rta_version,
-            "CS": cs_root_markup.find("ApplicationVersion").text
+            "CS": findAny(cs_root_markup, ("ApplicationVersion", "SystemSuiteVersion")).text
         }

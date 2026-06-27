@@ -1,5 +1,9 @@
 # Release 3.3.0 [DEV]
 
+### Improvements
+  * Update the parsers to support Illumina's new RunInfo and RunParameters file
+    formats.
+
 ### Bug fixes
   * `anacore.vcf`: Manage None in a list of values for an INFO field (Example:
     *QUALSRC=15.2,.,16*).

@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
 import datetime
 import os
@@ -291,6 +291,80 @@ class TestRunInfo(unittest.TestCase):
                     "instrument": {'id': 'A01789', 'platform': 'NovaSeq'},
                     "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 151}],
                     "run": {'number': '106', 'id': '231204_A01789_0106_BHTLGNDRX3', 'start_date': datetime.datetime(2023, 12, 4, 16, 53, 55)}
+                }
+            },
+            {  # MiSeq i100
+                "content": '''<?xml version="1.0"?>
+<RunInfo Version="7">
+        <Run Id="20251127_SH00093_0025_ASC2116528-SC3" Number="25">
+                <Flowcell>BWR97806-1622</Flowcell>
+                <Instrument>SH00093</Instrument>
+                <Date>2025-11-27T16:29:44Z</Date>
+                <Reads>
+                        <Read Number="1" NumCycles="301" IsIndexedRead="N" IsReverseComplement="N" IsPairedEndComplete="N"/>
+                        <Read Number="2" NumCycles="8" IsIndexedRead="Y" IsReverseComplement="N" IsPairedEndComplete="N"/>
+                        <Read Number="3" NumCycles="8" IsIndexedRead="Y" IsReverseComplement="Y" IsPairedEndComplete="Y"/>
+                        <Read Number="4" NumCycles="301" IsIndexedRead="N" IsReverseComplement="N" IsPairedEndComplete="N"/>
+                </Reads>
+                <FlowcellLayout LaneCount="1" SurfaceCount="1" SwathCount="9" TileCount="10">
+                        <TileSet TileNamingConvention="FourDigit">
+                                <Tiles>
+                                        <Tile>1_1101</Tile>
+                                        <Tile>1_1102</Tile>
+                                        <Tile>1_1909</Tile>
+                                        <Tile>1_1910</Tile>
+                                </Tiles>
+                        </TileSet>
+                </FlowcellLayout>
+                <ImageDimensions Width="858" Height="512"/>
+                <ImageChannels>
+                        <Name>green</Name>
+                        <Name>blue</Name>
+                </ImageChannels>
+        </Run>
+</RunInfo>''',
+                "expected": {
+                    "flowcell": {'id': 'BWR97806-1622', 'layout': {'LaneCount': '1', 'SurfaceCount': '1', 'SwathCount': '9', 'TileCount': '10'}},
+                    "instrument": {'id': 'SH00093', 'platform': 'MiSeq_i100'},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 301}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 301}],
+                    "run": {'number': '25', 'id': '20251127_SH00093_0025_ASC2116528-SC3', 'start_date': datetime.datetime(2025, 11, 27, 16, 29, 44, tzinfo=datetime.timezone.utc)}
+                }
+            },
+            {  # NextSeq 2000
+                "content": '''<?xml version="1.0"?>
+<RunInfo Version="6">
+        <Run Id="251209_VH00159_84_AACWV5LHV" Number="84">
+                <Flowcell>AACWV5LHV</Flowcell>
+                <Instrument>VH00159</Instrument>
+                <Date>2025-12-09T16:47:59Z</Date>
+                <Reads>
+                        <Read Number="1" NumCycles="151" IsIndexedRead="N" IsReverseComplement="N"/>
+                        <Read Number="2" NumCycles="10" IsIndexedRead="Y" IsReverseComplement="N"/>
+                        <Read Number="3" NumCycles="10" IsIndexedRead="Y" IsReverseComplement="Y"/>
+                        <Read Number="4" NumCycles="151" IsIndexedRead="N" IsReverseComplement="N"/>
+                </Reads>
+                <FlowcellLayout LaneCount="2" SurfaceCount="2" SwathCount="6" TileCount="14">
+                        <TileSet TileNamingConvention="FourDigit">
+                                <Tiles>
+                                        <Tile>1_1101</Tile>
+                                        <Tile>1_1102</Tile>
+                                        <Tile>2_2613</Tile>
+                                        <Tile>2_2614</Tile>
+                                </Tiles>
+                        </TileSet>
+                </FlowcellLayout>
+                <ImageDimensions Width="8208" Height="5541"/>
+                <ImageChannels>
+                        <Name>green</Name>
+                        <Name>blue</Name>
+                </ImageChannels>
+        </Run>
+</RunInfo>''',
+                "expected": {
+                    "flowcell": {'id': 'AACWV5LHV', 'layout': {'LaneCount': '2', 'SurfaceCount': '2', 'SwathCount': '6', 'TileCount': '14'}},
+                    "instrument": {'id': 'VH00159', 'platform': 'NextSeq_2000'},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 10}, {'is_index': True, 'nb_cycles': 10}, {'is_index': False, 'nb_cycles': 151}],
+                    "run": {'number': '84', 'id': '251209_VH00159_84_AACWV5LHV', 'start_date': datetime.datetime(2025, 12, 9, 16, 47, 59, tzinfo=datetime.timezone.utc)}
                 }
             }
         ]
@@ -983,6 +1057,131 @@ class TestRunParameters(unittest.TestCase):
   <UcsVersion>2.7.3.4836</UcsVersion>
   <RunSetupMode>Manual</RunSetupMode>
   <WorkflowType>NovaSeqStandard</WorkflowType>
+</RunParameters>''',
+            "MiSeqi100_basespace": '''<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Application>MiSeqi100Series Control Software</Application>
+  <SystemSuiteVersion>1.1.0.26158</SystemSuiteVersion>
+  <OutputFolder>//frev-prd-emfs01a.illumina.com/dragen_data/miseq/20251127_SH00093_0025_ASC2116528-SC3</OutputFolder>
+  <CustomPrimerSelections>
+    <ReadOnePrimer>false</ReadOnePrimer>
+    <ReadTwoPrimer>false</ReadTwoPrimer>
+    <IndexOnePrimer>false</IndexOnePrimer>
+    <IndexTwoPrimer>false</IndexTwoPrimer>
+  </CustomPrimerSelections>
+  <CloudUploadMode>RunMonitoringAndStorage</CloudUploadMode>
+  <RunSetupMode>CloudOrchestrated</RunSetupMode>
+  <SecondaryAnalysisMode>CloudAnalysis</SecondaryAnalysisMode>
+  <InstrumentType>MiSeqi100Plus</InstrumentType>
+  <InstrumentSerialNumber>SH00093</InstrumentSerialNumber>
+  <RunId>20251127_SH00093_0025_ASC2116528-SC3</RunId>
+  <ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>SC2116528-SC3</SerialNumber>
+      <LotNumber>20960044</LotNumber>
+      <PartNumber>20100087</PartNumber>
+      <ExpirationDate>2026-06-04T00:00:00+02:00</ExpirationDate>
+      <Type>DryCartridge</Type>
+      <Mode>25M</Mode>
+      <Version>1</Version>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>SC2102253-SC2</SerialNumber>
+      <LotNumber>20927780</LotNumber>
+      <PartNumber>20079747</PartNumber>
+      <ExpirationDate>2026-03-03T00:00:00+01:00</ExpirationDate>
+      <Type>WetCartridge</Type>
+      <Mode>B</Mode>
+      <Version>1</Version>
+    </ConsumableInfo>
+    <ConsumableInfo>
+      <SerialNumber>BWR97806-1622</SerialNumber>
+      <Type>FlowCell_1</Type>
+      <Mode>2</Mode>
+      <Version>1</Version>
+    </ConsumableInfo>
+  </ConsumableInfo>
+  <PlannedReads>
+    <Read ReadName="Read1" Cycles="301" />
+    <Read ReadName="Index1" Cycles="8" />
+    <Read ReadName="Index2" Cycles="8" />
+    <Read ReadName="Read2" Cycles="301" />
+  </PlannedReads>
+  <SecondaryAnalysisInfo>
+    <SecondaryAnalysisInfo>
+      <SecondaryAnalysisPlatformVersion>4.4.6</SecondaryAnalysisPlatformVersion>
+      <SecondaryAnalysisWorkflow>
+        <string>DRAGEN BCL Convert</string>
+      </SecondaryAnalysisWorkflow>
+    </SecondaryAnalysisInfo>
+  </SecondaryAnalysisInfo>
+  <RunCounter>25</RunCounter>
+  <RecipeName>25M/600_B_Recipe</RecipeName>
+  <RecipeVersion>2.2_RF</RecipeVersion>
+  <ExperimentName>BF010568_Mi100_PST</ExperimentName>
+  <PurgeReagentCartridge>true</PurgeReagentCartridge>
+</RunParameters>''',
+            "NextSeq2000_basespace": '''<?xml version="1.0" encoding="utf-8"?>
+<RunParameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SampleSheetFilePath>/usr/local/illumina/runs/setup/2025-12-09_16-26-01_VH00159/SampleSheetImport/SampleSheet.csv</SampleSheetFilePath>
+  <PlannedCycles>
+    <Read1>151</Read1>
+    <Index1>10</Index1>
+    <Index2>10</Index2>
+    <Read2>151</Read2>
+  </PlannedCycles>
+  <CompletedCycles>
+    <Read1>151</Read1>
+    <Index1>10</Index1>
+    <Index2>10</Index2>
+    <Read2>151</Read2>
+  </CompletedCycles>
+  <InstrumentSerialNumber>VH00159</InstrumentSerialNumber>
+  <InstrumentType>NextSeq 2000</InstrumentType>
+  <ApplicationName>NextSeq 1000/2000 Control Software</ApplicationName>
+  <ApplicationVersion>1.7.2.48444</ApplicationVersion>
+  <FlowCellSerialNumber>AACWV5LHV</FlowCellSerialNumber>
+  <FlowCellPartNumber>20027800</FlowCellPartNumber>
+  <FlowCellLotNumber>20960819</FlowCellLotNumber>
+  <FlowCellExpirationDate>2026-07-02</FlowCellExpirationDate>
+  <FlowCellVersion>2</FlowCellVersion>
+  <FlowCellMode>NextSeq 2000 P3 Flow Cell Cartridge</FlowCellMode>
+  <CartridgeSerialNumber>EC1966504-EC12</CartridgeSerialNumber>
+  <CartridgePartNumber>20038732</CartridgePartNumber>
+  <CartridgeLotNumber>20964373</CartridgeLotNumber>
+  <CartridgeExpirationDate>2026-08-13</CartridgeExpirationDate>
+  <CartridgeVersion>3</CartridgeVersion>
+  <CartridgeMode>NextSeq 2000 P3 Reagent Cartridge (327 Cycles)</CartridgeMode>
+  <ExperimentName>BF010567_5</ExperimentName>
+  <RecipeName>HO-Seq</RecipeName>
+  <RecipeVersion>1.2</RecipeVersion>
+  <RtaVersion>4.12.2</RtaVersion>
+  <RunStartTime>2025-12-09T16:47:59.6464401Z</RunStartTime>
+  <RunEndTime>2025-12-11T19:30:05.3704558Z</RunEndTime>
+  <RunElapsedTime>2:2:42:5:724 (d:hr:min:s:ms)</RunElapsedTime>
+  <RunCounter>84</RunCounter>
+  <CimVersion>cim@1.4.9</CimVersion>
+  <ChmVersion>chm@1.4.9</ChmVersion>
+  <ImbVersion>imb@1.4.9</ImbVersion>
+  <CibFpgaVersion>0x32000013</CibFpgaVersion>
+  <CopyServiceRunId>1D15409ADED8D1EF</CopyServiceRunId>
+  <CopyServiceVersion>2.7.3.4836</CopyServiceVersion>
+  <BaseSpaceRunId>27192173</BaseSpaceRunId>
+  <PlannedRunId>srn.d7b3c5edf65e4ec8b7ab162f8cfeca46</PlannedRunId>
+  <BsshMode>RunMonitoringAndStorage</BsshMode>
+  <SecondaryAnalysisPlatformVersion>4.3.13-singleanalysis</SecondaryAnalysisPlatformVersion>
+  <SecondaryAnalysisWorkflow>Cloud_GenerateFastQ</SecondaryAnalysisWorkflow>
+  <RunSetupMode>CloudOrchestrated</RunSetupMode>
+  <SecondaryAnalysisMode>Cloud</SecondaryAnalysisMode>
+  <OutputFolder>/mnt/dragen_data/nextseq2000/251209_VH00159_84_AACWV5LHV</OutputFolder>
+  <SkipObdd>false</SkipObdd>
+  <PurgeReagentCartridge>true</PurgeReagentCartridge>
+  <CustomPrimerSelections>
+    <Read1>None</Read1>
+    <Index1>None</Index1>
+    <Index2>None</Index2>
+    <Read2>None</Read2>
+  </CustomPrimerSelections>
 </RunParameters>'''
         }
 
@@ -1055,6 +1254,28 @@ class TestRunParameters(unittest.TestCase):
                     "kit": {"flowcell_id": "BHTLGNDRX3", "reagent_kit_id": None},
                     "post_process": None,
                     "software": {"RTA": "3.4.4", "CS": "1.8.1"}
+                }
+            },
+            {  # MiSeq i100 basespace
+                "content": TestRunParameters.CONTENT["MiSeqi100_basespace"],
+                "expected": {
+                    "instrument": {"id": "SH00093", "platform": "MiSeq_i100"},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 301}, {'is_index': True, 'nb_cycles': 8}, {'is_index': True, 'nb_cycles': 8}, {'is_index': False, 'nb_cycles': 301}],
+                    "run": {"number": "25", "id": "20251127_SH00093_0025_ASC2116528-SC3", "start_date": datetime.datetime(2025, 11, 27)},
+                    "kit": {"flowcell_id": "BWR97806-1622", "reagent_kit_id": None},
+                    "post_process": None,
+                    "software": {"RTA": None, "CS": "1.1.0.26158"}
+                }
+            },
+            {  # NextSeq 2000 basespace
+                "content": TestRunParameters.CONTENT["NextSeq2000_basespace"],
+                "expected": {
+                    "instrument": {"id": "VH00159", "platform": "NextSeq_2000"},
+                    "reads_phases": [{'is_index': False, 'nb_cycles': 151}, {'is_index': True, 'nb_cycles': 10}, {'is_index': True, 'nb_cycles': 10}, {'is_index': False, 'nb_cycles': 151}],
+                    "run": {"number": "84", "id": "251209_VH00159_84_AACWV5LHV", "start_date": datetime.datetime(2025, 12, 9, 16, 47, 59, tzinfo=datetime.timezone.utc)},
+                    "kit": {"flowcell_id": "AACWV5LHV", "reagent_kit_id": None},
+                    "post_process": "Cloud_GenerateFastQ",
+                    "software": {"RTA": "4.12.2", "CS": "1.7.2.48444"}
                 }
             }
         ]
