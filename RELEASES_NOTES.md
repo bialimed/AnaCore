@@ -1,6 +1,7 @@
 # Release 3.3.0 [DEV]
 
 ### Improvements
+  * Add utils to manage unstranded translocations in `anacore.fusion`.
   * Update the parsers to support Illumina's new RunInfo and RunParameters file
     formats.
 

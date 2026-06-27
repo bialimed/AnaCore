@@ -3,9 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2020 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.5.0'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '1.6.0'
 
 import os
 import pysam
@@ -674,6 +672,66 @@ class BreakendVCFIOTest(unittest.TestCase):
 
 
 class UtilsTest(unittest.TestCase):
+    def test_decodedAlt(self):
+        data = [
+            {
+                "input": "A]chr1:45874121]",
+                "expected": {"ref_shard": "up", "reverse": True, "chrom": "chr1", "pos": 45874121, "nt": "A"}
+            },
+            {
+                "input": "CGGAGGCCGGCCGNCCGGCCAG]3:190823671]",
+                "expected": {"ref_shard": "up", "reverse": True, "chrom": "3", "pos": 190823671, "nt": "CGGAGGCCGGCCGNCCGGCCAG"}
+            },
+            {
+                "input": "GT[7:41665861[",
+                "expected": {"ref_shard": "up", "reverse": False, "chrom": "7", "pos": 41665861, "nt": "GT"}
+            },
+            {
+                "input": "]8:127741673]TG",
+                "expected": {"ref_shard": "down", "reverse": False, "chrom": "8", "pos": 127741673, "nt": "TG"}
+            },
+            {
+                "input": "[7:116699629[GGAGGCCGGCCGNCCGGCCAGA",
+                "expected": {"ref_shard": "down", "reverse": True, "chrom": "7", "pos": 116699629, "nt": "GGAGGCCGGCCGNCCGGCCAGA"}
+            }
+        ]
+        expected = []
+        observed = []
+        for curr in data:
+            expected.append(curr["expected"])
+            observed.append(decodedAlt(curr["input"]))
+        self.assertEqual(expected, observed)
+
+    def test_endecodedAlt(self):
+        data = [
+            {
+                "input": {"ref_shard": "up", "reverse": True, "chrom": "chr1", "pos": 45874121, "nt": "A"},
+                "expected": "A]chr1:45874121]"
+            },
+            {
+                "input": {"ref_shard": "up", "reverse": True, "chrom": "3", "pos": 190823671, "nt": "CGGAGGCCGGCCGNCCGGCCAG"},
+                "expected": "CGGAGGCCGGCCGNCCGGCCAG]3:190823671]"
+            },
+            {
+                "input": {"ref_shard": "up", "reverse": False, "chrom": "7", "pos": 41665861, "nt": "GT"},
+                "expected": "GT[7:41665861["
+            },
+            {
+                "input": {"ref_shard": "down", "reverse": False, "chrom": "8", "pos": 127741673, "nt": "TG"},
+                "expected": "]8:127741673]TG"
+            },
+            {
+                "input": {"ref_shard": "down", "reverse": True, "chrom": "7", "pos": 116699629, "nt": "GGAGGCCGGCCGNCCGGCCAGA"},
+                "expected": "[7:116699629[GGAGGCCGGCCGNCCGGCCAGA"
+            }
+        ]
+        expected = []
+        observed = []
+        for curr in data:
+            expected.append(curr["expected"])
+            observed.append(encodedAlt(curr["input"]))
+        self.assertEqual(expected, observed)
+
     def test_getCoordDictFromCoordStr(self):
         # Ok
         data = [

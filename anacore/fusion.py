@@ -115,11 +115,9 @@ Alt representation in VCF specification:
 """
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2019 IUCT-O'
+__copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.6.1'
-__email__ = 'escudie.frederic@iuct-oncopole.fr'
-__status__ = 'prod'
+__version__ = '2.7.0'
 
 import gzip
 import json
@@ -129,6 +127,47 @@ from anacore.abstractFile import isGzip
 from anacore.annotVcf import AnnotVCFIO
 from anacore.sv import HashedSVIO, SVIO
 from anacore.vcf import decodeInfoValue, getAlleleRecord, VCFIO, VCFRecord, HeaderInfoAttr, HeaderFilterAttr, HeaderFormatAttr
+
+
+def decodedAlt(alt_str):
+    """
+    Return alternative information as dict from alternative string.
+
+    :param alt_str: One alternative from VCF alternative field (example: A]chr1:45874121]).
+    :type alt_str: str
+    :return: Alternative information as dict from alternative string.
+    :rtype: dict
+    """
+    start = alt_str[0]
+    if start == "[" or start == "]":
+        regexp = r"(.)(.+):(.+)[\[\]](.+)"
+        bracket, chrom, pos, nt = re.fullmatch(regexp, alt_str).groups()
+        reverse = bracket == "["
+        ref_shard = "down"
+    else:
+        regexp = r"(.+)([\[\]])(.+):(.+)."
+        nt, bracket, chrom, pos = re.fullmatch(regexp, alt_str).groups()
+        reverse = bracket == "]"
+        ref_shard = "up"
+    return {"ref_shard": ref_shard, "reverse": reverse, "chrom": chrom, "pos": int(pos), "nt": nt}
+
+
+def encodedAlt(alt):
+    """
+    Return allele string in VCF alternative field format (example: A]chr1:45874121]) from alternative allele dict.
+
+    :param alt: One alternative in dict format (example: {"ref_shard": "up", "reverse": True, "chrom": "chr1", "pos": 45874121, "nt": 1}).
+    :type alt: dict
+    :return: Allele string in VCF alternative field format (example: A]chr1:45874121]) from alternative allele dict.
+    :rtype: str
+    """
+    if alt["ref_shard"] == "up":
+        bracket = "]" if alt["reverse"] else "["
+        res = "{}{}{}:{}{}".format(alt["nt"], bracket, alt["chrom"], alt["pos"], bracket)
+    else:
+        bracket = "[" if alt["reverse"] else "]"
+        res = "{}{}:{}{}{}".format(bracket, alt["chrom"], alt["pos"], bracket, alt["nt"])
+    return res
 
 
 def getBNDInterval(record):
@@ -159,7 +198,7 @@ def getCoordDictFromCoordStr(coord):
     :return: Coordinates in dict format {"chrom": "CHROM", "pos": "POS", "strand":"STRAND"}.
     :rtype: dict
     """
-    matches = re.match("(.+):(\d+):([+-.])", coord)
+    matches = re.match(r"(.+):(\d+):([+-.])", coord)
     if matches is None:
         raise Exception("The coordinates fields {} cannot be parsed.".format(coord))
     return {
@@ -730,7 +769,7 @@ class STARFusionIO(HashedSVIO):
         try:
             with SVIO(filepath, title_starter="#") as reader:
                 mandatory_fields = set(STARFusionIO.titles) - {"JunctionReads", "SpanningFrags"}
-                if len(mandatory_fields - set(reader.titles)) == 0:  # All mandatory fields of Arriba are in reader
+                if len(mandatory_fields - set(reader.titles)) == 0:  # All mandatory fields of STAR-Fusion are in reader
                     is_valid = True
         except FileNotFoundError:
             raise
@@ -1253,7 +1292,7 @@ class BreakendVCFIO(AnnotVCFIO):
         if is_record:
             id = line.split("\t", 3)[2].strip()
             mate_info = line.split("\t", 8)[7].strip()
-            match = re.search("MATEID\=([^;]+);?", mate_info)
+            match = re.search(r"MATEID\=([^;]+);?", mate_info)
             if match:
                 mate_id = decodeInfoValue(match.groups()[0])
                 fusion_id = " @@ ".join(sorted([id, mate_id]))
