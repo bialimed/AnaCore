@@ -672,6 +672,32 @@ class BreakendVCFIOTest(unittest.TestCase):
 
 
 class UtilsTest(unittest.TestCase):
+    def test_areReversePartners(self):
+        data = [
+            {
+                "input": VCFRecord("8", 15454821, None, "A", ["A]chr1:45874121]"]),
+                "expected": True
+            },
+            {
+                "input": VCFRecord("3", 5487878, None, "A", ["GT[7:41665861["]),
+                "expected": False
+            },
+            {
+                "input": VCFRecord("5", 1257234, None, "G", ["]3:190823671]G"]),
+                "expected": False
+            },
+            {
+                "input": VCFRecord("12", 78923489, None, "G", ["[5:19082[G"]),
+                "expected": True
+            }
+        ]
+        expected = []
+        observed = []
+        for curr in data:
+            expected.append(curr["expected"])
+            observed.append(areReversePartners(curr["input"]))
+        self.assertEqual(expected, observed)
+
     def test_decodedAlt(self):
         data = [
             {
@@ -963,6 +989,48 @@ class UtilsTest(unittest.TestCase):
             expected.append(curr["expected"])
             observed.append(getCoordStr(curr["in"]))
         self.assertEqual(expected, observed)
+
+    def test_refIsUpstream(self):
+        record = VCFRecord(
+            "1", 70, "id_01", "A", ["A[2:100["],
+            info={"RNA_FIRST": True, "MATEID": "id_02"}
+        )
+        self.assertTrue(refIsUpstream(record))
+        record = VCFRecord(
+            "1", 70, "id_02", "A", ["A]2:100]"],
+            info={"RNA_FIRST": True, "MATEID": "id_02"}
+        )
+        self.assertTrue(refIsUpstream(record))
+        record = VCFRecord(
+            "1", 70, "id_03", "A", ["[2:100[A"],
+            info={"RNA_FIRST": True, "MATEID": "id_02"}
+        )
+        self.assertTrue(not refIsUpstream(record))
+        record = VCFRecord(
+            "1", 70, "id_04", "A", ["]2:100]A"],
+            info={"RNA_FIRST": True, "MATEID": "id_02"}
+        )
+        self.assertTrue(not refIsUpstream(record))
+        record = VCFRecord(
+            "1", 70, "id_05", "A", ["A[2:100["],
+            info={"MATEID": "id_02"}
+        )
+        self.assertTrue(refIsUpstream(record))
+        record = VCFRecord(
+            "1", 70, "id_06", "A", ["A]2:100]"],
+            info={"MATEID": "id_02"}
+        )
+        self.assertTrue(refIsUpstream(record))
+        record = VCFRecord(
+            "1", 70, "id_07", "A", ["[2:100[A"],
+            info={"MATEID": "id_02"}
+        )
+        self.assertTrue(not refIsUpstream(record))
+        record = VCFRecord(
+            "1", 70, "id_08", "A", ["]2:100]A"],
+            info={"MATEID": "id_02"}
+        )
+        self.assertTrue(not refIsUpstream(record))
 
 
 #####################################################################

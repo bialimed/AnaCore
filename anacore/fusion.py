@@ -129,6 +129,27 @@ from anacore.sv import HashedSVIO, SVIO
 from anacore.vcf import decodeInfoValue, getAlleleRecord, VCFIO, VCFRecord, HeaderInfoAttr, HeaderFilterAttr, HeaderFormatAttr
 
 
+def areReversePartners(bnd):
+    """
+    Return True if two breakends have opposite strand.
+
+    :param bnd: The breakend record.
+    :type bnd: anacore.vcf.VCFRecord
+    :return: True if two breakends have opposite strand.
+    :rtype: boolean
+    """
+    are_opposite = [
+        alt.startswith("[") or alt.endswith("]")
+        for alt in bnd.alt
+    ]
+    if len(set(are_opposite)) > 1:
+        record_name = bnd.getName() if bnd.id is None else bnd.id
+        raise Exception(
+            "The breakend {} has several fusion partners with different break's configuration.".format(record_name)
+        )
+    return are_opposite[0]
+
+
 def decodedAlt(alt_str):
     """
     Return alternative information as dict from alternative string.
@@ -273,6 +294,27 @@ def getCoordStr(breakend, is_first=None):
     :rtype: dict
     """
     return {"chrom": breakend.chrom, "pos": breakend.pos, "strand": getStrand(breakend, is_first)}
+
+
+def refIsUpstream(bnd):
+    """
+    Return True if the shard kept by translocation is upstream the breakend.
+
+    :param bnd: The breakend record.
+    :type bnd: anacore.vcf.VCFRecord
+    :return: True if the shard kept by translocation is upstream the breakend.
+    :rtype: boolean
+    """
+    is_upstream = [
+        alt.endswith("[") or alt.endswith("]")
+        for alt in bnd.alt
+    ]
+    if len(set(is_upstream)) > 1:
+        record_name = bnd.getName() if bnd.id is None else bnd.id
+        raise Exception(
+            "The breakend {} has several fusion partners with different break's configuration.".format(record_name)
+        )
+    return is_upstream[0]
 
 
 class FusionFileReader(object):
@@ -1333,7 +1375,6 @@ class BreakendVCFIO(AnnotVCFIO):
                     if "RNA_FIRST" in second.info:
                         first = alt_mate
                         second = alt_record
-                    # Return
                     yield first, second
 
     @staticmethod
