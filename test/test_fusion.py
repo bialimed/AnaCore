@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 __author__ = 'Frederic Escudie'
-__copyright__ = 'Copyright (C) 2020 IUCT-O'
+__copyright__ = 'Copyright (C) 2020 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.6.0'
+__version__ = '1.7.0'
 
 import os
 import pysam
@@ -989,6 +989,235 @@ class UtilsTest(unittest.TestCase):
             expected.append(curr["expected"])
             observed.append(getCoordStr(curr["in"]))
         self.assertEqual(expected, observed)
+
+    def test_hasSameBPOrientation(self):
+        data = [
+            # Stranded vs stranded same orientation with no reverse
+            {  # Same opposite sides
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": True, "case": "lr_ss"
+            },
+            {  # Same side left
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N]2:20]"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["N]1:10]"]),
+                    VCFRecord("1", 12, None, "N", ["N]2:22]"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["N]1:12]"]),
+                ],
+                "expected": True, "case": "ll_ss"
+            },
+            {  # Same side right
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["[2:20[N"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["[1:10[N"]),
+                    VCFRecord("1", 12, None, "N", ["[2:22[N"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["[1:12[N"]),
+                ],
+                "expected": True, "case": "rr_ss"
+            },
+            {  # Not same side
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N]2:20]"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["N]1:10]"]),
+                    VCFRecord("1", 12, None, "N", ["[2:22[N"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["[1:12[N"]),
+                ],
+                "expected": False, "case": "ll-vs-rr_ss"
+            },
+            {  # Same opposite sides and reverse order
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["]),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"], info={"RNA_FIRST": True}),
+                ],
+                "expected": False, "case": "lr_ss_rvs"
+            },
+            {  # Same side left and reverse order
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N]2:20]"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["N]1:10]"]),
+                    VCFRecord("1", 12, None, "N", ["N]2:22]"]),
+                    VCFRecord("2", 22, None, "N", ["N]1:12]"], info={"RNA_FIRST": True}),
+                ],
+                "expected": False, "case": "ll_ss_rvs"
+            },
+            {  # Same side right and reverse order
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["[2:20[N"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["[1:10[N"]),
+                    VCFRecord("1", 12, None, "N", ["[2:22[N"]),
+                    VCFRecord("2", 22, None, "N", ["[1:12[N"], info={"RNA_FIRST": True}),
+                ],
+                "expected": False, "case": "rr_ss_rvs"
+            },
+            # Stranded vs unstranded same orientation with no reverse
+            {  # Same opposite sides
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["]),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": True, "case": "lr_su"
+            },
+            {  # Same opposite sides
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["]),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"], info={"RNA_FIRST": True}),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["]),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": True, "case": "lr_su_f2"
+            },
+            {  # Same side left
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N]2:20]"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["N]1:10]"]),
+                    VCFRecord("1", 12, None, "N", ["N]2:22]"]),
+                    VCFRecord("2", 22, None, "N", ["N]1:12]"]),
+                ],
+                "expected": True, "case": "ll_su"
+            },
+            {  # Same side right
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["[2:20[N"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["[1:10[N"]),
+                    VCFRecord("1", 12, None, "N", ["[2:22[N"]),
+                    VCFRecord("2", 22, None, "N", ["[1:12[N"]),
+                ],
+                "expected": True, "case": "rr_su"
+            },
+            {  # Not same side
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 20, None, "N", ["N[1:10["]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["]),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": False, "case": "ll-vs-lr_su"
+            },
+            # Unstranded vs stranded same orientation with no reverse
+            {  # Same opposite sides
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["]),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": True, "case": "lr_us"
+            },
+            {  # Same opposite sides
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["]),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["]),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"], info={"RNA_FIRST": True}),
+                ],
+                "expected": True, "case": "lr_us_f2"
+            },
+            {  # Same side left
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N]2:20]"]),
+                    VCFRecord("2", 20, None, "N", ["N]1:10]"]),
+                    VCFRecord("1", 12, None, "N", ["N]2:22]"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["N]1:12]"]),
+                ],
+                "expected": True, "case": "ll_us"
+            },
+            {  # Same side right
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["[2:20[N"]),
+                    VCFRecord("2", 20, None, "N", ["[1:10[N"]),
+                    VCFRecord("1", 12, None, "N", ["[2:22[N"], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["[1:12[N"]),
+                ],
+                "expected": True, "case": "rr_us"
+            },
+            {  # Not same side
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["]),
+                    VCFRecord("2", 20, None, "N", ["N[1:10["]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["], info={"RNA_FIRST": True}),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": False, "case": "rr-vs-lr_us"
+            },
+            # Unstranded vs unstranded same orientation with no reverse
+            {  # Same opposite sides
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["]),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["]),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": True, "case": "lr_uu"
+            },
+            {  # Same side left
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N]2:20]"]),
+                    VCFRecord("2", 20, None, "N", ["N]1:10]"]),
+                    VCFRecord("1", 12, None, "N", ["N]2:22]"]),
+                    VCFRecord("2", 22, None, "N", ["N]1:12]"]),
+                ],
+                "expected": True, "case": "ll_uu"
+            },
+            {  # Same side right
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["[2:20[N"]),
+                    VCFRecord("2", 20, None, "N", ["[1:10[N"]),
+                    VCFRecord("1", 12, None, "N", ["[2:22[N"]),
+                    VCFRecord("2", 22, None, "N", ["[1:12[N"]),
+                ],
+                "expected": True, "case": "rr_uu"
+            },
+            {  # Not same side
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["]),
+                    VCFRecord("2", 20, None, "N", ["N[1:10["]),
+                    VCFRecord("1", 12, None, "N", ["N[2:22["]),
+                    VCFRecord("2", 22, None, "N", ["]1:12]N"]),
+                ],
+                "expected": False, "case": "ll-vs-lr_uu"
+            },
+            {  # Opposite sides reciprocal
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N[2:20["]),
+                    VCFRecord("2", 20, None, "N", ["]1:10]N"]),
+                    VCFRecord("1", 12, None, "N", ["]2:22]N"]),
+                    VCFRecord("2", 22, None, "N", ["N[1:12["]),
+                ],
+                "expected": False, "case": "lr-vs-rl_uu_recip"
+            },
+            {  # Side left reciprocal
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["N]2:20]"]),
+                    VCFRecord("2", 20, None, "N", ["N]1:10]"]),
+                    VCFRecord("1", 12, None, "N", ["[2:22[N"]),
+                    VCFRecord("2", 22, None, "N", ["[1:12[N"]),
+                ],
+                "expected": False, "case": "ll-vs-rr_uu_recip"
+            },
+            {  # Side right reciprocal
+                "in": [
+                    VCFRecord("1", 10, None, "N", ["[2:20[N"]),
+                    VCFRecord("2", 20, None, "N", ["[1:10[N"]),
+                    VCFRecord("1", 12, None, "N", ["N]2:22]"]),
+                    VCFRecord("2", 22, None, "N", ["N]1:12]"]),
+                ],
+                "expected": False, "case": "rr-vs-ll_uu_recip"
+            },
+        ]
+        for curr in data:
+            self.assertEqual(
+                curr["expected"],
+                hasSameBPOrientation(*curr["in"])
+            )
 
     def test_refIsUpstream(self):
         record = VCFRecord(

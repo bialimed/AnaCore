@@ -296,6 +296,31 @@ def getCoordStr(breakend, is_first=None):
     return {"chrom": breakend.chrom, "pos": breakend.pos, "strand": getStrand(breakend, is_first)}
 
 
+def hasSameBPOrientation(bnd, mate, matched_bnd, matched_mate):
+    """
+    Return True if the two breakpoints have same orientation: breakends retain same shards (upstream/downstream) and, for stranded breakpoints (INFO tag RNA_FIRST is present), they have the same strand. Breakends must be in matched order (bnd correspond to matched_bnd and mate correspond to matched_mate).
+
+    :param bnd: Breakend for the query breakpoint.
+    :type bnd: anacore.vcf.VCFRecord
+    :param mate: Mate breakend for the query breakpoint.
+    :type mate: anacore.vcf.VCFRecord
+    :param matched_bnd: Coordinates matched breakend for the bnd.
+    :type matched_bnd: anacore.vcf.VCFRecord
+    :param matched_mate: Coordinates matched breakend for the mate.
+    :type matched_mate: anacore.vcf.VCFRecord
+    :return: True if the two breakpoints have same orientation: breakends retain same shards (upstream/downstream) and, for stranded breakpoints (INFO tag RNA_FIRST is present), they have the same strand.
+    :rtype: boolean
+    """
+    same_orientation = False
+    if refIsUpstream(bnd) == refIsUpstream(matched_bnd) and refIsUpstream(mate) == refIsUpstream(matched_mate):  # Same shards
+        if ("RNA_FIRST" in bnd.info or "RNA_FIRST" in mate.info) and ("RNA_FIRST" in matched_bnd.info or "RNA_FIRST" in matched_mate.info):  # Stranded comparison
+            if ("RNA_FIRST" in bnd.info and "RNA_FIRST" in matched_bnd.info) or ("RNA_FIRST" in mate.info and "RNA_FIRST" in matched_mate.info):  # Same strands
+                same_orientation = True
+        else:  # Unstranded comparison
+            same_orientation = True
+    return same_orientation
+
+
 def refIsUpstream(bnd):
     """
     Return True if the shard kept by translocation is upstream the breakend.
