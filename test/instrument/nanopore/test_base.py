@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 import os
 import sys
@@ -13,7 +13,7 @@ TEST_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 PACKAGE_DIR = os.path.dirname(TEST_DIR)
 sys.path.append(PACKAGE_DIR)
 
-from anacore.instrument.nanopore.base import getInfFromSeqDesc
+from anacore.instrument.nanopore.base import getInfFromSeqDesc, getPlatformFromSerialNumber
 
 
 class TestGetInfFromSeqDesc(unittest.TestCase):
@@ -54,6 +54,15 @@ class TestGetInfFromSeqDesc(unittest.TestCase):
         }
         observed = getInfFromSeqDesc("runid=17838b1d08f30a031bf60afabb146a8b0fba7486 read=12217 ch=492 start_time=2017-07-04T06:42:43Z")
         self.assertEqual(expected, observed)
+
+
+class TestGetPlatformFromSerialNumber(unittest.TestCase):
+    def test(self):
+        self.assertEqual(getPlatformFromSerialNumber("MN42933"), "MinION")
+        self.assertEqual(getPlatformFromSerialNumber("MN42938"), "MinION")
+        self.assertEqual(getPlatformFromSerialNumber("P2S-01771-A"), "PromethION")
+        self.assertEqual(getPlatformFromSerialNumber("GXB12345"), "GridION")
+        self.assertEqual(getPlatformFromSerialNumber("GXB03681"), "GridION")
 
 
 if __name__ == "__main__":

@@ -22,12 +22,26 @@ Functions to manage reads headers and filenames.
         #    "barcode_id": "barcode01",
         #    "parent_read_id": None
         # }
+
+    Get platform type from instrument serial number
+
+    .. highlight:: python
+    .. code-block:: python
+
+        from anacore.instrument.nanopore.base import getPlatformFromSerialNumber
+
+        print(getPlatformFromSerialNumber("GXB12345"))
+
+        # Result>
+        # GridION
 """
 
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
+
+import re
 
 
 def getInfFromSeqDesc(seq_desc):
@@ -65,3 +79,26 @@ def getInfFromSeqDesc(seq_desc):
             value = None
         info[tag] = value
     return info
+
+
+def getPlatformFromSerialNumber(instrument_id):
+    """
+    Return platform name from instrument ID.
+
+    :param instrument_id: The instrument serial number.
+    :type instrument_id: str
+    :return: The platform name (MinION or GridION or ...).
+    :rtype: str
+    """
+    platform_by_re = {
+        "^MN": "MinION",
+        "^GXB": "GridION",
+        "^PR": "PromethION",
+        "^P2": "PromethION",
+    }
+    platform = None
+    for curr_re, curr_instru in platform_by_re.items():
+        if platform is None:
+            if re.search(curr_re, instrument_id):
+                platform = curr_instru
+    return platform
