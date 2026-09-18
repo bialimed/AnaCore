@@ -14,7 +14,7 @@ Classes and functions for reading Illumina's samplesheet.
         samplesheet = SampleSheetFactory.get("my_run/SampleSheet.csv"):
         print("Samples:")
         for spl in samplesheet.samples:
-            print("", spl.library_basename, spl.barcodes)
+            print("", spl.library_name, spl.barcodes)
 
         # Result>
         # Samples:
@@ -26,7 +26,7 @@ Classes and functions for reading Illumina's samplesheet.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2017 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.2.0'
+__version__ = '2.3.0'
 
 from anacore.instrument.illumina.base import getIlluminaName
 from anacore.instrument.samplesheet import cleanedEnd
@@ -268,6 +268,16 @@ class Sample(SampleBase):
         :rtype: str
         """
         return "{}_S{}".format(self.basename, self.sheet_index)
+
+    @property
+    def library_name(self):
+        """
+        Return the library name (example: splA_S1).
+
+        :return: Library basename.
+        :rtype: str
+        """
+        return self.library_basename
 
 
 class SampleADS(Sample):

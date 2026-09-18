@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 
 def cleanedEnd(value):
@@ -60,12 +60,22 @@ class Sample:
     @property
     def library_basename(self):
         """
-        Return the start of file basename corresponding to the library (example: splA).
+        Return the start of file basename corresponding to the library (example: splA_S1).
 
         :return: Library basename.
         :rtype: str
         """
         return self.basename
+
+    @property
+    def library_name(self):
+        """
+        Return the library name (example: splA_S1).
+
+        :return: Library basename.
+        :rtype: str
+        """
+        return self.id
 
     def toDict(self):
         """
@@ -77,4 +87,5 @@ class Sample:
         res = self.__dict__
         res["basename"] = self.basename
         res["library_basename"] = self.library_basename
+        res["library_name"] = self.library_name
         return res

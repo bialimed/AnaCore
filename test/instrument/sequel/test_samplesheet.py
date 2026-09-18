@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.0'
+__version__ = '1.3.0'
 
 
 import os
@@ -122,19 +122,21 @@ M13_bc1011--M13_bc1063,splB,14,"""
                 {
                     'barcodes': {"index": "bc1001"},
                     'barcode_name': "bc1001",
-                    'basename': 'Alfred',
+                    'basename': 'bc1001',
                     'description': None,
                     'id': 'Alfred',
-                    'library_basename': 'Alfred',
+                    'library_basename': 'bc1001',
+                    'library_name': 'Alfred',
                     'metadata': {}
                 },
                 {
                     'barcodes': {"index": "bc1003"},
                     'barcode_name': "bc1003",
-                    'basename': 'Berthold',
+                    'basename': 'bc1003',
                     'description': None,
                     'id': 'Berthold',
-                    'library_basename': 'Berthold',
+                    'library_basename': 'bc1003',
+                    'library_name': 'Berthold',
                     'metadata': {}
                 }
             ],
@@ -142,19 +144,21 @@ M13_bc1011--M13_bc1063,splB,14,"""
                 {
                     'barcodes': {"index": "M13_bc1011", "index2": "M13_bc1062"},
                     'barcode_name': "M13_bc1011--M13_bc1062",
-                    'basename': 'splA',
+                    'basename': 'M13_bc1011--M13_bc1062',
                     'description': None,
                     'id': 'splA',
-                    'library_basename': 'splA',
+                    'library_basename': 'M13_bc1011--M13_bc1062',
+                    'library_name': 'splA',
                     'metadata': {"CT": "100", "Design": "Cov"}
                 },
                 {
                     'barcodes': {"index": "M13_bc1011", "index2": "M13_bc1063"},
                     'barcode_name': "M13_bc1011--M13_bc1063",
-                    'basename': 'splB',
+                    'basename': 'M13_bc1011--M13_bc1063',
                     'description': None,
                     'id': 'splB',
-                    'library_basename': 'splB',
+                    'library_basename': 'M13_bc1011--M13_bc1063',
+                    'library_name': 'splB',
                     'metadata': {"CT": "14", "Design": ""}
                 }
             ]

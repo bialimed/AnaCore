@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2019 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '2.1.0'
+__version__ = '2.2.0'
 
 import os
 import sys
@@ -379,7 +379,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'Sample1-DNA', 'barcodes': {'index': 'GTCCGTAAGC', 'index2': 'CGTGTATCTT'},
                         'sheet_index': 1, 'description': '',
-                        'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1',
+                        'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1', 'library_name': 'Sample1-DNA_S1',
                         'metadata': {
                             'index': 'GTCCGTAAGC',
                             'index2': 'CGTGTATCTT',
@@ -397,7 +397,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'Sample1-RNA', 'barcodes': {'index': 'CCTGCGGAAC', 'index2': 'ATCATAGGCT'},
                         'sheet_index': 2, 'description': '',
-                        'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2',
+                        'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2', 'library_name': 'Sample1-RNA_S2',
                         'metadata': {
                             'index': 'CCTGCGGAAC',
                             'index2': 'ATCATAGGCT',
@@ -428,7 +428,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'Test_Sample_UP01', 'barcodes': {'index': 'TCCGGAGA', 'index2': 'AGGATAGG'},
                         'sheet_index': 1, 'description': None,
-                        'basename': 'Test-Sample-UP01', 'library_basename': 'Test-Sample-UP01_S1',
+                        'basename': 'Test-Sample-UP01', 'library_basename': 'Test-Sample-UP01_S1', 'library_name': 'Test-Sample-UP01_S1',
                         'metadata': {
                             'Sample_Name': '',
                             'Sample_Plate': '',
@@ -441,7 +441,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'Test_Sample_UP02', 'barcodes': {'index': 'CTGAAGCT', 'index2': 'TCAGAGCC'},
                         'sheet_index': 2, 'description': None,
-                        'basename': 'Test-Sample-UP02', 'library_basename': 'Test-Sample-UP02_S2',
+                        'basename': 'Test-Sample-UP02', 'library_basename': 'Test-Sample-UP02_S2', 'library_name': 'Test-Sample-UP02_S2',
                         'metadata': {
                             'Sample_Name': '',
                             'Sample_Plate': '',
@@ -474,7 +474,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'S01-TOO-12plex-P1-rep1', 'barcodes': {'index': 'ATCCACTG', 'index2': 'AGGTGCGT'},
                         'sheet_index': 1, 'description': None,
-                        'basename': 'S01-TOO-12plex-P1-rep1', 'library_basename': 'S01-TOO-12plex-P1-rep1_S1',
+                        'basename': 'S01-TOO-12plex-P1-rep1', 'library_basename': 'S01-TOO-12plex-P1-rep1_S1', 'library_name': 'S01-TOO-12plex-P1-rep1_S1',
                         'metadata': {
                             'Lane': '1'
                         }
@@ -482,7 +482,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'S02-TOO-12plex-P1-rep2', 'barcodes': {'index': 'GCTTGTCA', 'index2': 'GAACATAC'},
                         'sheet_index': 2, 'description': None,
-                        'basename': 'S02-TOO-12plex-P1-rep2', 'library_basename': 'S02-TOO-12plex-P1-rep2_S2',
+                        'basename': 'S02-TOO-12plex-P1-rep2', 'library_basename': 'S02-TOO-12plex-P1-rep2_S2', 'library_name': 'S02-TOO-12plex-P1-rep2_S2',
                         'metadata': {
                             'Lane': '1'
                         }
@@ -509,7 +509,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': '1', 'barcodes': {'index': 'GTACGTCA', 'index2': 'GAGGTAGT'},
                         'sheet_index': 1, 'description': None,
-                        'basename': '1', 'library_basename': '1_S1',
+                        'basename': '1', 'library_basename': '1_S1', 'library_name': '1_S1',
                         'metadata': {
                             'Sample_Name': 'DG-1-A01',
                             'I7_Index_ID': 'i7A01',
@@ -519,7 +519,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': '2', 'barcodes': {'index': 'TGCAGTTA', 'index2': 'GAGGTAGT'},
                         'sheet_index': 2, 'description': None,
-                        'basename': '2', 'library_basename': '2_S2',
+                        'basename': '2', 'library_basename': '2_S2', 'library_name': '2_S2',
                         'metadata': {
                             'Sample_Name': 'DG-1-A02',
                             'I7_Index_ID': 'i7A02',
@@ -543,7 +543,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': '1823A', 'barcodes': {'index': 'GAATCTGA'},
                         'sheet_index': 1, 'description': '0.5x treatment',
-                        'basename': '1823A', 'library_basename': '1823A_S1',
+                        'basename': '1823A', 'library_basename': '1823A_S1', 'library_name': '1823A_S1',
                         'metadata': {
                             'Sample_Name': '1823A-tissue',
                             'Library_ID': '2017-01-20',
@@ -556,7 +556,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': '1823B', 'barcodes': {'index': 'AGCAGGAA'},
                         'sheet_index': 2, 'description': '0.5x treatment',
-                        'basename': '1823B', 'library_basename': '1823B_S2',
+                        'basename': '1823B', 'library_basename': '1823B_S2', 'library_name': '1823B_S2',
                         'metadata': {
                             'Sample_Name': '1823B-tissue',
                             'Library_ID': '2017-01-20',
@@ -580,7 +580,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': '1823A', 'barcodes': dict(),
                         'sheet_index': 1, 'description': '0.5x treatment',
-                        'basename': '1823A', 'library_basename': '1823A_S1',
+                        'basename': '1823A', 'library_basename': '1823A_S1', 'library_name': '1823A_S1',
                         'metadata': {
                             'Sample_Name': '1823A-tissue',
                             'Library_ID': '2017-01-20',
@@ -604,7 +604,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'spl_A', 'barcodes': {'index': 'TCCGGAGA', 'index2': 'AGGATAGG'},
                         'sheet_index': 1, 'description': '',
-                        'basename': 'spl-A', 'library_basename': 'spl-A_S1',
+                        'basename': 'spl-A', 'library_basename': 'spl-A_S1', 'library_name': 'spl-A_S1',
                         'metadata': {
                             'Sample_Type': 'DNA',
                             'Project': 'FunSeq'
@@ -613,7 +613,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'spl_B', 'barcodes': {'index': 'CTGAAGCT', 'index2': 'TCAGAGCC'},
                         'sheet_index': 2, 'description': 'First rep for sample B',
-                        'basename': 'spl-B', 'library_basename': 'spl-B_S2',
+                        'basename': 'spl-B', 'library_basename': 'spl-B_S2', 'library_name': 'spl-B_S2',
                         'metadata': {
                             'Sample_Type': 'DNA',
                             'Project': 'FunSeq'
@@ -622,7 +622,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'spl_B', 'barcodes': {'index': 'TATCTTCA', 'index2': 'GTTGTCTG'},
                         'sheet_index': 2, 'description': 'Second rep for sample B',
-                        'basename': 'spl-B', 'library_basename': 'spl-B_S2',
+                        'basename': 'spl-B', 'library_basename': 'spl-B_S2', 'library_name': 'spl-B_S2',
                         'metadata': {
                             'Sample_Type': 'DNA',
                             'Project': 'FunSeq'
@@ -631,7 +631,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'spl_C', 'barcodes': {'index': 'GGTTGATA', 'index2': 'TCTGCTCC'},
                         'sheet_index': 3, 'description': '',
-                        'basename': 'spl-C', 'library_basename': 'spl-C_S3',
+                        'basename': 'spl-C', 'library_basename': 'spl-C_S3', 'library_name': 'spl-C_S3',
                         'metadata': {
                             'Sample_Type': 'DNA',
                             'Project': 'FunSeq'
@@ -678,7 +678,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'Sample1-DNA', 'barcodes': {'index': 'GTCCGTAAGC', 'index2': 'CGTGTATCTT'},
                         'sheet_index': 1, 'description': None,
-                        'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1',
+                        'basename': 'Sample1-DNA', 'library_basename': 'Sample1-DNA_S1', 'library_name': 'Sample1-DNA_S1',
                         'metadata': {
                             'Lane': '1,2',
                             'Sample_Name': 'Sample1-DNA',
@@ -689,7 +689,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'Sample1-RNA', 'barcodes': {'index': 'CCTGCGGAAC', 'index2': 'ATCATAGGCT'},
                         'sheet_index': 2, 'description': None,
-                        'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2',
+                        'basename': 'Sample1-RNA', 'library_basename': 'Sample1-RNA_S2', 'library_name': 'Sample1-RNA_S2',
                         'metadata': {
                             'Lane': '1,2',
                             'Sample_Name': 'Sample1-RNA',
@@ -721,7 +721,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'NTC_A', 'barcodes': {'index': 'CAGATCCA', 'index2': 'TGAACCTT'},
                         'sheet_index': 1, 'description': '',
-                        'basename': 'NTC', 'library_basename': 'NTC_S1',
+                        'basename': 'NTC', 'library_basename': 'NTC_S1', 'library_name': 'NTC_S1',
                         'metadata': {
                             'Sample_Name': 'NTC',
                             'Sample_Plate': '171114_INCaV1',
@@ -736,7 +736,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': '17T051074_A', 'barcodes': {'index': 'ACAAACGG', 'index2': 'TGAACCTT'},
                         'sheet_index': 2, 'description': '',
-                        'basename': '17T051074', 'library_basename': '17T051074_S2',
+                        'basename': '17T051074', 'library_basename': '17T051074_S2', 'library_name': '17T051074_S2',
                         'metadata': {
                             'Sample_Name': '17T051074',
                             'Sample_Plate': '171114_INCaV1',
@@ -751,7 +751,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': 'NTC_B', 'barcodes': {'index': 'AACCCCTC', 'index2': 'TGAACCTT'},
                         'sheet_index': 3, 'description': '',
-                        'basename': 'NTC', 'library_basename': 'NTC_S3',
+                        'basename': 'NTC', 'library_basename': 'NTC_S3', 'library_name': 'NTC_S3',
                         'metadata': {
                             'Sample_Name': 'NTC',
                             'Sample_Plate': '171114_INCaV1',
@@ -766,7 +766,7 @@ NTC_B ,NTC,171114_INCaV1,A04,A706,AACCCCTC,A501,TGAACCTT,B,Homo_sapiens\\UCSC\\h
                     {
                         'id': '17T051074_B', 'barcodes': {'index': 'CCCAACCT', 'index2': 'TGAACCTT'},
                         'sheet_index': 4, 'description': '',
-                        'basename': '17T051074', 'library_basename': '17T051074_S4',
+                        'basename': '17T051074', 'library_basename': '17T051074_S4', 'library_name': '17T051074_S4',
                         'metadata': {
                             'Sample_Name': '17T051074',
                             'Sample_Plate': '171114_INCaV1',

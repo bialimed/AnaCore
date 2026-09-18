@@ -4,7 +4,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 from anacore.instrument.sequel.samplesheet import SampleSheet
 import os
@@ -45,4 +45,4 @@ def samplesheetToLima(in_ss, out_ss):
     with open(out_ss, "w") as writer:
         writer.write("Barcodes,Bio Sample\n")
         for spl in SampleSheet(in_ss).samples:
-            writer.write("{},{}\n".format(spl.barcode_name, spl.basename))
+            writer.write("{},{}\n".format(spl.barcode_name, spl.library_name))

@@ -14,7 +14,7 @@ Classes and functions for reading PacificBioscience's sequel samplesheet.
         samplesheet = SampleSheet("my_run/SampleSheet.csv"):
         print("Samples:")
         for spl in samplesheet.samples:
-            print("", spl.basename, spl.barcodes)
+            print("", spl.library_name, spl.barcodes)
 
         # Result>
         # Samples:
@@ -26,7 +26,7 @@ Classes and functions for reading PacificBioscience's sequel samplesheet.
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.1'
+__version__ = '1.3.0'
 
 from anacore.instrument.samplesheet import Sample as SampleBase
 from anacore.sequenceIO import FastaIO
@@ -66,6 +66,10 @@ class Sample(SampleBase):
             if "index2" in self.barcodes:
                 barcode_name += "--" + self.barcodes["index2"]
         return barcode_name
+
+    @property
+    def basename(self):
+        return self.barcode_name
 
     def toDict(self):
         """

@@ -3,7 +3,7 @@
 __author__ = 'Frederic Escudie'
 __copyright__ = 'Copyright (C) 2024 CHU Toulouse'
 __license__ = 'GNU General Public License'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 
 import os
@@ -35,6 +35,12 @@ class TestSampleSheet(unittest.TestCase):
 X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode01,Test1
 X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode02,Test2
 X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode03,Test3"""
+            }, {
+                "name": "single_barcode_without_alias",
+                "content": """position_id,sample_id,experiment_id,flow_cell_product_code,kit,barcode
+X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode01
+X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode02
+X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode03"""
             },
         ]
 
@@ -86,54 +92,109 @@ X1,Test,Sample_sheet,FLO-MIN106,SQK-LSK109 EXP-NBD196,barcode03,Test3"""
                     'description': None,
                     'id': 'no_sample',
                     'library_basename': 'no_sample',
+                    'library_name': 'no_sample',
                     'metadata': {
                         "protocol_run_id": "500ea8b3-e682-451f-a47e-e2e845f55c88",
                         "position_id": "MN42938",
                         "flow_cell_id": "FAX28220",
                         "experiment_id": "RUN4_VM",
                         "flow_cell_product_code": "FLO-MIN106",
-                        "kit": ""
+                        "kit": "",
+                        "sample_id": "no_sample"
                     }
                 }
             ],
             "single_barcode_with_alias": [
                 {
-                    'barcodes': {"index": "barcode01", "alias": "Test1"},
-                    'basename': 'Test',
+                    'barcodes': {"index": "barcode01"},
+                    'basename': 'X1_pass_Test1',
                     'description': None,
-                    'id': 'Test',
-                    'library_basename': 'Test',
+                    'id': 'Test1',
+                    'library_basename': 'X1_pass_Test1',
+                    'library_name': 'Test1',
                     'metadata': {
                         "position_id": "X1",
                         "experiment_id": "Sample_sheet",
                         "flow_cell_product_code": "FLO-MIN106",
-                        "kit": "SQK-LSK109 EXP-NBD196"
+                        "kit": "SQK-LSK109 EXP-NBD196",
+                        "sample_id": "Test"
                     }
                 },
                 {
-                    'barcodes': {"index": "barcode02", "alias": "Test2"},
-                    'basename': 'Test',
+                    'barcodes': {"index": "barcode02"},
+                    'basename': 'X1_pass_Test2',
                     'description': None,
-                    'id': 'Test',
-                    'library_basename': 'Test',
+                    'id': 'Test2',
+                    'library_basename': 'X1_pass_Test2',
+                    'library_name': 'Test2',
                     'metadata': {
                         "position_id": "X1",
                         "experiment_id": "Sample_sheet",
                         "flow_cell_product_code": "FLO-MIN106",
-                        "kit": "SQK-LSK109 EXP-NBD196"
+                        "kit": "SQK-LSK109 EXP-NBD196",
+                        "sample_id": "Test"
                     }
                 },
                 {
-                    'barcodes': {"index": "barcode03", "alias": "Test3"},
-                    'basename': 'Test',
+                    'barcodes': {"index": "barcode03"},
+                    'basename': 'X1_pass_Test3',
                     'description': None,
-                    'id': 'Test',
-                    'library_basename': 'Test',
+                    'id': 'Test3',
+                    'library_basename': 'X1_pass_Test3',
+                    'library_name': 'Test3',
                     'metadata': {
                         "position_id": "X1",
                         "experiment_id": "Sample_sheet",
                         "flow_cell_product_code": "FLO-MIN106",
-                        "kit": "SQK-LSK109 EXP-NBD196"
+                        "kit": "SQK-LSK109 EXP-NBD196",
+                        "sample_id": "Test"
+                    }
+                }
+            ],
+            "single_barcode_without_alias": [
+                {
+                    'barcodes': {"index": "barcode01"},
+                    'basename': 'X1_pass_barcode01',
+                    'description': None,
+                    'id': 'barcode01',
+                    'library_basename': 'X1_pass_barcode01',
+                    'library_name': 'barcode01',
+                    'metadata': {
+                        "position_id": "X1",
+                        "experiment_id": "Sample_sheet",
+                        "flow_cell_product_code": "FLO-MIN106",
+                        "kit": "SQK-LSK109 EXP-NBD196",
+                        "sample_id": "Test"
+                    }
+                },
+                {
+                    'barcodes': {"index": "barcode02"},
+                    'basename': 'X1_pass_barcode02',
+                    'description': None,
+                    'id': 'barcode02',
+                    'library_basename': 'X1_pass_barcode02',
+                    'library_name': 'barcode02',
+                    'metadata': {
+                        "position_id": "X1",
+                        "experiment_id": "Sample_sheet",
+                        "flow_cell_product_code": "FLO-MIN106",
+                        "kit": "SQK-LSK109 EXP-NBD196",
+                        "sample_id": "Test"
+                    }
+                },
+                {
+                    'barcodes': {"index": "barcode03"},
+                    'basename': 'X1_pass_barcode03',
+                    'description': None,
+                    'id': 'barcode03',
+                    'library_basename': 'X1_pass_barcode03',
+                    'library_name': 'barcode03',
+                    'metadata': {
+                        "position_id": "X1",
+                        "experiment_id": "Sample_sheet",
+                        "flow_cell_product_code": "FLO-MIN106",
+                        "kit": "SQK-LSK109 EXP-NBD196",
+                        "sample_id": "Test"
                     }
                 }
             ]

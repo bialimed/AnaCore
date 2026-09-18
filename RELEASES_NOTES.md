@@ -3,11 +3,14 @@
 ### Improvements
   * Add utils to manage unstranded translocations in `anacore.fusion`.
   * Update the parsers to support Illumina's new RunInfo and RunParameters file
-    formats.
+  formats.
 
 ### Bug fixes
+  * `Sample.basename` and `Sample.library_basename` from Nanopore and Sequel
+  samplesheet, now return the file prefix. The previous behavior is implemented
+  in `Sample.library_name`.
   * `anacore.vcf`: Manage None in a list of values for an INFO field (Example:
-    *QUALSRC=15.2,.,16*).
+  *QUALSRC=15.2,.,16*).
 
 # Release 3.2.0 [2026-03-20]
 
